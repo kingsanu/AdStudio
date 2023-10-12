@@ -1,13 +1,13 @@
 import React, { Fragment, useContext, useMemo, useRef } from 'react';
-import { duplicate } from '../ultils/menu-actions/duplicate';
-import { PageContext } from '../layers/core/PageContext';
-import { useSelectedLayers, useEditor } from '../hooks';
 import TrashIcon from '@duyank/icons/regular/Trash';
 import DuplicateIcon from '@duyank/icons/external/Duplicate';
 import DotsThreeBoldIcon from '@duyank/icons/bold/DotsThreeBold';
 import LockKeyIcon from '@duyank/icons/regular/LockKey';
-import { isGroupLayer } from '../ultils/layer/layers';
-import { boundingRect } from '../ultils/2d/boundingRect';
+import { useSelectedLayers, useEditor } from '@canva/hooks';
+import { boundingRect } from '@canva/utils/2d/boundingRect';
+import { isGroupLayer } from '@canva/utils/layer/layers';
+import { duplicate } from '@canva/utils/menu/actions/duplicate';
+import { PageContext } from '../core/PageContext';
 
 const Toolbar = () => {
     const { pageIndex } = useContext(PageContext);

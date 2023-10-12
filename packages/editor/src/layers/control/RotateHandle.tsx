@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useContext } from 'react';
 import ArrowsClockwiseIcon from '@duyank/icons/regular/ArrowsClockwise';
-import { EditorContext } from '../editor/EditorContext';
-import { useEditor } from '../hooks';
+import { useEditor } from '@canva/hooks';
+import { EditorContext } from '@canva/components/editor/EditorContext';
 
 interface ResizeHandlerProps {
     rotate: number;

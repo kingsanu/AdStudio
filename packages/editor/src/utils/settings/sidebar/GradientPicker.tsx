@@ -1,11 +1,10 @@
 import React, { FC, Fragment, PropsWithChildren, useEffect, useMemo, useRef, useState } from 'react';
 import PlusIcon from '@duyank/icons/regular/Plus';
 import XIcon from '@duyank/icons/regular/X';
-import { ColorParser } from 'packages/editor/src/color-picker/utils';
 import { ColorPicker, ColorIcon } from '@canva/color-picker';
 import Popover from '@canva/components/popover/Popover';
 import { getGradientBackground } from '@canva/layers';
-import { Color } from 'packages/editor/src/color-picker/utils/parser/index copy';
+import { ColorParser } from '@canva/color-picker/utils';
 
 type GradientStyle = 'leftToRight' | 'topToBottom' | 'topLeftToBottomRight' | 'circleCenter' | 'circleTopLeft';
 interface GradientPickerProps {
@@ -183,7 +182,7 @@ const GradientPicker: FC<PropsWithChildren<GradientPickerProps>> = ({
                     </div>
                     {tab === 'solid' && (
                         <div css={{}}>
-                            <ColorPicker color={new Color(tmpColor).toHex()} onChange={handleChangeSolidColor} />
+                            <ColorPicker color={new ColorParser(tmpColor).toHex()} onChange={handleChangeSolidColor} />
                         </div>
                     )}
                     {tab === 'gradient' && (
@@ -247,7 +246,7 @@ const GradientPicker: FC<PropsWithChildren<GradientPickerProps>> = ({
                                         <div css={{ padding: 16, width: 280 }}>
                                             <ColorPicker
                                                 enableAlpha={true}
-                                                color={new Color(editColorPicker?.color || '#f25022').toHex()}
+                                                color={new ColorParser(editColorPicker?.color || '#f25022').toHex()}
                                                 onChange={handleChangeGradientColor}
                                             />
                                         </div>

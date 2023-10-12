@@ -7,7 +7,7 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    // "noImplicitAny": false,
+    "jsxImportSource": "@emotion/react",
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -26,6 +26,7 @@
     "rootDir": ".",
     "paths": {
       "@canva/color-picker": ["packages/editor/src/color-picker"],
+      "@canva/color-picker/*": ["packages/editor/src/color-picker/*"],
       "@canva/utils": ["packages/editor/src/utils"],
       "@canva/utils/*": ["packages/editor/src/utils/*"],
       "@canva/hooks": ["packages/editor/src/hooks"],

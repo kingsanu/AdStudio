@@ -4,7 +4,7 @@ import ColorSidebar from './sidebar/ColorSidebar';
 import { useEditor } from '@canva/hooks';
 import { getGradientBackground } from '@canva/layers';
 import { GradientStyle } from '@canva/types';
-import { Color } from '../../color-picker/utils/parser/index copy';
+import { ColorParser } from '../../color-picker/utils';
 
 interface ColorSettingsProps {
     colors: string[];
@@ -26,7 +26,7 @@ const ColorSettings: FC<PropsWithChildren<ColorSettingsProps>> = ({
     }));
 
     const linearGradient = useMemo(() => {
-        if ((colors.length === 0 || (colors.length === 1 && new Color(colors[0]).white() === 100)) && !gradient) {
+        if ((colors.length === 0 || (colors.length === 1 && new ColorParser(colors[0]).white() === 100)) && !gradient) {
             return 'conic-gradient(red, yellow, lime, aqua, blue, magenta, red)';
         }
         if (gradient) {

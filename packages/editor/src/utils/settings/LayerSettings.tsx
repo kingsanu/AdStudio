@@ -1,14 +1,14 @@
 import React, { useEffect, useMemo } from 'react';
-import { useSelectedLayers, useEditor } from '../hooks';
-import { TextLayerProps } from '../layers/TextLayer';
 import TextSettings from './TextSettings';
-import { Layer } from '../types';
 import CommonSettings from './CommonSettings';
-import { isRootLayer, isShapeLayer, isTextLayer } from '../ultils/layer/layers';
-import { ShapeLayerProps } from '../layers/ShapeLayer';
 import ShapeSettings from './ShapeSettings';
 import RootSettings from './RootSettings';
-import { RootLayerProps } from '../layers/RootLayer';
+import { useSelectedLayers, useEditor } from '@canva/hooks';
+import { RootLayerProps } from '@canva/layers/RootLayer';
+import { ShapeLayerProps } from '@canva/layers/ShapeLayer';
+import { TextLayerProps } from '@canva/layers/TextLayer';
+import { Layer } from '@canva/types';
+import { isRootLayer, isTextLayer, isShapeLayer } from '../layer/layers';
 
 const LayerSettings = () => {
     const { selectedLayers, selectedLayerIds } = useSelectedLayers();

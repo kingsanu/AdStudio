@@ -1,14 +1,14 @@
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
-import { useSelectedLayers, useEditor } from '../hooks';
 import LayerSidebar from './sidebar/LayerSidebar';
 import SettingButton from './SettingButton';
 import TransparencyIcon from '@duyank/icons/external/Transparency';
 import LockKeyIcon from '@duyank/icons/regular/LockKey';
 import LockKeyOpenIcon from '@duyank/icons/regular/LockKeyOpen';
-import Slider from '../common/slider/Slider';
-import Popover from '../common/popover/Popover';
-import { isRootLayer } from '../ultils/layer/layers';
-import { RootLayerProps } from '../layers/RootLayer';
+import Popover from '@canva/components/popover/Popover';
+import Slider from '@canva/components/slider/Slider';
+import { useSelectedLayers, useEditor } from '@canva/hooks';
+import { RootLayerProps } from '@canva/layers/RootLayer';
+import { isRootLayer } from '../layer/layers';
 
 const CommonSettings = () => {
     const transparencyButtonRef = useRef<HTMLDivElement>(null);

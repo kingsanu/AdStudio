@@ -22,11 +22,13 @@
     "prosemirror-commands": "^1.5.2",
     "prosemirror-gapcursor": "^1.3.2",
     "prosemirror-history": "^1.3.2",
+    "prosemirror-inputrules": "^1.2.1",
     "prosemirror-state": "^1.4.3",
     "react": "^18.2.0",
     "react-device-detect": "^2.2.3",
     "react-dom": "^18.2.0",
     "styled-components": "^6.0.8",
+    "url": "^0.11.3",
     "uuid": "^9.0.1",
     "w3c-keyname": "^2.2.8"
   },

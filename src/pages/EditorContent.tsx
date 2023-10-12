@@ -1,5 +1,5 @@
 import { DesignFrame } from '@canva/components/editor';
-import { data } from 'src/data';
+import { data } from '../data';
 
 const EditorContent = () => {
     return <DesignFrame data={data} />;

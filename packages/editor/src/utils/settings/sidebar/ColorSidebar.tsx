@@ -11,8 +11,7 @@ import { useEditor } from '@canva/hooks';
 import { getGradientBackground } from '@canva/layers';
 import { GradientStyle } from '@canva/types';
 import { isRootLayer, isShapeLayer, isTextLayer } from '@canva/utils/layer/layers';
-import { hex2rgbString } from 'packages/editor/src/color-picker/utils/parser/hex2rgb';
-import { Color } from 'packages/editor/src/color-picker/utils/parser/index copy';
+import { ColorParser, hex2rgbString } from '@canva/color-picker/utils';
 
 interface ColorSidebarProps extends SidebarProps {
     selected: string | null;
@@ -65,7 +64,7 @@ const ColorSidebar: ForwardRefRenderFunction<HTMLDivElement, ColorSidebarProps> 
         if (!customColor) {
             return documentColors;
         } else {
-            const idx = documentColors.findIndex((c) => selectedColor && c === new Color(selectedColor).toRgbString());
+            const idx = documentColors.findIndex((c) => selectedColor && c === new ColorParser(selectedColor).toRgbString());
             return uniq([
                 ...documentColors.slice(0, idx),
                 customColor,
@@ -95,7 +94,7 @@ const ColorSidebar: ForwardRefRenderFunction<HTMLDivElement, ColorSidebarProps> 
             setCustomColor(null);
             setCustomGradientColor(null);
         }
-        onSelect(new Color(c).toRgbString());
+        onSelect(new ColorParser(c).toRgbString());
     };
 
     const handleSelectGradient = (g: { colors: string[]; style: GradientStyle }) => {
@@ -170,11 +169,11 @@ const ColorSidebar: ForwardRefRenderFunction<HTMLDivElement, ColorSidebarProps> 
                     >
                         {useGradient && onChangeGradient && (
                             <GradientPicker
-                                selectedColor={new Color(customColor || selected || '#f25022').toHex()}
+                                selectedColor={new ColorParser(customColor || selected || '#f25022').toHex()}
                                 event={'click'}
                                 gradient={customGradientColor || gradient}
                                 onChangeColor={(color) => {
-                                    handleSelectCustomColor(new Color(color).toRgbString());
+                                    handleSelectCustomColor(new ColorParser(color).toRgbString());
                                 }}
                                 onChangeGradient={handleSelectCustomGradient}
                             >
@@ -260,7 +259,7 @@ const ColorSidebar: ForwardRefRenderFunction<HTMLDivElement, ColorSidebarProps> 
                                 return (
                                     <GradientPicker
                                         key={i}
-                                        selectedColor={new Color(customColor || selected || '#f25022').toHex()}
+                                        selectedColor={new ColorParser(customColor || selected || '#f25022').toHex()}
                                         event={'doubleClick'}
                                         gradient={customGradientColor || gradient}
                                         onChangeColor={(color) => {
@@ -290,7 +289,7 @@ const ColorSidebar: ForwardRefRenderFunction<HTMLDivElement, ColorSidebarProps> 
                             docGradientList.map((c, i) => (
                                 <GradientPicker
                                     key={i}
-                                    selectedColor={new Color(customColor || selected || '#f25022').toHex()}
+                                    selectedColor={new ColorParser(customColor || selected || '#f25022').toHex()}
                                     event={'doubleClick'}
                                     gradient={customGradientColor || gradient}
                                     onChangeColor={(color) => {

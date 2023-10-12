@@ -10,8 +10,7 @@ import { useSelectedLayers, useEditor } from '@canva/hooks';
 import { TextLayerProps } from '@canva/layers/TextLayer';
 import { Layer } from '@canva/types';
 import { isTextLayer } from '@canva/utils/layer/layers';
-import { hex2rgbString } from 'packages/editor/src/color-picker/utils/parser/hex2rgb';
-import { Color } from 'packages/editor/src/color-picker/utils/parser/index copy';
+import { ColorParser, hex2rgbString } from '@canva/color-picker/utils';
 
 const getEffectList = (assetPath: string) => [
     {
@@ -114,7 +113,7 @@ const TextEffectSidebar: ForwardRefRenderFunction<HTMLDivElement, TextEffectSide
                         getEffectList(assetPath).find((e) => e.value === effect)?.settings as Record<string, unknown>,
                     );
                     if (colors.length > 0) {
-                        const c = new Color(colors[0]);
+                        const c = new ColorParser(colors[0]);
                         if (c.white() > 50) {
                             settings.color = c.darken(0.5).toRgbString();
                         } else {
@@ -296,7 +295,7 @@ const TextEffectSidebar: ForwardRefRenderFunction<HTMLDivElement, TextEffectSide
                                                 >
                                                     <div css={{ padding: 16, width: 280 }}>
                                                         <ColorPicker
-                                                            color={new Color((value as string) || '#f25022').toHex()}
+                                                            color={new ColorParser((value as string) || '#f25022').toHex()}
                                                             onChange={(color) => {
                                                                 handleChangeSetting(settingKey, hex2rgbString(color));
                                                             }}

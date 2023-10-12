@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
-import { useEditor } from '../hooks/useEditor';
-import Page from '../editor/Page';
 import XIcon from '@duyank/icons/regular/X';
+import { useEditor } from '@canva/hooks';
+import Page from '@canva/components/editor/Page';
 
 interface PageSettingsProps {
     onClose: () => void;

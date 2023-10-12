@@ -1,5 +1,5 @@
+import { useEditor } from '@canva/hooks';
 import React, { FC } from 'react';
-import { useEditor } from '../hooks';
 const Guideline: FC = () => {
     const { guideline, frameScale } = useEditor((state) => ({ guideline: state.guideline, frameScale: state.scale }));
     if (!guideline.vertical.length && !guideline.horizontal.length) return null;

@@ -1,9 +1,9 @@
-import Slider from '../common/slider/Slider';
 import React, { useRef, useState } from 'react';
-import { useEditor } from '../hooks';
 import SettingButton from './SettingButton';
-import Popover from '../common/popover/Popover';
 import CheckIcon from '@duyank/icons/regular/Check';
+import Popover from '@canva/components/popover/Popover';
+import Slider from '@canva/components/slider/Slider';
+import { useEditor } from '@canva/hooks';
 
 const PageControl = () => {
     const labelScaleOptionRef = useRef<HTMLDivElement>(null);

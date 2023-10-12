@@ -45,13 +45,13 @@ import { useUsedFont } from '@canva/hooks/useUsedFont';
 import { getTransformStyle } from '@canva/layers';
 import { TextLayerProps } from '@canva/layers/TextLayer';
 import { Layer, LayerId, FontData, Font, LayerComponentProps } from '@canva/types';
-import { Color } from '../../color-picker/utils/parser/index copy';
 import { getPositionChangesBetweenTwoCorners } from '../2d/getPositionChangesBetweenTwoCorners';
 import { visualCorners } from '../2d/visualCorners';
 import { getVirtualDomHeight } from '../dom/getVirtualDomHeight';
 import { getControlBoxSizeFromLayers } from '../layer/getControlBoxSizeFromLayers';
 import KeyboardIcon from '@duyank/icons/regular/Keyboard';
 import LineSpacingIcon from '@duyank/icons/external/LineSpacing';
+import { ColorParser } from '../../color-picker/utils';
 
 interface TextSettingsProps {
     layers: Layer<TextLayerProps>[];
@@ -748,7 +748,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
 
     const backgroundIconDivider = useMemo(() => {
         if (!color) return {};
-        if (color.length === 1 && new Color(color[0]).white() === 100) {
+        if (color.length === 1 && new ColorParser(color[0]).white() === 100) {
             return {
                 backgroundImage:
                     'linear-gradient(to right, rgb(255, 0, 0) 0%, rgb(255, 255, 0) 17%, rgb(0, 255, 0) 33%, rgb(0, 255, 255) 50%, rgb(0, 0, 255) 67%, rgb(255, 0, 255) 83%, rgb(255, 0, 0) 100%)',
