@@ -1,12 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { cloneDeep, throttle } from 'lodash';
-import { isImageLayer, isTextLayer, isVideoLayer } from '../../ultils/layer/layers';
-import { getVirtualDomHeight } from '../../ultils/dom/getVirtualDomHeight';
 import { useResize } from './useResize';
-import { useEditor, useSelectedLayers } from '../../hooks';
-import { Direction, LayerDataRef } from '../../types';
-import { BoxData, CursorPosition, LayerId } from '@lidojs/core';
-import { getPosition, mergeWithoutArray } from '@lidojs/utils';
+import { BoxData, LayerId, LayerDataRef, CursorPosition } from '@canva/types';
+import { Direction } from '@canva/types/resize';
+import { mergeWithoutArray, getPosition } from '@canva/utils';
+import { getVirtualDomHeight } from '@canva/utils/dom/getVirtualDomHeight';
+import { isImageLayer, isVideoLayer, isTextLayer } from '@canva/utils/layer/layers';
+import { useSelectedLayers, useEditor } from '.';
 export type ResizeCallbackData = {
     controlBox: BoxData;
     layers: Record<LayerId, BoxData>;

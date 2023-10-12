@@ -1,17 +1,18 @@
 import { cloneDeep, throttle } from 'lodash';
-import { visualCorners } from '../ultils/2d/visualCorners';
-import { isPointInsideBox } from '../ultils/2d/isPointInsideBox';
-import { boundingRect } from '../ultils/2d/boundingRect';
 import { useEditor } from './useEditor';
 import { isMobile } from 'react-device-detect';
-import { getControlBoxSizeFromLayers } from '../ultils/layer/getControlBoxSizeFromLayers';
 import { RefObject, useEffect, useRef } from 'react';
 import { useLinkedRef } from './useLinkedRef';
-import { HorizontalGuideline, Layer, LayerDataRef, useSelectedLayers, VerticalGuideline } from '@lidojs/editor';
 import { useTrackingShiftKey } from './useTrackingShiftKey';
-import { rectangleInsideAnother } from '../ultils/2d/rectangleInsideAnother';
-import { BoxData, CursorPosition, Delta, getTransformStyle, LayerComponentProps, LayerId } from '@lidojs/core';
-import { getPosition } from '@lidojs/utils';
+import { getPosition } from '@canva/utils';
+import { BoxData, CursorPosition, Delta, HorizontalGuideline, Layer, LayerComponentProps, LayerDataRef, LayerId, VerticalGuideline } from '@canva/types';
+import { getTransformStyle } from '@canva/layers';
+import { boundingRect } from '@canva/utils/2d/boundingRect';
+import { isPointInsideBox } from '@canva/utils/2d/isPointInsideBox';
+import { rectangleInsideAnother } from '@canva/utils/2d/rectangleInsideAnother';
+import { visualCorners } from '@canva/utils/2d/visualCorners';
+import { getControlBoxSizeFromLayers } from '@canva/utils/layer/getControlBoxSizeFromLayers';
+import { useSelectedLayers } from '.';
 
 export type DragCallbackData = { controlBox?: Delta; layers: Record<LayerId, Delta> };
 

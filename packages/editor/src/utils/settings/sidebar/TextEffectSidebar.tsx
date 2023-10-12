@@ -1,16 +1,17 @@
 import React, { forwardRef, ForwardRefRenderFunction, Fragment, useContext, useMemo, useRef, useState } from 'react';
-import { useSelectedLayers, useEditor } from '../../hooks';
 import Sidebar, { SidebarProps } from './Sidebar';
-import { TextLayerProps } from '../../layers/TextLayer';
 import { cloneDeep, throttle } from 'lodash';
-import Slider from '../../common/slider/Slider';
-import Popover from '../../common/popover/Popover';
 import XIcon from '@duyank/icons/regular/X';
-import { isTextLayer } from '../../ultils/layer/layers';
-import { Layer } from '../../types';
-import { ColorIcon, ColorPicker } from '@lidojs/color-picker';
-import { Color, hex2rgbString } from '@lidojs/utils';
-import { EditorContext } from '../../editor/EditorContext';
+import { ColorIcon, ColorPicker } from '@canva/color-picker';
+import { EditorContext } from '@canva/components/editor/EditorContext';
+import Popover from '@canva/components/popover/Popover';
+import Slider from '@canva/components/slider/Slider';
+import { useSelectedLayers, useEditor } from '@canva/hooks';
+import { TextLayerProps } from '@canva/layers/TextLayer';
+import { Layer } from '@canva/types';
+import { isTextLayer } from '@canva/utils/layer/layers';
+import { hex2rgbString } from 'packages/editor/src/color-picker/utils/parser/hex2rgb';
+import { Color } from 'packages/editor/src/color-picker/utils/parser/index copy';
 
 const getEffectList = (assetPath: string) => [
     {

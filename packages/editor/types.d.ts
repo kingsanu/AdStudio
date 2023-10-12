@@ -41,7 +41,7 @@ declare global {
   }
 }
 
-import { CSSProp } from "styled-components";
+import { CSSProp } from "@emotion/react";
 
 declare module "react" {
   interface Attributes {

@@ -1,5 +1,6 @@
-import { FontData, SerializedPage, TextContentProps } from '@lidojs/core';
+import { SerializedPage, FontData } from '@canva/types';
 import { isEqual, uniqWith } from 'lodash';
+import { TextContentProps } from '..';
 
 export const getUsedFonts = (data: SerializedPage[]) => {
     const fontList: FontData[] = [];

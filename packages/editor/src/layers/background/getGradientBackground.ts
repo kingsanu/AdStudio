@@ -1,4 +1,4 @@
-import { GradientStyle } from '@lidojs/core';
+import { GradientStyle } from "@canva/types";
 
 export const getGradientBackground = (colors: string[], style: GradientStyle) => {
     const percent = 100 / (colors.length - 1);

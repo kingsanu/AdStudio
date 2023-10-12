@@ -1,6 +1,6 @@
 import { Node } from 'prosemirror-model';
 import { isArray, mergeWith, uniq } from 'lodash';
-import { Color } from '@lidojs/utils';
+import { ColorParser } from '../../color-picker/utils';
 
 export const getMarkAttrs = (node: Node) => {
     return node.marks.reduce((acc, mark) => {
@@ -84,5 +84,5 @@ export const getColor = (attrs: Record<string, string[]>, markAttrs: Record<stri
             return objValue.concat(srcValue);
         }
     });
-    return uniq(data?.color || []).map((c) => new Color(c).toRgbString());
+    return uniq(data?.color || []).map((c) => new ColorParser(c).toRgbString());
 };

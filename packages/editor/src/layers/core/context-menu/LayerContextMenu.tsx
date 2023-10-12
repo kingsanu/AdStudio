@@ -1,11 +1,7 @@
 import React, { forwardRef, ForwardRefRenderFunction, Fragment, useCallback, useEffect, useState } from 'react';
 import { useEditor, useSelectedLayers } from '../../../hooks';
-import { isGroupLayer } from '../../../ultils/layer/layers';
-import { copy } from '../../../ultils/menu-actions/copy';
-import { paste } from '../../../ultils/menu-actions/paste';
 import { ImageLayerProps } from '../../ImageLayer';
 import { cloneDeep } from 'lodash';
-import { duplicate } from '../../../ultils/menu-actions/duplicate';
 import ClipboardIcon from '@duyank/icons/regular/Clipboard';
 import CopyIcon from '@duyank/icons/regular/Copy';
 import TrashIcon from '@duyank/icons/regular/Trash';
@@ -30,8 +26,12 @@ import AlignCenterVerticalIcon from '@duyank/icons/regular/AlignCenterVertical';
 import SubMenu from './SubMenu';
 import CaretCircleDoubleDownIcon from '@duyank/icons/regular/CaretCircleDoubleDown';
 import { useForwardedRef } from '../../../hooks/useForwardedRef';
-import { getTransformStyle } from '@lidojs/core';
 import { RootLayerProps } from '../../RootLayer';
+import { getTransformStyle } from '@canva/layers';
+import { isGroupLayer } from '@canva/utils/layer/layers';
+import { copy } from '@canva/utils/menu/actions/copy';
+import { duplicate } from '@canva/utils/menu/actions/duplicate';
+import { paste } from '@canva/utils/menu/actions/paste';
 
 const LayerContextMenu: ForwardRefRenderFunction<HTMLDivElement> = (_, ref) => {
     const { selectedLayerIds, selectedLayers } = useSelectedLayers();

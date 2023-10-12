@@ -2,8 +2,7 @@ import { useContext, useMemo } from 'react';
 import { LayerContext } from '../layers/core/LayerContext';
 import { useEditor } from './useEditor';
 import { PageContext } from '../layers/core/PageContext';
-import { LayerComponentProps } from '@lidojs/core';
-import { Layer, LayerActions } from '../types';
+import { Layer, LayerActions, LayerComponentProps } from '../types';
 
 export const useLayer = <P extends LayerComponentProps, C>(collector?: (layer: Layer<P>) => C) => {
     const { pageIndex } = useContext(PageContext);

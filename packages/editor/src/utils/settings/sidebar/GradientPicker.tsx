@@ -1,10 +1,11 @@
-import Popover from '../../common/popover/Popover';
 import React, { FC, Fragment, PropsWithChildren, useEffect, useMemo, useRef, useState } from 'react';
 import PlusIcon from '@duyank/icons/regular/Plus';
 import XIcon from '@duyank/icons/regular/X';
-import { Color } from '@lidojs/utils';
-import { ColorIcon, ColorPicker } from '@lidojs/color-picker';
-import { getGradientBackground } from '@lidojs/core';
+import { ColorParser } from 'packages/editor/src/color-picker/utils';
+import { ColorPicker, ColorIcon } from '@canva/color-picker';
+import Popover from '@canva/components/popover/Popover';
+import { getGradientBackground } from '@canva/layers';
+import { Color } from 'packages/editor/src/color-picker/utils/parser/index copy';
 
 type GradientStyle = 'leftToRight' | 'topToBottom' | 'topLeftToBottomRight' | 'circleCenter' | 'circleTopLeft';
 interface GradientPickerProps {
@@ -42,14 +43,14 @@ const GradientPicker: FC<PropsWithChildren<GradientPickerProps>> = ({
         if (gradient?.colors.length) {
             return gradient?.colors;
         } else {
-            const c = new Color(selectedColor);
+            const c = new ColorParser(selectedColor);
             const hsl = c.toHsl();
             if (hsl.l < 50) {
                 hsl.l = Math.min(100, hsl.l + 30);
             } else {
                 hsl.l = Math.max(0, hsl.l - 30);
             }
-            return [c.toRgbString(), new Color(hsl).toRgbString()];
+            return [c.toRgbString(), new ColorParser(hsl).toRgbString()];
         }
     }, [gradient, selectedColor]);
     useEffect(() => {

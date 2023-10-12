@@ -1,7 +1,7 @@
+import { EditorContext } from '@canva/components/editor/EditorContext';
+import { BoxSize } from '@canva/types';
+import { EdgeDirection, Direction } from '@canva/types/resize';
 import React, { FC, useContext } from 'react';
-import { EditorContext } from '../editor/EditorContext';
-import { BoxSize } from '@lidojs/core';
-import { Direction, EdgeDirection } from '@lidojs/editor';
 
 export const HANDLER_SIZE = 16;
 

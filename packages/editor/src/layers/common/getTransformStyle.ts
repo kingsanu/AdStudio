@@ -1,4 +1,4 @@
-import { LayerComponentProps } from '@lidojs/core';
+import { LayerComponentProps } from "@canva/types";
 
 export const getTransformStyle = (props: Partial<LayerComponentProps & { rotate: number }>) => {
     const res: string[] = [];

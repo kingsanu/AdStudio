@@ -1,12 +1,12 @@
 import { useRef } from 'react';
 import { throttle } from 'lodash';
 import { useEditor } from '../../hooks';
-import { distanceBetweenPoints } from '../../ultils/2d/distanceBetweenPoints';
-import { horizontalAndVerticalChange } from '../../ultils/2d/horizontalAndVerticalChange';
-import { angleBetweenPoints } from '../../ultils/2d/angleBetwwenPoints';
-import { boundingRect } from '../../ultils/2d/boundingRect';
-import { CursorPosition } from '@lidojs/core';
-import { getPosition } from '@lidojs/utils';
+import { distanceBetweenPoints } from '@canva/utils/2d/distanceBetweenPoints';
+import { CursorPosition } from '@canva/types';
+import { horizontalAndVerticalChange } from '@canva/utils/2d/horizontalAndVerticalChange';
+import { angleBetweenPoints } from '@canva/utils/2d/angleBetwwenPoints';
+import { boundingRect } from '@canva/utils/2d/boundingRect';
+import { getPosition } from '@canva/utils';
 
 type DragData = {
     clientX: number;

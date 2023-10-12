@@ -1,5 +1,5 @@
+import { getPosition } from '@canva/utils';
 import { throttle } from 'lodash';
-import { getPosition } from '@lidojs/utils';
 
 export const useRotate = ({
     getData,

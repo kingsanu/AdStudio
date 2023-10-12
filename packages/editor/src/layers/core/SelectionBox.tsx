@@ -1,5 +1,6 @@
+import { LayerId, BoxData } from '@canva/types';
 import React, { forwardRef, ForwardRefRenderFunction, Fragment } from 'react';
-import { BoxData, getTransformStyle, LayerId } from '@lidojs/core';
+import { getTransformStyle } from '..';
 
 interface SelectionBoxProps {
     selectedLayers?: Record<LayerId, BoxData>;

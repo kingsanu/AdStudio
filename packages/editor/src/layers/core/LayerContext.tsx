@@ -1,5 +1,5 @@
+import { LayerId } from '@canva/types';
 import React, { createContext, FC, PropsWithChildren } from 'react';
-import { LayerId } from '@lidojs/core';
 
 export const LayerContext = createContext<{ id: LayerId }>({} as { id: LayerId });
 

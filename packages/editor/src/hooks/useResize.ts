@@ -1,14 +1,15 @@
 import { useMemo } from 'react';
 import { cloneDeep } from 'lodash';
-import { distanceBetweenPoints } from '../../ultils/2d/distanceBetweenPoints';
-import { horizontalAndVerticalChange } from '../../ultils/2d/horizontalAndVerticalChange';
-import { angleBetweenPoints } from '../../ultils/2d/angleBetwwenPoints';
-import { getSizeWithRatio } from '../../ultils/2d/getSizeWithRatio';
-import { visualCorners } from '../../ultils/2d/visualCorners';
-import { getPositionChangesBetweenTwoCorners } from '../../ultils/2d/getPositionChangesBetweenTwoCorners';
-import { useEditor } from '../../hooks';
-import { Direction } from '../../types';
-import { BoxData, BoxSize, Delta, getTransformStyle } from '@lidojs/core';
+import { getTransformStyle } from '@canva/layers';
+import { BoxData, BoxSize, Delta } from '@canva/types';
+import { Direction } from '@canva/types/resize';
+import { angleBetweenPoints } from '@canva/utils/2d/angleBetwwenPoints';
+import { distanceBetweenPoints } from '@canva/utils/2d/distanceBetweenPoints';
+import { getPositionChangesBetweenTwoCorners } from '@canva/utils/2d/getPositionChangesBetweenTwoCorners';
+import { getSizeWithRatio } from '@canva/utils/2d/getSizeWithRatio';
+import { horizontalAndVerticalChange } from '@canva/utils/2d/horizontalAndVerticalChange';
+import { visualCorners } from '@canva/utils/2d/visualCorners';
+import { useEditor } from '.';
 
 export const useResize = (getData: () => BoxData) => {
     const { frameScale } = useEditor((state) => ({ frameScale: state.scale }));

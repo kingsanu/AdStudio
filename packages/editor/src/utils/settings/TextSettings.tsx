@@ -1,19 +1,7 @@
 import React, { FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-    getAllAttrs,
-    getAllMarks,
-    getAttrs,
-    getColor,
-    getFontFamily,
-    getFontSize,
-    getLetterSpacing,
-    getLineHeight,
-    getMarkAttrs,
-} from '../common/text-editor/mark';
-import { TextLayerProps } from '../layers/TextLayer';
+
 import FontSidebar from './sidebar/FontSidebar';
 import TextEffectSidebar from './sidebar/TextEffectSidebar';
-import { useEditor } from '../hooks';
 import ColorSidebar from './sidebar/ColorSidebar';
 import TextBBoldIcon from '@duyank/icons/bold/TextBBold';
 import ListBulletsIcon from '@duyank/icons/regular/ListBullets';
@@ -29,39 +17,41 @@ import SettingButton from './SettingButton';
 import PlusIcon from '@duyank/icons/regular/Plus';
 import MinusIcon from '@duyank/icons/regular/Minus';
 import CaretDownIcon from '@duyank/icons/regular/CaretDown';
-import Popover from '../common/popover/Popover';
 import CheckIcon from '@duyank/icons/regular/Check';
 import TextAUnderlineIcon from '@duyank/icons/regular/TextAUnderline';
 import { isEqual, throttle, uniq, uniqBy } from 'lodash';
-import { useSelectedLayers } from '../hooks';
-import { useUsedFont } from '../layers/hooks/useUsedFont';
+import Popover from '@canva/components/popover/Popover';
+import Slider from '@canva/components/slider/Slider';
+import { unsetBoldOfBlock, toggleBold, setBold, unsetBold } from '@canva/components/text-editor/core/command/bold';
+import { unsetItalicOfBlock, toggleItalic, setItalic, unsetItalic } from '@canva/components/text-editor/core/command/italic';
+import { selectAll } from '@canva/components/text-editor/core/command/selectAll';
+import { selectNode } from '@canva/components/text-editor/core/command/selectNode';
+import { selectText } from '@canva/components/text-editor/core/command/selectText';
+import { setBulletList } from '@canva/components/text-editor/core/command/setBulletList';
+import { setFontFamily } from '@canva/components/text-editor/core/command/setFontFamily';
+import { setFontSize } from '@canva/components/text-editor/core/command/setFontSize';
+import { setLetterSpacing } from '@canva/components/text-editor/core/command/setLetterSpacing';
+import { setLineHeight } from '@canva/components/text-editor/core/command/setLineHeight';
+import { setOrderedList } from '@canva/components/text-editor/core/command/setOrderedList';
+import { setTextAlign } from '@canva/components/text-editor/core/command/setTextAlign';
+import { setTextTransform } from '@canva/components/text-editor/core/command/setTextTransform';
+import { setColorForBlock, setColor } from '@canva/components/text-editor/core/command/textColor';
+import { toggleUnderline, setUnderline, unsetUnderline } from '@canva/components/text-editor/core/command/underline';
+import { isActive } from '@canva/components/text-editor/core/helper/isActive';
+import { isEmptyContent } from '@canva/components/text-editor/core/helper/isEmptyContent';
+import { getAllAttrs, getFontFamily, getFontSize, getLineHeight, getLetterSpacing, getColor, getAllMarks, getAttrs, getMarkAttrs } from '@canva/components/text-editor/mark';
+import { useSelectedLayers, useEditor } from '@canva/hooks';
+import { useUsedFont } from '@canva/hooks/useUsedFont';
+import { getTransformStyle } from '@canva/layers';
+import { TextLayerProps } from '@canva/layers/TextLayer';
+import { Layer, LayerId, FontData, Font, LayerComponentProps } from '@canva/types';
+import { Color } from '../../color-picker/utils/parser/index copy';
+import { getPositionChangesBetweenTwoCorners } from '../2d/getPositionChangesBetweenTwoCorners';
+import { visualCorners } from '../2d/visualCorners';
+import { getVirtualDomHeight } from '../dom/getVirtualDomHeight';
+import { getControlBoxSizeFromLayers } from '../layer/getControlBoxSizeFromLayers';
 import KeyboardIcon from '@duyank/icons/regular/Keyboard';
-import { isActive } from '../common/text-editor/core/helper/isActive';
-import { isEmptyContent } from '../common/text-editor/core/helper/isEmptyContent';
-import { setTextAlign } from '../common/text-editor/core/command/setTextAlign';
-import { setFontFamily } from '../common/text-editor/core/command/setFontFamily';
-import { setFontSize } from '../common/text-editor/core/command/setFontSize';
-import { setBold, toggleBold, unsetBold, unsetBoldOfBlock } from '../common/text-editor/core/command/bold';
-import { setItalic, toggleItalic, unsetItalic, unsetItalicOfBlock } from '../common/text-editor/core/command/italic';
-import { setUnderline, toggleUnderline, unsetUnderline } from '../common/text-editor/core/command/underline';
-import { setTextTransform } from '../common/text-editor/core/command/setTextTransform';
-import { selectAll } from '../common/text-editor/core/command/selectAll';
-import { setBulletList } from '../common/text-editor/core/command/setBulletList';
-import { setOrderedList } from '../common/text-editor/core/command/setOrderedList';
-import { selectText } from '../common/text-editor/core/command/selectText';
-import { setColor, setColorForBlock } from '../common/text-editor/core/command/textColor';
-import Slider from '../common/slider/Slider';
 import LineSpacingIcon from '@duyank/icons/external/LineSpacing';
-import { setLetterSpacing } from '../common/text-editor/core/command/setLetterSpacing';
-import { setLineHeight } from '../common/text-editor/core/command/setLineHeight';
-import { selectNode } from '../common/text-editor/core/command/selectNode';
-import { getVirtualDomHeight } from '../ultils/dom/getVirtualDomHeight';
-import { visualCorners } from '../ultils/2d/visualCorners';
-import { getPositionChangesBetweenTwoCorners } from '../ultils/2d/getPositionChangesBetweenTwoCorners';
-import { getControlBoxSizeFromLayers } from '../ultils/layer/getControlBoxSizeFromLayers';
-import { Layer } from '@lidojs/editor';
-import { Font, FontData, getTransformStyle, LayerComponentProps, LayerId } from '@lidojs/core';
-import { Color } from '@lidojs/utils';
 
 interface TextSettingsProps {
     layers: Layer<TextLayerProps>[];

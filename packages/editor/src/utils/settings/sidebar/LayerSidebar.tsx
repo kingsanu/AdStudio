@@ -1,16 +1,16 @@
 import React, { forwardRef, ForwardRefRenderFunction, useEffect, useMemo, useRef } from 'react';
 import reverse from 'lodash/reverse';
-import { useEditor, useSelectedLayers } from '../../hooks';
 import Sidebar, { SidebarProps } from './Sidebar';
 import DotsSixVerticalBoldIcon from '@duyank/icons/bold/DotsSixVerticalBold';
 import DotsThreeBoldIcon from '@duyank/icons/bold/DotsThreeBold';
 import XIcon from '@duyank/icons/regular/X';
-import { PageContext } from '../../layers/core/PageContext';
-import { isGroupLayer } from '../../ultils/layer/layers';
 import BoundingBoxIcon from '@duyank/icons/regular/BoundingBox';
 import SelectionBackgroundIcon from '@duyank/icons/regular/SelectionBackground';
 import ReverseTransformLayer from './layer/ReverseTransformLayer';
-import { getPosition } from '@lidojs/utils';
+import { useEditor, useSelectedLayers } from '@canva/hooks';
+import { getPosition } from '@canva/utils';
+import { PageContext } from '@canva/layers/core/PageContext';
+import { isGroupLayer } from '@canva/utils/layer/layers';
 
 type LayerSidebarProps = SidebarProps;
 const LayerSidebar: ForwardRefRenderFunction<HTMLDivElement, LayerSidebarProps> = ({ ...props }, ref) => {

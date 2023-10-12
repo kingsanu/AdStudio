@@ -1,6 +1,6 @@
+import { EditorContext } from '@canva/components/editor/EditorContext';
 import { EditorQuery, EditorState } from '../types';
 import { useContext } from 'react';
-import { EditorContext } from '../editor/EditorContext';
 
 export const useEditor = <C>(collector?: (s: EditorState, query: EditorQuery) => C) => {
     const store = useContext(EditorContext);

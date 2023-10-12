@@ -1,7 +1,7 @@
-import { useEditor } from '../../hooks';
-import { isTextLayer } from '../../ultils/layer/layers';
+import { FontData } from '@canva/types';
+import { isTextLayer } from '@canva/utils/layer/layers';
 import { uniqBy } from 'lodash';
-import { FontData } from '@lidojs/core';
+import { useEditor } from '.';
 
 export const useUsedFont = () => {
     const { fontFamilyList } = useEditor((state) => {

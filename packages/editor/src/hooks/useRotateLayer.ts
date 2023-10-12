@@ -1,10 +1,9 @@
+import { BoxData, LayerId, LayerDataRef, Delta, CursorPosition } from '@canva/types';
+import { getPosition } from '@canva/utils';
+import { boundingRect } from '@canva/utils/2d/boundingRect';
 import { cloneDeep, throttle } from 'lodash';
-import { useEditor, useSelectedLayers } from '../../hooks';
 import { useRef } from 'react';
-import { boundingRect } from '../../ultils/2d/boundingRect';
-import { BoxData, CursorPosition, Delta, LayerId } from '@lidojs/core';
-import { LayerDataRef } from '@lidojs/editor';
-import { getPosition } from '@lidojs/utils';
+import { useSelectedLayers, useEditor } from '.';
 
 export type RotateCallbackData = { controlBox?: BoxData; layers: Record<LayerId, BoxData> };
 const setRightAngle = (rotate: number) => {

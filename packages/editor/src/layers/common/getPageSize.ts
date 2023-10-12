@@ -1,5 +1,4 @@
-import { SerializedPage } from '@lidojs/core';
-import { BoxSize } from '../../types';
+import { BoxSize, SerializedPage } from '../../types';
 
 export const getPageSize = (data: SerializedPage[]) => {
     if (data.length === 0) {

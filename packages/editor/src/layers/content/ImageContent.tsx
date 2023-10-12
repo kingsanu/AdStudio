@@ -5,6 +5,7 @@ import { getTransformStyle } from '..';
 export interface ImageContentProps extends LayerComponentProps {
     image: {
         url: string;
+        thumb: string;
         position: Delta;
         rotate: number;
         boxSize: BoxSize;

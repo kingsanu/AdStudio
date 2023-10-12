@@ -8,16 +8,15 @@ import React, {
     useRef,
     useState,
 } from 'react';
-import { EditorContext } from '../../editor/EditorContext';
 import Sidebar, { SidebarProps } from './Sidebar';
 import FontStyle from './FontStyle';
 import CheckIcon from '@duyank/icons/regular/Check';
-import { useEditor } from '../../hooks';
-import { useAsync } from 'react-use';
-import { useUsedFont } from '../../layers/hooks/useUsedFont';
 import MagnifyingGlassIcon from '@duyank/icons/regular/MagnifyingGlass';
 import XIcon from '@duyank/icons/regular/X';
-import { FontData } from '@lidojs/core';
+import { FontData } from '@canva/types';
+import { EditorContext } from '@canva/components/editor/EditorContext';
+import { useUsedFont } from '@canva/hooks/useUsedFont';
+import { useEditor } from '@canva/hooks';
 
 interface FontSidebarProps extends SidebarProps {
     selected: FontData[];
@@ -54,8 +53,8 @@ const FontSidebar: ForwardRefRenderFunction<HTMLDivElement, FontSidebarProps> = 
         [getFonts, actions, setIsLoading, keyword],
     );
 
-    useAsync(async () => {
-        await loadFontList();
+    useEffect(() => {
+        loadFontList();
     }, [loadFontList]);
 
     useEffect(() => {

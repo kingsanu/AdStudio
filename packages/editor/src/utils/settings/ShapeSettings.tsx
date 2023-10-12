@@ -1,19 +1,19 @@
 import React, { FC, Fragment, ReactElement, useMemo, useRef, useState } from 'react';
 import SettingButton from './SettingButton';
-import { useEditor } from '../hooks';
-import Slider from '../common/slider/Slider';
-import Popover from '../common/popover/Popover';
 import ColorSettings from './ColorSettings';
-import { ShapeLayerProps } from '../layers/ShapeLayer';
 import FrameCornersIcon from '@duyank/icons/regular/FrameCorners';
-import { Layer } from '@lidojs/editor';
-import { GradientStyle, ShapeBorderStyle, ShapeType } from '@lidojs/core';
 import SolidIcon from '@duyank/icons/external/Solid';
 import NotAllowedIcon from '@duyank/icons/external/NotAllowed';
 import LongDashesIcon from '@duyank/icons/external/LongDashes';
 import ShortDashesIcon from '@duyank/icons/external/ShortDashes';
 import DotsIcon from '@duyank/icons/external/Dots';
 import SquareBoldIcon from '@duyank/icons/bold/SquareBold';
+import Popover from '@canva/components/popover/Popover';
+import { useEditor } from '@canva/hooks';
+import { ShapeLayerProps } from '@canva/layers/ShapeLayer';
+import { Layer, ShapeBorderStyle, GradientStyle } from '@canva/types';
+import Slider from '@canva/components/slider/Slider';
+
 interface ShapeSettingsProps {
     layers: Layer<ShapeLayerProps>[];
 }

@@ -1,7 +1,7 @@
 import React, { FC, PropsWithChildren } from 'react';
 import LayerProvider from './LayerContext';
 import RenderLayer from './RenderLayer';
-import { LayerId } from '@lidojs/core';
+import { LayerId } from '@canva/types';
 
 type LayerElementProps = {
     id: LayerId;

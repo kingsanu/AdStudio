@@ -39,7 +39,7 @@ export const createEditor = ({
         ],
     });
     const editor = new EditorView(ele, {
-        attributes: { class: 'lidojs-text' },
+        attributes: { class: 'canva-editor-text' },
         state,
         handleDOMEvents,
     }) as TextEditor;

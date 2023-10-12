@@ -1,11 +1,11 @@
 import React, { RefObject, useCallback, useEffect, useRef, useState } from 'react';
 import { throttle } from 'lodash';
-import { distanceBetweenPoints } from '../ultils/2d/distanceBetweenPoints';
 import { useEditor } from './useEditor';
 import { isMobile } from 'react-device-detect';
-import { CursorPosition, getTransformStyle } from '@lidojs/core';
-import { getPosition } from '@lidojs/utils';
-import { GestureEvent } from '@lidojs/editor';
+import { getTransformStyle } from '@canva/layers';
+import { CursorPosition, GestureEvent } from '@canva/types';
+import { getPosition } from '@canva/utils';
+import { distanceBetweenPoints } from '@canva/utils/2d/distanceBetweenPoints';
 
 export const useZoomPage = (
     frameRef: RefObject<HTMLDivElement | null>,

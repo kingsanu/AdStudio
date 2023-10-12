@@ -1,7 +1,8 @@
 import React, { forwardRef, ForwardRefRenderFunction, Fragment, PropsWithChildren } from 'react';
 import { useEditor } from '../../hooks';
-import { BoxSize, Delta, getTransformStyle, LayerType } from '@lidojs/core';
 import TriangleIcon from '@duyank/icons/shape/Triangle';
+import { BoxSize, Delta, LayerType } from '@canva/types';
+import { getTransformStyle } from '..';
 
 interface LayerBorderBoxProps {
     boxSize: BoxSize;

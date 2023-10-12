@@ -1,11 +1,11 @@
 import { useCallback, useEffect } from 'react';
 import { useEditor } from './useEditor';
-import { paste } from '../ultils/menu-actions/paste';
 import { keyName } from 'w3c-keyname';
-import { copy } from '../ultils/menu-actions/copy';
 import { useSelectedLayers } from './useSelectedLayers';
-import { duplicate } from '../ultils/menu-actions/duplicate';
-import { modifiers, normalizeKeyName } from '@lidojs/utils';
+import { paste } from '@canva/utils/menu/actions/paste';
+import { modifiers, normalizeKeyName } from '@canva/utils';
+import { copy } from '@canva/utils/menu/actions/copy';
+import { duplicate } from '@canva/utils/menu/actions/duplicate';
 
 const useShortcut = (frameEle: HTMLElement | null) => {
     const { actions, state, activePage, rootLayer, scale } = useEditor((state) => ({

@@ -1,9 +1,10 @@
 import React, { FC, Fragment, PropsWithChildren, useMemo } from 'react';
 import SettingButton from './SettingButton';
 import ColorSidebar from './sidebar/ColorSidebar';
-import { useEditor } from '../hooks';
-import { getGradientBackground, GradientStyle } from '@lidojs/core';
-import { Color } from '@lidojs/utils';
+import { useEditor } from '@canva/hooks';
+import { getGradientBackground } from '@canva/layers';
+import { GradientStyle } from '@canva/types';
+import { Color } from '../../color-picker/utils/parser/index copy';
 
 interface ColorSettingsProps {
     colors: string[];

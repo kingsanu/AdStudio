@@ -16,7 +16,7 @@ export interface TextContentProps extends LayerComponentProps {
 export const TextContent: FC<TextContentProps> = ({ text, colors, fontSizes, effect }) => {
     return (
         <div
-            className={`lidojs-text`}
+            className={`canva-editor-text`}
             css={{
                 p: {
                     ':before': {

@@ -2,8 +2,9 @@ import React from 'react';
 import { useEditor } from '../../hooks';
 import { TextLayerProps } from '../../layers/TextLayer';
 import EditorContent from './EditorContent';
-import { EffectSettings, getTextEffectStyle, getTransformStyle, LayerId } from '@lidojs/core';
-import { Layer } from '@lidojs/editor';
+import { EffectSettings, Layer, LayerId } from '@canva/types';
+import { getTransformStyle } from '@canva/layers';
+import { getTextEffectStyle } from '@canva/layers/text'
 
 const TextEditor = () => {
     const { editorScale, layer } = useEditor((state) => {

@@ -1,5 +1,6 @@
+import { BoxSize, Delta } from '@canva/types';
 import React, { forwardRef, ForwardRefRenderFunction, PropsWithChildren } from 'react';
-import { BoxSize, Delta, getTransformStyle } from '@lidojs/core';
+import { getTransformStyle } from '..';
 
 interface TransformLayerProps {
     boxSize: BoxSize;

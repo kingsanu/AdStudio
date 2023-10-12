@@ -1,10 +1,11 @@
 import { RefObject, useCallback, useEffect, useState } from 'react';
-import { visualCorners } from '../ultils/2d/visualCorners';
-import { isIntersection } from '../ultils/2d/isIntersection';
 import { useEditor } from './useEditor';
 import { useLinkedRef } from './useLinkedRef';
-import { BoxData, Delta, getTransformStyle, LayerId } from '@lidojs/core';
-import { getPosition } from '@lidojs/utils';
+import { getTransformStyle } from '@canva/layers';
+import { LayerId, BoxData, Delta } from '@canva/types';
+import { getPosition } from '@canva/utils';
+import { isIntersection } from '@canva/utils/2d/isIntersection';
+import { visualCorners } from '@canva/utils/2d/visualCorners';
 
 export const useSelectLayer = ({
     frameRef,

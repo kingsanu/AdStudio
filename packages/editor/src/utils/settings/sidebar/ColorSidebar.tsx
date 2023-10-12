@@ -1,16 +1,18 @@
 import React, { forwardRef, ForwardRefRenderFunction, useMemo, useState } from 'react';
 import Sidebar, { SidebarProps } from './Sidebar';
-import { isRootLayer, isShapeLayer, isTextLayer } from '../../ultils/layer/layers';
 import PlusIcon from '@duyank/icons/regular/Plus';
 import { isEqual, uniq, uniqWith } from 'lodash';
-import { useEditor } from '../../hooks';
 import XIcon from '@duyank/icons/regular/X';
 import GradientPicker from './GradientPicker';
 import ColorPickerPopover from './ColorPickerPopover';
 import { defaultColors } from '../default-colors';
-import { Color, hex2rgbString } from '@lidojs/utils';
-import { ColorIcon } from '@lidojs/color-picker';
-import { getGradientBackground, GradientStyle } from '@lidojs/core';
+import { ColorIcon } from '@canva/color-picker';
+import { useEditor } from '@canva/hooks';
+import { getGradientBackground } from '@canva/layers';
+import { GradientStyle } from '@canva/types';
+import { isRootLayer, isShapeLayer, isTextLayer } from '@canva/utils/layer/layers';
+import { hex2rgbString } from 'packages/editor/src/color-picker/utils/parser/hex2rgb';
+import { Color } from 'packages/editor/src/color-picker/utils/parser/index copy';
 
 interface ColorSidebarProps extends SidebarProps {
     selected: string | null;

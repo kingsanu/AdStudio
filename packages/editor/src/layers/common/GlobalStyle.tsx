@@ -10,7 +10,7 @@ export interface GlobalStyleProps {
 
 export const GlobalStyle: FC<GlobalStyleProps> = ({ fonts, mode = 'view' }) => {
     const formatText = `
-        .lidojs-text {
+        .canva-editor-text {
             counter-reset: list;
             p {
                 margin-left: calc(var(--indent-level)*1.7em);

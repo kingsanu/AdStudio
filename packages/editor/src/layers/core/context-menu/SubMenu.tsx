@@ -1,5 +1,6 @@
+import { getTransformStyle } from '@canva/layers';
+import { Delta } from '@canva/types';
 import React, { FC, PropsWithChildren, useEffect, useRef, useState } from 'react';
-import { Delta, getTransformStyle } from '@lidojs/core';
 
 interface SubMenuProps {
     transform: Delta;
