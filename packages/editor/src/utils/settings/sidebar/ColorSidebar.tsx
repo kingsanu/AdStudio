@@ -1,8 +1,7 @@
 import React, { forwardRef, ForwardRefRenderFunction, useMemo, useState } from 'react';
 import Sidebar, { SidebarProps } from './Sidebar';
-import PlusIcon from '@duyank/icons/regular/Plus';
+import PlusIcon from '@canva/icons/PlusIcon';
 import { isEqual, uniq, uniqWith } from 'lodash';
-import XIcon from '@duyank/icons/regular/X';
 import GradientPicker from './GradientPicker';
 import ColorPickerPopover from './ColorPickerPopover';
 import { defaultColors } from '../default-colors';
@@ -12,6 +11,7 @@ import { getGradientBackground } from '@canva/layers';
 import { GradientStyle } from '@canva/types';
 import { isRootLayer, isShapeLayer, isTextLayer } from '@canva/utils/layer/layers';
 import { ColorParser, hex2rgbString } from '@canva/color-picker/utils';
+import ArrowLeftIcon from '@canva/icons/ArrowLeftIcon';
 
 interface ColorSidebarProps extends SidebarProps {
     selected: string | null;
@@ -154,7 +154,8 @@ const ColorSidebar: ForwardRefRenderFunction<HTMLDivElement, ColorSidebarProps> 
                         actions.setSidebar();
                     }}
                 >
-                    <XIcon />
+                    
+                    <ArrowLeftIcon />
                 </div>
             </div>
             <div css={{ padding: '0 20px', display: 'grid', rowGap: 24 }}>

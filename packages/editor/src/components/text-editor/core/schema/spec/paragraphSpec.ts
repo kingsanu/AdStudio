@@ -19,8 +19,6 @@ const ParagraphSpec: NodeSpec = {
 };
 const getAttrs = (dom: HTMLElement) => {
     const { lineHeight, letterSpacing, textTransform, textAlign, fontFamily, fontSize, color } = dom.style;
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     const indentLevel = dom.getAttribute('data-indent');
     const indent = indentLevel ? parseInt(indentLevel, 10) : 0;
     const listType = indent ? (dom.getAttribute('data-list-type') === 'ordered' ? 'ordered' : '') : '';

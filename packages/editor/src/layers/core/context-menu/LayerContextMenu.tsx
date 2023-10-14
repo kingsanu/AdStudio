@@ -15,7 +15,6 @@ import ShapesIcon from '@duyank/icons/regular/Shapes';
 import CaretCircleUpIcon from '@duyank/icons/regular/CaretCircleUp';
 import CaretCircleDoubleUpIcon from '@duyank/icons/regular/CaretCircleDoubleUp';
 import CaretCircleDownIcon from '@duyank/icons/regular/CaretCircleDown';
-import XIcon from '@duyank/icons/regular/X';
 import AlignLeftIcon from '@duyank/icons/regular/AlignLeft';
 import ContextMenuItem from './ContextMenuItem';
 import AlignBottomIcon from '@duyank/icons/regular/AlignBottom';
@@ -32,6 +31,7 @@ import { isGroupLayer } from '@canva/utils/layer/layers';
 import { copy } from '@canva/utils/menu/actions/copy';
 import { duplicate } from '@canva/utils/menu/actions/duplicate';
 import { paste } from '@canva/utils/menu/actions/paste';
+import ArrowLeftIcon from '@canva/icons/ArrowLeftIcon';
 
 const LayerContextMenu: ForwardRefRenderFunction<HTMLDivElement> = (_, ref) => {
     const { selectedLayerIds, selectedLayers } = useSelectedLayers();
@@ -245,7 +245,7 @@ const LayerContextMenu: ForwardRefRenderFunction<HTMLDivElement> = (_, ref) => {
                 }}
                 onClick={() => actions.hideContextMenu()}
             >
-                <XIcon />
+                <ArrowLeftIcon />
             </div>
             <div
                 css={{

@@ -12,11 +12,11 @@ import Sidebar, { SidebarProps } from './Sidebar';
 import FontStyle from './FontStyle';
 import CheckIcon from '@duyank/icons/regular/Check';
 import MagnifyingGlassIcon from '@duyank/icons/regular/MagnifyingGlass';
-import XIcon from '@duyank/icons/regular/X';
 import { FontData } from '@canva/types';
 import { EditorContext } from '@canva/components/editor/EditorContext';
 import { useUsedFont } from '@canva/hooks/useUsedFont';
 import { useEditor } from '@canva/hooks';
+import ArrowLeftIcon from '@canva/icons/ArrowLeftIcon';
 
 interface FontSidebarProps extends SidebarProps {
     selected: FontData[];
@@ -119,7 +119,7 @@ const FontSidebar: ForwardRefRenderFunction<HTMLDivElement, FontSidebarProps> = 
                             actions.setSidebar();
                         }}
                     >
-                        <XIcon />
+                        <ArrowLeftIcon />
                     </div>
                 </div>
                 <div css={{ borderRadius: 4, boxShadow: '0 0 0 1px rgba(43,59,74,.3)', margin: 16 }}>

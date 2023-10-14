@@ -1,6 +1,6 @@
 import { FC } from 'react';
-import XIcon from '@duyank/icons/regular/X';
 import { Preview } from '@canva/components/editor';
+import CloseIcon from '@canva/icons/CloseIcon';
 
 interface PreviewModalProps {
     onClose: () => void;
@@ -28,7 +28,7 @@ const PreviewModal: FC<PreviewModalProps> = ({ onClose }) => {
                 }}
                 onClick={onClose}
             >
-                <XIcon />
+                <CloseIcon />
             </div>
         </div>
     );

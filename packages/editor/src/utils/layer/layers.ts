@@ -13,7 +13,9 @@ import { resolvers } from '../resolvers';
 export const getRandomId = (): LayerId => v4();
 export const deserializeLayer = <P extends LayerComponentProps>(data: SerializedLayer): LayerData<P> => {
     const { type, props } = deserializeComponent(data);
-
+    console.log('props');
+    console.log(type);
+    console.log((type as LayerComponent<P>).info)
     return {
         ...(type as LayerComponent<P>).info,
         comp: type as LayerComponent<P>,
@@ -29,7 +31,6 @@ const deserializeComponent = (data: SerializedLayer): ReactElement => {
         type: { resolvedName },
         props,
     } = data;
-    console.log(resolvedName);
     const component = resolvers[resolvedName];
     return createElement(component, props) as ReactElement;
 };

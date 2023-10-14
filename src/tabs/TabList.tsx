@@ -97,7 +97,7 @@ const SidebarTab: FC<SidebarTabProps> = ({ tabs, active, onChange }) => {
                         }}
                         onClick={(e) => onChange(e, tab.name)}
                     >
-                        <div css={{ fontSize: 24 }}>{tab.icon}</div>
+                        <div css={{ fontSize: 24, height: 28 }}>{tab.icon}</div>
                         <span css={{ fontSize: 10, lineHeight: 1.6, fontWeight: 600 }}>{tab.name}</span>
                     </div>
                 ))}

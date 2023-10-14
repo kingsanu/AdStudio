@@ -65,6 +65,7 @@ export const useZoomPage = (
     });
 
     const pageZoomStart = useCallback(() => {
+        console.log(123)
         transformRef.current.isZoom = true;
         transformRef.current.isMoving = false;
     }, []);

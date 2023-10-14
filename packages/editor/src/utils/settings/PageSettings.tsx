@@ -1,7 +1,7 @@
-import React, { FC } from 'react';
-import XIcon from '@duyank/icons/regular/X';
+import { FC } from 'react';
 import { useEditor } from '@canva/hooks';
 import Page from '@canva/components/editor/Page';
+import ArrowLeftIcon from '@canva/icons/ArrowLeftIcon';
 
 interface PageSettingsProps {
     onClose: () => void;
@@ -65,7 +65,7 @@ const PageSettings: FC<PageSettingsProps> = ({ onClose }) => {
                     }}
                     onClick={() => onClose()}
                 >
-                    <XIcon />
+                    <ArrowLeftIcon />
                 </div>
             </div>
             <div

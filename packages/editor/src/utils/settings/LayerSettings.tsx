@@ -20,6 +20,8 @@ const LayerSettings = () => {
     const { rootLayer, textLayers, shapeLayers } = useMemo(() => {
         return selectedLayers.reduce(
             (acc, layer) => {
+                console.log('layer')
+                console.log(layer)
                 if (layer.data.locked) {
                     return acc;
                 }

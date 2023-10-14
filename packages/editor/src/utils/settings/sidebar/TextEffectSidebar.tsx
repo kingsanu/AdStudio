@@ -1,7 +1,6 @@
 import React, { forwardRef, ForwardRefRenderFunction, Fragment, useContext, useMemo, useRef, useState } from 'react';
 import Sidebar, { SidebarProps } from './Sidebar';
 import { cloneDeep, throttle } from 'lodash';
-import XIcon from '@duyank/icons/regular/X';
 import { ColorIcon, ColorPicker } from '@canva/color-picker';
 import { EditorContext } from '@canva/components/editor/EditorContext';
 import Popover from '@canva/components/popover/Popover';
@@ -11,6 +10,7 @@ import { TextLayerProps } from '@canva/layers/TextLayer';
 import { Layer } from '@canva/types';
 import { isTextLayer } from '@canva/utils/layer/layers';
 import { ColorParser, hex2rgbString } from '@canva/color-picker/utils';
+import ArrowLeftIcon from '@canva/icons/ArrowLeftIcon';
 
 const getEffectList = (assetPath: string) => [
     {
@@ -187,7 +187,7 @@ const TextEffectSidebar: ForwardRefRenderFunction<HTMLDivElement, TextEffectSide
                         actions.setSidebar();
                     }}
                 >
-                    <XIcon />
+                    <ArrowLeftIcon />
                 </div>
             </div>
             <div css={{ padding: '24px 16px' }}>

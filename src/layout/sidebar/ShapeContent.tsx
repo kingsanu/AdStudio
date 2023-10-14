@@ -1,5 +1,4 @@
 import React, { FC, PropsWithChildren, ReactElement } from 'react';
-import XIcon from '@duyank/icons/regular/X';
 import { isMobile } from 'react-device-detect';
 import RectangleIcon from '@duyank/icons/shape/Rectangle';
 import CircleIcon from '@duyank/icons/shape/Circle';
@@ -20,6 +19,7 @@ import HexagonIcon from '@duyank/icons/shape/Hexagon';
 import PentagonIcon from '@duyank/icons/shape/Pentagon';
 import { ShapeType } from '@canva/types';
 import { useEditor } from '@canva/hooks';
+import CloseIcon from '@canva/icons/CloseIcon';
 
 type Shape = {
   type: ShapeType;
@@ -318,7 +318,7 @@ const ShapeContent: FC<{ onClose: () => void }> = ({ onClose }) => {
           }}
           onClick={onClose}
         >
-          <XIcon />
+          <CloseIcon />
         </div>
       </div>
       <div css={{ padding: '16px' }}>

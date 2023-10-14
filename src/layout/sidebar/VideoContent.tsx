@@ -1,8 +1,8 @@
 import React, { FC, useEffect, useState } from 'react';
-import XIcon from '@duyank/icons/regular/X';
 import { isMobile } from 'react-device-detect';
 import { useEditor } from '@canva/hooks';
 import axios from 'axios';
+import CloseIcon from '@canva/icons/CloseIcon';
 
 const VideoContent: FC<{ onClose: () => void }> = ({ onClose }) => {
     const [videos, setVideos] = useState<{ img: string; url: string; width: number; height: number }[]>([
@@ -75,7 +75,7 @@ const VideoContent: FC<{ onClose: () => void }> = ({ onClose }) => {
                     }}
                     onClick={onClose}
                 >
-                    <XIcon />
+                    <CloseIcon />
                 </div>
             </div>
             <div css={{ flexDirection: 'column', overflowY: 'auto', display: 'flex' }}>

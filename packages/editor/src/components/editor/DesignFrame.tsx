@@ -1,7 +1,6 @@
 import { FC, Fragment, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { EditorContext } from './EditorContext';
 import DesignPage from './DesignPage';
-import PlusIcon from '@duyank/icons/regular/Plus';
 import SquaresFourBoldIcon from '@duyank/icons/bold/SquaresFourBold';
 import { SerializedPage } from '@canva/types';
 import { useTrackingShiftKey } from '../../hooks/useTrackingShiftKey';
@@ -22,6 +21,7 @@ import LayerContextMenu from '@canva/layers/core/context-menu/LayerContextMenu';
 import SelectionBox from '@canva/layers/core/SelectionBox';
 import PageSettings from '@canva/utils/settings/PageSettings';
 import { isMobile } from 'react-device-detect';
+import PlusIcon from '@canva/icons/PlusIcon';
 
 interface DesignFrameProps {
     data: SerializedPage[];

@@ -1,8 +1,8 @@
 import { FC, useEffect, useState } from 'react';
 import axios from 'axios';
-import XIcon from '@duyank/icons/regular/X';
 import { isMobile } from 'react-device-detect';
 import { useEditor } from '@canva/hooks';
+import CloseIcon from '@canva/icons/CloseIcon';
 
 interface Frame {
     img: string;
@@ -74,7 +74,7 @@ const FrameContent: FC<{ onClose: () => void }> = ({ onClose }) => {
                     }}
                     onClick={onClose}
                 >
-                    <XIcon />
+                    <CloseIcon />
                 </div>
             </div>
             <div css={{ flexDirection: 'column', overflowY: 'auto', display: 'flex' }}>

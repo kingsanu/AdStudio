@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": ["ES2020", "ES2021.String", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -27,6 +27,7 @@
     "paths": {
       "@canva/color-picker": ["packages/editor/src/color-picker"],
       "@canva/color-picker/*": ["packages/editor/src/color-picker/*"],
+      "@canva/icons/*": ["packages/editor/src/icons/*"],
       "@canva/utils": ["packages/editor/src/utils"],
       "@canva/utils/*": ["packages/editor/src/utils/*"],
       "@canva/hooks": ["packages/editor/src/hooks"],

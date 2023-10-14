@@ -1,7 +1,7 @@
 import { ChangeEvent, FC, useRef, useState } from 'react';
-import XIcon from '@duyank/icons/regular/X';
 import { isMobile } from 'react-device-detect';
 import { useEditor } from '@canva/hooks';
+import CloseIcon from '@canva/icons/CloseIcon';
 
 interface UploadContentProps {
     visibility: boolean;
@@ -80,7 +80,7 @@ const UploadContent: FC<UploadContentProps> = ({ visibility, onClose }) => {
                     }}
                     onClick={onClose}
                 >
-                    <XIcon />
+                    <CloseIcon />
                 </div>
             </div>
             <div

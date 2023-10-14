@@ -192,9 +192,9 @@ const useShortcut = (frameEle: HTMLElement | null) => {
     useEffect(() => {
         const handleZoomDesktop = (e: WheelEvent) => {
             if (e.ctrlKey) {
-                const s = Math.exp(-e.deltaY / 600);
+                const s = Math.exp(-e.deltaY / 400);
                 const newScale = Math.min(Math.max(scale * s, 0.1), 5);
-                actions.setScale(newScale);
+                actions.setScale(Math.round(newScale*100)/100);
                 e.preventDefault();
                 e.stopPropagation();
             }

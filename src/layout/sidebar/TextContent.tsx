@@ -1,10 +1,10 @@
 import { FC, useEffect, useState } from 'react';
 import axios from 'axios';
 import { getThumbnail } from '../../utils/thumbnail';
-import XIcon from '@duyank/icons/regular/X';
 import { isMobile } from 'react-device-detect';
 import { useEditor } from '@canva/hooks';
 import { LayerId, SerializedLayers } from '@canva/types';
+import CloseIcon from '@canva/icons/CloseIcon';
 
 interface Text {
     img: string;
@@ -74,7 +74,7 @@ const TextContent: FC<{ onClose: () => void }> = ({ onClose }) => {
                     }}
                     onClick={onClose}
                 >
-                    <XIcon />
+                    <CloseIcon />
                 </div>
             </div>
             <div css={{ flexDirection: 'column', overflowY: 'auto', display: 'flex' }}>

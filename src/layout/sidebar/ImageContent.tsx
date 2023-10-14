@@ -1,10 +1,9 @@
 import React, { FC, useEffect, useState } from 'react';
 import axios from 'axios';
 import { getThumbnail } from '../../utils/thumbnail';
-import XIcon from '@duyank/icons/regular/X';
 import { isMobile } from 'react-device-detect';
 import { useEditor } from '@canva/hooks';
-// import * as Sentry from '@sentry/react';
+import CloseIcon from '@canva/icons/CloseIcon';
 
 const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
     const [images, setImages] = useState<{ img: string }[]>([]);
@@ -79,7 +78,7 @@ const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
                     }}
                     onClick={onClose}
                 >
-                    <XIcon />
+                    <CloseIcon />
                 </div>
             </div>
             <div css={{ flexDirection: 'column', overflowY: 'auto', display: 'flex' }}>
