@@ -1,4 +1,4 @@
-import { CSSObject } from "styled-components";
+import { CSSObject } from "@emotion/react";
 
 interface Props {
     style: CSSObject;

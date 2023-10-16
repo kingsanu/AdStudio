@@ -1,9 +1,19 @@
-import React, { FC, Fragment, PropsWithChildren } from 'react';
-import { RootContent, RootContentProps } from '.';
+import React, { Fragment, PropsWithChildren } from 'react';
+import { useLayer } from '../hooks';
+import { Delta, BoxSize, LayerComponent } from '@canva/types';
+import { RootContentProps, RootContent } from '.';
 
-export type RootLayerProps = RootContentProps;
-
-const RootLayer: FC<PropsWithChildren<RootLayerProps>> = ({
+export interface RootLayerProps extends Omit<RootContentProps, 'image'> {
+    image?: {
+        url: string;
+        thumb: string;
+        position: Delta;
+        rotate: number;
+        boxSize: BoxSize;
+        transparency: number;
+    } | null;
+}
+const RootLayer: LayerComponent<PropsWithChildren<RootLayerProps>> = ({
     boxSize,
     children,
     color,
@@ -14,6 +24,7 @@ const RootLayer: FC<PropsWithChildren<RootLayerProps>> = ({
     rotate,
     scale,
 }) => {
+    const { actions } = useLayer();
     return (
         <Fragment>
             <RootContent
@@ -23,12 +34,19 @@ const RootLayer: FC<PropsWithChildren<RootLayerProps>> = ({
                 gradientBackground={gradientBackground}
                 color={color}
                 image={image}
-                video={video ? { ...video, autoPlay: true } : undefined}
+                video={video}
                 scale={scale}
+                onDoubleClick={() =>
+                    (image || video) && actions.openImageEditor({ boxSize, position, rotate, image, video })
+                }
             />
             {children}
         </Fragment>
     );
 };
 
+RootLayer.info = {
+    name: 'Main',
+    type: 'Root',
+};
 export default RootLayer;

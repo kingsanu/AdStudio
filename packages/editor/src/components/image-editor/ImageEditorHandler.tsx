@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useMemo } from 'react';
 import { CornerDirection } from '@canva/types/resize';
-import { CSSObject } from 'styled-components';
+import { CSSObject } from '@emotion/react';
 
 interface ImageEditorHandlerProps {
     direction: CornerDirection;

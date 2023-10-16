@@ -1,4 +1,4 @@
-import { CSSObject } from 'styled-components';
+import { CSSObject } from '@emotion/react';
 import { ColorParser } from '../../color-picker/utils';
 import { EffectSettings } from '../../types';
 

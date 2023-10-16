@@ -1,5 +1,7 @@
-import { BoxSize, Delta, LayerComponent } from '@canva/types';
-import { ImageContent, ImageContentProps } from '.';
+import React, { useEffect, useState } from 'react';
+import { useLayer, useEditor, useSelectedLayers } from '../hooks';
+import { Delta, BoxSize, LayerComponent } from '@canva/types';
+import { ImageContentProps, ImageContent } from '.';
 
 export interface ImageLayerProps extends ImageContentProps {
     image: {
@@ -13,7 +15,37 @@ export interface ImageLayerProps extends ImageContentProps {
 }
 
 const ImageLayer: LayerComponent<ImageLayerProps> = ({ image, boxSize, position, rotate }) => {
-    return <ImageContent image={image} boxSize={boxSize} rotate={rotate} position={position} />;
+    const { actions, pageIndex, id } = useLayer();
+    const { selectedLayerIds } = useSelectedLayers();
+    const { imageEditor } = useEditor((state) => ({ imageEditor: state.imageEditor }));
+    const [imageData, setImageData] = useState<ImageLayerProps['image']>({ ...image, url: image.thumb });
+    useEffect(() => {
+        const img = new Image();
+        img.onload = () => {
+            setImageData((prevState) => ({ ...prevState, url: image.url }));
+        };
+        img.src = image.url;
+    }, [image, setImageData]);
+
+    useEffect(() => {
+        setImageData(image);
+    }, [image]);
+    return (
+        <div
+            css={{
+                pointerEvents: 'auto',
+                visibility:
+                    imageEditor && imageEditor.pageIndex === pageIndex && imageEditor.layerId === id
+                        ? 'hidden'
+                        : undefined,
+            }}
+            onDoubleClick={() =>
+                selectedLayerIds.includes(id) && actions.openImageEditor({ position, rotate, boxSize, image })
+            }
+        >
+            <ImageContent image={imageData} boxSize={boxSize} rotate={rotate} position={position} />
+        </div>
+    );
 };
 
 ImageLayer.info = {

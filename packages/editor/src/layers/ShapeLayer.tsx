@@ -1,5 +1,6 @@
-import { LayerComponent } from "@canva/types";
-import { ShapeContent, ShapeContentProps } from ".";
+import { LayerComponent } from '@canva/types';
+import React from 'react';
+import { ShapeContentProps, ShapeContent } from '.';
 
 export type ShapeLayerProps = ShapeContentProps;
 const ShapeLayer: LayerComponent<ShapeLayerProps> = ({

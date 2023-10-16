@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useMemo } from 'react';
 import ResizeIcon from './ResizeIcon';
-import { CSSObject } from 'styled-components';
 import { CornerDirection } from '@canva/types/resize';
+import { CSSObject } from '@emotion/react';
 
 interface ResizeIconProps {
     direction: CornerDirection;

@@ -1,18 +1,31 @@
-import { VideoContent, VideoContentProps } from './content/VideoContent';
-import { BoxSize, Delta, LayerComponent } from '@canva/types';
+import React from 'react';
+import { useEditor, useLayer, useSelectedLayers } from '../hooks';
+import { LayerComponent } from '@canva/types';
+import { VideoContentProps, VideoContent } from './content/VideoContent';
 
-export interface VideoLayerProps extends VideoContentProps {
-    video: {
-        url: string;
-        position: Delta;
-        rotate: number;
-        boxSize: BoxSize;
-        transparency?: number;
-    };
-}
+export type VideoLayerProps = VideoContentProps;
 
 const VideoLayer: LayerComponent<VideoLayerProps> = ({ video, boxSize, position, rotate }) => {
-    return <VideoContent video={{ ...video, autoPlay: true }} boxSize={boxSize} rotate={rotate} position={position} />;
+    const { actions, pageIndex, id } = useLayer();
+    const { selectedLayerIds } = useSelectedLayers();
+    const { imageEditor } = useEditor((state) => ({ imageEditor: state.imageEditor }));
+
+    return (
+        <div
+            css={{
+                pointerEvents: 'auto',
+                visibility:
+                    imageEditor && imageEditor.pageIndex === pageIndex && imageEditor.layerId === id
+                        ? 'hidden'
+                        : undefined,
+            }}
+            onDoubleClick={() =>
+                selectedLayerIds.includes(id) && actions.openImageEditor({ position, rotate, boxSize, video })
+            }
+        >
+            <VideoContent video={video} boxSize={boxSize} rotate={rotate} position={position} />
+        </div>
+    );
 };
 
 VideoLayer.info = {

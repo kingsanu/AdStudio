@@ -1,4 +1,3 @@
-import React from 'react';
 import { useEditor } from '../../hooks';
 import { TextLayerProps } from '../../layers/TextLayer';
 import EditorContent from './EditorContent';

@@ -13,7 +13,7 @@ import { resolvers } from '../resolvers';
 export const getRandomId = (): LayerId => v4();
 export const deserializeLayer = <P extends LayerComponentProps>(data: SerializedLayer): LayerData<P> => {
     const { type, props } = deserializeComponent(data);
-    console.log('props');
+    console.log('props----');
     console.log(type);
     console.log((type as LayerComponent<P>).info)
     return {

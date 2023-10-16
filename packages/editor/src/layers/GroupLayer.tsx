@@ -1,11 +1,11 @@
-import { FC, PropsWithChildren } from 'react';
-import { LayerComponentProps } from '@canva/types';
+import { LayerComponentProps, LayerComponent } from '@canva/types';
+import React, { PropsWithChildren } from 'react';
 
 export interface GroupLayerProps extends LayerComponentProps {
     scale: number;
 }
 
-const GroupLayer: FC<PropsWithChildren<GroupLayerProps>> = ({ boxSize, scale, children }) => {
+const GroupLayer: LayerComponent<PropsWithChildren<GroupLayerProps>> = ({ boxSize, scale, children }) => {
     return (
         <div
             css={{
@@ -20,6 +20,11 @@ const GroupLayer: FC<PropsWithChildren<GroupLayerProps>> = ({ boxSize, scale, ch
             {children}
         </div>
     );
+};
+
+GroupLayer.info = {
+    name: 'Group',
+    type: 'Group',
 };
 
 export default GroupLayer;
