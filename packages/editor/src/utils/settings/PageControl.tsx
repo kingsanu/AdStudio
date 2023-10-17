@@ -1,10 +1,10 @@
 import React, { useRef, useState } from 'react';
 import SettingButton from './SettingButton';
-import CheckIcon from '@duyank/icons/regular/Check';
 import Popover from '@canva/components/popover/Popover';
 import Slider from '@canva/components/slider/Slider';
 import { useEditor } from '@canva/hooks';
 import GridViewIcon from '@canva/icons/GridViewIcon';
+import CheckIcon from '@canva/icons/CheckIcon';
 
 const PageControl = () => {
   const labelScaleOptionRef = useRef<HTMLDivElement>(null);
@@ -64,7 +64,7 @@ const PageControl = () => {
           onClose={() => setOpenScaleOptions(false)}
         >
           <div css={{ padding: '8px 0' }}>
-            {[300, 200, 150, 100, 75, 50, 25, 10].map((s) => (
+            {[400, 500, 300, 200, 150, 100, 75, 50, 25, 10].map((s) => (
               <div
                 key={s}
                 css={{

@@ -14,10 +14,7 @@ import TextAlignRightIcon from '@duyank/icons/regular/TextAlignRight';
 import TextItalicIcon from '@duyank/icons/regular/TextItalic';
 import TextUnderlineIcon from '@duyank/icons/regular/TextUnderline';
 import SettingButton from './SettingButton';
-import PlusIcon from '@duyank/icons/regular/Plus';
 import MinusIcon from '@duyank/icons/regular/Minus';
-import CaretDownIcon from '@duyank/icons/regular/CaretDown';
-import CheckIcon from '@duyank/icons/regular/Check';
 import TextAUnderlineIcon from '@duyank/icons/regular/TextAUnderline';
 import { isEqual, throttle, uniq, uniqBy } from 'lodash';
 import Popover from '@canva/components/popover/Popover';
@@ -52,6 +49,9 @@ import { getControlBoxSizeFromLayers } from '../layer/getControlBoxSizeFromLayer
 import KeyboardIcon from '@duyank/icons/regular/Keyboard';
 import LineSpacingIcon from '@duyank/icons/external/LineSpacing';
 import { ColorParser } from '../../color-picker/utils';
+import CheckIcon from '@canva/icons/CheckIcon';
+import PlusIcon from '@canva/icons/PlusIcon';
+import ArrowDownIcon from '@canva/icons/ArrowDownIcon';
 
 interface TextSettingsProps {
     layers: Layer<TextLayerProps>[];
@@ -1083,7 +1083,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
                             fontSize: 16,
                         }}
                     >
-                        <CaretDownIcon />
+                        <ArrowDownIcon />
                     </div>
                 </div>
             </div>

@@ -8,7 +8,7 @@ import { keyName } from 'w3c-keyname';
 import Alpha from './Alpha';
 import { modifiers, normalizeKeyName } from '@canva/utils/keyboard';
 import { ColorParser, hex2hsv, hsv2hex } from '../utils';
-import EyedropperIcon from '@duyank/icons/regular/Eyedropper';
+import ColorizeIcon from '@canva/icons/ColorizeIcon';
 
 interface Props<T extends string> extends Partial<ColorPickerBaseProps<T>> {
     colorModel: ColorModel<T>;
@@ -177,7 +177,7 @@ export const BaseColorPicker = ({
                         }}
                         onClick={handleEyedropper}
                     >
-                        {window.EyeDropper && <EyedropperIcon />}
+                        {window.EyeDropper && <ColorizeIcon />}
                     </div>
                 </div>
             </div>

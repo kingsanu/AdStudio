@@ -1,8 +1,8 @@
 import React, { forwardRef, ForwardRefRenderFunction, Fragment, PropsWithChildren } from 'react';
 import { useEditor } from '../../hooks';
-import TriangleIcon from '@duyank/icons/shape/Triangle';
 import { BoxSize, Delta, LayerType } from '@canva/types';
 import { getTransformStyle } from '..';
+import PlayArrowIcon from '@canva/icons/PlayArrowIcon';
 
 interface LayerBorderBoxProps {
     boxSize: BoxSize;
@@ -86,7 +86,7 @@ const LayerBorderBox: ForwardRefRenderFunction<HTMLDivElement, PropsWithChildren
                                 justifyContent: 'center',
                             }}
                         >
-                            <TriangleIcon />
+                            <PlayArrowIcon />
                         </div>
                     </div>
                 </Fragment>

@@ -1,7 +1,7 @@
 import React, { ChangeEvent, forwardRef, ForwardRefRenderFunction, useRef } from 'react';
-import PlayCircleIcon from '@duyank/icons/regular/PlayCircle';
 import { downloadObjectAsJson } from '../utils/download';
 import { useEditor } from '@canva/hooks';
+import PlayArrowIcon from '@canva/icons/PlayArrowIcon';
 
 interface HeaderLayoutProps {
     openPreview: () => void;
@@ -102,7 +102,7 @@ const HeaderLayout: ForwardRefRenderFunction<HTMLDivElement, HeaderLayoutProps> 
                     onClick={openPreview}
                 >
                     <div css={{ marginRight: 4, fontSize: 20 }}>
-                        <PlayCircleIcon />
+                        <PlayArrowIcon />
                     </div>{' '}
                     Preview
                 </div>

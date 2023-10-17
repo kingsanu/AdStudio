@@ -1,5 +1,5 @@
 import React, { FC, PropsWithChildren, ReactElement, useState } from 'react';
-import CaretRightIcon from '@duyank/icons/regular/CaretRight';
+import ArrowRightIcon from '@canva/icons/ArrowRightIcon';
 interface ContextMenuItemProps {
     name: string;
     icon: ReactElement;
@@ -68,7 +68,7 @@ const ContextMenuItem: FC<PropsWithChildren<ContextMenuItemProps>> = ({
                     }}
                 >
                     {shortcut}
-                    {children && <CaretRightIcon />}
+                    {children && <ArrowRightIcon />}
                 </div>
             )}
             {showSub && children}

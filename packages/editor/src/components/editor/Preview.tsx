@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import Page from './Page';
-import CaretLeftIcon from '@duyank/icons/regular/CaretLeft';
-import CaretRightIcon from '@duyank/icons/regular/CaretRight';
 import { useEditor } from '../../hooks';
 import { useUsedFont } from '../../hooks/useUsedFont';
 import { GlobalStyle } from '@canva/layers';
+import ArrowBackIcon from '@canva/icons/ArrowBackIcon';
+import ArrowForwardIcon from '@canva/icons/ArrowForwardIcon';
 
 type Interval = ReturnType<typeof setTimeout>;
 let timeout: Interval;
@@ -100,7 +100,7 @@ const Preview = () => {
                     }}
                     onClick={() => moveSlide(-1)}
                 >
-                    <CaretLeftIcon />
+                    <ArrowBackIcon />
                 </div>
             </div>
             <div
@@ -122,7 +122,7 @@ const Preview = () => {
                     }}
                     onClick={() => moveSlide(1)}
                 >
-                    <CaretRightIcon />
+                    <ArrowForwardIcon />
                 </div>
             </div>
             <div css={{ width: size.width, height: size.height }}>

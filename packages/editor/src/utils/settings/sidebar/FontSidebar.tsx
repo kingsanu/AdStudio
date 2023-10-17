@@ -10,13 +10,13 @@ import React, {
 } from 'react';
 import Sidebar, { SidebarProps } from './Sidebar';
 import FontStyle from './FontStyle';
-import CheckIcon from '@duyank/icons/regular/Check';
-import MagnifyingGlassIcon from '@duyank/icons/regular/MagnifyingGlass';
 import { FontData } from '@canva/types';
 import { EditorContext } from '@canva/components/editor/EditorContext';
 import { useUsedFont } from '@canva/hooks/useUsedFont';
 import { useEditor } from '@canva/hooks';
 import ArrowLeftIcon from '@canva/icons/ArrowLeftIcon';
+import CheckIcon from '@canva/icons/CheckIcon';
+import SearchIcon from '@canva/icons/SearchIcon';
 
 interface FontSidebarProps extends SidebarProps {
     selected: FontData[];
@@ -127,7 +127,7 @@ const FontSidebar: ForwardRefRenderFunction<HTMLDivElement, FontSidebarProps> = 
                         css={{ height: 40, borderRadius: 4, padding: '0 12px', display: 'flex', alignItems: 'center' }}
                     >
                         <div css={{ fontSize: 24, marginRight: 8, flexShrink: 0 }}>
-                            <MagnifyingGlassIcon />
+                            <SearchIcon />
                         </div>
                         <form onSubmit={handleSearch}>
                             <input ref={qRef} type={'text'} css={{ width: '100%', height: '100%' }} />

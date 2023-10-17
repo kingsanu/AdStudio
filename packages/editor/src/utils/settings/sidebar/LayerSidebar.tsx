@@ -1,16 +1,16 @@
 import React, { forwardRef, ForwardRefRenderFunction, useEffect, useMemo, useRef } from 'react';
 import reverse from 'lodash/reverse';
 import Sidebar, { SidebarProps } from './Sidebar';
-import DotsSixVerticalBoldIcon from '@duyank/icons/bold/DotsSixVerticalBold';
-import DotsThreeBoldIcon from '@duyank/icons/bold/DotsThreeBold';
-import BoundingBoxIcon from '@duyank/icons/regular/BoundingBox';
-import SelectionBackgroundIcon from '@duyank/icons/regular/SelectionBackground';
 import ReverseTransformLayer from './layer/ReverseTransformLayer';
 import { useEditor, useSelectedLayers } from '@canva/hooks';
 import { getPosition } from '@canva/utils';
 import { PageContext } from '@canva/layers/core/PageContext';
 import { isGroupLayer } from '@canva/utils/layer/layers';
 import ArrowLeftIcon from '@canva/icons/ArrowLeftIcon';
+import MoreVertIcon from '@canva/icons/MoreVertIcon';
+import MoreHorizIcon from '@canva/icons/MoreHorizIcon';
+import GroupingIcon from '@canva/icons/GroupingIcon';
+import BackgroundSelectionIcon from '@canva/icons/BackgroundSelectionIcon';
 
 type LayerSidebarProps = SidebarProps;
 const LayerSidebar: ForwardRefRenderFunction<HTMLDivElement, LayerSidebarProps> = ({ ...props }, ref) => {
@@ -146,14 +146,14 @@ const LayerSidebar: ForwardRefRenderFunction<HTMLDivElement, LayerSidebarProps> 
                                                 flexShrink: 0,
                                             }}
                                         >
-                                            <DotsSixVerticalBoldIcon />
+                                            <MoreVertIcon />
                                         </div>
                                         <div css={{ minWidth: 0, flexGrow: 1 }}>
                                             <ReverseTransformLayer layer={layer} />
                                         </div>
                                         {isGroupLayer(layer) && (
                                             <div css={{ flexShrink: 0, fontSize: 24 }}>
-                                                <BoundingBoxIcon />
+                                                <GroupingIcon />
                                             </div>
                                         )}
                                     </div>
@@ -169,7 +169,7 @@ const LayerSidebar: ForwardRefRenderFunction<HTMLDivElement, LayerSidebarProps> 
                                         }}
                                         onClick={handleClickOption}
                                     >
-                                        <DotsThreeBoldIcon />
+                                        <MoreHorizIcon />
                                     </div>
                                 </div>
                             ))}
@@ -216,7 +216,7 @@ const LayerSidebar: ForwardRefRenderFunction<HTMLDivElement, LayerSidebarProps> 
                                         </div>
 
                                         <div css={{ flexShrink: 0, fontSize: 24 }}>
-                                            <SelectionBackgroundIcon />
+                                            <BackgroundSelectionIcon />
                                         </div>
                                     </div>
                                 </div>

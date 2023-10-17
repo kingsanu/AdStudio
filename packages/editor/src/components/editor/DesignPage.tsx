@@ -25,14 +25,14 @@ import ImageEditor from '../image-editor/ImageEditor';
 import TextEditor from '../text-editor/TextEditor';
 
 // Icons
-import CaretUpIcon from '@duyank/icons/regular/CaretUp';
-import CaretDownIcon from '@duyank/icons/regular/CaretDown';
-import TrashIcon from '@duyank/icons/regular/Trash';
 import FilePlusIcon from '@duyank/icons/regular/FilePlus';
-import DuplicateIcon from '@duyank/icons/external/Duplicate';
-import LockKeyOpenIcon from '@duyank/icons/regular/LockKeyOpen';
-import LockKeyIcon from '@duyank/icons/regular/LockKey';
 import DownloadIcon from '@duyank/icons/regular/Download';
+import LockIcon from '@canva/icons/LockIcon';
+import LockOpenIcon from '@canva/icons/LockOpenIcon';
+import DuplicateIcon from '@canva/icons/DuplicateIcon';
+import TrashIcon from '@canva/icons/TrashIcon';
+import ArrowUpIcon from '@canva/icons/ArrowUpIcon';
+import ArrowDownIcon from '@canva/icons/ArrowDownIcon';
 
 export interface PageProps {
     pageIndex: number;
@@ -313,7 +313,7 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
                         }}
                         onClick={() => actions.movePageUp(pageIndex)}
                     >
-                        <CaretUpIcon />
+                        <ArrowUpIcon />
                     </div>
                     <div
                         css={{
@@ -332,7 +332,7 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
                         }}
                         onClick={() => actions.movePageDown(pageIndex)}
                     >
-                        <CaretDownIcon />
+                        <ArrowDownIcon />
                     </div>
                     <div
                         css={{
@@ -352,8 +352,8 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
                             isLocked ? actions.unlockPage(pageIndex) : actions.lockPage(pageIndex);
                         }}
                     >
-                        {!isLocked && <LockKeyOpenIcon />}
-                        {isLocked && <LockKeyIcon />}
+                        {!isLocked && <LockOpenIcon />}
+                        {isLocked && <LockIcon />}
                     </div>
                     <div
                         css={{

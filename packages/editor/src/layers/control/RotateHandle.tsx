@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useContext } from 'react';
-import ArrowsClockwiseIcon from '@duyank/icons/regular/ArrowsClockwise';
 import { useEditor } from '@canva/hooks';
 import { EditorContext } from '@canva/components/editor/EditorContext';
+import RotateIcon from '@canva/icons/RotateIcon';
 
 interface ResizeHandlerProps {
     rotate: number;
@@ -53,7 +53,7 @@ const RotateHandle: FC<ResizeHandlerProps> = ({ rotate, onRotateStart }) => {
                     onMouseDown={handleRotateStart}
                     onTouchStart={handleRotateStart}
                 >
-                    <ArrowsClockwiseIcon />
+                    <RotateIcon />
                 </div>
             </div>
             {isRotating && (

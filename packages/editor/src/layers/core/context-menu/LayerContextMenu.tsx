@@ -4,13 +4,9 @@ import { ImageLayerProps } from '../../ImageLayer';
 import { cloneDeep } from 'lodash';
 import ClipboardIcon from '@duyank/icons/regular/Clipboard';
 import CopyIcon from '@duyank/icons/regular/Copy';
-import TrashIcon from '@duyank/icons/regular/Trash';
 import LayersIcon from '@duyank/icons/external/Layers';
 import SelectionBackgroundIcon from '@duyank/icons/regular/SelectionBackground';
 import SelectionForegroundIcon from '@duyank/icons/regular/SelectionForeground';
-import DuplicateIcon from '@duyank/icons/external/Duplicate';
-import LockKeyIcon from '@duyank/icons/regular/LockKey';
-import BoundingBoxIcon from '@duyank/icons/regular/BoundingBox';
 import ShapesIcon from '@duyank/icons/regular/Shapes';
 import CaretCircleUpIcon from '@duyank/icons/regular/CaretCircleUp';
 import CaretCircleDoubleUpIcon from '@duyank/icons/regular/CaretCircleDoubleUp';
@@ -32,6 +28,10 @@ import { copy } from '@canva/utils/menu/actions/copy';
 import { duplicate } from '@canva/utils/menu/actions/duplicate';
 import { paste } from '@canva/utils/menu/actions/paste';
 import ArrowLeftIcon from '@canva/icons/ArrowLeftIcon';
+import TrashIcon from '@canva/icons/TrashIcon';
+import DuplicateIcon from '@canva/icons/DuplicateIcon';
+import LockIcon from '@canva/icons/LockIcon';
+import GroupingIcon from '@canva/icons/GroupingIcon';
 
 const LayerContextMenu: ForwardRefRenderFunction<HTMLDivElement> = (_, ref) => {
     const { selectedLayerIds, selectedLayers } = useSelectedLayers();
@@ -388,13 +388,13 @@ const LayerContextMenu: ForwardRefRenderFunction<HTMLDivElement> = (_, ref) => {
                 )}
 
                 {selectedLayerIds.length > 1 && (
-                    <ContextMenuItem name={'Group'} icon={<BoundingBoxIcon />} onClick={handleGroup} />
+                    <ContextMenuItem name={'Group'} icon={<GroupingIcon />} onClick={handleGroup} />
                 )}
                 {containerGroupLayer && (
                     <ContextMenuItem name={'Ungroup'} icon={<ShapesIcon />} onClick={handleUngroup} />
                 )}
                 {!selectedLayerIds.includes('ROOT') && (
-                    <ContextMenuItem name={'Lock'} icon={<LockKeyIcon />} onClick={handleLock} />
+                    <ContextMenuItem name={'Lock'} icon={<LockIcon />} onClick={handleLock} />
                 )}
                 {imageLayer && selectedLayerIds.length === 1 && (
                     <ContextMenuItem
