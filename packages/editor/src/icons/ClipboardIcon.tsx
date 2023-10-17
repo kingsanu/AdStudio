@@ -13,8 +13,8 @@ const ClipboardIcon: React.FC<IconProps> = ({ className = '' }: IconProps) => {
     >
       <mask id='_1304310517__a' fill='#fff'>
         <path
-          fill-rule='evenodd'
-          clip-rule='evenodd'
+          fillRule='evenodd'
+          clipRule='evenodd'
           d='M14 5a2 2 0 1 0-4 0H8v3a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V5h-2Z'
         ></path>
       </mask>
@@ -24,8 +24,8 @@ const ClipboardIcon: React.FC<IconProps> = ({ className = '' }: IconProps) => {
         mask='url(#_1304310517__a)'
       ></path>
       <path
-        fill-rule='evenodd'
-        clip-rule='evenodd'
+        fillRule='evenodd'
+        clipRule='evenodd'
         d='M16 6.5h1.714c.316 0 .572.224.572.5v13c0 .276-.256.5-.572.5H6.286c-.316 0-.572-.224-.572-.5V7c0-.276.256-.5.572-.5H8V5H6.286C5.023 5 4 5.895 4 7v13c0 1.105 1.023 2 2.286 2h11.428C18.977 22 20 21.105 20 20V7c0-1.105-1.023-2-2.286-2H16v1.5Z'
         fill='currentColor'
       ></path>

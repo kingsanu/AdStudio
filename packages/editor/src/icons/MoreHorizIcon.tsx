@@ -12,7 +12,7 @@ const MoreHorizIcon: React.FC<IconProps> = ({ className = '' }: IconProps) => {
     >
       <path
         fill='currentColor'
-        fill-rule='evenodd'
+        fillRule='evenodd'
         d='M5 14a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm7 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm7 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4z'
       ></path>
     </svg>

@@ -119,6 +119,10 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
       isUppercase,
       isBulletList,
       isOrderedList,
+      isAlignLeft,
+      isAlignRight,
+      isAlignCenter,
+      isAlignJustify,
       ...settings
     },
     setSettings,
@@ -133,6 +137,10 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
       isUppercase: boolean;
       isBulletList: boolean;
       isOrderedList: boolean;
+      isAlignLeft: boolean;
+      isAlignRight: boolean;
+      isAlignCenter: boolean;
+      isAlignJustify: boolean;
       lineHeight: Record<LayerId, number[]>;
       letterSpacing: Record<LayerId, number[]>;
     } = {
@@ -145,6 +153,10 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
       isUppercase: true,
       isBulletList: true,
       isOrderedList: true,
+      isAlignLeft: true,
+      isAlignRight: true,
+      isAlignCenter: true,
+      isAlignJustify: true,
       lineHeight: {},
       letterSpacing: {},
     };
@@ -163,17 +175,26 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         if (!isActive(editor.state, 'underline')) {
           settings.isUnderline = false;
         }
-        if (!isActive(editor.state, null, { indent: 1, listType: '' })) {
+        if (!isActive(editor.state, null, { '--indent-level': 1 })) {
           settings.isBulletList = false;
         }
-        if (!isActive(editor.state, null, { indent: 1, listType: 'ordered' })) {
+        if (!isActive(editor.state, null, { '--indent-level': 1, '--counter-list-marker': 'decimal' })) {
           settings.isOrderedList = false;
         }
         if (!isActive(editor.state, null, { textTransform: 'uppercase' })) {
           settings.isUppercase = false;
         }
-        if (!isActive(editor.state, null, { textTransform: 'uppercase' })) {
-          settings.isUppercase = false;
+        if (!isActive(editor.state, null, { textAlign: 'left' })) {
+          settings.isAlignLeft = false;
+        }
+        if (!isActive(editor.state, null, { textAlign: 'right' })) {
+          settings.isAlignRight = false;
+        }
+        if (!isActive(editor.state, null, { textAlign: 'center' })) {
+          settings.isAlignCenter = false;
+        }
+        if (!isActive(editor.state, null, { textAlign: 'justify' })) {
+          settings.isAlignJustify = false;
         }
       }
     });
@@ -203,6 +224,10 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
       isUppercase: boolean;
       isBulletList: boolean;
       isOrderedList: boolean;
+      isAlignLeft: boolean;
+      isAlignRight: boolean;
+      isAlignCenter: boolean;
+      isAlignJustify: boolean;
       lineHeight: Record<LayerId, number[]>;
       letterSpacing: Record<LayerId, number[]>;
     } = {
@@ -215,6 +240,10 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
       isUppercase: true,
       isBulletList: true,
       isOrderedList: true,
+      isAlignLeft: true,
+      isAlignRight: true,
+      isAlignCenter: true,
+      isAlignJustify: true,
       lineHeight: {},
       letterSpacing: {},
     };
@@ -247,14 +276,26 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         if (!isActive(editor.state, 'underline')) {
           settings.isUnderline = false;
         }
-        if (!isActive(editor.state, 'bulletList')) {
+        if (!isActive(editor.state, null, { '--indent-level': 1 })) {
           settings.isBulletList = false;
         }
-        if (!isActive(editor.state, 'orderedList')) {
+        if (!isActive(editor.state, null, { '--indent-level': 1, '--counter-list-marker': 'decimal' })) {
           settings.isOrderedList = false;
         }
         if (!isActive(editor.state, null, { textTransform: 'uppercase' })) {
           settings.isUppercase = false;
+        }
+        if (!isActive(editor.state, null, { textAlign: 'left' })) {
+          settings.isAlignLeft = false;
+        }
+        if (!isActive(editor.state, null, { textAlign: 'right' })) {
+          settings.isAlignRight = false;
+        }
+        if (!isActive(editor.state, null, { textAlign: 'center' })) {
+          settings.isAlignCenter = false;
+        }
+        if (!isActive(editor.state, null, { textAlign: 'justify' })) {
+          settings.isAlignJustify = false;
         }
         setSettings(settings);
       }
@@ -338,6 +379,10 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         isUppercase: boolean;
         isBulletList: boolean;
         isOrderedList: boolean;
+        isAlignLeft: boolean;
+        isAlignRight: boolean;
+        isAlignCenter: boolean;
+        isAlignJustify: boolean;
         lineHeight: Record<LayerId, number[]>;
         letterSpacing: Record<LayerId, number[]>;
       } = {
@@ -350,6 +395,10 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         isUppercase: true,
         isBulletList: true,
         isOrderedList: true,
+        isAlignLeft: true,
+        isAlignRight: true,
+        isAlignCenter: true,
+        isAlignJustify: true,
         lineHeight: {},
         letterSpacing: {},
       };
@@ -461,16 +510,26 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
           if (!isActive(editor.state, 'underline')) {
             settings.isUnderline = false;
           }
-          if (!isActive(editor.state, null, { indent: 1, listType: '' })) {
+          if (!isActive(editor.state, null, { '--indent-level': 1 })) {
             settings.isBulletList = false;
           }
-          if (
-            !isActive(editor.state, null, { indent: 1, listType: 'ordered' })
-          ) {
+          if (!isActive(editor.state, null, { '--indent-level': 1, '--counter-list-marker': 'decimal' })) {
             settings.isOrderedList = false;
           }
           if (!isActive(editor.state, null, { textTransform: 'uppercase' })) {
             settings.isUppercase = false;
+          }
+          if (!isActive(editor.state, null, { textAlign: 'left' })) {
+            settings.isAlignLeft = false;
+          }
+          if (!isActive(editor.state, null, { textAlign: 'right' })) {
+            settings.isAlignRight = false;
+          }
+          if (!isActive(editor.state, null, { textAlign: 'center' })) {
+            settings.isAlignCenter = false;
+          }
+          if (!isActive(editor.state, null, { textAlign: 'justify' })) {
+            settings.isAlignJustify = false;
           }
           setSettings(settings);
           if (type === 'content') {
@@ -540,14 +599,26 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
             if (!isActive(editor.state, 'underline')) {
               settings.isUnderline = false;
             }
-            if (!isActive(editor.state, 'bulletList')) {
+            if (!isActive(editor.state, null, { '--indent-level': 1 })) {
               settings.isBulletList = false;
             }
-            if (!isActive(editor.state, 'orderedList')) {
+            if (!isActive(editor.state, null, { '--indent-level': 1, '--counter-list-marker': 'decimal' })) {
               settings.isOrderedList = false;
             }
             if (!isActive(editor.state, null, { textTransform: 'uppercase' })) {
               settings.isUppercase = false;
+            }
+            if (!isActive(editor.state, null, { textAlign: 'left' })) {
+              settings.isAlignLeft = false;
+            }
+            if (!isActive(editor.state, null, { textAlign: 'right' })) {
+              settings.isAlignRight = false;
+            }
+            if (!isActive(editor.state, null, { textAlign: 'center' })) {
+              settings.isAlignCenter = false;
+            }
+            if (!isActive(editor.state, null, { textAlign: 'justify' })) {
+              settings.isAlignJustify = false;
             }
             if (type === 'content') {
               const scale = isEqual(
@@ -1423,24 +1494,28 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
 
       <SettingButton
         css={{ fontSize: 24 }}
+        isActive={isAlignLeft}
         onClick={() => updateTextAlign('left')}
       >
         <TextAlignLeftIcon />
       </SettingButton>
       <SettingButton
         css={{ fontSize: 24 }}
+        isActive={isAlignCenter}
         onClick={() => updateTextAlign('center')}
       >
         <TextAlignCenterIcon />
       </SettingButton>
       <SettingButton
         css={{ fontSize: 24 }}
+        isActive={isAlignRight}
         onClick={() => updateTextAlign('right')}
       >
         <TextAlignRightIcon />
       </SettingButton>
       <SettingButton
         css={{ fontSize: 24 }}
+        isActive={isAlignJustify}
         onClick={() => updateTextAlign('justify')}
       >
         <TextAlignJustifyIcon />

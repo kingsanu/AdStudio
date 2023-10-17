@@ -22,7 +22,7 @@ const TextAlignJustifyIcon: React.FC<IconProps> = ({
       <use
         fill='currentColor'
         xlinkHref='#_1025355287__a'
-        fill-rule='evenodd'
+        fillRule='evenodd'
       ></use>
     </svg>
   );

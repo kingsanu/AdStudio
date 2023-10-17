@@ -17,8 +17,8 @@ const MinusIcon: React.FC<IconProps> = ({ className = '' }: IconProps) => {
           id='svg_1'
           fill='currentColor'
           d='m2,8.12499a1.13672,0.75 0 0 1 1.13672,-0.75l9.85155,0a1.13672,0.75 0 0 1 0,1.5l-9.85155,0a1.13672,0.75 0 0 1 -1.13672,-0.75z'
-          clip-rule='evenodd'
-          fill-rule='evenodd'
+          clipRule='evenodd'
+          fillRule='evenodd'
         />
       </g>
     </svg>

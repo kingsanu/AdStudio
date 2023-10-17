@@ -16,7 +16,6 @@ export function isMarkActive(
                 if (!type) {
                     return true;
                 }
-
                 return type.name === mark.type.name;
             })
             .find((mark) => objectIncludes(mark.attrs, attributes));

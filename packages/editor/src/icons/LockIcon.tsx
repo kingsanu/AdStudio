@@ -18,7 +18,7 @@ const LockIcon: React.FC<IconProps> = ({ className = '' }: IconProps) => {
         stroke-linejoin='round'
       ></path>
       <path
-        fill-rule='evenodd'
+        fillRule='evenodd'
         clip-rule='evenodd'
         d='M10.018 2.028a4.983 4.983 0 0 0-4.983 4.983v1.22h1.25V7.01a3.736 3.736 0 0 1 3.732-3.733 3.736 3.736 0 0 1 3.733 3.733v1.22H15V7.01a4.983 4.983 0 0 0-4.982-4.983Z'
         fill='currentColor'

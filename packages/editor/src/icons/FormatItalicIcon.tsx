@@ -15,7 +15,7 @@ const FormatItalicIcon: React.FC<IconProps> = ({
     >
       <path
         fill='currentColor'
-        fill-rule='evenodd'
+        fillRule='evenodd'
         d='m14.73 6.5-3.67 11H14l-.3 1.5H6l.3-1.5h2.81l3.68-11H10l.3-1.5H18l-.3 1.5h-2.97z'
       ></path>
     </svg>
