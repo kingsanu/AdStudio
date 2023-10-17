@@ -2,36 +2,37 @@ import React, { forwardRef, ForwardRefRenderFunction, Fragment, useCallback, use
 import { useEditor, useSelectedLayers } from '../../../hooks';
 import { ImageLayerProps } from '../../ImageLayer';
 import { cloneDeep } from 'lodash';
-import ClipboardIcon from '@duyank/icons/regular/Clipboard';
-import CopyIcon from '@duyank/icons/regular/Copy';
-import LayersIcon from '@duyank/icons/external/Layers';
-import SelectionBackgroundIcon from '@duyank/icons/regular/SelectionBackground';
-import SelectionForegroundIcon from '@duyank/icons/regular/SelectionForeground';
-import ShapesIcon from '@duyank/icons/regular/Shapes';
-import CaretCircleUpIcon from '@duyank/icons/regular/CaretCircleUp';
-import CaretCircleDoubleUpIcon from '@duyank/icons/regular/CaretCircleDoubleUp';
-import CaretCircleDownIcon from '@duyank/icons/regular/CaretCircleDown';
-import AlignLeftIcon from '@duyank/icons/regular/AlignLeft';
-import ContextMenuItem from './ContextMenuItem';
-import AlignBottomIcon from '@duyank/icons/regular/AlignBottom';
-import AlignTopIcon from '@duyank/icons/regular/AlignTop';
-import AlignRightIcon from '@duyank/icons/regular/AlignRight';
-import AlignCenterHorizontalIcon from '@duyank/icons/regular/AlignCenterHorizontal';
-import AlignCenterVerticalIcon from '@duyank/icons/regular/AlignCenterVertical';
 import SubMenu from './SubMenu';
-import CaretCircleDoubleDownIcon from '@duyank/icons/regular/CaretCircleDoubleDown';
 import { useForwardedRef } from '../../../hooks/useForwardedRef';
 import { RootLayerProps } from '../../RootLayer';
+import ContextMenuItem from './ContextMenuItem';
 import { getTransformStyle } from '@canva/layers';
 import { isGroupLayer } from '@canva/utils/layer/layers';
 import { copy } from '@canva/utils/menu/actions/copy';
 import { duplicate } from '@canva/utils/menu/actions/duplicate';
 import { paste } from '@canva/utils/menu/actions/paste';
+
+// Icons
 import ArrowLeftIcon from '@canva/icons/ArrowLeftIcon';
 import TrashIcon from '@canva/icons/TrashIcon';
 import DuplicateIcon from '@canva/icons/DuplicateIcon';
 import LockIcon from '@canva/icons/LockIcon';
 import GroupingIcon from '@canva/icons/GroupingIcon';
+import ClipboardIcon from '@canva/icons/ClipboardIcon';
+import BringForwardIcon from '@canva/icons/BringForwardIcon';
+import BringToFontIcon from '@canva/icons/BringToFontIcon';
+import SendBackwardIcon from '@canva/icons/SendBackwardIcon';
+import SendToBackIcon from '@canva/icons/SendToBackIcon';
+import LayersIcon from '@canva/icons/LayersIcon';
+import UngroupIcon from '@canva/icons/UngroupIcon';
+import CopyIcon from '@canva/icons/CopyIcon';
+import AlignLeftIcon from '@canva/icons/AlignLeftIcon';
+import AlignCenterHorizontalIcon from '@canva/icons/AlignCenterHorizontalIcon';
+import AlignRightIcon from '@canva/icons/AlignRightIcon';
+import AlignTopIcon from '@canva/icons/AlignTopIcon';
+import AlignCenterVerticalIcon from '@canva/icons/AlignCenterVerticalIcon';
+import AlignBottomIcon from '@canva/icons/AlignBottomIcon';
+import BackgroundSelectionIcon from '@canva/icons/BackgroundSelectionIcon';
 
 const LayerContextMenu: ForwardRefRenderFunction<HTMLDivElement> = (_, ref) => {
     const { selectedLayerIds, selectedLayers } = useSelectedLayers();
@@ -303,28 +304,28 @@ const LayerContextMenu: ForwardRefRenderFunction<HTMLDivElement> = (_, ref) => {
                             >
                                 <ContextMenuItem
                                     name={'Bring Forward'}
-                                    icon={<CaretCircleUpIcon />}
+                                    icon={<BringForwardIcon />}
                                     shortcut={'Ctrl+]'}
                                     disabled={forwardDisabled}
                                     onClick={handleForward}
                                 />
                                 <ContextMenuItem
                                     name={'Bring to Front'}
-                                    icon={<CaretCircleDoubleUpIcon />}
+                                    icon={<BringToFontIcon />}
                                     shortcut={'Ctrl+Alt+]'}
                                     disabled={forwardDisabled}
                                     onClick={handleToFront}
                                 />
                                 <ContextMenuItem
                                     name={'Send Backward'}
-                                    icon={<CaretCircleDownIcon />}
+                                    icon={<SendBackwardIcon />}
                                     shortcut={'Ctrl+['}
                                     disabled={backwardDisabled}
                                     onClick={handleBackward}
                                 />
                                 <ContextMenuItem
                                     name={'Send to Back'}
-                                    icon={<CaretCircleDoubleDownIcon />}
+                                    icon={<SendToBackIcon />}
                                     shortcut={'Ctrl+Alt+['}
                                     disabled={backwardDisabled}
                                     onClick={handleToBack}
@@ -391,15 +392,15 @@ const LayerContextMenu: ForwardRefRenderFunction<HTMLDivElement> = (_, ref) => {
                     <ContextMenuItem name={'Group'} icon={<GroupingIcon />} onClick={handleGroup} />
                 )}
                 {containerGroupLayer && (
-                    <ContextMenuItem name={'Ungroup'} icon={<ShapesIcon />} onClick={handleUngroup} />
+                    <ContextMenuItem name={'Ungroup'} icon={<UngroupIcon />} onClick={handleUngroup} />
                 )}
                 {!selectedLayerIds.includes('ROOT') && (
                     <ContextMenuItem name={'Lock'} icon={<LockIcon />} onClick={handleLock} />
                 )}
                 {imageLayer && selectedLayerIds.length === 1 && (
                     <ContextMenuItem
-                        name={'Set as Background Image'}
-                        icon={<SelectionForegroundIcon />}
+                        name={'Set image as background'}
+                        icon={<BackgroundSelectionIcon />}
                         onClick={handleSetAsBackground}
                     />
                 )}
@@ -407,8 +408,8 @@ const LayerContextMenu: ForwardRefRenderFunction<HTMLDivElement> = (_, ref) => {
                     selectedLayerIds.includes('ROOT') &&
                     (rootLayer?.data.props as RootLayerProps)?.image && (
                         <ContextMenuItem
-                            name={'Set Background as Image Layer'}
-                            icon={<SelectionBackgroundIcon />}
+                            name={'Detach image from background'}
+                            icon={<BackgroundSelectionIcon />}
                             onClick={handleSetAsImageLayer}
                         />
                     )}

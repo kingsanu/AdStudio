@@ -1,18 +1,20 @@
-import React, { FC, Fragment, ReactElement, useMemo, useRef, useState } from 'react';
+import { FC, Fragment, ReactElement, useMemo, useRef, useState } from 'react';
 import SettingButton from './SettingButton';
 import ColorSettings from './ColorSettings';
-import FrameCornersIcon from '@duyank/icons/regular/FrameCorners';
-import SolidIcon from '@duyank/icons/external/Solid';
-import NotAllowedIcon from '@duyank/icons/external/NotAllowed';
-import LongDashesIcon from '@duyank/icons/external/LongDashes';
-import ShortDashesIcon from '@duyank/icons/external/ShortDashes';
-import DotsIcon from '@duyank/icons/external/Dots';
-import SquareBoldIcon from '@duyank/icons/bold/SquareBold';
 import Popover from '@canva/components/popover/Popover';
+import Slider from '@canva/components/slider/Slider';
 import { useEditor } from '@canva/hooks';
 import { ShapeLayerProps } from '@canva/layers/ShapeLayer';
 import { Layer, ShapeBorderStyle, GradientStyle } from '@canva/types';
-import Slider from '@canva/components/slider/Slider';
+
+// Icons
+import ShapeSettingsIcon from '@canva/icons/ShapeSettingsIcon';
+import LongDashIcon from '@canva/icons/LongDashIcon';
+import TwoDashesIcon from '@canva/icons/TwoDashesIcon';
+import ThreeDashesIcon from '@canva/icons/ThreeDashesIcon';
+import DotsIcon from '@canva/icons/DotsIcon';
+import NotAllowedIcon from '@canva/icons/NotAllowedIcon';
+import SquareBoldIcon from '@canva/icons/SquareBoldIcon';
 
 interface ShapeSettingsProps {
     layers: Layer<ShapeLayerProps>[];
@@ -22,9 +24,9 @@ const shapeStyles: { type: ShapeBorderStyle; icon: ReactElement }[] = [
         type: 'none',
         icon: <NotAllowedIcon />,
     },
-    { type: 'solid', icon: <SolidIcon /> },
-    { type: 'longDashes', icon: <LongDashesIcon /> },
-    { type: 'shortDashes', icon: <ShortDashesIcon /> },
+    { type: 'solid', icon: <LongDashIcon /> },
+    { type: 'longDashes', icon: <TwoDashesIcon /> },
+    { type: 'shortDashes', icon: <ThreeDashesIcon /> },
     { type: 'dots', icon: <DotsIcon /> },
 ];
 const ShapeSettings: FC<ShapeSettingsProps> = ({ layers }) => {
@@ -149,7 +151,7 @@ const ShapeSettings: FC<ShapeSettingsProps> = ({ layers }) => {
                     </Fragment>
                 )}
                 <SettingButton ref={borderRef} css={{ fontSize: 20 }} onClick={() => setOpenBorderSetting(true)}>
-                    <FrameCornersIcon />
+                    <ShapeSettingsIcon />
                 </SettingButton>
                 <Popover
                     open={openBorderSetting}

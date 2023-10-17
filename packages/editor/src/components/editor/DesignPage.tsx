@@ -25,14 +25,14 @@ import ImageEditor from '../image-editor/ImageEditor';
 import TextEditor from '../text-editor/TextEditor';
 
 // Icons
-import FilePlusIcon from '@duyank/icons/regular/FilePlus';
-import DownloadIcon from '@duyank/icons/regular/Download';
 import LockIcon from '@canva/icons/LockIcon';
 import LockOpenIcon from '@canva/icons/LockOpenIcon';
 import DuplicateIcon from '@canva/icons/DuplicateIcon';
 import TrashIcon from '@canva/icons/TrashIcon';
 import ArrowUpIcon from '@canva/icons/ArrowUpIcon';
 import ArrowDownIcon from '@canva/icons/ArrowDownIcon';
+import AddNewPageIcon from '@canva/icons/AddNewPageIcon';
+import DownloadIcon from '@canva/icons/DownloadIcon';
 
 export interface PageProps {
     pageIndex: number;
@@ -426,7 +426,7 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
                         }}
                         onClick={() => actions.addPage(pageIndex)}
                     >
-                        <FilePlusIcon />
+                        <AddNewPageIcon />
                     </div>
                 </div>
             </div>
