@@ -164,6 +164,9 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       state.guideline.vertical = vertical;
       state.guideline.horizontal = horizontal;
     },
+    togglePageSettings: () => {
+      state.openPageSettings = !state.openPageSettings;
+    },
     selectLayers(
       pageIndex: number,
       layerIds: LayerId | LayerId[],
@@ -197,10 +200,6 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
           ...ids,
         ]);
       }
-      console.log('===')
-      console.log(state.selectedLayers)
-      console.log(state.selectedLayers[pageIndex])
-      console.log(ids)
       state.activePage = pageIndex;
     },
     selectAllLayers: () => {
@@ -390,7 +389,6 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
         pages.push(page);
       });
       state.pages = pages;
-      console.log(state.pages)
 
     },
     setPage: (pageIndex: number, serializedPage: SerializedPage) => {

@@ -16,7 +16,6 @@ const LayerBorderBox: ForwardRefRenderFunction<HTMLDivElement, PropsWithChildren
     ref,
 ) => {
     const { scale } = useEditor((state) => ({ scale: state.scale }));
-
     return (
         <div
             ref={ref}

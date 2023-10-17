@@ -189,12 +189,13 @@ const useShortcut = (frameEle: HTMLElement | null) => {
         [actions, handleCopy, handlePaste, handleDuplicate, handleDelete],
     );
 
+    const zoomStep = 0.3;
     useEffect(() => {
         const handleZoomDesktop = (e: WheelEvent) => {
             if (e.ctrlKey) {
-                const s = Math.exp(-e.deltaY / 400);
+                const s = Math.exp((-e.deltaY * zoomStep) / 3);
                 const newScale = Math.min(Math.max(scale * s, 0.1), 5);
-                actions.setScale(Math.round(newScale*100)/100);
+                actions.setScale(+newScale.toFixed(4));
                 e.preventDefault();
                 e.stopPropagation();
             }

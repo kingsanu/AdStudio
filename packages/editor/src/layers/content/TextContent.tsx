@@ -19,7 +19,7 @@ export const TextContent: FC<TextContentProps> = ({ text, colors, fontSizes, eff
             className={`canva-editor-text`}
             css={{
                 p: {
-                    ':before': {
+                    '&:before': {
                         ...getTextEffectStyle(
                             effect?.name || 'none',
                             effect?.settings as EffectSettings,

@@ -1,7 +1,6 @@
-import { FC, Fragment, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { FC, Fragment, useCallback, useContext, useEffect, useRef } from 'react';
 import { EditorContext } from './EditorContext';
 import DesignPage from './DesignPage';
-import SquaresFourBoldIcon from '@duyank/icons/bold/SquaresFourBold';
 import { SerializedPage } from '@canva/types';
 import { useTrackingShiftKey } from '../../hooks/useTrackingShiftKey';
 import { useUsedFont } from '../../hooks/useUsedFont';
@@ -19,9 +18,8 @@ import { isPointInsideBox } from '@canva/utils/2d/isPointInsideBox';
 import { rectangleInsideAnother } from '@canva/utils/2d/rectangleInsideAnother';
 import LayerContextMenu from '@canva/layers/core/context-menu/LayerContextMenu';
 import SelectionBox from '@canva/layers/core/SelectionBox';
-import PageSettings from '@canva/utils/settings/PageSettings';
 import { isMobile } from 'react-device-detect';
-import PlusIcon from '@canva/icons/PlusIcon';
+import PageSettings from '@canva/utils/settings/PageSettings';
 
 interface DesignFrameProps {
     data: SerializedPage[];
@@ -36,7 +34,6 @@ const DesignFrame: FC<DesignFrameProps> = ({ data }) => {
     const {
         config: { assetPath },
     } = useContext(EditorContext);
-    const [showPageSettings, setShowPageSettings] = useState(false);
     useShortcut(frameRef.current);
     const {
         actions,
@@ -52,6 +49,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data }) => {
         dragData,
         imageEditor,
         pageSize,
+        openPageSettings
     } = useEditor((state) => {
         const hoveredPage = parseInt(Object.keys(state.hoveredLayer)[0]);
         const hoverLayerId = state.hoveredLayer[hoveredPage];
@@ -68,6 +66,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data }) => {
             dragData: state.dragData,
             imageEditor: state.imageEditor,
             pageSize: state.pageSize,
+            openPageSettings: state.openPageSettings
         };
     });
     const {
@@ -333,56 +332,6 @@ const DesignFrame: FC<DesignFrameProps> = ({ data }) => {
                         {selectStatus && <SelectionBox ref={boxRef} selectedLayers={tmpSelected?.selectedLayers} />}
                     </div>
                 </div>
-                <div
-                    css={{
-                        display: 'none',
-                        '@media (max-width: 900px)': {
-                            pointerEvents: 'auto',
-                            display: 'flex',
-                            position: 'absolute',
-                            bottom: 24,
-                            left: 24,
-                            background: '#3d8eff',
-                            width: 48,
-                            height: 48,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            borderRadius: '50%',
-                            color: '#fff',
-                            fontSize: 24,
-                        },
-                    }}
-                    onClick={() => {
-                        actions.addPage();
-                    }}
-                >
-                    <PlusIcon />
-                </div>
-                <div
-                    css={{
-                        display: 'none',
-                        '@media (max-width: 900px)': {
-                            pointerEvents: 'auto',
-                            display: 'flex',
-                            position: 'absolute',
-                            bottom: 24,
-                            right: 24,
-                            background: '#fff',
-                            width: 48,
-                            height: 48,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            borderRadius: '50%',
-                            fontSize: 24,
-                            boxShadow: '0 0 0 1px rgba(64,87,109,.07),0 2px 12px rgba(53,71,90,.2)',
-                        },
-                    }}
-                    onClick={() => {
-                        setShowPageSettings(true);
-                    }}
-                >
-                    <SquaresFourBoldIcon />
-                </div>
             </div>
             {resizeData.status && (
                 <div
@@ -403,7 +352,9 @@ const DesignFrame: FC<DesignFrameProps> = ({ data }) => {
                     w: {Math.round(resizeData.boxSize?.width || 0)} h: {Math.round(resizeData.boxSize?.height || 0)}
                 </div>
             )}
-            {showPageSettings && <PageSettings onClose={() => setShowPageSettings(false)} />}
+            {openPageSettings &&
+            <PageSettings />
+            }
         </Fragment>
     );
 };

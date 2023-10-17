@@ -2,11 +2,10 @@ import { FC } from 'react';
 import { useEditor } from '@canva/hooks';
 import Page from '@canva/components/editor/Page';
 import ArrowLeftIcon from '@canva/icons/ArrowLeftIcon';
+import PlusIcon from '@canva/icons/PlusIcon';
 
-interface PageSettingsProps {
-    onClose: () => void;
-}
-const PageSettings: FC<PageSettingsProps> = ({ onClose }) => {
+interface PageSettingsProps {}
+const PageSettings: FC<PageSettingsProps> = () => {
     const { actions, pages, pageSize } = useEditor((state) => {
         return {
             pages: state.pages,
@@ -17,16 +16,14 @@ const PageSettings: FC<PageSettingsProps> = ({ onClose }) => {
     const scale = contentWidth / pageSize.width;
     const handleChangePage = (pageIndex: number) => {
         actions.setActivePage(pageIndex);
-        onClose();
     };
     return (
         <div
             css={{
                 top: 0,
                 left: 0,
-                width: '100vw',
-                height: '100vh',
-                position: 'fixed',
+                height: 'calc(100% - 40px)',
+                position: 'absolute',
                 background: '#fff',
                 zIndex: 2050,
             }}
@@ -54,6 +51,30 @@ const PageSettings: FC<PageSettingsProps> = ({ onClose }) => {
                 </p>
                 <div
                     css={{
+                        '@media (max-width: 900px)': {
+                            pointerEvents: 'auto',
+                            display: 'flex',
+                            position: 'absolute',
+                            bottom: 24,
+                            left: 24,
+                            background: '#3d8eff',
+                            width: 48,
+                            height: 48,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: '50%',
+                            color: '#fff',
+                            fontSize: 24,
+                        },
+                    }}
+                    onClick={() => {
+                        actions.addPage();
+                    }}
+                >
+                    <PlusIcon />
+                </div>
+                <div
+                    css={{
                         fontSize: 20,
                         flexShrink: 0,
                         width: 32,
@@ -63,7 +84,7 @@ const PageSettings: FC<PageSettingsProps> = ({ onClose }) => {
                         alignItems: 'center',
                         justifyContent: 'center',
                     }}
-                    onClick={() => onClose()}
+                    onClick={() => actions.togglePageSettings()}
                 >
                     <ArrowLeftIcon />
                 </div>

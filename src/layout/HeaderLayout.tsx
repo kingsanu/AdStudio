@@ -46,7 +46,7 @@ const HeaderLayout: ForwardRefRenderFunction<HTMLDivElement, HeaderLayoutProps> 
                 }}
             >
                 <div css={{ color: 'white', height: 46 }}>
-                    <img src={'./assets/logo.png'} css={{ maxHeight: '100%' }} />
+                    <img src={'./vite.svg'} css={{ maxHeight: '100%' }} />
                 </div>
             </div>
             <div css={{ display: 'flex', alignItems: 'center' }}>

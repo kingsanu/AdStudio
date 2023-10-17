@@ -47,6 +47,7 @@ export interface EditorState {
         vertical: VerticalGuideline[];
     };
     activePage: number;
+    openPageSettings: boolean;
     pageSize: PageSize;
     pages: Page[];
     sidebar: SidebarType | null;
