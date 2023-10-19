@@ -175,10 +175,10 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         if (!isActive(editor.state, 'underline')) {
           settings.isUnderline = false;
         }
-        if (!isActive(editor.state, null, { '--indent-level': 1 })) {
+        if (!isActive(editor.state, null, { indent: 1, listType: '' })) {
           settings.isBulletList = false;
         }
-        if (!isActive(editor.state, null, { '--indent-level': 1, '--counter-list-marker': 'decimal' })) {
+        if (!isActive(editor.state, null, { indent: 1, listType: 'ordered' })) {
           settings.isOrderedList = false;
         }
         if (!isActive(editor.state, null, { textTransform: 'uppercase' })) {
@@ -276,10 +276,10 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         if (!isActive(editor.state, 'underline')) {
           settings.isUnderline = false;
         }
-        if (!isActive(editor.state, null, { '--indent-level': 1 })) {
+        if (!isActive(editor.state, null, { indent: 1, listType: '' })) {
           settings.isBulletList = false;
         }
-        if (!isActive(editor.state, null, { '--indent-level': 1, '--counter-list-marker': 'decimal' })) {
+        if (!isActive(editor.state, null, { indent: 1, listType: 'ordered' })) {
           settings.isOrderedList = false;
         }
         if (!isActive(editor.state, null, { textTransform: 'uppercase' })) {
@@ -510,10 +510,12 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
           if (!isActive(editor.state, 'underline')) {
             settings.isUnderline = false;
           }
-          if (!isActive(editor.state, null, { '--indent-level': 1 })) {
+          if (!isActive(editor.state, null, { indent: 1, listType: '' })) {
             settings.isBulletList = false;
           }
-          if (!isActive(editor.state, null, { '--indent-level': 1, '--counter-list-marker': 'decimal' })) {
+          if (
+            !isActive(editor.state, null, { indent: 1, listType: 'ordered' })
+          ) {
             settings.isOrderedList = false;
           }
           if (!isActive(editor.state, null, { textTransform: 'uppercase' })) {
@@ -599,10 +601,12 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
             if (!isActive(editor.state, 'underline')) {
               settings.isUnderline = false;
             }
-            if (!isActive(editor.state, null, { '--indent-level': 1 })) {
+            if (!isActive(editor.state, null, { indent: 1, listType: '' })) {
               settings.isBulletList = false;
             }
-            if (!isActive(editor.state, null, { '--indent-level': 1, '--counter-list-marker': 'decimal' })) {
+            if (
+              !isActive(editor.state, null, { indent: 1, listType: 'ordered' })
+            ) {
               settings.isOrderedList = false;
             }
             if (!isActive(editor.state, null, { textTransform: 'uppercase' })) {
