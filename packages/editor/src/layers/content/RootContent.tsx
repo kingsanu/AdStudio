@@ -22,6 +22,10 @@ export const RootContent: FC<RootContentProps> = ({
     rotate,
     ...props
 }) => {
+    if (image) {
+        console.log(image)
+        console.log(boxSize)
+    }
     return (
         <div
             css={{

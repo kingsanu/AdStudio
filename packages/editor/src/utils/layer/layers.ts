@@ -1,5 +1,4 @@
 import { createElement, ReactElement } from 'react';
-import { v4 } from 'uuid';
 import { resolveComponent } from './resolveComponent';
 import { TextLayerProps } from '../../layers/TextLayer';
 import { ShapeLayerProps } from '../../layers/ShapeLayer';
@@ -9,8 +8,9 @@ import { LayerComponentProps, LayerId, SerializedLayer, SerializedLayers, Layer,
 import { RootLayerProps } from '../../layers/RootLayer';
 import { VideoLayerProps } from '../../layers/VideoLayer';
 import { resolvers } from '../resolvers';
+import { generateRandomID } from '../identityGenerator';
 
-export const getRandomId = (): LayerId => v4();
+export const getRandomId = (): LayerId => generateRandomID();
 export const deserializeLayer = <P extends LayerComponentProps>(data: SerializedLayer): LayerData<P> => {
     const { type, props } = deserializeComponent(data);
     return {

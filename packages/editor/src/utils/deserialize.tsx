@@ -6,7 +6,7 @@ import {
 } from "@canva/types";
 import { createElement, ReactElement } from "react";
 import { resolvers } from "./resolvers";
-import TransformLayer from "../layers/TransformLayer";
+import TransformLayer from "@canva/layers/core/TransformLayer";
 
 const renderLayer = (
   layers: Record<LayerId, SerializedLayer>,

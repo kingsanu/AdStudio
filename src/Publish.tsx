@@ -3,20 +3,21 @@ import { getPageSize } from '@canva/layers';
 import { Frame } from '@canva/components';
 
 const Publish = () => {
-    const size = getPageSize(data);
-    return (
-        <div
-            css={{
-                minWidth: '100vw',
-                minHeight: '100vh',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-            }}
-        >
-            <Frame width={size.width} height={size.height} data={data} />
-        </div>
-    );
+    return null;
+    // const size = getPageSize(data);
+    // return (
+    //     <div
+    //         css={{
+    //             minWidth: '100vw',
+    //             minHeight: '100vh',
+    //             display: 'flex',
+    //             alignItems: 'center',
+    //             justifyContent: 'center',
+    //         }}
+    //     >
+    //         <Frame width={size.width} height={size.height} data={data} />
+    //     </div>
+    // );
 };
 
 export default Publish;

@@ -14,7 +14,6 @@
     "@emotion/css": "^11.11.2",
     "@emotion/react": "^11.11.1",
     "@types/lodash": "^4.14.199",
-    "@types/uuid": "^9.0.5",
     "axios": "^1.5.1",
     "html-to-image": "^1.11.11",
     "immer": "^10.0.3",
@@ -29,7 +28,6 @@
     "react-dom": "^18.2.0",
     "styled-components": "^6.0.8",
     "url": "^0.11.3",
-    "uuid": "^9.0.1",
     "w3c-keyname": "^2.2.8"
   },
   "devDependencies": {

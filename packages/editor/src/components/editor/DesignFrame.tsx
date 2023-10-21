@@ -20,9 +20,10 @@ import LayerContextMenu from '@canva/layers/core/context-menu/LayerContextMenu';
 import SelectionBox from '@canva/layers/core/SelectionBox';
 import { isMobile } from 'react-device-detect';
 import PageSettings from '@canva/utils/settings/PageSettings';
+import { unpack } from '@canva/utils/minifier';
 
 interface DesignFrameProps {
-    data: SerializedPage[];
+    data: any;
 }
 const DesignFrame: FC<DesignFrameProps> = ({ data }) => {
     const shiftKeyRef = useTrackingShiftKey();
@@ -81,7 +82,8 @@ const DesignFrame: FC<DesignFrameProps> = ({ data }) => {
         onMovePageEnd,
     } = useZoomPage(frameRef, pageRef, pageContainerRef);
     useEffect(() => {
-        actions.setData(data);
+        const serializedData: SerializedPage[] = unpack([...data]);
+        actions.setData(serializedData);
     }, [data, actions]);
 
     useClickOutside(
