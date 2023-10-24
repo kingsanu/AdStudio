@@ -804,7 +804,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
         id: layerId,
         data: mergeWithoutArray(dl, {
           props: {
-            position: getPositionWhenLayerCenter(
+            position: dl.props.position || getPositionWhenLayerCenter(
               state.pageSize,
               dl.props.boxSize
             ),
@@ -841,14 +841,18 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
         width = height * shapeRatio;
         scale = height / dl.props.boxSize.height;
       }
+
       state.pages[state.activePage].layers[layerId] = {
         id: layerId,
         data: mergeWithoutArray(cloneDeep(dl), {
           props: {
             boxSize: { width, height },
-            position: getPositionWhenLayerCenter(
+            position: dl.props.position || getPositionWhenLayerCenter(
               state.pageSize,
-              dl.props.boxSize
+              {
+                width: dl.props.boxSize.width*scale,
+                height: dl.props.boxSize.height*scale
+              }
             ),
             scale,
           },
@@ -907,7 +911,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
         id: layerId,
         data: mergeWithoutArray(dl, {
           props: {
-            position: getPositionWhenLayerCenter(
+            position: dl.props.position || getPositionWhenLayerCenter(
               state.pageSize,
               dl.props.boxSize
             ),

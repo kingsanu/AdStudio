@@ -452,7 +452,6 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
                 <div
                     ref={pageRef}
                     css={{
-                        userSelect: 'none',
                         background: 'white',
                         overflow: 'hidden',
                         transformOrigin: '0 0',
@@ -466,6 +465,7 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
                 >
                     <div
                         ref={displayRef}
+                        className="page-content"
                         css={{
                             width,
                             height,

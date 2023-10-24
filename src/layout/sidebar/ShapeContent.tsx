@@ -1,4 +1,8 @@
-import React, { FC, PropsWithChildren, ReactElement } from 'react';
+import {
+  FC,
+  PropsWithChildren,
+  ReactElement,
+} from 'react';
 import { isMobile } from 'react-device-detect';
 import RectangleIcon from '@duyank/icons/shape/Rectangle';
 import CircleIcon from '@duyank/icons/shape/Circle';
@@ -20,6 +24,7 @@ import PentagonIcon from '@duyank/icons/shape/Pentagon';
 import { ShapeType } from '@canva/types';
 import { useEditor } from '@canva/hooks';
 import CloseIcon from '@canva/icons/CloseIcon';
+import Draggable from '@canva/layers/core/Dragable';
 
 type Shape = {
   type: ShapeType;
@@ -251,17 +256,14 @@ const shapes: Shape[] = [
 ];
 const ShapeContent: FC<{ onClose: () => void }> = ({ onClose }) => {
   const { actions } = useEditor();
-  const addShape = (shape: Shape) => {
+  const addShape = (shape: Shape, position?: {x: number, y: number;}) => {
     actions.addShapeLayer({
       type: {
         resolvedName: 'ShapeLayer',
       },
       props: {
         shape: shape.type,
-        position: {
-          x: 0,
-          y: 400,
-        },
+        position,
         boxSize: {
           width: shape.width,
           height: shape.height,
@@ -274,6 +276,7 @@ const ShapeContent: FC<{ onClose: () => void }> = ({ onClose }) => {
       onClose();
     }
   };
+  
   return (
     <div
       css={{
@@ -332,18 +335,28 @@ const ShapeContent: FC<{ onClose: () => void }> = ({ onClose }) => {
           }}
         >
           {shapes.map((shape) => (
-            <div
+            <Draggable
               key={shape.type}
-              css={{
-                width: '100%',
-                paddingBottom: '100%',
-                position: 'relative',
-                cursor: 'pointer',
+              onDrop={(pos) => {
+                if (pos) {
+                  addShape(shape, pos);
+                }
               }}
-              onClick={() => addShape(shape)}
+              onClick={() => {
+                addShape(shape);
+              }}
             >
-              {shape.icon}
-            </div>
+              <div
+                key={shape.type}
+                css={{
+                  width: '100%',
+                  paddingBottom: '100%',
+                  position: 'relative',
+                }}
+              >
+                {shape.icon}
+              </div>
+            </Draggable>
           ))}
         </div>
       </div>
