@@ -1,10 +1,11 @@
 import { IconProps } from '@canva/types';
 import React from 'react';
 
-const MoreHorizIcon: React.FC<IconProps> = ({ className = '' }: IconProps) => {
+const MoreHorizIcon: React.FC<IconProps> = ({ className = '', style = {} }: IconProps) => {
   return (
     <svg
       className={className}
+      style={style}
       xmlns='http://www.w3.org/2000/svg'
       width='24'
       height='24'

@@ -60,5 +60,6 @@ export type GestureEvent = UIEvent & {
 
 export interface IconProps {
   className?: string;
+  style?: any;
   fill?: string;
 }

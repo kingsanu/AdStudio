@@ -11,6 +11,43 @@ import MoreVertIcon from '@canva/icons/MoreVertIcon';
 import MoreHorizIcon from '@canva/icons/MoreHorizIcon';
 import GroupingIcon from '@canva/icons/GroupingIcon';
 import BackgroundSelectionIcon from '@canva/icons/BackgroundSelectionIcon';
+import styled from '@emotion/styled';
+import { Layer, LayerComponentProps } from '@canva/types';
+import DragAndDrop from '@canva/drag-and-drop/DD';
+
+const LayerItem = styled('div')`
+    background: #F6F6F6;
+    border-radius: 8px;
+    padding: 8px;
+    cursor: pointer;
+    position: relative;
+    border-width: 2px;
+    border-style: solid;
+
+    .drag-icon: {
+        font-size: 24px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-shrink: 0;
+    }
+
+    .more-btn {
+        display: none;
+        position: absolute;
+        right: 4px;
+        top: 4px;
+        background: #5E6278;
+        border-radius: 8px;
+        color: #fff;
+        padding: 0 6px;
+    }
+    :hover .more-btn {
+        display: block;
+    }
+`;
 
 type LayerSidebarProps = SidebarProps;
 const LayerSidebar: ForwardRefRenderFunction<HTMLDivElement, LayerSidebarProps> = ({ ...props }, ref) => {
@@ -24,8 +61,9 @@ const LayerSidebar: ForwardRefRenderFunction<HTMLDivElement, LayerSidebarProps> 
         if (!layers) {
             return;
         }
-        return reverse(layers['ROOT'].data.child.map((layerId) => layers[layerId]));
+        return reverse(layers['ROOT'].data.child.map((layerId, order) => ({order, ...layers[layerId]})));
     }, [layers]);
+    console.log(layerList)
     const rootLayer = useMemo(() => {
         if (!layers) {
             return;
@@ -47,6 +85,56 @@ const LayerSidebar: ForwardRefRenderFunction<HTMLDivElement, LayerSidebarProps> 
             window.removeEventListener('keyup', enableMultipleSelect);
         };
     }, []);
+
+    const itemRenderer = (layer: Layer<LayerComponentProps>, index: number): JSX.Element => {
+		return (
+			<LayerItem className="item"
+                                    key={layer.id}
+                                    css={{
+                                        borderColor: selectedLayerIds.includes(layer.id) ? '#3d8eff' : 'transparent',
+                                    }}
+                                    onMouseDown={() => {
+                                        actions.selectLayers(
+                                            activePage,
+                                            layer.id,
+                                            dataRef.current.isMultipleSelect ? 'add' : 'replace',
+                                        );
+                                    }}
+                                >
+                                    <div
+                                        css={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                        }}
+                                    >
+                                        <div
+                                            className='drag-icon'
+                                        >
+                                            <MoreVertIcon />
+                                        </div>
+                                        <div css={{ minWidth: 0, flexGrow: 1 }}>
+                                            <ReverseTransformLayer layer={layer} />
+                                        </div>
+                                        {isGroupLayer(layer) && (
+                                            <div css={{ flexShrink: 0, fontSize: 24 }}>
+                                                <GroupingIcon />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div
+                                        className='more-btn'
+                                        onClick={handleClickOption}
+                                    >
+                                        <MoreHorizIcon style={{ width: 16, height: 16 }} />
+                                    </div>
+                                </LayerItem>
+		);
+	}
+
+    const handleDDChange = (reorderedItems: Array<Layer<LayerComponentProps>>) => {
+		// console.log('Example.handleRLDDChange');
+        console.log(reorderedItems)
+	}
     return (
         <Sidebar {...props}>
             <PageContext.Provider value={{ pageIndex: activePage }}>
@@ -108,17 +196,16 @@ const LayerSidebar: ForwardRefRenderFunction<HTMLDivElement, LayerSidebarProps> 
                                 padding: 16,
                             }}
                         >
-                            {(layerList || []).map((layer) => (
-                                <div
+                            <DragAndDrop
+                            cssClasses="list-container"
+                            items={layerList}
+                            itemRenderer={itemRenderer}
+                            onChange={handleDDChange}
+                            />
+                            {/* {(layerList || []).map((layer) => (
+                                <LayerItem
                                     key={layer.id}
                                     css={{
-                                        background: '#F6F6F6',
-                                        borderRadius: 8,
-                                        padding: 8,
-                                        cursor: 'pointer',
-                                        position: 'relative',
-                                        borderWidth: 2,
-                                        borderStyle: 'solid',
                                         borderColor: selectedLayerIds.includes(layer.id) ? '#3d8eff' : 'transparent',
                                     }}
                                     onMouseDown={() => {
@@ -136,15 +223,7 @@ const LayerSidebar: ForwardRefRenderFunction<HTMLDivElement, LayerSidebarProps> 
                                         }}
                                     >
                                         <div
-                                            css={{
-                                                fontSize: 24,
-                                                width: 40,
-                                                height: 40,
-                                                display: 'flex',
-                                                justifyContent: 'center',
-                                                alignItems: 'center',
-                                                flexShrink: 0,
-                                            }}
+                                            className='drag-icon'
                                         >
                                             <MoreVertIcon />
                                         </div>
@@ -158,21 +237,13 @@ const LayerSidebar: ForwardRefRenderFunction<HTMLDivElement, LayerSidebarProps> 
                                         )}
                                     </div>
                                     <div
-                                        css={{
-                                            position: 'absolute',
-                                            right: 4,
-                                            top: 4,
-                                            background: '#5E6278',
-                                            borderRadius: 8,
-                                            color: '#fff',
-                                            padding: '0 6px',
-                                        }}
+                                        className='more-btn'
                                         onClick={handleClickOption}
                                     >
-                                        <MoreHorizIcon />
+                                        <MoreHorizIcon style={{ width: 16, height: 16 }} />
                                     </div>
-                                </div>
-                            ))}
+                                </LayerItem>
+                            ))} */}
                             {rootLayer && (
                                 <div
                                     css={{

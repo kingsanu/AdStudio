@@ -13,6 +13,7 @@
     "@duyank/icons": "^0.0.21",
     "@emotion/css": "^11.11.2",
     "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
     "@types/lodash": "^4.14.199",
     "axios": "^1.5.1",
     "html-to-image": "^1.11.11",

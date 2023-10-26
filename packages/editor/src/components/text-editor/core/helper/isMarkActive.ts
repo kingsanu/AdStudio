@@ -10,7 +10,6 @@ export function isMarkActive(
 ): boolean {
     const { empty, ranges } = state.selection;
     const type = typeOrName ? getMarkType(typeOrName, state.schema) : null;
-    console.log(typeOrName)
     if (empty) {
         return !!(state.storedMarks || state.selection.$from.marks())
             .filter((mark) => {

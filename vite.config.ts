@@ -48,6 +48,12 @@ export default defineConfig({
           new URL('./packages/editor/src/color-picker', import.meta.url)
         ),
       },
+      {
+        find: '@canva/drag-and-drop',
+        replacement: fileURLToPath(
+          new URL('./packages/editor/src/drag-and-drop', import.meta.url)
+        ),
+      },
     ],
   },
   plugins: [
