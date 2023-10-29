@@ -1,14 +1,4 @@
 // @ts-nocheck
-/* global process */
-export function arrayMove(array, from, to) {
-  // Will be deprecated soon. Consumers should install 'array-move' instead
-  // https://www.npmjs.com/package/array-move
-
-  array.splice(to < 0 ? array.length + to : to, 0, array.splice(from, 1)[0]);
-
-  return array;
-}
-
 export function omit(obj, keysToOmit) {
   return Object.keys(obj).reduce((acc, key) => {
     if (keysToOmit.indexOf(key) === -1) {
@@ -289,4 +279,21 @@ export function cloneNode(node) {
   });
 
   return clonedNode;
+}
+
+function arrayMoveMutable(array, fromIndex, toIndex) {
+	const startIndex = fromIndex < 0 ? array.length + fromIndex : fromIndex;
+
+	if (startIndex >= 0 && startIndex < array.length) {
+		const endIndex = toIndex < 0 ? array.length + toIndex : toIndex;
+
+		const [item] = array.splice(fromIndex, 1);
+		array.splice(endIndex, 0, item);
+	}
+}
+
+export function arrayMove(array, fromIndex, toIndex) {
+	const newArray = [...array];
+	arrayMoveMutable(newArray, fromIndex, toIndex);
+	return newArray;
 }

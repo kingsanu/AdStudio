@@ -669,6 +669,11 @@ export default function sortableContainer(
             );
           }
         }
+
+        if (!edgeOffset) {
+          console.error('Cannot get edge offset.');
+          return;
+        }
   
         // Get a reference to the next and previous node
         const nextNode = i < nodes.length - 1 && nodes[i + 1];

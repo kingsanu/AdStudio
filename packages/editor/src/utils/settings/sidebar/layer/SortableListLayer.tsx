@@ -14,7 +14,11 @@ type LayerSortableType = {
   checkIsSelected: (layerId: string) => boolean;
   onSelectLayer: (layerId: string) => void;
   onOpenContextMenu: (e: React.MouseEvent) => void;
-  onChange: (sorted: SortEnd) => void;
+  onChange: (change: {
+    layerId: string;
+    fromIndex: number;
+    toIndex: number;
+  }) => void;
 };
 
 const LayerItem = styled('button')`
@@ -68,35 +72,37 @@ const SortableItem = SortableElement(
     onOpenContextMenu: (e: React.MouseEvent) => void;
   }): JSX.Element => {
     return (
-      <LayerItem
-        key={item.id}
-        css={{
-          borderColor: isSelected ? '#3d8eff' : 'transparent',
-        }}
-        onMouseDown={onSelectLayer}
-      >
-        <div
+      <li css={{ listStyle: 'none' }}>
+        <LayerItem
+          key={item.id}
           css={{
-            display: 'flex',
-            alignItems: 'center',
+            borderColor: isSelected ? '#3d8eff' : 'transparent',
           }}
+          onMouseDown={onSelectLayer}
         >
-          <div className='drag-icon'>
-            <MoreVertIcon />
-          </div>
-          <div css={{ minWidth: 0, flexGrow: 1 }}>
-            <ReverseTransformLayer layer={item} />
-          </div>
-          {isGroupLayer(item) && (
-            <div css={{ flexShrink: 0, fontSize: 24 }}>
-              <GroupingIcon />
+          <div
+            css={{
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <div className='drag-icon'>
+              <MoreVertIcon />
             </div>
-          )}
-        </div>
-        <div className='more-btn' onMouseDown={onOpenContextMenu}>
-          <MoreHorizIcon style={{ width: 16, height: 16 }} />
-        </div>
-      </LayerItem>
+            <div css={{ minWidth: 0, flexGrow: 1 }}>
+              <ReverseTransformLayer layer={item} />
+            </div>
+            {isGroupLayer(item) && (
+              <div css={{ flexShrink: 0, fontSize: 24 }}>
+                <GroupingIcon />
+              </div>
+            )}
+          </div>
+          <div className='more-btn' onMouseDown={onOpenContextMenu}>
+            <MoreHorizIcon style={{ width: 16, height: 16 }} />
+          </div>
+        </LayerItem>
+      </li>
     );
   }
 );
@@ -109,7 +115,7 @@ const SortableList = SortableContainer(
     onSelectLayer,
   }: LayerSortableType) => {
     return (
-      <div>
+      <ul>
         {items.map((layer: Layer<LayerComponentProps>, index: number) => (
           <SortableItem
             key={`item-${index}`}
@@ -120,7 +126,7 @@ const SortableList = SortableContainer(
             index={index}
           />
         ))}
-      </div>
+      </ul>
     );
   }
 );
@@ -139,8 +145,12 @@ const SortableListLayer: FC<LayerSortableType> = ({
       onSelectLayer={onSelectLayer}
       onOpenContextMenu={onOpenContextMenu}
       onSortEnd={(change: SortEnd) => {
-        if (change.newIndex !== change.oldIndex) {
-          onChange(change);
+        if (change?.newIndex !== change.oldIndex) {
+          onChange({
+            layerId: items[change.oldIndex].id,
+            fromIndex: change.oldIndex,
+            toIndex: change.newIndex,
+          });
         }
       }}
     />

@@ -67,7 +67,21 @@ const LayerSidebar: ForwardRefRenderFunction<
   const handleClickOption = (e: React.MouseEvent) => {
     actions.showContextMenu(getPosition(e.nativeEvent));
   };
-  
+
+  const handleBringTo = (
+    layerId: string,
+    fromIndex: number,
+    toIndex: number
+  ) => {
+    if (!layerList) return;
+    const indexBeforeReverse = layerList.length - 1 - toIndex;
+    if (fromIndex > toIndex) {
+      actions.bringToFront(activePage, layerId, indexBeforeReverse);
+    } else {
+      actions.sendToBack(activePage, layerId, indexBeforeReverse);
+    }
+  };
+
   return (
     <Sidebar {...props}>
       <PageContext.Provider value={{ pageIndex: activePage }}>
@@ -140,8 +154,12 @@ const LayerSidebar: ForwardRefRenderFunction<
                 checkIsSelected={checkLayerSelected}
                 onSelectLayer={onSelectLayer}
                 onOpenContextMenu={handleClickOption}
-                onChange={(rs) => {
-                    console.log(rs)
+                onChange={(change) => {
+                  handleBringTo(
+                    change.layerId,
+                    change.fromIndex,
+                    change.toIndex
+                  );
                 }}
               />
               {rootLayer && (

@@ -19,8 +19,8 @@ import {
   SerializedLayer,
   SerializedLayerTree,
   SerializedPage,
-} from "@canva/types";
-import { cloneDeep, isArray, uniq } from "lodash";
+} from '@canva/types';
+import { cloneDeep, isArray, uniq } from 'lodash';
 import {
   deserializeLayer,
   getRandomId,
@@ -29,22 +29,22 @@ import {
   isRootLayer,
   isTextLayer,
   serializeLayers,
-} from "@canva/utils/layer/layers";
-import { TextEditor } from "../text-editor/interfaces";
-import { getControlBoxSizeFromLayers } from "@canva/utils/layer/getControlBoxSizeFromLayers";
-import { Direction, EdgeDirection } from "@canva/types/resize";
-import { mergeWithoutArray } from "@canva/utils";
-import { boundingRect } from "@canva/utils/2d/boundingRect";
-import { RootLayerProps } from "@canva/layers/RootLayer";
-import { positionOfObjectInsideAnother } from "@canva/utils/2d/positionOfObjectInsideAnother";
-import { GroupLayerProps } from "@canva/layers/GroupLayer";
-import { getPositionWhenLayerCenter } from "@canva/utils/layer/getPositionWhenLayerCenter";
+} from '@canva/utils/layer/layers';
+import { TextEditor } from '../text-editor/interfaces';
+import { getControlBoxSizeFromLayers } from '@canva/utils/layer/getControlBoxSizeFromLayers';
+import { Direction, EdgeDirection } from '@canva/types/resize';
+import { mergeWithoutArray } from '@canva/utils';
+import { boundingRect } from '@canva/utils/2d/boundingRect';
+import { RootLayerProps } from '@canva/layers/RootLayer';
+import { positionOfObjectInsideAnother } from '@canva/utils/2d/positionOfObjectInsideAnother';
+import { GroupLayerProps } from '@canva/layers/GroupLayer';
+import { getPositionWhenLayerCenter } from '@canva/utils/layer/getPositionWhenLayerCenter';
 
 export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
   const addLayerTreeToParent = (
     pageIndex: number,
     { rootId, layers }: SerializedLayerTree,
-    parentId: LayerId = "ROOT"
+    parentId: LayerId = 'ROOT'
   ) => {
     const decodeLayer = (
       serializedLayer: SerializedLayer,
@@ -102,16 +102,16 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
     moveSelectedLayers: (direction: EdgeDirection, value: number) => {
       state.controlBox = undefined;
       state.selectedLayers[state.activePage].forEach((layerId) => {
-        if (direction === "right") {
+        if (direction === 'right') {
           state.pages[state.activePage].layers[layerId].data.props.position.x +=
             value;
-        } else if (direction === "left") {
+        } else if (direction === 'left') {
           state.pages[state.activePage].layers[layerId].data.props.position.x -=
             value;
-        } else if (direction === "top") {
+        } else if (direction === 'top') {
           state.pages[state.activePage].layers[layerId].data.props.position.y -=
             value;
-        } else if (direction === "bottom") {
+        } else if (direction === 'bottom') {
           state.pages[state.activePage].layers[layerId].data.props.position.y +=
             value;
         }
@@ -170,9 +170,9 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
     selectLayers(
       pageIndex: number,
       layerIds: LayerId | LayerId[],
-      type: "replace" | "add" = "replace"
+      type: 'replace' | 'add' = 'replace'
     ) {
-      const ids = typeof layerIds === "object" ? layerIds : [layerIds];
+      const ids = typeof layerIds === 'object' ? layerIds : [layerIds];
 
       state.textEditor = undefined;
       state.imageEditor = undefined;
@@ -180,10 +180,10 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
         state.selectedLayers = {};
       }
       if (
-        type === "replace" ||
+        type === 'replace' ||
         (state.selectedLayers[pageIndex] &&
-          state.selectedLayers[pageIndex].includes("ROOT")) ||
-        ids.includes("ROOT")
+          state.selectedLayers[pageIndex].includes('ROOT')) ||
+        ids.includes('ROOT')
       ) {
         state.selectedLayers = {
           [pageIndex]: ids,
@@ -209,7 +209,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
         [state.activePage]: Object.entries(
           state.pages[state.activePage].layers
         ).reduce((acc, [id, layer]) => {
-          if (layer.data.parent === "ROOT") {
+          if (layer.data.parent === 'ROOT') {
             acc.push(id);
           }
           return acc;
@@ -228,7 +228,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       };
     },
     setAlign(
-      alignment: "left" | "right" | "center" | "top" | "bottom" | "middle"
+      alignment: 'left' | 'right' | 'center' | 'top' | 'bottom' | 'middle'
     ) {
       const getChangeX = (box: BoxData, layer: Layer<LayerComponentProps>) => {
         const rect = boundingRect(
@@ -236,11 +236,11 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
           layer.data.props.position,
           layer.data.props.rotate
         );
-        if (alignment === "left") {
+        if (alignment === 'left') {
           return (
             box.position.x - (layer.data.props.boxSize.width - rect.width) / 2
           );
-        } else if (alignment === "right") {
+        } else if (alignment === 'right') {
           return (
             box.position.x +
             box.boxSize.width -
@@ -260,11 +260,11 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
           layer.data.props.position,
           layer.data.props.rotate
         );
-        if (alignment === "top") {
+        if (alignment === 'top') {
           return (
             box.position.y - (layer.data.props.boxSize.height - rect.height) / 2
           );
-        } else if (alignment === "bottom") {
+        } else if (alignment === 'bottom') {
           return (
             box.position.y +
             box.boxSize.height -
@@ -282,7 +282,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
         return state.pages[state.activePage].layers[layerId];
       });
       if (layers.length === 1) {
-        if (["left", "right", "center"].includes(alignment)) {
+        if (['left', 'right', 'center'].includes(alignment)) {
           const newX = getChangeX(
             state.pages[state.activePage].layers.ROOT.data.props,
             layers[0]
@@ -313,7 +313,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
         const currentRect = getControlBoxSizeFromLayers(layerData) as BoxData;
         const newLayerData: Record<LayerId, LayerComponentProps> = {};
         layers.forEach((layer) => {
-          if (["left", "right", "center"].includes(alignment)) {
+          if (['left', 'right', 'center'].includes(alignment)) {
             state.pages[state.activePage].layers[
               layer.id
             ].data.props.position.x = getChangeX(currentRect, layer);
@@ -344,7 +344,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
         serializedLayer: SerializedLayer,
         parentId: LayerId | null
       ) => {
-        const newId = serializedLayer.parent === null ? "ROOT" : getRandomId();
+        const newId = serializedLayer.parent === null ? 'ROOT' : getRandomId();
         return {
           id: newId,
           data: deserializeLayer({
@@ -381,7 +381,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
           });
           return res;
         };
-        const child = deserializeChild("ROOT", "ROOT");
+        const child = deserializeChild('ROOT', 'ROOT');
         const layerList: Layers = Object.fromEntries(child);
         Object.entries(layerList).forEach(([layerId, layer]) => {
           page.layers[layerId] = layer;
@@ -389,7 +389,6 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
         pages.push(page);
       });
       state.pages = pages;
-
     },
     setPage: (pageIndex: number, serializedPage: SerializedPage) => {
       const page: Page = {
@@ -399,7 +398,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
         serializedLayer: SerializedLayer,
         parentId: LayerId | null
       ) => {
-        const newId = serializedLayer.parent === null ? "ROOT" : getRandomId();
+        const newId = serializedLayer.parent === null ? 'ROOT' : getRandomId();
         return {
           id: newId,
           data: deserializeLayer({
@@ -427,7 +426,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
         });
         return res;
       };
-      const child = deserializeChild("ROOT", "ROOT");
+      const child = deserializeChild('ROOT', 'ROOT');
       const layerList: Layers = Object.fromEntries(child);
       Object.entries(layerList).forEach(([layerId, layer]) => {
         page.layers[layerId] = layer;
@@ -443,7 +442,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
     },
     deleteLayer: (pageIndex: number, layerId: LayerId | LayerId[]) => {
       const ids: LayerId[] = [];
-      if (typeof layerId === "object") {
+      if (typeof layerId === 'object') {
         ids.push(...layerId);
       } else {
         ids.push(layerId);
@@ -494,7 +493,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
         layers: {},
       };
       Object.entries(
-        cloneDeep(serializeLayers(state.pages[pageIndex].layers, "ROOT"))
+        cloneDeep(serializeLayers(state.pages[pageIndex].layers, 'ROOT'))
       ).map(([layerId, layer]) => {
         newPage.layers[layerId] = {
           id: layerId,
@@ -504,7 +503,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       state.pages.splice(pageIndex, 0, newPage);
       state.activePage = pageIndex + 1;
       state.selectedLayers = {
-        [pageIndex + 1]: ["ROOT"],
+        [pageIndex + 1]: ['ROOT'],
       };
     },
     addPage: (pageIndex?: number) => {
@@ -512,10 +511,10 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
         layers: {},
       };
       page.layers.ROOT = {
-        id: "ROOT",
+        id: 'ROOT',
         data: deserializeLayer({
           type: {
-            resolvedName: "RootLayer",
+            resolvedName: 'RootLayer',
           },
           props: {
             boxSize: {
@@ -527,7 +526,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
               y: 0,
             },
             rotate: 0,
-            color: "#fff",
+            color: '#fff',
             image: null,
           },
           locked: false,
@@ -536,7 +535,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
         }),
       };
 
-      if (typeof pageIndex !== "undefined") {
+      if (typeof pageIndex !== 'undefined') {
         state.pages.splice(pageIndex + 1, 0, page);
         state.activePage = pageIndex + 1;
       } else {
@@ -560,7 +559,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
     },
     lock: (pageIndex: number, layerId: LayerId | LayerId[]) => {
       const ids: LayerId[] = [];
-      if (typeof layerId === "object") {
+      if (typeof layerId === 'object') {
         ids.push(...layerId);
       } else {
         ids.push(layerId);
@@ -571,7 +570,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
     },
     unlock: (pageIndex: number, layerId: LayerId | LayerId[]) => {
       const ids: LayerId[] = [];
-      if (typeof layerId === "object") {
+      if (typeof layerId === 'object') {
         ids.push(...layerId);
       } else {
         ids.push(layerId);
@@ -599,7 +598,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       const groupIdx = parent.data.child.indexOf(layerId);
       child.forEach((id) => {
         const layer = state.pages[activePage].layers[id];
-        layer.data.parent = "ROOT";
+        layer.data.parent = 'ROOT';
         layer.data.props.position.x = childLayer[id].x;
         layer.data.props.position.y = childLayer[id].y;
         layer.data.props.rotate = childLayer[id].rotate;
@@ -609,7 +608,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
           layer.data.props.boxSize.height * group.data.props.scale;
         if (isTextLayer(layer)) {
           layer.data.props.scale =
-            layer.data.props.scale as number * group.data.props.scale;
+            (layer.data.props.scale as number) * group.data.props.scale;
         }
       });
       state.pages[activePage].layers[parentId].data.child.splice(groupIdx, 1);
@@ -671,7 +670,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       );
       const newGroupNode = {
         type: {
-          resolvedName: "GroupLayer",
+          resolvedName: 'GroupLayer',
         },
         props: {
           position: {
@@ -687,7 +686,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
         },
         locked: false,
         hidden: false,
-        parent: "ROOT",
+        parent: 'ROOT',
         child: ids,
       };
       const parentId = getRandomId();
@@ -697,7 +696,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       ids.sort((a, b) => rootChild.indexOf(a) - rootChild.indexOf(b));
       const lastIdx = state.pages[
         activePage
-      ].layers.ROOT.data.child.findLastIndex((i) => ids.includes(i));
+      ].layers.ROOT.data.child.findLastIndex((i: string) => ids.includes(i));
       ids.forEach((id) => {
         const idx = state.pages[activePage].layers.ROOT.data.child.findIndex(
           (lId) => lId === id
@@ -721,9 +720,13 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       };
       return parentId;
     },
-    bringToFront: (pageIndex: number, layerId: LayerId | LayerId[]) => {
+    bringToFront: (
+      pageIndex: number,
+      layerId: LayerId | LayerId[],
+      toIndex = -1
+    ) => {
       const ids: LayerId[] = [];
-      if (typeof layerId === "object") {
+      if (typeof layerId === 'object') {
         ids.push(...layerId);
       } else {
         ids.push(layerId);
@@ -733,18 +736,18 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       ids.forEach((id) => {
         const fromIndex = child.findIndex((lId) => lId === id);
         child.splice(fromIndex, 1);
-        child.splice(child.length, 0, id);
+        child.splice(toIndex === -1 ? child.length : toIndex, 0, id);
       });
     },
     bringForward: (pageIndex: number, layerId: LayerId | LayerId[]) => {
       const ids: LayerId[] = [];
-      if (typeof layerId === "object") {
+      if (typeof layerId === 'object') {
         ids.push(...layerId);
       } else {
         ids.push(layerId);
       }
       const child = state.pages[pageIndex].layers.ROOT.data.child;
-      const lastIndex = child.findLastIndex((lId) => ids.includes(lId));
+      const lastIndex = child.findLastIndex((lId: string) => ids.includes(lId));
       ids.sort((a, b) => child.indexOf(a) - child.indexOf(b));
       ids.forEach((id) => {
         const fromIndex = child.findIndex((lId) => lId === id);
@@ -752,9 +755,13 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
         child.splice(lastIndex + 1, 0, id);
       });
     },
-    sendToBack: (pageIndex: number, layerId: LayerId | LayerId[]) => {
+    sendToBack: (
+      pageIndex: number,
+      layerId: LayerId | LayerId[],
+      toIndex = -1
+    ) => {
       const ids: LayerId[] = [];
-      if (typeof layerId === "object") {
+      if (typeof layerId === 'object') {
         ids.push(...layerId);
       } else {
         ids.push(layerId);
@@ -764,12 +771,12 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       ids.forEach((id) => {
         const fromIndex = child.findIndex((lId) => lId === id);
         child.splice(fromIndex, 1);
-        child.splice(0, 0, id);
+        child.splice(toIndex === -1 ? 0 : toIndex, 0, id);
       });
     },
     sendBackward: (pageIndex: number, layerId: LayerId | LayerId[]) => {
       const ids: LayerId[] = [];
-      if (typeof layerId === "object") {
+      if (typeof layerId === 'object') {
         ids.push(...layerId);
       } else {
         ids.push(layerId);
@@ -790,8 +797,8 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       state.fontList.push(...list);
     },
     addLayer(
-      serializedLayer: Pick<SerializedLayer, "type" | "props">,
-      parentId: LayerId = "ROOT"
+      serializedLayer: Pick<SerializedLayer, 'type' | 'props'>,
+      parentId: LayerId = 'ROOT'
     ) {
       const layerId = getRandomId();
       const dl = deserializeLayer({
@@ -804,10 +811,9 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
         id: layerId,
         data: mergeWithoutArray(dl, {
           props: {
-            position: dl.props.position || getPositionWhenLayerCenter(
-              state.pageSize,
-              dl.props.boxSize
-            ),
+            position:
+              dl.props.position ||
+              getPositionWhenLayerCenter(state.pageSize, dl.props.boxSize),
           },
         }),
       };
@@ -815,8 +821,8 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       this.selectLayers(state.activePage, layerId);
     },
     addShapeLayer(
-      serializedLayer: Pick<SerializedLayer, "type" | "props">,
-      parentId: LayerId = "ROOT"
+      serializedLayer: Pick<SerializedLayer, 'type' | 'props'>,
+      parentId: LayerId = 'ROOT'
     ) {
       const layerId = getRandomId();
       const dl = deserializeLayer({
@@ -847,13 +853,12 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
         data: mergeWithoutArray(cloneDeep(dl), {
           props: {
             boxSize: { width, height },
-            position: dl.props.position || getPositionWhenLayerCenter(
-              state.pageSize,
-              {
-                width: dl.props.boxSize.width*scale,
-                height: dl.props.boxSize.height*scale
-              }
-            ),
+            position:
+              dl.props.position ||
+              getPositionWhenLayerCenter(state.pageSize, {
+                width: dl.props.boxSize.width * scale,
+                height: dl.props.boxSize.height * scale,
+              }),
             scale,
           },
         }),
@@ -864,7 +869,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
     addImageLayer(
       { thumb, url }: { url: string; thumb: string },
       boxSize: BoxSize,
-      parentId: LayerId = "ROOT"
+      parentId: LayerId = 'ROOT'
     ) {
       const layerId = getRandomId();
       const pageSize = state.pageSize;
@@ -877,7 +882,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       const h = w / imgRatio;
       const dl = deserializeLayer({
         type: {
-          resolvedName: "ImageLayer",
+          resolvedName: 'ImageLayer',
         },
         props: {
           image: {
@@ -911,10 +916,9 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
         id: layerId,
         data: mergeWithoutArray(dl, {
           props: {
-            position: dl.props.position || getPositionWhenLayerCenter(
-              state.pageSize,
-              dl.props.boxSize
-            ),
+            position:
+              dl.props.position ||
+              getPositionWhenLayerCenter(state.pageSize, dl.props.boxSize),
           },
         }),
       };
