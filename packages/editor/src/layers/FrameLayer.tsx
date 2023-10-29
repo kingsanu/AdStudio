@@ -5,12 +5,7 @@ export type FrameLayerProps = FrameContentProps;
 const FrameLayer: LayerComponent<FrameLayerProps> = ({
   boxSize,
   clipPath,
-  width,
-  height,
-  color,
-  gradientBackground,
   scale = 1,
-  border,
   rotate,
   position,
   image,
@@ -29,14 +24,9 @@ const FrameLayer: LayerComponent<FrameLayerProps> = ({
       <FrameContent
         boxSize={boxSize}
         clipPath={clipPath}
-        width={width}
-        height={height}
-        color={color}
-        gradientBackground={gradientBackground}
         scale={scale}
         rotate={rotate}
         position={position}
-        border={border}
         image={image}
       />
     </div>

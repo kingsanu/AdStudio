@@ -13,7 +13,6 @@ import { FrameLayerProps } from '@canva/layers/FrameLayer';
 
 export const getRandomId = (): LayerId => generateRandomID();
 export const deserializeLayer = <P extends LayerComponentProps>(data: SerializedLayer): LayerData<P> => {
-    console.log(data)
     const { type, props } = deserializeComponent(data);
     return {
         ...(type as LayerComponent<P>).info,

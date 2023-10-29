@@ -867,10 +867,50 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       this.selectLayers(state.activePage, layerId);
     },
     addFrameLayer(
-      data: any,
-      clipPath: any
+      serializedLayer: Pick<SerializedLayer, 'type' | 'props'>,
+      parentId: LayerId = 'ROOT'
     ) {
-      console.log('Add frame')
+      const layerId = getRandomId();
+      const dl = deserializeLayer({
+        ...serializedLayer,
+        locked: false,
+        parent: parentId,
+        child: [],
+      });
+      const ratio = state.pageSize.width / state.pageSize.height;
+      const shapeRatio = dl.props.boxSize.width / dl.props.boxSize.height;
+      let scale = 1,
+        width = dl.props.boxSize.width,
+        height = dl.props.boxSize.height;
+      const shapeSize = 0.3;
+      if (shapeRatio > ratio) {
+        //scale by width
+        width = state.pageSize.width * shapeSize;
+        height = width / shapeRatio;
+        scale = width / dl.props.boxSize.width;
+      } else {
+        height = state.pageSize.height * shapeSize;
+        width = height * shapeRatio;
+        scale = height / dl.props.boxSize.height;
+      }
+
+      state.pages[state.activePage].layers[layerId] = {
+        id: layerId,
+        data: mergeWithoutArray(cloneDeep(dl), {
+          props: {
+            boxSize: { width, height },
+            position:
+              dl.props.position ||
+              getPositionWhenLayerCenter(state.pageSize, {
+                width: dl.props.boxSize.width * scale,
+                height: dl.props.boxSize.height * scale,
+              }),
+            scale,
+          },
+        }),
+      };
+      state.pages[state.activePage].layers[parentId].data.child.push(layerId);
+      this.selectLayers(state.activePage, layerId);
     },
     addImageLayer(
       { thumb, url }: { url: string; thumb: string },

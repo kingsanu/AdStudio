@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { isGroupLayer, isShapeLayer, isTextLayer } from '@canva/utils/layer/layers';
+import { isFrameLayer, isGroupLayer, isShapeLayer, isTextLayer } from '@canva/utils/layer/layers';
 import { useSelectedLayers } from '.';
 
 export const useDisabledFeatures = () => {
@@ -28,9 +28,12 @@ export const useDisabledFeatures = () => {
             if (isTextLayer(layer)) {
                 disable.vertical = true;
             }
-            if (isGroupLayer(layer)) {
+
+            const isFrame = isFrameLayer(layer);
+            if (isGroupLayer(layer) || isFrame) {
                 disable.horizontal = true;
                 disable.vertical = true;
+                if (isFrame) disable.scalable = false;
             }
         });
         return disable;

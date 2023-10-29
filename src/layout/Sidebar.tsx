@@ -27,6 +27,10 @@ const tabs = [
     icon: <ElementsIcon />,
   },
   {
+    name: 'Frame',
+    icon: <ElementsIcon />,
+  },
+  {
     name: 'Text',
     icon: <TextIcon />,
   },
