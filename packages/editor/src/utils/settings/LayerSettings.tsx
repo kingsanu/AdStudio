@@ -8,7 +8,8 @@ import { RootLayerProps } from '@canva/layers/RootLayer';
 import { ShapeLayerProps } from '@canva/layers/ShapeLayer';
 import { TextLayerProps } from '@canva/layers/TextLayer';
 import { Layer } from '@canva/types';
-import { isRootLayer, isTextLayer, isShapeLayer } from '../layer/layers';
+import { isRootLayer, isTextLayer, isShapeLayer, isFrameLayer } from '../layer/layers';
+import { FrameLayerProps } from '@canva/layers/FrameLayer';
 
 const LayerSettings = () => {
     const { selectedLayers, selectedLayerIds } = useSelectedLayers();
@@ -29,16 +30,20 @@ const LayerSettings = () => {
                     acc.textLayers.push(layer);
                 } else if (isShapeLayer(layer)) {
                     acc.shapeLayers.push(layer);
+                } else if (isFrameLayer(layer)) {
+                    acc.frameLayers.push(layer);
                 }
                 return acc;
             },
             {
                 textLayers: [],
                 shapeLayers: [],
+                frameLayers: [],
                 rootLayer: null,
             } as {
                 textLayers: Layer<TextLayerProps>[];
                 shapeLayers: Layer<ShapeLayerProps>[];
+                frameLayers: Layer<FrameLayerProps>[];
                 rootLayer: Layer<RootLayerProps> | null;
             },
         );

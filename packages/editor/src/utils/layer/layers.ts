@@ -9,9 +9,11 @@ import { RootLayerProps } from '../../layers/RootLayer';
 import { VideoLayerProps } from '../../layers/VideoLayer';
 import { resolvers } from '../resolvers';
 import { generateRandomID } from '../identityGenerator';
+import { FrameLayerProps } from '@canva/layers/FrameLayer';
 
 export const getRandomId = (): LayerId => generateRandomID();
 export const deserializeLayer = <P extends LayerComponentProps>(data: SerializedLayer): LayerData<P> => {
+    console.log(data)
     const { type, props } = deserializeComponent(data);
     return {
         ...(type as LayerComponent<P>).info,
@@ -68,6 +70,9 @@ export const isImageLayer = <P extends LayerComponentProps>(
 export const isShapeLayer = <P extends LayerComponentProps>(
     layer: Layer<ShapeLayerProps> | Layer<P>,
 ): layer is Layer<ShapeLayerProps> => layer.data.type === 'Shape';
+export const isFrameLayer = <P extends LayerComponentProps>(
+    layer: Layer<FrameLayerProps> | Layer<P>,
+): layer is Layer<FrameLayerProps> => layer.data.type === 'Frame';
 export const isVideoLayer = <P extends LayerComponentProps>(
     layer: Layer<VideoLayerProps> | Layer<P>,
 ): layer is Layer<VideoLayerProps> => layer.data.type === 'Video';

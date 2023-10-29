@@ -247,6 +247,7 @@ export const useDragLayer = ({
             isInsideControlBox = isPointInsideBox({ x: clientX, y: clientY }, controlBoxCorner);
             if (isInsideControlBox && hoveredLayer && !selectedLayerIds.includes(hoveredLayer.id)) {
                 isInsertion = rectangleInsideAnother(hoveredLayer.data.props, controlBox);
+                console.log(123232)
             }
         }
         if (shiftKeyRef.current || (isInsideControlBox && !isInsertion)) {

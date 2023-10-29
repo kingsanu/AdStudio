@@ -9,7 +9,7 @@ import { ColorIcon } from '@canva/color-picker';
 import { useEditor } from '@canva/hooks';
 import { getGradientBackground } from '@canva/layers';
 import { GradientStyle } from '@canva/types';
-import { isRootLayer, isShapeLayer, isTextLayer } from '@canva/utils/layer/layers';
+import { isRootLayer, isShapeLayer, isTextLayer, isFrameLayer } from '@canva/utils/layer/layers';
 import { ColorParser, hex2rgbString } from '@canva/color-picker/utils';
 import ArrowLeftIcon from '@canva/icons/ArrowLeftIcon';
 
@@ -41,6 +41,8 @@ const ColorSidebar: ForwardRefRenderFunction<HTMLDivElement, ColorSidebarProps> 
                     acc.push(layer.data.props.color);
                 } else if (isTextLayer(layer)) {
                     acc.push(...layer.data.props.colors);
+                } else if (isFrameLayer(layer) && layer.data.props.color) {
+                    acc.push(...layer.data.props.color);
                 }
             });
             return uniq(acc);
@@ -51,7 +53,7 @@ const ColorSidebar: ForwardRefRenderFunction<HTMLDivElement, ColorSidebarProps> 
             Object.entries(page.layers).forEach(([, layer]) => {
                 if (isRootLayer(layer) && layer.data.props.gradientBackground) {
                     acc.push(layer.data.props.gradientBackground);
-                } else if (isShapeLayer(layer) && layer.data.props.gradientBackground) {
+                } else if ((isShapeLayer(layer) || isFrameLayer(layer)) && layer.data.props.gradientBackground) {
                     acc.push(layer.data.props.gradientBackground);
                 }
             });

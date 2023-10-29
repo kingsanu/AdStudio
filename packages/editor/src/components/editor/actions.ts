@@ -866,6 +866,12 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       state.pages[state.activePage].layers[parentId].data.child.push(layerId);
       this.selectLayers(state.activePage, layerId);
     },
+    addFrameLayer(
+      data: any,
+      clipPath: any
+    ) {
+      console.log('Add frame')
+    },
     addImageLayer(
       { thumb, url }: { url: string; thumb: string },
       boxSize: BoxSize,

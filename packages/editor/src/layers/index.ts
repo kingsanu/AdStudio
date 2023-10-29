@@ -5,4 +5,5 @@ export * from './background';
 export * from './content/TextContent';
 export * from './content/ImageContent';
 export * from './content/ShapeContent';
+export * from './content/FrameContent';
 export * from './content/RootContent';

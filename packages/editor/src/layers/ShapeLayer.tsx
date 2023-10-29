@@ -1,5 +1,4 @@
 import { LayerComponent } from '@canva/types';
-import React from 'react';
 import { ShapeContentProps, ShapeContent } from '.';
 
 export type ShapeLayerProps = ShapeContentProps;
@@ -31,8 +30,8 @@ const ShapeLayer: LayerComponent<ShapeLayerProps> = ({
                 roundedCorners={roundedCorners}
                 gradientBackground={gradientBackground}
                 boxSize={boxSize}
-                rotate={rotate}
                 scale={scale}
+                rotate={rotate}
                 position={position}
                 border={border}
             />
