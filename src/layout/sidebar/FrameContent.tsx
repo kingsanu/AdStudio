@@ -4,6 +4,7 @@ import { isMobile } from 'react-device-detect';
 import { useEditor } from '@canva/hooks';
 import CloseIcon from '@canva/icons/CloseIcon';
 import Draggable from '@canva/layers/core/Dragable';
+import { Delta } from '@canva/types';
 
 interface Frame {
   img: string;
@@ -28,7 +29,7 @@ const FrameContent: FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const addFrame = async (
     frame: Frame,
-    position?: { x: number; y: number }
+    position?: Delta
   ) => {
     actions.addFrameLayer({
       type: {
@@ -41,6 +42,7 @@ const FrameContent: FC<{ onClose: () => void }> = ({ onClose }) => {
           height: frame.height,
         },
         rotate: 0,
+        clipPath: frame.clipPath,
         image: {
           boxSize: {
             width: frame.width,

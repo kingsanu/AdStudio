@@ -1,17 +1,10 @@
-import React, { Fragment, PropsWithChildren } from 'react';
+import { Fragment, PropsWithChildren } from 'react';
 import { useLayer } from '../hooks';
-import { Delta, BoxSize, LayerComponent } from '@canva/types';
-import { RootContentProps, RootContent } from '.';
+import { LayerComponent } from '@canva/types';
+import { RootContentProps, RootContent, ImageContentProps } from '.';
 
 export interface RootLayerProps extends Omit<RootContentProps, 'image'> {
-    image?: {
-        url: string;
-        thumb: string;
-        position: Delta;
-        rotate: number;
-        boxSize: BoxSize;
-        transparency: number;
-    } | null;
+    image?: ImageContentProps['image'];
 }
 const RootLayer: LayerComponent<PropsWithChildren<RootLayerProps>> = ({
     boxSize,

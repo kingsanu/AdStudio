@@ -135,7 +135,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
                 layer.data.props.image.boxSize.width /
                 layer.data.props.image.boxSize.height;
               if (imageRatio > pageRatio) {
-                //use image height
+                // Use image height
                 layer.data.props.image.boxSize.height = size.height;
                 layer.data.props.image.boxSize.width = size.height * imageRatio;
               } else {
@@ -913,7 +913,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       this.selectLayers(state.activePage, layerId);
     },
     addImageLayer(
-      { thumb, url }: { url: string; thumb: string },
+      { thumb, url, position }: { url: string; thumb: string; position?: Delta; },
       boxSize: BoxSize,
       parentId: LayerId = 'ROOT'
     ) {
@@ -944,10 +944,11 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
             },
             rotate: 0,
           },
-          position: {
-            x: 0,
-            y: 0,
-          },
+          position: position ||
+          getPositionWhenLayerCenter(state.pageSize, {
+            width: w,
+            height: h,
+          }),
           boxSize: {
             width: w,
             height: h,
@@ -1067,6 +1068,12 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
         rotate: number;
         boxSize: BoxSize;
         image: {
+          url: string;
+          position: Delta;
+          rotate: number;
+          boxSize: BoxSize;
+        };
+        video: {
           url: string;
           position: Delta;
           rotate: number;

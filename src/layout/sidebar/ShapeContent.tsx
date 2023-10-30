@@ -21,7 +21,7 @@ import { CSSObject } from '@emotion/react';
 import OctagonIcon from '@duyank/icons/shape/Octagon';
 import HexagonIcon from '@duyank/icons/shape/Hexagon';
 import PentagonIcon from '@duyank/icons/shape/Pentagon';
-import { ShapeType } from '@canva/types';
+import { Delta, ShapeType } from '@canva/types';
 import { useEditor } from '@canva/hooks';
 import CloseIcon from '@canva/icons/CloseIcon';
 import Draggable from '@canva/layers/core/Dragable';
@@ -256,7 +256,7 @@ const shapes: Shape[] = [
 ];
 const ShapeContent: FC<{ onClose: () => void }> = ({ onClose }) => {
   const { actions } = useEditor();
-  const addShape = (shape: Shape, position?: {x: number, y: number;}) => {
+  const addShape = (shape: Shape, position?: Delta) => {
     actions.addShapeLayer({
       type: {
         resolvedName: 'ShapeLayer',

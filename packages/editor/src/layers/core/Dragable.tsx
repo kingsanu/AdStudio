@@ -140,7 +140,7 @@ const Draggable: FC<PropsWithChildren<DrapableProps>> = ({
           <div
             css={{
               width: size.w,
-              height: size.h,
+              height: size.h
             }}
           >
             {''}
@@ -155,6 +155,7 @@ const Draggable: FC<PropsWithChildren<DrapableProps>> = ({
               top: position.y,
               width: size.w,
               height: size.h,
+              zIndex: 1
             }),
           }}
         >

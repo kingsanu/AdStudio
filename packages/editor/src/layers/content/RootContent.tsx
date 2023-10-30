@@ -9,7 +9,7 @@ export interface RootContentProps extends LayerComponentProps, Omit<HTMLProps<HT
         colors: string[];
         style: GradientStyle;
     } | null;
-    image?: (ImageContentProps['image'] & { transparency: number }) | null;
+    image?: ImageContentProps['image'] | null;
     video?: VideoContentProps['video'] | null;
 }
 export const RootContent: FC<RootContentProps> = ({

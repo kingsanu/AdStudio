@@ -50,6 +50,7 @@ export const useDragLayer = ({
                 layers: state.pages[hoveredPage] && state.pages[hoveredPage].layers,
             };
         });
+    let tempFrameLayer: Layer<LayerComponentProps> | null = null;
 
     const calculateSize = ({ clientX, clientY }: CursorPosition) => {
         const layersData = getLayerData();
@@ -67,6 +68,8 @@ export const useDragLayer = ({
         });
         const controlBoxData = getControlBoxData();
         if (controlBoxData) {
+            // console.log('layersData')
+            // console.log(controlBoxData)
             callbackData.controlBox = {
                 x: controlBoxData.position.x + changeX,
                 y: controlBoxData.position.y + changeY,
@@ -83,6 +86,7 @@ export const useDragLayer = ({
             clientX: clientX + (frameRef.current as HTMLDivElement).scrollLeft,
             clientY: clientY + (frameRef.current as HTMLDivElement).scrollTop,
         };
+
         dragRef.current.e = e;
         const data = calculateSize(dragRef.current.last);
         const controlBox = getControlBoxData();
@@ -100,15 +104,29 @@ export const useDragLayer = ({
                 vertical: change?.line.vertical || [],
             });
         }
+
         actions.setDragData(true, Object.keys(data.layers));
         Object.entries(data.layers).forEach(([layerId, position]) => {
-            dragRef.current &&
+            if (dragRef.current) {
                 actions.history.merge().setProp(dragRef.current.pageIndex, layerId, {
+                    transparency: change?.frameLayer ? .3 : 1,
                     position: {
                         x: position.x + (change?.x || 0),
                         y: position.y + (change?.y || 0),
                     },
                 });
+                if (change?.frameLayer) {
+                    tempFrameLayer = change?.frameLayer;
+                    actions.history.merge().setProp(dragRef.current.pageIndex, change?.frameLayer.id, {
+                        image: hoveredLayer?.data.props.image,
+                    });
+                } else if (tempFrameLayer) {
+                    actions.history.merge().setProp(dragRef.current.pageIndex, tempFrameLayer.id, {
+                        image: tempFrameLayer.data.props.image,
+                    });
+                    tempFrameLayer = null;
+                }
+            }
         });
         const layerIds = Object.keys(data.layers);
         if (data.controlBox && controlBox) {
@@ -155,7 +173,8 @@ export const useDragLayer = ({
                     rect.x >= pageSize.width ||
                     rect.y >= pageSize.height ||
                     rect.x + rect.width < 0 ||
-                    rect.y + rect.height < 0
+                    rect.y + rect.height < 0 ||
+                    tempFrameLayer
                 ) {
                     actions.deleteLayer(dragRef.current?.pageIndex, Object.keys(data.layers));
                     isDelete = true;
@@ -165,6 +184,7 @@ export const useDragLayer = ({
                 Object.entries(data.layers).forEach(([layerId, position]) => {
                     dragRef.current &&
                         actions.history.merge().setProp(dragRef.current.pageIndex, layerId, {
+                            transparency: 1,
                             position: {
                                 x: position.x + (change?.x || 0),
                                 y: position.y + (change?.y || 0),
@@ -226,6 +246,7 @@ export const useDragLayer = ({
         let isInsideControlBox = false;
         let isInsertion = false;
         let isContainLockedLayer = false;
+
         if (controlBox) {
             const matrix = new WebKitCSSMatrix(
                 getTransformStyle({
@@ -247,7 +268,6 @@ export const useDragLayer = ({
             isInsideControlBox = isPointInsideBox({ x: clientX, y: clientY }, controlBoxCorner);
             if (isInsideControlBox && hoveredLayer && !selectedLayerIds.includes(hoveredLayer.id)) {
                 isInsertion = rectangleInsideAnother(hoveredLayer.data.props, controlBox);
-                console.log(123232)
             }
         }
         if (shiftKeyRef.current || (isInsideControlBox && !isInsertion)) {
@@ -280,6 +300,7 @@ export const useDragLayer = ({
         } else if (controlBox) {
             isContainLockedLayer = !!selectedLayers.find(({ data: { locked } }) => locked);
             setControlBoxData(controlBox);
+
         }
         setLayerData(data);
         if (!isContainLockedLayer && !isPageLocked) {
@@ -317,6 +338,7 @@ const getChange = (
             horizontal: HorizontalGuideline[];
             vertical: VerticalGuideline[];
         };
+        frameLayer: Layer<LayerComponentProps> | null;
     } = {
         x: null,
         y: null,
@@ -324,6 +346,7 @@ const getChange = (
             horizontal: [],
             vertical: [],
         },
+        frameLayer: null
     };
     if (controlBox && controlBox) {
         const boxRect = boundingRect(controlBox.boxSize, controlBox.position, controlBox.rotate);
@@ -370,6 +393,7 @@ const getChange = (
                                     x1: Math.min(active.left, target.left),
                                     x2: Math.max(active.right, target.right),
                                 });
+                                change.frameLayer = layer.data.type === 'Frame' ? layer : null;
                             }
                         }
                     });
@@ -389,6 +413,7 @@ const getChange = (
                                     y1: Math.min(active.top, target.top),
                                     y2: Math.max(active.bottom, target.bottom),
                                 });
+                                change.frameLayer = layer.data.type === 'Frame' ? layer : null;
                             }
                         }
                     });
