@@ -39,6 +39,8 @@ import { RootLayerProps } from '@canva/layers/RootLayer';
 import { positionOfObjectInsideAnother } from '@canva/utils/2d/positionOfObjectInsideAnother';
 import { GroupLayerProps } from '@canva/layers/GroupLayer';
 import { getPositionWhenLayerCenter } from '@canva/utils/layer/getPositionWhenLayerCenter';
+import { ImageContentProps } from '@canva/layers';
+import { TextLayerProps } from '@canva/layers/TextLayer';
 
 export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
   const addLayerTreeToParent = (
@@ -165,7 +167,13 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       state.guideline.horizontal = horizontal;
     },
     togglePageSettings: () => {
+      state.sidebar = null;
+      state.sideBarTab = null;
       state.openPageSettings = !state.openPageSettings;
+    },
+    setSidebarTab: (tab: string | null) => {
+      state.openPageSettings = false;
+      state.sideBarTab = tab;
     },
     selectLayers(
       pageIndex: number,
@@ -473,6 +481,15 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       }
     },
     closeTextEditor() {
+      if (state.textEditor?.editor) {
+        const editingLayer = state.textEditor
+          ? (state.pages[state.textEditor.pageIndex].layers[
+              state.textEditor.layerId
+            ] as unknown as Layer<TextLayerProps>)
+          : null;
+        editingLayer?.data.editor?.updateState(state.textEditor?.editor?.state);
+        return;
+      }
       state.textEditor = undefined;
     },
     lockPage: (pageIndex: number) => {
@@ -913,7 +930,11 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       this.selectLayers(state.activePage, layerId);
     },
     addImageLayer(
-      { thumb, url, position }: { url: string; thumb: string; position?: Delta; },
+      {
+        thumb,
+        url,
+        position,
+      }: { url: string; thumb: string; position?: Delta },
       boxSize: BoxSize,
       parentId: LayerId = 'ROOT'
     ) {
@@ -944,11 +965,12 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
             },
             rotate: 0,
           },
-          position: position ||
-          getPositionWhenLayerCenter(state.pageSize, {
-            width: w,
-            height: h,
-          }),
+          position:
+            position ||
+            getPositionWhenLayerCenter(state.pageSize, {
+              width: w,
+              height: h,
+            }),
           boxSize: {
             width: w,
             height: h,
@@ -1045,12 +1067,13 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
         position: Delta;
         rotate: number;
         boxSize: BoxSize;
-        image: {
+        image?: ImageContentProps['image'] | null;
+        video?: {
           url: string;
           position: Delta;
           rotate: number;
           boxSize: BoxSize;
-        };
+        } | null;
       }
     ) {
       state.imageEditor = cloneDeep({
@@ -1073,12 +1096,12 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
           rotate: number;
           boxSize: BoxSize;
         };
-        video: {
+        video?: {
           url: string;
           position: Delta;
           rotate: number;
           boxSize: BoxSize;
-        };
+        } | null;
       }>
     ) {
       if (state.imageEditor) {

@@ -9,10 +9,11 @@ import CheckIcon from '@canva/icons/CheckIcon';
 const PageControl = () => {
   const labelScaleOptionRef = useRef<HTMLDivElement>(null);
   const [openScaleOptions, setOpenScaleOptions] = useState(false);
-  const { actions, activePage, totalPages, scale } = useEditor((state) => ({
+  const { actions, activePage, totalPages, scale, isOpenPageSettings } = useEditor((state) => ({
     activePage: state.activePage,
     totalPages: state.pages.length,
     scale: state.scale,
+    isOpenPageSettings: state.openPageSettings
   }));
 
   const handleChangeScale = (value: number) => {
@@ -46,6 +47,7 @@ const PageControl = () => {
             value={scale * 100}
             min={10}
             max={500}
+            disabled={isOpenPageSettings}
             onChange={handleChangeScale}
           />
         </div>

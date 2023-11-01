@@ -54,6 +54,7 @@ const ControlBox: ForwardRefRenderFunction<HTMLDivElement, PropsWithChildren<Res
             ref={boxRef}
             css={{
                 position: 'absolute',
+                zIndex: 1
             }}
             style={{
                 transform: getTransformStyle({

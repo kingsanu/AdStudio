@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import SidebarTab from '../tabs/TabList';
 import TextContent from './sidebar/TextContent';
 import ShapeContent from './sidebar/ShapeContent';
@@ -48,8 +47,7 @@ const tabs = [
   },
 ];
 const Sidebar = () => {
-  const { actions } = useEditor();
-  const [tab, setTab] = useState<string | null>(null);
+  const { actions, state } = useEditor();
   return (
     <div
       css={{
@@ -67,13 +65,13 @@ const Sidebar = () => {
       >
         <SidebarTab
           tabs={tabs}
-          active={tab}
+          active={state.sideBarTab}
           onChange={(_, tab) => {
             actions.setSidebar();
-            setTab(tab);
+            actions.setSidebarTab(tab);
           }}
         />
-        {tab && (
+        {state.sideBarTab && (
           <div
             css={{
               width: 360,
@@ -87,58 +85,58 @@ const Sidebar = () => {
               },
             }}
           >
-            {tab === 'Template' && (
+            {state.sideBarTab === 'Template' && (
               <TemplateContent
                 onClose={() => {
-                  setTab(null);
+                  actions.setSidebarTab(null);
                   actions.setSidebar();
                 }}
               />
             )}
-            {tab === 'Text' && (
+            {state.sideBarTab === 'Text' && (
               <TextContent
                 onClose={() => {
-                  setTab(null);
+                  actions.setSidebarTab(null);
                   actions.setSidebar();
                 }}
               />
             )}
-            {tab === 'Frame' && (
+            {state.sideBarTab === 'Frame' && (
               <FrameContent
                 onClose={() => {
-                  setTab(null);
+                  actions.setSidebarTab(null);
                   actions.setSidebar();
                 }}
               />
             )}
-            {tab === 'Image' && (
+            {state.sideBarTab === 'Image' && (
               <ImageContent
                 onClose={() => {
-                  setTab(null);
+                  actions.setSidebarTab(null);
                   actions.setSidebar();
                 }}
               />
             )}
-            {tab === 'Video' && (
+            {state.sideBarTab === 'Video' && (
               <VideoContent
                 onClose={() => {
-                  setTab(null);
+                  actions.setSidebarTab(null);
                   actions.setSidebar();
                 }}
               />
             )}
-            {tab === 'Shape' && (
+            {state.sideBarTab === 'Shape' && (
               <ShapeContent
                 onClose={() => {
-                  setTab(null);
+                  actions.setSidebarTab(null);
                   actions.setSidebar();
                 }}
               />
             )}
             <UploadContent
-              visibility={tab === 'Upload'}
+              visibility={state.sideBarTab === 'Upload'}
               onClose={() => {
-                setTab(null);
+                actions.setSidebarTab(null);
                 actions.setSidebar();
               }}
             />

@@ -410,7 +410,6 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         settings.letterSpacing[editingLayer.id] = [];
         const editor = textEditor?.editor;
         if (editor) {
-          editingLayer.data.editor?.updateState(editor.state);
           const props = editingLayer.data.props;
           if (isEmptyContent(editor.state)) {
             setColorForBlock(props.colors[0])(editor.state, editor.dispatch);

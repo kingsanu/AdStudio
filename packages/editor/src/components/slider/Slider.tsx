@@ -11,6 +11,7 @@ interface SliderProps {
     hideInput?: boolean;
     defaultValue?: number;
     value?: number;
+    disabled?: boolean;
     onChange?: (value: number) => void;
 }
 const Slider: FC<SliderProps> = ({
@@ -22,6 +23,7 @@ const Slider: FC<SliderProps> = ({
     value,
     hideLabel,
     hideInput,
+    disabled,
     onChange,
 }) => {
     const trackRef = useRef<HTMLDivElement>(null);
@@ -102,6 +104,7 @@ const Slider: FC<SliderProps> = ({
     };
 
     const handleStartDrag = (e: React.MouseEvent | React.TouchEvent) => {
+        if (disabled) return;
         const { clientX } = getPosition(e.nativeEvent);
         const diff = getDiffPosition(clientX);
         const newVal = getChange(diff);
@@ -172,21 +175,21 @@ const Slider: FC<SliderProps> = ({
                         width: '100%',
                         position: 'absolute',
                         left: 0,
-                        top: '50%',
-                        transform: 'translateY(-50%)',
+                        top: '49%',
+                        transform: 'translateY(-49%)',
                         height: 2,
                         borderRadius: 2,
                         cursor: 'pointer',
-                        backgroundColor: '#bbbbbb',
+                        backgroundColor: disabled ? 'rgb(57 76 96 / 15%)' : '#bbbbbb',
                     }}
                 />
                 {zeroPoint > 0 && (
                     <div
                         css={{
                             position: 'absolute',
-                            top: '50%',
+                            top: '49%',
                             width: '100%',
-                            transform: 'translateY(-50%)',
+                            transform: 'translateY(-49%)',
                             display: 'inline-flex',
                         }}
                     >
@@ -196,7 +199,7 @@ const Slider: FC<SliderProps> = ({
                                 width: 4,
                                 height: 4,
                                 transform: 'translateY(-6px)',
-                                borderRadius: '50%',
+                                borderRadius: '49%',
                                 background: '#bbbbbb',
                             }}
                         />
@@ -204,7 +207,7 @@ const Slider: FC<SliderProps> = ({
                 )}
                 <div
                     ref={markRef}
-                    css={{ position: 'absolute', top: '50%' }}
+                    css={{ position: 'absolute', top: '49%' }}
                     style={{
                         width: `${((Math.abs(v) - (min > 0 ? min : 0)) / (max - min)) * 100}%`,
                         marginLeft: `${Math.min(zeroPoint, zeroPoint + (v / (max - min)) * 100)}%`,
@@ -213,7 +216,7 @@ const Slider: FC<SliderProps> = ({
                 >
                     <div
                         css={{
-                            backgroundColor: '#3d8eff',
+                            backgroundColor: disabled ? 'rgb(57 76 96 / 15%)' : '#3d8eff',
                             width: '100%',
                             height: 2,
                             transform: 'translateY(-50%)',
@@ -225,7 +228,7 @@ const Slider: FC<SliderProps> = ({
                             css={{
                                 width: 16,
                                 height: 16,
-                                transform: `translate(-50%, -50%)`,
+                                transform: `translate(-50%, -44%)`,
                                 background: '#fff',
                                 left: '100%',
                                 position: 'absolute',
@@ -239,6 +242,7 @@ const Slider: FC<SliderProps> = ({
                                     borderRadius: '50%',
                                     width: 16,
                                     height: 16,
+                                    background:  disabled ? '#898d90' : 'transparent',
                                     transform: isDragging ? ' scale(1.125)' : undefined,
                                     border: isDragging ? '1px solid #3d8eff' : '1px solid #5E6278',
                                 }}

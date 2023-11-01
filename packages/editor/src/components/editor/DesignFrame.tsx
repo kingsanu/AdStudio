@@ -101,7 +101,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data }) => {
     const handleScroll = () => {
         if (!dragData.status && !selectStatus) {
             const viewport = frameRef.current as HTMLDivElement;
-            //change active page
+            // change active page
             if (pageRef.current[activePage] && !isElementInViewport(viewport, pageRef.current[activePage])) {
                 pageRef.current.some((page, pageIndex) => {
                     if (isElementInViewport(viewport, page)) {
@@ -112,6 +112,12 @@ const DesignFrame: FC<DesignFrameProps> = ({ data }) => {
             }
         }
     };
+
+    const handleScrollToActivePage = (pageIndex: number) => {
+        setTimeout(() => {
+            pageRef.current[pageIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 16);
+    }
 
     const { tmpSelected, onSelectStart } = useSelectLayer({
         frameRef: frameRef,
@@ -295,6 +301,14 @@ const DesignFrame: FC<DesignFrameProps> = ({ data }) => {
                                             width={pageSize.width}
                                             height={pageSize.height}
                                             transform={pageTransform}
+                                            onMovePageUp={() => {
+                                                actions.movePageUp(index)
+                                                handleScrollToActivePage(activePage - 1)
+                                            }}
+                                            onMovePageDown={() => {
+                                                actions.movePageDown(index)
+                                                handleScrollToActivePage(activePage + 1)
+                                            }}
                                         />
                                     </div>
                                 ))}
@@ -315,6 +329,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data }) => {
                                     }}
                                     onClick={() => {
                                         actions.addPage();
+                                        handleScrollToActivePage(activePage + 1)
                                     }}
                                 >
                                     Add Page

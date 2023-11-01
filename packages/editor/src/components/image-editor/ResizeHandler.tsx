@@ -50,7 +50,7 @@ const ResizeHandler: FC<ResizeIconProps> = ({ direction, onResizeStart }) => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 pointerEvents: 'auto',
-                color: 'white',
+                color: 'white'
             }}
             onTouchStart={handleResizeStart}
             onMouseDown={handleResizeStart}

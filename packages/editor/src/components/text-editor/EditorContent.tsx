@@ -18,7 +18,7 @@ const EditorContent: FC<EditorContentProps> = ({ editor }) => {
             ele: ref.current,
             handleDOMEvents: {
                 blur: () => {
-                    isMobile && actions.closeTextEditor();
+                    actions.closeTextEditor();
                 },
             },
         });

@@ -48,6 +48,7 @@ export interface EditorState {
     };
     activePage: number;
     openPageSettings: boolean;
+    sideBarTab: string | null;
     pageSize: PageSize;
     pages: Page[];
     sidebar: SidebarType | null;

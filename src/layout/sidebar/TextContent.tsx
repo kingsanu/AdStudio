@@ -7,29 +7,43 @@ import { LayerId, SerializedLayers } from '@canva/types';
 import CloseIcon from '@canva/icons/CloseIcon';
 import { getPositionWhenLayerCenter } from '@canva/utils/layer/getPositionWhenLayerCenter';
 import Draggable from '@canva/layers/core/Dragable';
-const simpleTxt = (boxSize: any, position: any) => ({
-  rootId: '7740b655-a0e2-44ec-9ecd-249ec6367582',
-  layers: {
-    '7740b655-a0e2-44ec-9ecd-249ec6367582': {
-      type: {
-        resolvedName: 'TextLayer',
-      },
-      props: {
-        text: '<p style="font-weight: 500; font-style: normal; color: rgb(50, 38, 23); text-decoration: none; font-size: 20px; text-align: center;"><strong>Your text here!</strong></p>',
-        position: position,
-        boxSize: boxSize,
-        scale: 1,
-        rotate: 0,
-        fonts: [],
-        colors: ['rgb(50, 38, 23)'],
-        fontSizes: [16],
-        effect: null,
-      },
-      locked: false,
-      child: [],
-      parent: 'ROOT',
-    },
+import { generateRandomID } from '@canva/utils/identityGenerator';
+
+const simpleTxtLayer = (boxSize: any, position: any) => ({
+  type: {
+    resolvedName: 'TextLayer',
   },
+  props: {
+    text: '<p style="font-family: Oswald; color: rgb(0, 0, 0); font-size: 18px; text-align: center">Your text here!</p>',
+    position,
+    boxSize,
+    scale: 1,
+    rotate: 0,
+    fonts: [
+      {
+        name: 'Oswald',
+        fonts: [
+          {
+            style: 'Bold',
+            urls: [
+              'https://lidojs-fonts.s3.us-east-2.amazonaws.com/Oswald/Oswald-Bold.woff2',
+            ],
+          },
+          {
+            urls: [
+              'https://lidojs-fonts.s3.us-east-2.amazonaws.com/Oswald/Oswald-Regular.woff2',
+            ],
+          },
+        ],
+      },
+    ],
+    colors: ['rgb(0, 0, 0)'],
+    fontSizes: [18],
+    effect: null,
+  },
+  locked: false,
+  child: [],
+  parent: 'ROOT',
 });
 interface Text {
   img: string;
@@ -53,6 +67,7 @@ const TextContent: FC<{ onClose: () => void }> = ({ onClose }) => {
     rootId: LayerId;
     layers: SerializedLayers;
   }) => {
+    console.log(data);
     actions.addLayerTree(data);
     if (isMobile) {
       onClose();
@@ -61,17 +76,22 @@ const TextContent: FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const handleAddNewText = () => {
     const boxSize = {
-      width: 300,
+      width: 309.91666666666606,
       height: 28,
-      x: 45,
-      y: 167,
+      x: 623,
+      y: 415,
     };
     const position = getPositionWhenLayerCenter(state.pageSize, {
       width: boxSize.width,
       height: boxSize.height,
     });
-    const simpleText = simpleTxt(boxSize, position);
-    actions.addLayerTree(simpleText);
+    const layers: SerializedLayers = {};
+    const layerId = generateRandomID();
+    layers[layerId] = simpleTxtLayer(boxSize, position);
+    actions.addLayerTree({
+      rootId: layerId,
+      layers,
+    });
     if (isMobile) {
       onClose();
     }

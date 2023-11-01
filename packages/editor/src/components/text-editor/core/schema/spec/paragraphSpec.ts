@@ -72,7 +72,7 @@ const toDOM = (node: Node): DOMOutputSpec => {
         }
     }
     style += `line-height: ${lineHeight || 1.4};`;
-    style += `letter-spacing: ${letterSpacing}em;`;
+    style += `letter-spacing: ${letterSpacing ? letterSpacing + 'em' : 'normal'};`;
 
     style && (attrs.style = style);
     return ['p', attrs, 0];

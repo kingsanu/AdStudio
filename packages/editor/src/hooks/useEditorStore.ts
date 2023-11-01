@@ -76,14 +76,12 @@ export const useEditorStore = () => {
 
     const baseQuery = useMemo(() => {
         const qMethods = QueryMethods;
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         return Object.keys(qMethods()).reduce((accum, key) => {
             return {
                 ...accum,
                 [key as keyof CoreEditorQuery]: (...args: never) => {
                     const func = qMethods(getState())[key as keyof CoreEditorQuery];
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                     // @ts-ignore
                     return func(...args);
                 },
@@ -130,15 +128,12 @@ export const useEditorStore = () => {
                             case HISTORY_ACTIONS.IGNORE:
                             case HISTORY_ACTIONS.MERGE:
                             case HISTORY_ACTIONS.THROTTLE:
-                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                                 // @ts-ignore
                                 const [type, ...params] = action.payload;
-                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                                 // @ts-ignore
                                 methods(draft, query)[type](...params);
                                 break;
                             default:
-                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                                 // @ts-ignore
                                 methods(draft, query)[action.type](...action.payload);
                         }
@@ -270,7 +265,6 @@ export const useEditorStore = () => {
                 return actionKeys
                     .filter((type) => !ignoreHistoryForActions.includes(type))
                     .reduce((accum, type) => {
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-ignore
                         accum[type] = (...payload) =>
                             dispatch({
@@ -284,7 +278,6 @@ export const useEditorStore = () => {
                 return actionKeys
                     .filter((type) => !ignoreHistoryForActions.includes(type))
                     .reduce((accum, type) => {
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-ignore
                         accum[type] = (...payload) =>
                             dispatch({
@@ -301,7 +294,6 @@ export const useEditorStore = () => {
                 return actionKeys
                     .filter((type) => !ignoreHistoryForActions.includes(type))
                     .reduce((accum, type) => {
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-ignore
                         accum[type] = (...payload) =>
                             dispatch({

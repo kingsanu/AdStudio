@@ -68,8 +68,6 @@ export const useDragLayer = ({
         });
         const controlBoxData = getControlBoxData();
         if (controlBoxData) {
-            // console.log('layersData')
-            // console.log(controlBoxData)
             callbackData.controlBox = {
                 x: controlBoxData.position.x + changeX,
                 y: controlBoxData.position.y + changeY,
