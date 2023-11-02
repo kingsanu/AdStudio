@@ -5,6 +5,7 @@ import Slider from '@canva/components/slider/Slider';
 import { useEditor } from '@canva/hooks';
 import GridViewIcon from '@canva/icons/GridViewIcon';
 import CheckIcon from '@canva/icons/CheckIcon';
+import Button from '@canva/components/Button';
 
 const PageControl = () => {
   const labelScaleOptionRef = useRef<HTMLDivElement>(null);
@@ -73,7 +74,6 @@ const PageControl = () => {
                   padding: '0 8px',
                   display: 'flex',
                   height: 40,
-                  minWidth: 100,
                   alignItems: 'center',
                   cursor: 'pointer',
                   ':hover': {
@@ -95,31 +95,13 @@ const PageControl = () => {
             ))}
           </div>
         </Popover>
-        <div
-          css={{
-            '@media (max-width: 900px)': {
-              pointerEvents: 'auto',
-              display: 'flex',
-              position: 'absolute',
-              bottom: 24,
-              right: 24,
-              background: '#fff',
-              width: 48,
-              height: 48,
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: '50%',
-              fontSize: 24,
-              boxShadow:
-                '0 0 0 1px rgba(64,87,109,.07),0 2px 12px rgba(53,71,90,.2)',
-            },
-          }}
+        <Button
           onClick={() => {
             actions.togglePageSettings();
           }}
         >
           <GridViewIcon />
-        </div>
+        </Button>
       </div>
     </div>
   );

@@ -2,6 +2,8 @@ import { pack, unpack } from '@canva/utils/minifier';
 import { data } from './origin-data';
 // import { data } from './data';
 import Test from './Test';
+import { useState } from 'react';
+import { GridView } from './dev/GridView';
 // import { generateRandomID, isEditorID } from '@canva/utils/identityGenerator';
 // function App() {
 //   // const id = generateRandomID(10);
@@ -20,6 +22,7 @@ import Test from './Test';
 // }
 function App() {
   return <Test />;
+  // return <GridView />
 }
 
 export default App;

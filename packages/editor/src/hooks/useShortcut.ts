@@ -205,6 +205,9 @@ const useShortcut = (frameEle: HTMLElement | null) => {
         const s = Math.exp((-e.deltaY * zoomStep) / 3);
         const newScale = +Math.min(Math.max(scale * s, 0.1), 5).toFixed(5);
         actions.setScale(newScale);
+
+        // const target = e.currentTarget as HTMLTextAreaElement;
+        
         e.preventDefault();
         e.stopPropagation();
       }

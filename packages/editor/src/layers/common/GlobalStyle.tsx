@@ -4,12 +4,12 @@ import FontStyle from './FontStyle';
 import { FontData } from '@canva/types';
 
 export interface GlobalStyleProps {
-    fonts: FontData[];
-    mode?: 'editor' | 'view';
+  fonts: FontData[];
+  mode?: 'editor' | 'view';
 }
 
 export const GlobalStyle: FC<GlobalStyleProps> = ({ fonts, mode = 'view' }) => {
-    const formatText = `
+  const formatText = `
         .canva-editor-text {
             counter-reset: list;
             p {
@@ -31,28 +31,60 @@ export const GlobalStyle: FC<GlobalStyleProps> = ({ fonts, mode = 'view' }) => {
         }
     `;
 
-    const commonCss = `
+  const commonCss = `
         * {
-            -webkit-user-select: ${mode === 'editor' ? 'none' : 'text'}; /* Safari */
-            -khtml-user-select: ${mode === 'editor' ? 'none' : 'text'}; /* Konqueror HTML */
-            -moz-user-select: ${mode === 'editor' ? 'none' : 'text'}; /* Old versions of Firefox */
-            -ms-user-select: ${mode === 'editor' ? 'none' : 'text'}; /* Internet Explorer/Edge */
+            -webkit-user-select: ${
+              mode === 'editor' ? 'none' : 'text'
+            }; /* Safari */
+            -khtml-user-select: ${
+              mode === 'editor' ? 'none' : 'text'
+            }; /* Konqueror HTML */
+            -moz-user-select: ${
+              mode === 'editor' ? 'none' : 'text'
+            }; /* Old versions of Firefox */
+            -ms-user-select: ${
+              mode === 'editor' ? 'none' : 'text'
+            }; /* Internet Explorer/Edge */
             user-select: ${mode === 'editor' ? 'none' : 'text'};
             -webkit-user-drag: none;
              -webkit-touch-callout: none; /* iOS Safari */
         }
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+          
+          @-moz-keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+          
+          @-webkit-keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+          
+          @-o-keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+          
+          @-ms-keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
     `;
-    return (
-        <Fragment>
-            <Global
-                styles={css`
-                    ${formatText}
-                    ${commonCss}
-                `}
-            />
-            {fonts.map((font) => (
-                <FontStyle key={font.name} font={font} />
-            ))}
-        </Fragment>
-    );
+  return (
+    <Fragment>
+      <Global
+        styles={css`
+          ${formatText}
+          ${commonCss}
+        `}
+      />
+      {fonts.map((font) => (
+        <FontStyle key={font.name} font={font} />
+      ))}
+    </Fragment>
+  );
 };
