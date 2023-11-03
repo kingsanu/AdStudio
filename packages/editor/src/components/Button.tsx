@@ -19,6 +19,7 @@ const Button: ForwardRefRenderFunction<
         height: 32,
         minWidth: 32,
         alignItems: 'center',
+        justifyContent: 'center',
         transition: 'background-color 0.3s ease',
         color: '#000',
         borderRadius: 6,

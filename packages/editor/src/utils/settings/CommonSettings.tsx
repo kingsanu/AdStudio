@@ -126,7 +126,7 @@ const CommonSettings = () => {
           gridGap: 8,
         }}
       >
-        <SettingButton onClick={() => actions.setSidebar('LAYER_MANAGEMENT')}>
+        <SettingButton css={{minWidth: 75}} onClick={() => actions.setSidebar('LAYER_MANAGEMENT')}>
           <span css={{ padding: '0 4px' }}>Position</span>
         </SettingButton>
 
@@ -145,7 +145,7 @@ const CommonSettings = () => {
                 />
                 <SettingButton
                   ref={transparencyButtonRef}
-                  css={{ fontSize: 20 }}
+                  css={{ fontSize: 20, minWidth: 30 }}
                   onClick={() => setOpenTransparencySetting(true)}
                 >
                   <TransparencyIcon />
@@ -182,6 +182,7 @@ const CommonSettings = () => {
             />
             <SettingButton
               ref={resizeButtonRef}
+              css={{minWidth: 75}}
               onClick={() => setOpenResizeSetting(true)}
             >
               <span css={{ padding: '0 4px' }}>Resize</span>

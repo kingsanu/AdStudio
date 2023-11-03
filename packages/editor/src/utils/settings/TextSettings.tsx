@@ -1580,8 +1580,8 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         css={{ height: 24, width: `1px`, background: 'rgba(57,76,96,.15)' }}
       />
 
-      <SettingButton onClick={() => actions.setSidebar('TEXT_EFFECT')}>
-        <span css={{ padding: '0 4px' }}>Effects</span>
+      <SettingButton css={{minWidth: 70}} onClick={() => actions.setSidebar('TEXT_EFFECT')}>
+        Effects
       </SettingButton>
       <div
         css={{ height: 24, width: `1px`, background: 'rgba(57,76,96,.15)' }}
