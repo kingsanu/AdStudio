@@ -369,6 +369,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
           ).boxSize;
         }
         const page: Page = {
+          name: serializedPage.name,
           layers: {},
         };
 
@@ -400,6 +401,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
     },
     setPage: (pageIndex: number, serializedPage: SerializedPage) => {
       const page: Page = {
+        name: '',
         layers: {},
       };
       const decodeLayer = (
@@ -441,6 +443,9 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       });
       state.selectedLayers = {};
       state.pages[pageIndex] = page;
+    },
+    setPageName(pageIndex: number, name: string) {
+      state.pages[pageIndex].name = name;
     },
     setActivePage(pageIndex: number) {
       state.selectedLayers = {};
@@ -507,6 +512,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       state.textEditor = undefined;
       state.imageEditor = undefined;
       const newPage: Page = {
+        name: '',
         layers: {},
       };
       Object.entries(
@@ -525,6 +531,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
     },
     addPage: (pageIndex?: number) => {
       const page: Page = {
+        name: '',
         layers: {},
       };
       page.layers.ROOT = {

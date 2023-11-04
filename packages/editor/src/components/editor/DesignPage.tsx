@@ -44,9 +44,11 @@ import ArrowUpIcon from '@canva/icons/ArrowUpIcon';
 import ArrowDownIcon from '@canva/icons/ArrowDownIcon';
 import AddNewPageIcon from '@canva/icons/AddNewPageIcon';
 import DownloadIcon from '@canva/icons/DownloadIcon';
+import EditInlineInput from '../EditInlineInput';
 
 export interface PageProps {
   pageIndex: number;
+  pageName: string;
   width: number;
   height: number;
   transform: {
@@ -58,7 +60,15 @@ export interface PageProps {
   onMovePageDown: () => void;
 }
 const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
-  { pageIndex, width, height, transform, onMovePageUp, onMovePageDown },
+  {
+    pageIndex,
+    pageName,
+    width,
+    height,
+    transform,
+    onMovePageUp,
+    onMovePageDown,
+  },
   ref
 ) => {
   const pageRef = useRef<HTMLDivElement>(null);
@@ -324,7 +334,18 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
           },
         }}
       >
-        <div css={{ flexGrow: 1 }}>Page {pageIndex + 1}</div>
+        <div css={{ flexGrow: 1 }}>
+          <div css={{ display: 'flex' }}>
+            <div>Page {pageIndex + 1} -</div>&nbsp;
+            <EditInlineInput
+              text={pageName}
+              placeholder='Add page title'
+              onSetText={(newText) => {
+                actions.setPageName(pageIndex, newText);
+              }}
+            />
+          </div>
+        </div>
         <div
           css={{
             display: 'flex',

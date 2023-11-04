@@ -8,13 +8,14 @@ import { copy } from '@canva/utils/menu/actions/copy';
 import { duplicate } from '@canva/utils/menu/actions/duplicate';
 
 const useShortcut = (frameEle: HTMLElement | null) => {
-  const { actions, state, activePage, rootLayer, scale } = useEditor(
+  const { actions, state, activePage, rootLayer, scale, selectedLayers } = useEditor(
     (state) => ({
       rootLayer:
         state.pages[state.activePage] &&
         state.pages[state.activePage].layers.ROOT,
       activePage: state.activePage,
       scale: state.scale,
+      selectedLayers: state.selectedLayers
     })
   );
   const { selectedLayerIds } = useSelectedLayers();
@@ -124,8 +125,7 @@ const useShortcut = (frameEle: HTMLElement | null) => {
       // Contain shortcut in blur mode
       switch (key) {
         case normalizeKeyName('Mod-a'):
-          actions.selectAllLayers();
-          e.preventDefault();
+          isSelectedLayer && actions.selectAllLayers();
           break;
         case normalizeKeyName('Mod-z'):
           actions.history.undo();
@@ -167,19 +167,18 @@ const useShortcut = (frameEle: HTMLElement | null) => {
         case normalizeKeyName('Delete'):
         case normalizeKeyName('Backspace'):
           isSelectedLayer && handleDelete();
-          e.preventDefault();
           break;
         case normalizeKeyName('ArrowLeft'):
-          actions.moveSelectedLayers('left', 1);
+          isSelectedLayer && actions.moveSelectedLayers('left', 1);
           break;
         case normalizeKeyName('ArrowRight'):
-          actions.moveSelectedLayers('right', 1);
+          isSelectedLayer && actions.moveSelectedLayers('right', 1);
           break;
         case normalizeKeyName('ArrowUp'):
-          actions.moveSelectedLayers('top', 1);
+          isSelectedLayer && actions.moveSelectedLayers('top', 1);
           break;
         case normalizeKeyName('ArrowDown'):
-          actions.moveSelectedLayers('bottom', 1);
+          isSelectedLayer && actions.moveSelectedLayers('bottom', 1);
           break;
         case normalizeKeyName('Mod-0'):
           handleZoomReset();

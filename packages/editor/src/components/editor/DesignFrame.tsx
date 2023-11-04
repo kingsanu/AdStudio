@@ -1,4 +1,11 @@
-import { FC, Fragment, useCallback, useContext, useEffect, useRef } from 'react';
+import {
+  FC,
+  Fragment,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+} from 'react';
 import { EditorContext } from './EditorContext';
 import DesignPage from './DesignPage';
 import { SerializedPage } from '@canva/types';
@@ -21,359 +28,422 @@ import SelectionBox from '@canva/layers/core/SelectionBox';
 import { isMobile } from 'react-device-detect';
 import PageSettings from '@canva/utils/settings/PageSettings';
 import { unpack } from '@canva/utils/minifier';
+import useDebouncedEffect from '@canva/hooks/useDebouncedEffect';
 
 interface DesignFrameProps {
-    data: any;
+  data: any;
+  onChanges?: (changes: any) => void;
 }
-const DesignFrame: FC<DesignFrameProps> = ({ data }) => {
-    const shiftKeyRef = useTrackingShiftKey();
-    const frameRef = useRef<HTMLDivElement>(null);
-    const pageContainerRef = useRef<HTMLDivElement>(null);
-    const pageRef = useRef<HTMLDivElement[]>([]);
-    const contextMenuRef = useRef<HTMLDivElement>(null);
-    const { usedFonts } = useUsedFont();
-    const {
-        config: { assetPath },
-    } = useContext(EditorContext);
-    useShortcut(frameRef.current);
-    const {
-        actions,
-        scale,
-        pages,
-        hoveredPage,
-        hoveredLayer,
-        selectStatus,
-        rotateData,
-        resizeData,
-        controlBox,
-        activePage,
-        dragData,
-        imageEditor,
-        pageSize,
-        openPageSettings
-    } = useEditor((state) => {
-        const hoveredPage = parseInt(Object.keys(state.hoveredLayer)[0]);
-        const hoverLayerId = state.hoveredLayer[hoveredPage];
-        return {
-            scale: state.scale,
-            pages: state.pages,
-            hoveredPage,
-            hoveredLayer: hoverLayerId ? state.pages[hoveredPage].layers[hoverLayerId] : null,
-            selectStatus: state.selectData.status,
-            rotateData: state.rotateData,
-            resizeData: state.resizeData,
-            controlBox: state.controlBox,
-            activePage: state.activePage,
-            dragData: state.dragData,
-            imageEditor: state.imageEditor,
-            pageSize: state.pageSize,
-            openPageSettings: state.openPageSettings
-        };
-    });
-    const {
-        pageTransform,
-        onZoomStart,
-        onZoomMove,
-        onZoomEnd,
-        onMoveStart,
-        onMove,
-        onMoveEnd,
-        onMovePage,
-        onMovePageEnd,
-    } = useZoomPage(frameRef, pageRef, pageContainerRef);
-    useEffect(() => {
-        const serializedData: SerializedPage[] = unpack([...data]);
-        actions.setData(serializedData);
-    }, [data, actions]);
-
-    useClickOutside(
-        contextMenuRef,
-        () => {
-            actions.hideContextMenu();
-        },
-        'mousedown',
-        { capture: true },
-    );
-
-    const boxRef = useRef<HTMLDivElement>(null);
-    const { selectedLayerIds } = useSelectedLayers();
-
-    const handleScroll = () => {
-        if (!dragData.status && !selectStatus) {
-            const viewport = frameRef.current as HTMLDivElement;
-            // change active page
-            if (pageRef.current[activePage] && !isElementInViewport(viewport, pageRef.current[activePage])) {
-                pageRef.current.some((page, pageIndex) => {
-                    if (isElementInViewport(viewport, page)) {
-                        actions.selectLayers(pageIndex, 'ROOT');
-                        return true;
-                    }
-                });
-            }
-        }
+const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
+  const shiftKeyRef = useTrackingShiftKey();
+  const frameRef = useRef<HTMLDivElement>(null);
+  const pageContainerRef = useRef<HTMLDivElement>(null);
+  const pageRef = useRef<HTMLDivElement[]>([]);
+  const contextMenuRef = useRef<HTMLDivElement>(null);
+  const { usedFonts } = useUsedFont();
+  const {
+    config: { assetPath },
+  } = useContext(EditorContext);
+  useShortcut(frameRef.current);
+  const {
+    actions,
+    query,
+    scale,
+    pages,
+    hoveredPage,
+    hoveredLayer,
+    selectStatus,
+    rotateData,
+    resizeData,
+    controlBox,
+    activePage,
+    dragData,
+    imageEditor,
+    pageSize,
+    openPageSettings,
+  } = useEditor((state) => {
+    const hoveredPage = parseInt(Object.keys(state.hoveredLayer)[0]);
+    const hoverLayerId = state.hoveredLayer[hoveredPage];
+    return {
+      scale: state.scale,
+      pages: state.pages,
+      hoveredPage,
+      hoveredLayer: hoverLayerId
+        ? state.pages[hoveredPage].layers[hoverLayerId]
+        : null,
+      selectStatus: state.selectData.status,
+      rotateData: state.rotateData,
+      resizeData: state.resizeData,
+      controlBox: state.controlBox,
+      activePage: state.activePage,
+      dragData: state.dragData,
+      imageEditor: state.imageEditor,
+      pageSize: state.pageSize,
+      openPageSettings: state.openPageSettings,
     };
+  });
 
-    const handleScrollToActivePage = (pageIndex: number) => {
-        setTimeout(() => {
-            pageRef.current[pageIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 16);
+  const {
+    pageTransform,
+    onZoomStart,
+    onZoomMove,
+    onZoomEnd,
+    onMoveStart,
+    onMove,
+    onMoveEnd,
+    onMovePage,
+    onMovePageEnd,
+  } = useZoomPage(frameRef, pageRef, pageContainerRef);
+  useEffect(() => {
+    // const serializedData: SerializedPage[] = unpack([...data]);
+    // actions.setData(serializedData);
+    actions.setData(data);
+  }, [data, actions]);
+
+  useDebouncedEffect(
+    () => {
+      if (onChanges) onChanges(query.serialize());
+    },
+    500,
+    [pages]
+  );
+
+  useClickOutside(
+    contextMenuRef,
+    () => {
+      actions.hideContextMenu();
+    },
+    'mousedown',
+    { capture: true }
+  );
+
+  const boxRef = useRef<HTMLDivElement>(null);
+  const { selectedLayerIds } = useSelectedLayers();
+
+  const handleScroll = () => {
+    if (!dragData.status && !selectStatus) {
+      const viewport = frameRef.current as HTMLDivElement;
+      // change active page
+      if (
+        pageRef.current[activePage] &&
+        !isElementInViewport(viewport, pageRef.current[activePage])
+      ) {
+        pageRef.current.some((page, pageIndex) => {
+          if (isElementInViewport(viewport, page)) {
+            actions.selectLayers(pageIndex, 'ROOT');
+            return true;
+          }
+        });
+      }
     }
+  };
 
-    const { tmpSelected, onSelectStart } = useSelectLayer({
-        frameRef: frameRef,
-        pageListRef: pageRef,
-        selectionBoxRef: boxRef,
-    });
+  const handleScrollToActivePage = (pageIndex: number) => {
+    setTimeout(() => {
+      pageRef.current[pageIndex].scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }, 16);
+  };
 
-    const { onDragStart } = useDragLayer({
-        frameRef,
-        pageListRef: pageRef,
-    });
+  const { tmpSelected, onSelectStart } = useSelectLayer({
+    frameRef: frameRef,
+    pageListRef: pageRef,
+    selectionBoxRef: boxRef,
+  });
 
-    const handMouseDown = useCallback(
-        (e: MouseEvent | TouchEvent) => {
-            if ((isMouseEvent(e) && e.button === 2) || imageEditor || (isTouchEvent(e) && e.touches.length > 1)) {
-                return;
-            }
-            const isClickPage = pageRef.current.find((page) => page.contains(e.target as Node));
-            const isClickOutPage = pageRef.current.find((page) => (e.target as Node).contains(page));
-            const { clientX, clientY } = getPosition(e);
-            if (!isClickPage && !isClickOutPage) {
-                return;
-            }
+  const { onDragStart } = useDragLayer({
+    frameRef,
+    pageListRef: pageRef,
+  });
 
-            let isInsideControlBox = false;
-            if (controlBox) {
-                const matrix = new WebKitCSSMatrix(
-                    getTransformStyle({
-                        rotate: controlBox.rotate,
-                    }),
-                );
-                const rect = pageRef.current[activePage].getBoundingClientRect();
-                const controlBoxCorner = visualCorners(
-                    {
-                        width: controlBox.boxSize.width * scale,
-                        height: controlBox.boxSize.height * scale,
-                    },
-                    matrix,
-                    {
-                        x: rect.x + controlBox.position.x * scale,
-                        y: rect.y + controlBox.position.y * scale,
-                    },
-                );
-                isInsideControlBox = isPointInsideBox({ x: clientX, y: clientY }, controlBoxCorner);
-            }
-            if (hoveredLayer && hoveredLayer.id !== 'ROOT' && !selectedLayerIds.includes(hoveredLayer.id)) {
-                if (
-                    !isInsideControlBox ||
-                    (controlBox && rectangleInsideAnother(hoveredLayer.data.props, controlBox))
-                ) {
-                    actions.selectLayers(hoveredPage, hoveredLayer.id, shiftKeyRef.current ? 'add' : 'replace');
-                }
-            }
-            if ((hoveredLayer && hoveredLayer.id !== 'ROOT' && !hoveredLayer.data.locked) || isInsideControlBox) {
-                onDragStart(e);
-                e.stopPropagation();
-            } else if (isMouseEvent(e)) {
-                onSelectStart(e);
-                e.stopPropagation();
-            } else if (isTouchEvent(e)) {
-                onMoveStart(e);
-            }
-        },
-        [hoveredLayer, controlBox, selectedLayerIds, dragData],
-    );
+  const handMouseDown = useCallback(
+    (e: MouseEvent | TouchEvent) => {
+      if (
+        (isMouseEvent(e) && e.button === 2) ||
+        imageEditor ||
+        (isTouchEvent(e) && e.touches.length > 1)
+      ) {
+        return;
+      }
+      const isClickPage = pageRef.current.find((page) =>
+        page.contains(e.target as Node)
+      );
+      const isClickOutPage = pageRef.current.find((page) =>
+        (e.target as Node).contains(page)
+      );
+      const { clientX, clientY } = getPosition(e);
+      if (!isClickPage && !isClickOutPage) {
+        return;
+      }
 
-    const cursorCSS = () => {
-        if (rotateData.status) {
-            const cursor = Math.round((rotateData.rotate || 0) / 10);
-            return {
-                cursor: `url('${assetPath}/cursors/rotate/${cursor === 36 ? 0 : cursor}.png') 12 12, auto;`,
-            };
-        } else if (resizeData.status) {
-            const rd = {
-                bottomLeft: 45,
-                left: 90,
-                topLeft: 135,
-                top: 180,
-                topRight: 225,
-                right: 270,
-                bottomRight: 315,
-                bottom: 0,
-            };
-            const rotate = (resizeData.rotate || 0) + rd[resizeData.direction || 'bottom'] + 90;
-            const file = Math.round((rotate % 180) / 10);
-            return {
-                cursor: `url('${assetPath}/cursors/resize/${file}.png') 12 12, auto`,
-            };
-        } else if (dragData.status) {
-            return {
-                cursor: 'move',
-            };
+      let isInsideControlBox = false;
+      if (controlBox) {
+        const matrix = new WebKitCSSMatrix(
+          getTransformStyle({
+            rotate: controlBox.rotate,
+          })
+        );
+        const rect = pageRef.current[activePage].getBoundingClientRect();
+        const controlBoxCorner = visualCorners(
+          {
+            width: controlBox.boxSize.width * scale,
+            height: controlBox.boxSize.height * scale,
+          },
+          matrix,
+          {
+            x: rect.x + controlBox.position.x * scale,
+            y: rect.y + controlBox.position.y * scale,
+          }
+        );
+        isInsideControlBox = isPointInsideBox(
+          { x: clientX, y: clientY },
+          controlBoxCorner
+        );
+      }
+      if (
+        hoveredLayer &&
+        hoveredLayer.id !== 'ROOT' &&
+        !selectedLayerIds.includes(hoveredLayer.id)
+      ) {
+        if (
+          !isInsideControlBox ||
+          (controlBox &&
+            rectangleInsideAnother(hoveredLayer.data.props, controlBox))
+        ) {
+          actions.selectLayers(
+            hoveredPage,
+            hoveredLayer.id,
+            shiftKeyRef.current ? 'add' : 'replace'
+          );
         }
-        return {};
-    };
+      }
+      if (
+        (hoveredLayer &&
+          hoveredLayer.id !== 'ROOT' &&
+          !hoveredLayer.data.locked) ||
+        isInsideControlBox
+      ) {
+        onDragStart(e);
+        e.stopPropagation();
+      } else if (isMouseEvent(e)) {
+        onSelectStart(e);
+        e.stopPropagation();
+      } else if (isTouchEvent(e)) {
+        onMoveStart(e);
+      }
+    },
+    [hoveredLayer, controlBox, selectedLayerIds, dragData]
+  );
 
-    return (
-        <Fragment>
+  const cursorCSS = () => {
+    if (rotateData.status) {
+      const cursor = Math.round((rotateData.rotate || 0) / 10);
+      return {
+        cursor: `url('${assetPath}/cursors/rotate/${
+          cursor === 36 ? 0 : cursor
+        }.png') 12 12, auto;`,
+      };
+    } else if (resizeData.status) {
+      const rd = {
+        bottomLeft: 45,
+        left: 90,
+        topLeft: 135,
+        top: 180,
+        topRight: 225,
+        right: 270,
+        bottomRight: 315,
+        bottom: 0,
+      };
+      const rotate =
+        (resizeData.rotate || 0) + rd[resizeData.direction || 'bottom'] + 90;
+      const file = Math.round((rotate % 180) / 10);
+      return {
+        cursor: `url('${assetPath}/cursors/resize/${file}.png') 12 12, auto`,
+      };
+    } else if (dragData.status) {
+      return {
+        cursor: 'move',
+      };
+    }
+    return {};
+  };
+
+  return (
+    <Fragment>
+      <div
+        ref={frameRef}
+        css={{
+          display: 'flex',
+          position: 'relative',
+          height: '100%',
+          overflow: 'scroll',
+          ...cursorCSS(),
+          '@media (max-width: 900px)': {
+            overflow: 'hidden',
+            height: 'calc(100% - 72px)',
+          },
+        }}
+        tabIndex={0}
+        onTouchStart={onZoomStart}
+        onTouchMove={onZoomMove}
+        onTouchEnd={onZoomEnd}
+        onScroll={() => {
+          handleScroll();
+        }}
+      >
+        <div
+          css={{
+            position: 'absolute',
+            display: 'flex',
+            minWidth: '100%',
+            minHeight: '100%',
+          }}
+          onMouseDown={(e) => handMouseDown(e.nativeEvent)}
+          onTouchStart={(e) => handMouseDown(e.nativeEvent)}
+        >
+          <div
+            css={{
+              position: 'relative',
+              display: 'flex',
+              flexGrow: 1,
+              touchAction: 'pinch-zoom',
+            }}
+          >
             <div
-                ref={frameRef}
-                css={{
-                    display: 'flex',
-                    position: 'relative',
-                    height: '100%',
-                    overflow: 'scroll',
-                    ...cursorCSS(),
-                    '@media (max-width: 900px)': {
-                        overflow: 'hidden',
-                        height: 'calc(100% - 72px)',
-                    },
-                }}
-                tabIndex={0}
-                onTouchStart={onZoomStart}
-                onTouchMove={onZoomMove}
-                onTouchEnd={onZoomEnd}
-                onScroll={() => {
-                    handleScroll();
-                }}
+              ref={pageContainerRef}
+              css={{
+                display: 'flex',
+                position: 'relative',
+                flexDirection: 'row',
+                justifyContent: 'center',
+                margin: 'auto',
+                '@media (max-width: 900px)': {
+                  transition: 'transform 250ms linear 0s',
+                  margin: 'initial',
+                },
+              }}
+              style={{
+                transform: `translateX(-${
+                  isMobile ? window.innerWidth * activePage : 0
+                }px)`,
+              }}
             >
-                <div
+              <div
+                css={{
+                  marginLeft: 56,
+                  '@media (max-width: 900px)': {
+                    display: 'flex',
+                    marginLeft: 0,
+                  },
+                }}
+                onTouchMove={(e) => {
+                  onMove(e);
+                  onMovePage(e);
+                }}
+                onTouchEnd={() => {
+                  onMoveEnd();
+                  onMovePageEnd();
+                }}
+              >
+                <GlobalStyle fonts={usedFonts} mode={'editor'} />
+                {pages.map((page, index) => (
+                  <div
+                    key={index}
                     css={{
-                        position: 'absolute',
-                        display: 'flex',
-                        minWidth: '100%',
-                        minHeight: '100%',
+                      '@media (max-width: 900px)': {
+                        padding: '0 16px',
+                        width: window.innerWidth,
+                        height: window.innerHeight,
+                        overflow: 'hidden',
+                      },
                     }}
-                    onMouseDown={(e) => handMouseDown(e.nativeEvent)}
-                    onTouchStart={(e) => handMouseDown(e.nativeEvent)}
+                  >
+                    <DesignPage
+                      ref={(el) => el && (pageRef.current[index] = el)}
+                      pageIndex={index}
+                      pageName={page.name}
+                      width={pageSize.width}
+                      height={pageSize.height}
+                      transform={pageTransform}
+                      onMovePageUp={() => {
+                        actions.movePageUp(index);
+                        handleScrollToActivePage(activePage - 1);
+                      }}
+                      onMovePageDown={() => {
+                        actions.movePageDown(index);
+                        handleScrollToActivePage(activePage + 1);
+                      }}
+                    />
+                  </div>
+                ))}
+                <div
+                  css={{
+                    marginTop: 20,
+                    marginBottom: 20,
+                    background: 'rgba(64,87,109,.07)',
+                    color: '#0d1216',
+                    width: pageSize.width * scale,
+                    textAlign: 'center',
+                    paddingTop: 8,
+                    paddingBottom: 8,
+                    borderRadius: 8,
+                    '@media (max-width: 900px)': {
+                      display: 'none',
+                    },
+                  }}
+                  onClick={() => {
+                    actions.addPage();
+                    handleScrollToActivePage(activePage + 1);
+                  }}
                 >
-                    <div css={{ position: 'relative', display: 'flex', flexGrow: 1, touchAction: 'pinch-zoom' }}>
-                        <div
-                            ref={pageContainerRef}
-                            css={{
-                                display: 'flex',
-                                position: 'relative',
-                                flexDirection: 'row',
-                                justifyContent: 'center',
-                                margin: 'auto',
-                                '@media (max-width: 900px)': {
-                                    transition: 'transform 250ms linear 0s',
-                                    margin: 'initial',
-                                },
-                            }}
-                            style={{
-                                transform: `translateX(-${isMobile ? window.innerWidth * activePage : 0}px)`,
-                            }}
-                        >
-                            <div
-                                css={{
-                                    marginLeft: 56,
-                                    '@media (max-width: 900px)': {
-                                        display: 'flex',
-                                        marginLeft: 0,
-                                    },
-                                }}
-                                onTouchMove={(e) => {
-                                    onMove(e);
-                                    onMovePage(e);
-                                }}
-                                onTouchEnd={() => {
-                                    onMoveEnd();
-                                    onMovePageEnd();
-                                }}
-                            >
-                                <GlobalStyle fonts={usedFonts} mode={'editor'} />
-                                {pages.map((page, index) => (
-                                    <div
-                                        key={index}
-                                        css={{
-                                            '@media (max-width: 900px)': {
-                                                padding: '0 16px',
-                                                width: window.innerWidth,
-                                                height: window.innerHeight,
-                                                overflow: 'hidden',
-                                            },
-                                        }}
-                                    >
-                                        <DesignPage
-                                            ref={(el) => el && (pageRef.current[index] = el)}
-                                            pageIndex={index}
-                                            width={pageSize.width}
-                                            height={pageSize.height}
-                                            transform={pageTransform}
-                                            onMovePageUp={() => {
-                                                actions.movePageUp(index)
-                                                handleScrollToActivePage(activePage - 1)
-                                            }}
-                                            onMovePageDown={() => {
-                                                actions.movePageDown(index)
-                                                handleScrollToActivePage(activePage + 1)
-                                            }}
-                                        />
-                                    </div>
-                                ))}
-                                <div
-                                    css={{
-                                        marginTop: 20,
-                                        marginBottom: 20,
-                                        background: 'rgba(64,87,109,.07)',
-                                        color: '#0d1216',
-                                        width: pageSize.width * scale,
-                                        textAlign: 'center',
-                                        paddingTop: 8,
-                                        paddingBottom: 8,
-                                        borderRadius: 8,
-                                        '@media (max-width: 900px)': {
-                                            display: 'none',
-                                        },
-                                    }}
-                                    onClick={() => {
-                                        actions.addPage();
-                                        handleScrollToActivePage(activePage + 1)
-                                    }}
-                                >
-                                    Add Page
-                                </div>
-                            </div>
-                            <div
-                                css={{
-                                    width: 56,
-                                    pointerEvents: 'none',
-                                    '@media (max-width: 900px)': {
-                                        width: 0,
-                                    },
-                                }}
-                            />
-                        </div>
-                        <LayerContextMenu ref={contextMenuRef} />
-                        {selectStatus && <SelectionBox ref={boxRef} selectedLayers={tmpSelected?.selectedLayers} />}
-                    </div>
+                  Add Page
                 </div>
+              </div>
+              <div
+                css={{
+                  width: 56,
+                  pointerEvents: 'none',
+                  '@media (max-width: 900px)': {
+                    width: 0,
+                  },
+                }}
+              />
             </div>
-            {resizeData.status && (
-                <div
-                    css={{
-                        position: 'fixed',
-                        top: `${(resizeData.cursor?.clientY || 0) + 36}px`,
-                        left: `${(resizeData.cursor?.clientX || 0) + 60}px`,
-                        whiteSpace: 'nowrap',
-                        background: '#3a3a4c',
-                        padding: '3px 8px',
-                        borderRadius: 4,
-                        textAlign: 'center',
-                        color: 'white',
-                        fontSize: 12,
-                        fontWeight: 700,
-                    }}
-                >
-                    w: {Math.round(resizeData.boxSize?.width || 0)} h: {Math.round(resizeData.boxSize?.height || 0)}
-                </div>
+            <LayerContextMenu ref={contextMenuRef} />
+            {selectStatus && (
+              <SelectionBox
+                ref={boxRef}
+                selectedLayers={tmpSelected?.selectedLayers}
+              />
             )}
-            {openPageSettings &&
-            <PageSettings />
-            }
-        </Fragment>
-    );
+          </div>
+        </div>
+      </div>
+      {resizeData.status && (
+        <div
+          css={{
+            position: 'fixed',
+            top: `${(resizeData.cursor?.clientY || 0) + 36}px`,
+            left: `${(resizeData.cursor?.clientX || 0) + 60}px`,
+            whiteSpace: 'nowrap',
+            background: '#3a3a4c',
+            padding: '3px 8px',
+            borderRadius: 4,
+            textAlign: 'center',
+            color: 'white',
+            fontSize: 12,
+            fontWeight: 700,
+          }}
+        >
+          w: {Math.round(resizeData.boxSize?.width || 0)} h:{' '}
+          {Math.round(resizeData.boxSize?.height || 0)}
+        </div>
+      )}
+      {openPageSettings && <PageSettings />}
+    </Fragment>
+  );
 };
 
 export default DesignFrame;

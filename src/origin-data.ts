@@ -1,6 +1,7 @@
 export const data = [
     {
         locked: false,
+        name: 'First page',
         layers: {
             ROOT: {
                 type: { resolvedName: 'RootLayer' },

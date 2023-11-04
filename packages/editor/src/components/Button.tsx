@@ -14,7 +14,7 @@ const Button: ForwardRefRenderFunction<
       className={className}
       {...props}
       css={{
-        padding: '0 8px',
+        padding: '0 4px',
         display: 'flex',
         height: 32,
         minWidth: 32,
