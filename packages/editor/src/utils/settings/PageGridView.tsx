@@ -33,10 +33,11 @@ export const PageGridItem = styled.button<{isNew: boolean;}>`
     box-shadow: 0 0 0 1px rgba(64,87,109,.07),0 2px 8px rgba(57,76,96,.15);
   }
 
-  > div:nth-of-type(2) p {
+  > div:nth-of-type(2) {
     padding: 8px 8px 12px;
     font-weight: 600;
     color: #000;
+    display: inline-flex;
   }
 `;
 
@@ -62,9 +63,6 @@ export const PageGridItemContainer = styled.div`
       > div:nth-of-type(1) {
         box-shadow: none;
         border-color: #8b3dff;
-      }
-      > div:nth-of-type(2) p {
-        color: #fff;
       }
     }
   }

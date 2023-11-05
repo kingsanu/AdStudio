@@ -512,6 +512,9 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       state.selectedLayers = {};
       state.hoveredLayer = {};
       state.pages.splice(pageIndex, 1);
+      if (state.pages.length === 1) {
+        state.activePage = 0;
+      }
     },
     duplicatePage(pageIndex: number) {
       state.textEditor = undefined;

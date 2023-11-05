@@ -9,6 +9,10 @@ import {
   PageGridView,
 } from './PageGridView';
 import EditorButton from '@canva/components/EditorButton';
+import EditInlineInput from '@canva/components/EditInlineInput';
+import DuplicateIcon from '@canva/icons/DuplicateIcon';
+import TrashIcon from '@canva/icons/TrashIcon';
+import AddNewPageIcon from '@canva/icons/AddNewPageIcon';
 
 interface PageSettingsProps {}
 const PageSettings: FC<PageSettingsProps> = () => {
@@ -16,13 +20,18 @@ const PageSettings: FC<PageSettingsProps> = () => {
   const gridItemRef = useRef(null);
   const [itemSize, setItemSize] = useState({ width: 0, height: 0 });
   const [scale, setScale] = useState(1);
-  const { actions, pages, pageSize, activePage } = useEditor((state) => {
-    return {
-      pages: state.pages,
-      pageSize: state.pageSize,
-      activePage: state.activePage,
-    };
-  });
+  const { actions, pages, pageSize, activePage, isLocked, totalPages } =
+    useEditor((state) => {
+      return {
+        pages: state.pages,
+        pageSize: state.pageSize,
+        activePage: state.activePage,
+        totalPages: state.pages.length,
+        isLocked:
+          state.pages[state.activePage] &&
+          state.pages[state.activePage].layers.ROOT.data.locked,
+      };
+    });
 
   const handleChangePage = (pageIndex: number) => {
     actions.setActivePage(pageIndex);
@@ -76,61 +85,74 @@ const PageSettings: FC<PageSettingsProps> = () => {
         css={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
           flexShrink: 0,
           height: 48,
           borderBottom: '1px solid rgba(57,76,96,.15)',
-          padding: '0 20px',
+          padding: '0 16px',
         }}
       >
-        <p
-          css={{
-            lineHeight: '48px',
-            fontWeight: 600,
-            color: '#181C32',
-            flexGrow: 1,
-          }}
-        >
-          Pages
-        </p>
         <div
           css={{
-            '@media (max-width: 900px)': {
-              pointerEvents: 'auto',
-              display: 'flex',
-              position: 'absolute',
-              bottom: 24,
-              left: 24,
-              background: '#3d8eff',
-              width: 48,
-              height: 48,
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: '50%',
-              color: '#fff',
-              fontSize: 24,
-            },
-          }}
-          onClick={() => {
-            actions.addPage();
-          }}
-        >
-          <PlusIcon />
-        </div>
-        <div
-          css={{
-            fontSize: 20,
-            flexShrink: 0,
-            width: 32,
-            height: 32,
-            cursor: 'pointer',
+            marginLeft: 8,
+            width: 28,
+            height: 28,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            borderRadius: 4,
+            cursor: 'pointer',
+            ':hover': {
+              background: 'rgba(64, 87, 109, 0.07)',
+            },
           }}
-          onClick={() => actions.togglePageSettings()}
+          onClick={() => {
+            handleAddItem(activePage);
+          }}
         >
-          <ArrowLeftIcon />
+          <AddNewPageIcon />
+        </div>
+        <div
+          css={{
+            marginLeft: 8,
+            width: 28,
+            height: 28,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 4,
+            cursor: 'pointer',
+            ':hover': {
+              background: 'rgba(64, 87, 109, 0.07)',
+            },
+          }}
+          onClick={() => actions.duplicatePage(activePage)}
+        >
+          <DuplicateIcon />
+        </div>
+        <div
+          css={{
+            marginLeft: 8,
+            width: 28,
+            height: 28,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 4,
+            cursor: isLocked || totalPages <= 1 ? 'not-allowed' : 'pointer',
+            color:
+              isLocked || totalPages <= 1 ? 'rgba(36,49,61,.4)' : '#0d1216',
+            ':hover': {
+              background:
+                isLocked || totalPages <= 1
+                  ? undefined
+                  : 'rgba(64, 87, 109, 0.07)',
+            },
+          }}
+          onClick={() =>
+            !isLocked && totalPages > 1 && actions.deletePage(activePage)
+          }
+        >
+          <TrashIcon />
         </div>
       </div>
       <div
@@ -165,10 +187,20 @@ const PageSettings: FC<PageSettingsProps> = () => {
                   />
                 </div>
                 <div>
-                  <p>{index}</p>
+                  <span>{index + 1} -&nbsp;</span>
+                  <EditInlineInput
+                    text={page.name}
+                    placeholder='Add page title'
+                    onSetText={(newText) => {
+                      actions.setPageName(index, newText);
+                    }}
+                  />
                 </div>
               </PageGridItem>
-              <EditorButton className='add-btn' onClick={() => handleAddItem(index)}>
+              <EditorButton
+                className='add-btn'
+                onClick={() => handleAddItem(index)}
+              >
                 <PlusIcon />
               </EditorButton>
             </PageGridItemContainer>

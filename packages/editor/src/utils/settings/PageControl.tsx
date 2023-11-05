@@ -32,10 +32,12 @@ const PageControl = () => {
       }}
     >
       <div css={{ flexGrow: 1 }}>
-        <EditorButton onClick={() => {
-          actions.setSidebar();
-          actions.setSidebarTab('Notes');
-        }}>
+        <EditorButton
+          onClick={() => {
+            actions.setSidebar();
+            actions.setSidebarTab('Notes');
+          }}
+        >
           <NotesIcon />
           <span css={{ padding: '0 4px' }}>Notes</span>
         </EditorButton>
@@ -116,6 +118,7 @@ const PageControl = () => {
           </div>
         </Popover>
         <EditorButton
+          isActive={isOpenPageSettings}
           onClick={() => {
             actions.togglePageSettings();
           }}

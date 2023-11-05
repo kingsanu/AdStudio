@@ -3,11 +3,12 @@ import { ForwardRefRenderFunction, PropsWithChildren, forwardRef } from 'react';
 interface Props {
   onClick: (event: React.MouseEvent<HTMLElement>) => void;
   className?: string;
+  isActive?: boolean;
 }
 const EditorButton: ForwardRefRenderFunction<
   HTMLButtonElement,
   PropsWithChildren<Props>
-> = ({ children, className = '', ...props }, ref) => {
+> = ({ children, isActive = false, className = '', ...props }, ref) => {
   return (
     <button
       ref={ref}
@@ -28,6 +29,7 @@ const EditorButton: ForwardRefRenderFunction<
         ':hover': {
           backgroundColor: 'rgba(64,87,109,.2)',
         },
+        ...(isActive ? { backgroundColor: 'rgba(64,87,109,.2)' } : {}),
       }}
     >
       {children}
@@ -35,4 +37,6 @@ const EditorButton: ForwardRefRenderFunction<
   );
 };
 
-export default forwardRef<HTMLButtonElement, PropsWithChildren<Props>>(EditorButton);
+export default forwardRef<HTMLButtonElement, PropsWithChildren<Props>>(
+  EditorButton
+);
