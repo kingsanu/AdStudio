@@ -3,9 +3,9 @@ import axios from 'axios';
 import { getThumbnail } from '../../utils/thumbnail';
 import { isMobile } from 'react-device-detect';
 import { useEditor } from '@canva/hooks';
-import CloseIcon from '@canva/icons/CloseIcon';
 import Draggable from '@canva/layers/core/Dragable';
 import { Delta } from '@canva/types';
+import CloseSidebarButton from './CloseButton';
 
 const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
   const [images, setImages] = useState<{ img: string }[]>([]);
@@ -49,43 +49,7 @@ const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
         display: 'flex',
       }}
     >
-      <div
-        css={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-          height: 48,
-          borderBottom: '1px solid rgba(57,76,96,.15)',
-          padding: '0 20px',
-        }}
-      >
-        <p
-          css={{
-            lineHeight: '48px',
-            fontWeight: 600,
-            color: '#181C32',
-            flexGrow: 1,
-          }}
-        >
-          Images
-        </p>
-        <div
-          css={{
-            fontSize: 20,
-            flexShrink: 0,
-            width: 32,
-            height: 32,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-          onClick={onClose}
-        >
-          <CloseIcon />
-        </div>
-      </div>
+      <CloseSidebarButton onClose={onClose} />
       <div
         css={{ flexDirection: 'column', overflowY: 'auto', display: 'flex' }}
       >

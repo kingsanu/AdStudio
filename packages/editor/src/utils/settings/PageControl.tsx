@@ -5,7 +5,7 @@ import Slider from '@canva/components/slider/Slider';
 import { useEditor } from '@canva/hooks';
 import GridViewIcon from '@canva/icons/GridViewIcon';
 import CheckIcon from '@canva/icons/CheckIcon';
-import Button from '@canva/components/Button';
+import EditorButton from '@canva/components/EditorButton';
 
 const PageControl = () => {
   const labelScaleOptionRef = useRef<HTMLDivElement>(null);
@@ -95,13 +95,13 @@ const PageControl = () => {
             ))}
           </div>
         </Popover>
-        <Button
+        <EditorButton
           onClick={() => {
             actions.togglePageSettings();
           }}
         >
           <GridViewIcon />
-        </Button>
+        </EditorButton>
       </div>
     </div>
   );

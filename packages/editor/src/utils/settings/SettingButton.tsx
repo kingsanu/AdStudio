@@ -1,4 +1,4 @@
-import Button from '@canva/components/Button';
+import EditorButton from '@canva/components/EditorButton';
 import {
   forwardRef,
   ForwardRefRenderFunction,
@@ -13,13 +13,13 @@ const SettingButton: ForwardRefRenderFunction<
   PropsWithChildren<SettingButtonProps>
 > = ({ children, isActive, disabled, onClick, ...props }, ref) => {
   return (
-    <Button
+    <EditorButton
       ref={ref as any}
       onClick={(e) => !disabled && onClick && onClick(e)}
       {...props}
     >
       {children}
-    </Button>
+    </EditorButton>
   );
 };
 export default forwardRef<

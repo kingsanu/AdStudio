@@ -4,10 +4,11 @@ import { getThumbnail } from '../../utils/thumbnail';
 import { isMobile } from 'react-device-detect';
 import { useEditor } from '@canva/hooks';
 import { LayerId, SerializedLayers } from '@canva/types';
-import CloseIcon from '@canva/icons/CloseIcon';
 import { getPositionWhenLayerCenter } from '@canva/utils/layer/getPositionWhenLayerCenter';
 import Draggable from '@canva/layers/core/Dragable';
 import { generateRandomID } from '@canva/utils/identityGenerator';
+import Button from '@canva/components/button/Button';
+import CloseSidebarButton from './CloseButton';
 
 const simpleTxtLayer = (boxSize: any, position: any) => ({
   type: {
@@ -102,50 +103,14 @@ const TextContent: FC<{ onClose: () => void }> = ({ onClose }) => {
         width: '100%',
         height: '100%',
         flexDirection: 'column',
-        overflowY: 'auto',
         display: 'flex',
       }}
     >
+      <CloseSidebarButton onClose={onClose} />
       <div
-        css={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-          height: 48,
-          borderBottom: '1px solid rgba(57,76,96,.15)',
-          padding: '0 20px',
-        }}
+        css={{ flexDirection: 'column', overflowY: 'auto', display: 'flex', padding: 16 }}
       >
-        <p
-          css={{
-            lineHeight: '48px',
-            fontWeight: 600,
-            color: '#181C32',
-            flexGrow: 1,
-          }}
-        >
-          Text
-        </p>
-        <div
-          css={{
-            fontSize: 20,
-            flexShrink: 0,
-            width: 32,
-            height: 32,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-          onClick={onClose}
-        >
-          <CloseIcon />
-        </div>
-      </div>
-      <div
-        css={{ flexDirection: 'column', overflowY: 'auto', display: 'flex' }}
-      >
+      <Button onClick={() => handleAddNewText()} text='Add a text box' />
         <div
           css={{
             flexGrow: 1,
@@ -156,7 +121,6 @@ const TextContent: FC<{ onClose: () => void }> = ({ onClose }) => {
             padding: '16px',
           }}
         >
-          <button onClick={() => handleAddNewText()}>Add text</button>
           {isLoading && <div>Loading...</div>}
           {texts.map(({ img, data }, idx) => (
             <Draggable

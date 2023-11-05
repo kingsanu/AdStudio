@@ -1,8 +1,4 @@
-import {
-  FC,
-  PropsWithChildren,
-  ReactElement,
-} from 'react';
+import { FC, PropsWithChildren, ReactElement } from 'react';
 import { isMobile } from 'react-device-detect';
 import RectangleIcon from '@duyank/icons/shape/Rectangle';
 import CircleIcon from '@duyank/icons/shape/Circle';
@@ -23,8 +19,8 @@ import HexagonIcon from '@duyank/icons/shape/Hexagon';
 import PentagonIcon from '@duyank/icons/shape/Pentagon';
 import { Delta, ShapeType } from '@canva/types';
 import { useEditor } from '@canva/hooks';
-import CloseIcon from '@canva/icons/CloseIcon';
 import Draggable from '@canva/layers/core/Dragable';
+import CloseSidebarButton from './CloseButton';
 
 type Shape = {
   type: ShapeType;
@@ -276,7 +272,7 @@ const ShapeContent: FC<{ onClose: () => void }> = ({ onClose }) => {
       onClose();
     }
   };
-  
+
   return (
     <div
       css={{
@@ -287,43 +283,7 @@ const ShapeContent: FC<{ onClose: () => void }> = ({ onClose }) => {
         display: 'flex',
       }}
     >
-      <div
-        css={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-          height: 48,
-          borderBottom: '1px solid rgba(57,76,96,.15)',
-          padding: '0 20px',
-        }}
-      >
-        <p
-          css={{
-            lineHeight: '48px',
-            fontWeight: 600,
-            color: '#181C32',
-            flexGrow: 1,
-          }}
-        >
-          Shapes
-        </p>
-        <div
-          css={{
-            fontSize: 20,
-            flexShrink: 0,
-            width: 32,
-            height: 32,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-          onClick={onClose}
-        >
-          <CloseIcon />
-        </div>
-      </div>
+      <CloseSidebarButton onClose={onClose} />
       <div css={{ padding: '16px' }}>
         <div
           css={{

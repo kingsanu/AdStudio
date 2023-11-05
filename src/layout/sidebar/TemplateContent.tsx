@@ -3,101 +3,69 @@ import axios from 'axios';
 import { isMobile } from 'react-device-detect';
 import { useEditor } from '@canva/hooks';
 import { SerializedPage } from '@canva/types';
-import CloseIcon from '@canva/icons/CloseIcon';
+import CloseSidebarButton from './CloseButton';
+import OutlineButton from '@canva/components/button/OutlineButton';
+import TemplateSearchBox from './components/TemplateSearchBox';
 interface Template {
-    img: string;
-    data: string;
+  img: string;
+  data: string;
 }
 const TemplateContent: FC<{ onClose: () => void }> = ({ onClose }) => {
-    const [templates, setTemplates] = useState<Template[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const { actions, activePage } = useEditor((state) => ({
-        activePage: state.activePage,
-    }));
-    useEffect(() => {
-        async function fetchTemplates() {
-            const response = await axios.get<Template[]>('/templates');
-            setTemplates(response.data);
-            setIsLoading(false);
-        }
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { actions, activePage } = useEditor((state) => ({
+    activePage: state.activePage,
+  }));
+  useEffect(() => {
+    async function fetchTemplates() {
+      const response = await axios.get<Template[]>('/templates');
+      setTemplates(response.data);
+      setIsLoading(false);
+    }
 
-        fetchTemplates();
-    }, []);
+    fetchTemplates();
+  }, []);
 
-    const addPage = async (data: SerializedPage) => {
-        actions.setPage(activePage, data);
-        if (isMobile) {
-            onClose();
-        }
-    };
-    return (
+  const addPage = async (data: SerializedPage) => {
+    actions.setPage(activePage, data);
+    if (isMobile) {
+      onClose();
+    }
+  };
+  return (
+    <div css={{padding: '16px'}}>
+      <CloseSidebarButton onClose={onClose} />
+      <div css={{
+        marginBottom: 16
+      }}>
+        <TemplateSearchBox />
+      </div>
+      <div
+        css={{ flexDirection: 'column', overflowY: 'auto', display: 'flex' }}
+      >
         <div
-            css={{
-                width: '100%',
-                height: '100%',
-                flexDirection: 'column',
-                overflowY: 'auto',
-                display: 'flex',
-            }}
+          css={{
+            flexGrow: 1,
+            overflowY: 'auto',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2,minmax(0,1fr))',
+            gridGap: 8,
+          }}
         >
+          {isLoading && <div>Loading...</div>}
+          {templates.map((item, index) => (
             <div
-                css={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                    height: 48,
-                    borderBottom: '1px solid rgba(57,76,96,.15)',
-                    padding: '0 20px',
-                }}
+              key={index}
+              css={{ cursor: 'pointer' }}
+              onClick={() => addPage(JSON.parse(item.data))}
             >
-                <p
-                    css={{
-                        lineHeight: '48px',
-                        fontWeight: 600,
-                        color: '#181C32',
-                        flexGrow: 1,
-                    }}
-                >
-                    Templates
-                </p>
-                <div
-                    css={{
-                        fontSize: 20,
-                        flexShrink: 0,
-                        width: 32,
-                        height: 32,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    }}
-                    onClick={onClose}
-                >
-                    <CloseIcon />
-                </div>
+              <img src={item.img} loading='lazy' />
             </div>
-            <div css={{ flexDirection: 'column', overflowY: 'auto', display: 'flex' }}>
-                <div
-                    css={{
-                        flexGrow: 1,
-                        overflowY: 'auto',
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(2,minmax(0,1fr))',
-                        gridGap: 8,
-                        padding: '16px',
-                    }}
-                >
-                    {isLoading && <div>Loading...</div>}
-                    {templates.map((item, index) => (
-                        <div key={index} css={{ cursor: 'pointer' }} onClick={() => addPage(JSON.parse(item.data))}>
-                            <img src={item.img} loading="lazy" />
-                        </div>
-                    ))}
-                </div>
-            </div>
+          ))}
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default TemplateContent;

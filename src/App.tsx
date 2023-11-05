@@ -2,8 +2,14 @@ import { pack, unpack } from '@canva/utils/minifier';
 import { data } from './origin-data';
 // import { data } from './data';
 import Test from './Test';
-import { useState } from 'react';
-import { GridView } from './dev/GridView';
+import {
+  JSXElementConstructor,
+  ReactElement,
+  ReactNode,
+  ReactPortal,
+  useState,
+} from 'react';
+// import { GridView } from './dev/GridView';
 // import { generateRandomID, isEditorID } from '@canva/utils/identityGenerator';
 // function App() {
 //   // const id = generateRandomID(10);
@@ -20,8 +26,16 @@ import { GridView } from './dev/GridView';
 //   // console.log('Unpacked Object:', JSON.stringify(unpackedObject));
 //   // return <>test</>;
 // }
+
+// const formatResult = (item: { id: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; name: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; }) => {
+//   return (
+//     <>
+//       <span style={{ display: 'block', textAlign: 'left' }}>id: {item.id}</span>
+//       <span style={{ display: 'block', textAlign: 'left' }}>name: {item.name}</span>
+//     </>
+//   )
+// }
 function App() {
-  
   return <Test />;
 }
 

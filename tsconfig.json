@@ -29,6 +29,8 @@
       "@canva/color-picker/*": ["packages/editor/src/color-picker/*"],
       "@canva/drag-and-drop": ["packages/editor/src/drag-and-drop"],
       "@canva/drag-and-drop/*": ["packages/editor/src/drag-and-drop/*"],
+      "@canva/search-autocomplete": ["packages/editor/src/search-autocomplete"],
+      "@canva/search-autocomplete/*": ["packages/editor/src/search-autocomplete/*"],
       "@canva/icons/*": ["packages/editor/src/icons/*"],
       "@canva/utils": ["packages/editor/src/utils"],
       "@canva/utils/*": ["packages/editor/src/utils/*"],

@@ -8,7 +8,7 @@ import {
   PageGridItemContainer,
   PageGridView,
 } from './PageGridView';
-import Button from '@canva/components/Button';
+import EditorButton from '@canva/components/EditorButton';
 
 interface PageSettingsProps {}
 const PageSettings: FC<PageSettingsProps> = () => {
@@ -168,9 +168,9 @@ const PageSettings: FC<PageSettingsProps> = () => {
                   <p>{index}</p>
                 </div>
               </PageGridItem>
-              <Button className='add-btn' onClick={() => handleAddItem(index)}>
+              <EditorButton className='add-btn' onClick={() => handleAddItem(index)}>
                 <PlusIcon />
-              </Button>
+              </EditorButton>
             </PageGridItemContainer>
           ))}
         </PageGridView>

@@ -4,7 +4,7 @@ interface Props {
   onClick: (event: React.MouseEvent<HTMLElement>) => void;
   className?: string;
 }
-const Button: ForwardRefRenderFunction<
+const EditorButton: ForwardRefRenderFunction<
   HTMLButtonElement,
   PropsWithChildren<Props>
 > = ({ children, className = '', ...props }, ref) => {
@@ -33,4 +33,4 @@ const Button: ForwardRefRenderFunction<
   );
 };
 
-export default forwardRef<HTMLButtonElement, PropsWithChildren<Props>>(Button);
+export default forwardRef<HTMLButtonElement, PropsWithChildren<Props>>(EditorButton);

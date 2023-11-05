@@ -16,6 +16,7 @@
     "@emotion/styled": "^11.11.0",
     "@types/lodash": "^4.14.199",
     "axios": "^1.5.1",
+    "fuse.js": "^7.0.0",
     "html-to-image": "^1.11.11",
     "immer": "^10.0.3",
     "lodash": "^4.17.21",

@@ -78,6 +78,7 @@ const EditInlineInput: React.FC<InlineEditProps> = ({
             color: text ? 'inherit' : '#73757b',
             fontWeight: 'bold',
             font: 'inherit',
+            cursor: 'text'
           }}
         >
           {text || placeholder}

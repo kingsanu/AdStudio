@@ -54,6 +54,12 @@ export default defineConfig({
           new URL('./packages/editor/src/drag-and-drop', import.meta.url)
         ),
       },
+      {
+        find: '@canva/search-autocomplete',
+        replacement: fileURLToPath(
+          new URL('./packages/editor/src/search-autocomplete', import.meta.url)
+        ),
+      },
     ],
   },
   plugins: [
