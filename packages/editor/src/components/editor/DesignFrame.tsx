@@ -29,6 +29,7 @@ import { isMobile } from 'react-device-detect';
 import PageSettings from '@canva/utils/settings/PageSettings';
 import { unpack } from '@canva/utils/minifier';
 import useDebouncedEffect from '@canva/hooks/useDebouncedEffect';
+import PlusIcon from '@canva/icons/PlusIcon';
 
 interface DesignFrameProps {
   data: any;
@@ -378,17 +379,20 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
                     />
                   </div>
                 ))}
-                <div
+                <button
                   css={{
+                    alignItems: 'center',
+                    justifyItems: 'center',
                     marginTop: 20,
                     marginBottom: 20,
                     background: 'rgba(64,87,109,.07)',
                     color: '#0d1216',
                     width: pageSize.width * scale,
+                    height: 40,
                     textAlign: 'center',
-                    paddingTop: 8,
-                    paddingBottom: 8,
-                    borderRadius: 8,
+                    padding: '0 2px',
+                    fontWeight: 600,
+                    borderRadius: 3,
                     '@media (max-width: 900px)': {
                       display: 'none',
                     },
@@ -398,8 +402,8 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
                     handleScrollToActivePage(activePage + 1);
                   }}
                 >
-                  Add Page
-                </div>
+                  + Add Page
+                </button>
               </div>
               <div
                 css={{
@@ -441,7 +445,16 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
           {Math.round(resizeData.boxSize?.height || 0)}
         </div>
       )}
-      {openPageSettings && <PageSettings />}
+      {openPageSettings && (
+        <PageSettings
+          onChangePage={(pageIndex) => {
+            actions.setActivePage(pageIndex);
+            pageRef.current[pageIndex].scrollIntoView({
+              block: 'center',
+            });
+          }}
+        />
+      )}
     </Fragment>
   );
 };

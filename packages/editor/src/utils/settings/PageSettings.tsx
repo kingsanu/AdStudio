@@ -1,7 +1,6 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import { useEditor } from '@canva/hooks';
 import Page from '@canva/components/editor/Page';
-import ArrowLeftIcon from '@canva/icons/ArrowLeftIcon';
 import PlusIcon from '@canva/icons/PlusIcon';
 import {
   PageGridItem,
@@ -14,8 +13,10 @@ import DuplicateIcon from '@canva/icons/DuplicateIcon';
 import TrashIcon from '@canva/icons/TrashIcon';
 import AddNewPageIcon from '@canva/icons/AddNewPageIcon';
 
-interface PageSettingsProps {}
-const PageSettings: FC<PageSettingsProps> = () => {
+interface PageSettingsProps {
+  onChangePage: (pageIndex: number) => void;
+}
+const PageSettings: FC<PageSettingsProps> = ({ onChangePage }) => {
   const [newItemIndex, setNewItemIndex] = useState(-1);
   const gridItemRef = useRef(null);
   const [itemSize, setItemSize] = useState({ width: 0, height: 0 });
@@ -33,9 +34,6 @@ const PageSettings: FC<PageSettingsProps> = () => {
       };
     });
 
-  const handleChangePage = (pageIndex: number) => {
-    actions.setActivePage(pageIndex);
-  };
   const handleAddItem = (index: number) => {
     actions.addPage(index);
     setNewItemIndex(-1);
@@ -170,7 +168,7 @@ const PageSettings: FC<PageSettingsProps> = () => {
                 ref={gridItemRef}
                 className='page-btn'
                 isNew={index === newItemIndex}
-                onClick={() => handleChangePage(index)}
+                onClick={() => onChangePage(index)}
               >
                 <div
                   css={{

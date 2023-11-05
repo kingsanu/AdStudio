@@ -580,8 +580,6 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
     movePageUp: (pageIndex: number) => {
       const newPage = cloneDeep(state.pages[pageIndex]);
       state.pages.splice(pageIndex, 1);
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       state.pages.splice(pageIndex - 1, 0, newPage);
       state.activePage = pageIndex - 1;
     },
