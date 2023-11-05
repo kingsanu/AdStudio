@@ -21,8 +21,10 @@ const EditorButton: ForwardRefRenderFunction<
         alignItems: 'center',
         justifyContent: 'center',
         transition: 'background-color 0.3s ease',
-        color: '#000',
+        color: '#0d1216',
         borderRadius: 6,
+        fontSize: 14,
+        fontWeight: 400,
         ':hover': {
           backgroundColor: 'rgba(64,87,109,.2)',
         },

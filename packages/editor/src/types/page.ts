@@ -8,11 +8,13 @@ export type PageSize = {
 export type SerializedPage = {
     layers: SerializedLayers;
     name: string;
+    notes: string;
     locked?: boolean;
 };
 
 export type Page = {
     layers: Layers;
     name: string;
+    notes: string;
     locked?: boolean;
 };

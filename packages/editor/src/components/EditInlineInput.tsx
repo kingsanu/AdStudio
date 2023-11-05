@@ -54,7 +54,6 @@ const EditInlineInput: React.FC<InlineEditProps> = ({
           <input
             ref={inputRef}
             defaultValue={text}
-            placeholder={placeholder}
             onBlur={handleBlur}
             onKeyDown={handleKeyPress}
             css={{

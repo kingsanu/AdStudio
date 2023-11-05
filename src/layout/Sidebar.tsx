@@ -15,6 +15,7 @@ import ElementsIcon from '@canva/icons/ElementsIcon';
 import UploadIcon from '@canva/icons/UploadIcon';
 import VideoIcon from '@canva/icons/VideoIcon';
 import ImageIcon from '@canva/icons/ImageIcon';
+import Notes from '@canva/utils/settings/sidebar/Notes';
 
 const tabs = [
   {
@@ -133,6 +134,7 @@ const Sidebar = () => {
                 }}
               />
             )}
+            {state.sideBarTab === 'Notes' && <Notes />}
             <UploadContent
               visibility={state.sideBarTab === 'Upload'}
               onClose={() => {

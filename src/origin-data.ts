@@ -2,6 +2,7 @@ export const data = [
     {
         locked: false,
         name: 'First page',
+        notes: 'Nothing to note.',
         layers: {
             ROOT: {
                 type: { resolvedName: 'RootLayer' },

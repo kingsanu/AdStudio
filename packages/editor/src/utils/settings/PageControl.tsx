@@ -6,16 +6,18 @@ import { useEditor } from '@canva/hooks';
 import GridViewIcon from '@canva/icons/GridViewIcon';
 import CheckIcon from '@canva/icons/CheckIcon';
 import EditorButton from '@canva/components/EditorButton';
+import NotesIcon from '@canva/icons/NotesIcon';
 
 const PageControl = () => {
   const labelScaleOptionRef = useRef<HTMLDivElement>(null);
   const [openScaleOptions, setOpenScaleOptions] = useState(false);
-  const { actions, activePage, totalPages, scale, isOpenPageSettings } = useEditor((state) => ({
-    activePage: state.activePage,
-    totalPages: state.pages.length,
-    scale: state.scale,
-    isOpenPageSettings: state.openPageSettings
-  }));
+  const { actions, activePage, totalPages, scale, isOpenPageSettings } =
+    useEditor((state) => ({
+      activePage: state.activePage,
+      totalPages: state.pages.length,
+      scale: state.scale,
+      isOpenPageSettings: state.openPageSettings,
+    }));
 
   const handleChangeScale = (value: number) => {
     actions.setScale(value / 100);
@@ -30,8 +32,15 @@ const PageControl = () => {
       }}
     >
       <div css={{ flexGrow: 1 }}>
-        Page {activePage + 1} / {totalPages}
+        <EditorButton onClick={() => {
+          actions.setSidebar();
+          actions.setSidebarTab('Notes');
+        }}>
+          <NotesIcon />
+          <span css={{ padding: '0 4px' }}>Notes</span>
+        </EditorButton>
       </div>
+
       <div
         css={{
           flexShrink: 0,
@@ -41,6 +50,17 @@ const PageControl = () => {
           alignItems: 'center',
         }}
       >
+        <div css={{ flexGrow: 1 }}>
+          Page {activePage + 1} / {totalPages}
+        </div>
+        <div
+          css={{
+            height: 24,
+            width: `1px`,
+            background: 'rgba(57,76,96,.15)',
+            margin: '0 8px',
+          }}
+        />
         <div css={{ width: 200, paddingRight: 8 }}>
           <Slider
             hideInput={true}
