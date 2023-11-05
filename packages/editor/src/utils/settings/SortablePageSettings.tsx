@@ -179,6 +179,7 @@ const SortablePageSettings: FC<PageSortableType> = ({
             fromIndex: change.oldIndex,
             toIndex: change.newIndex,
           });
+          onChangePage(change.newIndex)
         }
       }}
     />

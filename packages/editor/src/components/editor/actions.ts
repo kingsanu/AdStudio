@@ -591,7 +591,6 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       state.activePage = pageIndex + 1;
     },
     swapPagePosition: (from: number, to: number) => {
-      state.activePage = to;
       arrayMoveMutable(state.pages, from, to);
     },
     lock: (pageIndex: number, layerId: LayerId | LayerId[]) => {
