@@ -14,7 +14,8 @@ const EditInlineInput: React.FC<InlineEditProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [textDraft, setTextDraft] = useState('');
-  const handleDoubleClick = () => {
+  const handleDoubleClick = (e: { preventDefault: () => void; }) => {
+    e.preventDefault();
     setTextDraft(text);
     setIsEditing(true);
   };

@@ -281,7 +281,7 @@ export function cloneNode(node) {
   return clonedNode;
 }
 
-function arrayMoveMutable(array, fromIndex, toIndex) {
+export function arrayMoveMutable(array, fromIndex, toIndex) {
 	const startIndex = fromIndex < 0 ? array.length + fromIndex : fromIndex;
 
 	if (startIndex >= 0 && startIndex < array.length) {

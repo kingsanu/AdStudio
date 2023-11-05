@@ -1,22 +1,16 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import { useEditor } from '@canva/hooks';
-import Page from '@canva/components/editor/Page';
-import PlusIcon from '@canva/icons/PlusIcon';
-import {
-  PageGridItem,
-  PageGridItemContainer,
-  PageGridView,
-} from './PageGridView';
-import EditorButton from '@canva/components/EditorButton';
-import EditInlineInput from '@canva/components/EditInlineInput';
 import DuplicateIcon from '@canva/icons/DuplicateIcon';
 import TrashIcon from '@canva/icons/TrashIcon';
 import AddNewPageIcon from '@canva/icons/AddNewPageIcon';
+import SortablePageSettings from './SortablePageSettings';
+import { cloneDeep } from 'lodash';
 
 interface PageSettingsProps {
   onChangePage: (pageIndex: number) => void;
 }
 const PageSettings: FC<PageSettingsProps> = ({ onChangePage }) => {
+  const ref = useRef<any>(null);
   const [newItemIndex, setNewItemIndex] = useState(-1);
   const gridItemRef = useRef(null);
   const [itemSize, setItemSize] = useState({ width: 0, height: 0 });
@@ -154,56 +148,30 @@ const PageSettings: FC<PageSettingsProps> = ({ onChangePage }) => {
         </div>
       </div>
       <div
+        ref={ref}
         css={{
+          flexGrow: 1,
+          overflowY: 'auto',
           padding: 24,
         }}
       >
-        <PageGridView>
-          {pages.map((page: any, index: any) => (
-            <PageGridItemContainer
-              key={index}
-              className={activePage === index ? 'is-active' : ''}
-            >
-              <PageGridItem
-                ref={gridItemRef}
-                className='page-btn'
-                isNew={index === newItemIndex}
-                onClick={() => onChangePage(index)}
-              >
-                <div
-                  css={{
-                    position: 'relative',
-                    height: itemSize.height,
-                  }}
-                >
-                  <Page
-                    pageIndex={index}
-                    width={pageSize.width}
-                    height={pageSize.height}
-                    scale={scale}
-                    isActive={true}
-                  />
-                </div>
-                <div>
-                  <span>{index + 1} -&nbsp;</span>
-                  <EditInlineInput
-                    text={page.name}
-                    placeholder='Add page title'
-                    onSetText={(newText) => {
-                      actions.setPageName(index, newText);
-                    }}
-                  />
-                </div>
-              </PageGridItem>
-              <EditorButton
-                className='add-btn'
-                onClick={() => handleAddItem(index)}
-              >
-                <PlusIcon />
-              </EditorButton>
-            </PageGridItemContainer>
-          ))}
-        </PageGridView>
+        <SortablePageSettings
+          items={cloneDeep(pages)}
+          containerRef={gridItemRef}
+          activePage={activePage}
+          scale={scale}
+          newItemIndex={newItemIndex}
+          pageSize={pageSize}
+          itemSize={itemSize}
+          onSetText={(newText) => {
+            actions.setPageName(activePage, newText);
+          }}
+          onChangePage={onChangePage}
+          onAddNewPage={handleAddItem}
+          onChange={(change) => {
+            actions.swapPagePosition(change.fromIndex, change.toIndex);
+          }}
+        />
       </div>
     </div>
   );

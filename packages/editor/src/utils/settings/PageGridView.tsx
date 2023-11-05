@@ -1,12 +1,4 @@
-import { isActive } from '@canva/components/text-editor/core/helper/isActive';
 import styled from '@emotion/styled';
-
-export const PageGridView = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(217px, 1fr));
-  gap: 10px;
-  position: relative;
-`;
 
 export const PageGridItem = styled.button<{isNew: boolean;}>`
   position: relative;

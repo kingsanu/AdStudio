@@ -41,6 +41,7 @@ import { GroupLayerProps } from '@canva/layers/GroupLayer';
 import { getPositionWhenLayerCenter } from '@canva/utils/layer/getPositionWhenLayerCenter';
 import { ImageContentProps } from '@canva/layers';
 import { TextLayerProps } from '@canva/layers/TextLayer';
+import { arrayMoveMutable } from '@canva/drag-and-drop/DDUtils';
 
 export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
   const addLayerTreeToParent = (
@@ -588,6 +589,10 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       state.pages.splice(pageIndex, 1);
       state.pages.splice(pageIndex + 1, 0, newPage);
       state.activePage = pageIndex + 1;
+    },
+    swapPagePosition: (from: number, to: number) => {
+      state.activePage = to;
+      arrayMoveMutable(state.pages, from, to);
     },
     lock: (pageIndex: number, layerId: LayerId | LayerId[]) => {
       const ids: LayerId[] = [];
