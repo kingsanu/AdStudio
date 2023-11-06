@@ -3,7 +3,7 @@ import App from './App.tsx'
 import './index.css'
 import axios from 'axios';
 
-axios.defaults.baseURL = 'https://api-gilt-one.vercel.app/';
+axios.defaults.baseURL = 'http://localhost:4000/api';
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <App />
 )

@@ -3,43 +3,55 @@ import axios from 'axios';
 import { getThumbnail } from '../../utils/thumbnail';
 import { isMobile } from 'react-device-detect';
 import { useEditor } from '@canva/hooks';
-import { LayerId, SerializedLayers } from '@canva/types';
+import { BoxSize, Delta, LayerId, SerializedLayers } from '@canva/types';
 import { getPositionWhenLayerCenter } from '@canva/utils/layer/getPositionWhenLayerCenter';
 import Draggable from '@canva/layers/core/Dragable';
 import { generateRandomID } from '@canva/utils/identityGenerator';
 import Button from '@canva/components/button/Button';
 import CloseSidebarButton from './CloseButton';
+import OutlineButton from '@canva/components/button/OutlineButton';
+import styled from '@emotion/styled';
 
-const simpleTxtLayer = (boxSize: any, position: any) => ({
+const DefaultTextButton = styled(OutlineButton)`
+  background-color: #313334;
+  color: #fff;
+`;
+
+const simpleTxtLayer = (
+  text: string,
+  boxSize: BoxSize,
+  position: Delta,
+  fontSize = 18
+) => ({
   type: {
     resolvedName: 'TextLayer',
   },
   props: {
-    text: '<p style="font-family: Oswald; color: rgb(0, 0, 0); font-size: 18px; text-align: center">Your text here!</p>',
+    text: `<p style="font-family: Roboto; color: rgb(0, 0, 0); font-size: ${fontSize}px; text-align: center"><strong>${text}</strong></p>`,
     position,
     boxSize,
     scale: 1,
     rotate: 0,
     fonts: [
       {
-        name: 'Oswald',
+        name: 'Roboto',
         fonts: [
           {
             style: 'Bold',
             urls: [
-              'https://lidojs-fonts.s3.us-east-2.amazonaws.com/Oswald/Oswald-Bold.woff2',
+              'https://lidojs-fonts.s3.us-east-2.amazonaws.com/Roboto/Roboto-Bold.woff2',
             ],
           },
           {
             urls: [
-              'https://lidojs-fonts.s3.us-east-2.amazonaws.com/Oswald/Oswald-Regular.woff2',
+              'https://lidojs-fonts.s3.us-east-2.amazonaws.com/Roboto/Roboto-Regular.woff2',
             ],
           },
         ],
       },
     ],
     colors: ['rgb(0, 0, 0)'],
-    fontSizes: [18],
+    fontSizes: [fontSize],
     effect: null,
   },
   locked: false,
@@ -68,27 +80,27 @@ const TextContent: FC<{ onClose: () => void }> = ({ onClose }) => {
     rootId: LayerId;
     layers: SerializedLayers;
   }) => {
-    console.log(data);
     actions.addLayerTree(data);
     if (isMobile) {
       onClose();
     }
   };
 
-  const handleAddNewText = () => {
-    const boxSize = {
+  const handleAddNewText = (
+    text = 'Your text here!',
+    boxSize = {
       width: 309.91666666666606,
       height: 28,
-      x: 623,
-      y: 415,
-    };
+    },
+    fontSize = 18
+  ) => {
     const position = getPositionWhenLayerCenter(state.pageSize, {
       width: boxSize.width,
       height: boxSize.height,
     });
     const layers: SerializedLayers = {};
     const layerId = generateRandomID();
-    layers[layerId] = simpleTxtLayer(boxSize, position);
+    layers[layerId] = simpleTxtLayer(text, boxSize, position, fontSize);
     actions.addLayerTree({
       rootId: layerId,
       layers,
@@ -104,19 +116,103 @@ const TextContent: FC<{ onClose: () => void }> = ({ onClose }) => {
         height: '100%',
         flexDirection: 'column',
         display: 'flex',
+        padding: 16,
       }}
     >
       <CloseSidebarButton onClose={onClose} />
-      <div
-        css={{ flexDirection: 'column', overflowY: 'auto', display: 'flex', padding: 16 }}
+      <div>
+        <Button onClick={() => handleAddNewText()} text='Add a text box' style={{width: '100%'}} />
+      </div>
+      <p
+        css={{
+          fontWeight: 600,
+          margin: '16px 0',
+        }}
       >
-      <Button onClick={() => handleAddNewText()} text='Add a text box' />
+        Default text styles
+      </p>
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          rowGap: 8,
+        }}
+      >
+        <DefaultTextButton
+          onClick={() =>
+            handleAddNewText(
+              'Add a heading',
+              {
+                width: 400,
+                height: 100,
+              },
+              50
+            )
+          }
+          text='Add a heading'
+          css={{
+            fontSize: 28,
+            height: 60,
+            fontWeight: 600,
+          }}
+        />
+        <DefaultTextButton
+          onClick={() =>
+            handleAddNewText(
+              'Add a subheading',
+              {
+                width: 300,
+                height: 52,
+              },
+              14
+            )
+          }
+          text='Add a subheading'
+          css={{
+            fontSize: 14,
+            height: 52,
+            fontWeight: 600,
+          }}
+        />
+        <DefaultTextButton
+          onClick={() =>
+            handleAddNewText(
+              'Add a little bit of body text',
+              {
+                width: 300,
+                height: 48,
+              },
+              14
+            )
+          }
+          text='Add a little bit of body text'
+          css={{
+            fontSize: 14,
+            height: 48,
+          }}
+        />
+      </div>
+      <p
+        css={{
+          fontWeight: 600,
+          margin: '16px 0',
+        }}
+      >
+        Font combinations
+      </p>
+      <div
+        css={{
+          flexDirection: 'column',
+          overflowY: 'auto',
+          display: 'flex',
+        }}
+      >
         <div
           css={{
             flexGrow: 1,
             overflowY: 'auto',
             display: 'grid',
-            gridTemplateColumns: 'repeat(3,minmax(0,1fr))',
+            gridTemplateColumns: 'repeat(2,minmax(0,1fr))',
             gridGap: 8,
             padding: '16px',
           }}

@@ -167,6 +167,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
       const editor = layer.data.editor;
       if (editor) {
         if (!isActive(editor.state, 'bold')) {
+          console.log(editor.state);
           settings.isBold = false;
         }
         if (!isActive(editor.state, 'italic')) {
@@ -991,29 +992,45 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
     if (editingLayer) {
       const editor = textEditor?.editor;
       if (editor) {
-        if (type === 'BOLD') {
-          const fonts = editingLayer.data.props.fonts.reduce((acc, f) => {
-            acc[f.name] = f.fonts;
-            return acc;
-          }, {} as Record<string, Font[]>);
+        switch (type) {
+          case 'BOLD': {
+            const fonts = editingLayer.data.props.fonts.reduce((acc, f) => {
+              acc[f.name] = f.fonts;
+              return acc;
+            }, {} as Record<string, Font[]>);
 
-          let supported = true;
-          editor.state.doc.nodesBetween(
-            editor.state.selection.ranges[0].$from.pos,
-            editor.state.selection.ranges[0].$to.pos,
-            (node) => {
-              const attrs = getAllAttrs(node);
-              const fontFamily = getFontFamily(attrs);
-              const check = fontFamily.every(
-                (f) => fonts[f] && fonts[f].find((s) => s.style === 'Bold')
-              );
-              if (!check) {
-                supported = false;
+            let supported = true;
+            editor.state.doc.nodesBetween(
+              editor.state.selection.ranges[0].$from.pos,
+              editor.state.selection.ranges[0].$to.pos,
+              (node) => {
+                const attrs = getAllAttrs(node);
+                const fontFamily = getFontFamily(attrs);
+                const check = fontFamily.every(
+                  (f) => fonts[f] && fonts[f].find((s) => s.style === 'Bold')
+                );
+                if (!check) {
+                  supported = false;
+                }
+              }
+            );
+            if (supported) {
+              toggleBold(editor.state, editor.dispatch);
+              editor.focus();
+              if (editingLayer.data.editor) {
+                const hiddenEditor = editingLayer.data.editor;
+                const { $from, $to } = editor.state.selection;
+                selectText({ from: $from.pos, to: $to.pos })(
+                  hiddenEditor.state,
+                  hiddenEditor.dispatch
+                );
+                toggleBold(hiddenEditor.state, hiddenEditor.dispatch);
               }
             }
-          );
-          if (supported) {
-            toggleBold(editor.state, editor.dispatch);
+            break;
+          }
+          case 'ITALIC': {
+            toggleItalic(editor.state, editor.dispatch);
             editor.focus();
             if (editingLayer.data.editor) {
               const hiddenEditor = editingLayer.data.editor;
@@ -1022,49 +1039,42 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
                 hiddenEditor.state,
                 hiddenEditor.dispatch
               );
-              toggleBold(hiddenEditor.state, hiddenEditor.dispatch);
+              toggleItalic(hiddenEditor.state, hiddenEditor.dispatch);
             }
+            break;
           }
-        } else if (type === 'ITALIC') {
-          toggleItalic(editor.state, editor.dispatch);
-          editor.focus();
-          if (editingLayer.data.editor) {
-            const hiddenEditor = editingLayer.data.editor;
-            const { $from, $to } = editor.state.selection;
-            selectText({ from: $from.pos, to: $to.pos })(
-              hiddenEditor.state,
-              hiddenEditor.dispatch
-            );
-            toggleItalic(hiddenEditor.state, hiddenEditor.dispatch);
+          case 'UNDERLINE': {
+            toggleUnderline(editor.state, editor.dispatch);
+            editor.focus();
+            if (editingLayer.data.editor) {
+              const hiddenEditor = editingLayer.data.editor;
+              const { $from, $to } = editor.state.selection;
+              selectText({ from: $from.pos, to: $to.pos })(
+                hiddenEditor.state,
+                hiddenEditor.dispatch
+              );
+              toggleUnderline(hiddenEditor.state, hiddenEditor.dispatch);
+            }
+            break;
           }
-        } else if (type === 'UNDERLINE') {
-          toggleUnderline(editor.state, editor.dispatch);
-          editor.focus();
-          if (editingLayer.data.editor) {
-            const hiddenEditor = editingLayer.data.editor;
-            const { $from, $to } = editor.state.selection;
-            selectText({ from: $from.pos, to: $to.pos })(
-              hiddenEditor.state,
-              hiddenEditor.dispatch
+          case 'UPPERCASE': {
+            const cmd = setTextTransform(
+              isActive(editor.state, null, { textTransform: 'uppercase' })
+                ? undefined
+                : 'uppercase'
             );
-            toggleUnderline(hiddenEditor.state, hiddenEditor.dispatch);
-          }
-        } else if (type === 'UPPERCASE') {
-          const cmd = setTextTransform(
-            isActive(editor.state, null, { textTransform: 'uppercase' })
-              ? undefined
-              : 'uppercase'
-          );
-          cmd(editor.state, editor.dispatch);
-          editor.focus();
-          if (editingLayer.data.editor) {
-            const hiddenEditor = editingLayer.data.editor;
-            const { $from, $to } = editor.state.selection;
-            selectText({ from: $from.pos, to: $to.pos })(
-              hiddenEditor.state,
-              hiddenEditor.dispatch
-            );
-            cmd(hiddenEditor.state, hiddenEditor.dispatch);
+            cmd(editor.state, editor.dispatch);
+            editor.focus();
+            if (editingLayer.data.editor) {
+              const hiddenEditor = editingLayer.data.editor;
+              const { $from, $to } = editor.state.selection;
+              selectText({ from: $from.pos, to: $to.pos })(
+                hiddenEditor.state,
+                hiddenEditor.dispatch
+              );
+              cmd(hiddenEditor.state, hiddenEditor.dispatch);
+            }
+            break;
           }
         }
       }
@@ -1073,22 +1083,31 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         const editor = layer.data.editor;
         if (editor) {
           selectAll(editor.state, editor.dispatch);
-          if (type === 'BOLD') {
-            !isBold
-              ? setBold(editor.state, editor.dispatch)
-              : unsetBold(editor.state, editor.dispatch);
-          } else if (type === 'ITALIC') {
-            !isItalic
-              ? setItalic(editor.state, editor.dispatch)
-              : unsetItalic(editor.state, editor.dispatch);
-          } else if (type === 'UNDERLINE') {
-            !isUnderline
-              ? setUnderline(editor.state, editor.dispatch)
-              : unsetUnderline(editor.state, editor.dispatch);
-          } else if (type === 'UPPERCASE') {
-            !isUppercase
-              ? setTextTransform('uppercase')(editor.state, editor.dispatch)
-              : setTextTransform()(editor.state, editor.dispatch);
+          switch (type) {
+            case 'BOLD': {
+              !isBold
+                ? setBold(editor.state, editor.dispatch)
+                : unsetBold(editor.state, editor.dispatch);
+              break;
+            }
+            case 'ITALIC': {
+              !isItalic
+                ? setItalic(editor.state, editor.dispatch)
+                : unsetItalic(editor.state, editor.dispatch);
+              break;
+            }
+            case 'UNDERLINE': {
+              !isUnderline
+                ? setUnderline(editor.state, editor.dispatch)
+                : unsetUnderline(editor.state, editor.dispatch);
+              break;
+            }
+            case 'UPPERCASE': {
+              !isUppercase
+                ? setTextTransform('uppercase')(editor.state, editor.dispatch)
+                : setTextTransform()(editor.state, editor.dispatch);
+              break;
+            }
           }
         }
       });
@@ -1580,7 +1599,10 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         css={{ height: 24, width: `1px`, background: 'rgba(57,76,96,.15)' }}
       />
 
-      <SettingButton css={{minWidth: 70}} onClick={() => actions.setSidebar('TEXT_EFFECT')}>
+      <SettingButton
+        css={{ minWidth: 70 }}
+        onClick={() => actions.setSidebar('TEXT_EFFECT')}
+      >
         Effects
       </SettingButton>
       <div

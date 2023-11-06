@@ -11,7 +11,7 @@ interface SettingButtonProps extends HTMLProps<HTMLElement> {
 const SettingButton: ForwardRefRenderFunction<
   HTMLDivElement,
   PropsWithChildren<SettingButtonProps>
-> = ({ children, isActive, disabled, onClick, ...props }, ref) => {
+> = ({ children, disabled, onClick, ...props }, ref) => {
   return (
     <EditorButton
       ref={ref as any}
