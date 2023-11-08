@@ -16,6 +16,7 @@ const SettingButton: ForwardRefRenderFunction<
     <EditorButton
       ref={ref as any}
       onClick={(e) => !disabled && onClick && onClick(e)}
+      disabled={disabled}
       {...props}
     >
       {children}

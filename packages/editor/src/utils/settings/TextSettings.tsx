@@ -11,7 +11,7 @@ import React, {
 import FontSidebar from './sidebar/FontSidebar';
 import TextEffectSidebar from './sidebar/TextEffectSidebar';
 import ColorSidebar from './sidebar/ColorSidebar';
-import { isEqual, throttle, uniq, uniqBy } from 'lodash';
+import { filter, isEqual, throttle, uniq, uniqBy } from 'lodash';
 import Popover from '@canva/components/popover/Popover';
 import Slider from '@canva/components/slider/Slider';
 import {
@@ -212,6 +212,21 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
           ] as unknown as Layer<TextLayerProps>)
         : null,
     }));
+  const getUniqueFontFamily = (editorAttrs: Record<string, string[]>) =>
+    uniqBy(
+      getFontFamily(editorAttrs).map((font) => {
+        const usedFont = usedFontObj[font] || fontObj[font];
+        if (!usedFont) console.log('Font not found: ' + font);
+        return {
+          family: usedFont.family,
+          name: usedFont.name,
+          url: usedFont.url,
+          style: usedFont.style,
+          styles: filter(fontList, (f) => f.family === usedFont.family),
+        };
+      }),
+      'name'
+    );
 
   useEffect(() => {
     const settings: {
@@ -253,13 +268,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
       const editor = layer.data.editor;
       if (editor) {
         const attrs = getAllAttrs(editor.state.doc);
-        settings.fontFamily[layer.id] = uniqBy(
-          getFontFamily(attrs).map((font) => ({
-            family: font,
-            styles: usedFontObj[font] || fontObj[font],
-          })),
-          'family'
-        );
+        settings.fontFamily[layer.id] = getUniqueFontFamily(attrs);
         settings.fontSize[layer.id] = getFontSize(attrs);
         settings.lineHeight[layer.id] = getLineHeight(attrs);
         settings.letterSpacing[layer.id] = getLetterSpacing(attrs);
@@ -308,7 +317,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
           if (settings.fontFamily[layer.id]) {
             const props = layer.data.props;
             acc.fontFamily.push(...settings.fontFamily[layer.id]);
-            acc.fontFamily = uniqBy(acc.fontFamily, 'family');
+            acc.fontFamily = uniqBy(acc.fontFamily, 'name');
             if (settings.fontSize[layer.id]) {
               acc.fontSize = uniq(
                 acc.fontSize.concat(
@@ -355,15 +364,15 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
   }, [fontSize]);
   const fontObj = useMemo(() => {
     return fontList.reduce((acc, font) => {
-      acc[font.family] = font.styles;
+      acc[font.name] = font;
       return acc;
-    }, {} as Record<string, FontStyle[]>);
+    }, {} as Record<string, FontData>);
   }, [fontList]);
   const usedFontObj = useMemo(() => {
     return usedFonts.reduce((acc, font) => {
-      acc[font.family] = font.styles;
+      acc[font.name] = font;
       return acc;
-    }, {} as Record<string, FontStyle[]>);
+    }, {} as Record<string, FontData>);
   }, [usedFonts]);
 
   const updateLayerProps = useCallback(
@@ -414,7 +423,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
           if (isEmptyContent(editor.state)) {
             setColorForBlock(props.colors[0])(editor.state, editor.dispatch);
             setFontSize(props.fontSizes[0])(editor.state, editor.dispatch);
-            setFontFamily(props.fonts[0].family)(editor.state, editor.dispatch);
+            setFontFamily(props.fonts[0].name)(editor.state, editor.dispatch);
             editor.focus();
           }
           const matrix = new WebKitCSSMatrix(
@@ -464,14 +473,11 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
             (node) => {
               const attrs = getAttrs(node);
               if (node.isBlock) {
-                const fontFamily = getFontFamily(attrs).map((font) => ({
-                  family: font,
-                  styles: usedFontObj[font] || fontObj[font],
-                }));
+                const fontFamily = getUniqueFontFamily(attrs);
                 settings.fontFamily[editingLayer.id].push(...fontFamily);
                 settings.fontFamily[editingLayer.id] = uniqBy(
                   settings.fontFamily[editingLayer.id],
-                  'family'
+                  'name'
                 );
                 settings.fontSize[editingLayer.id] = uniq(
                   settings.fontSize[editingLayer.id].concat(getFontSize(attrs))
@@ -540,13 +546,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
               .setProp<TextLayerProps>(activePage, editingLayer.id, {
                 text: editor.dom.innerHTML,
                 fontSizes: getFontSize(attrs),
-                fonts: uniqBy(
-                  getFontFamily(attrs).map((font) => ({
-                    family: font,
-                    styles: usedFontObj[font] || fontObj[font],
-                  })),
-                  'family'
-                ),
+                fonts: getUniqueFontFamily(attrs),
                 colors: getColor(attrs, getAllMarks(editor.state.doc)),
                 boxSize: {
                   width: props.boxSize.width,
@@ -577,13 +577,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
           if (editor) {
             const props = layer.data.props as TextLayerProps;
             const attrs = getAllAttrs(editor.state.doc);
-            settings.fontFamily[layer.id] = uniqBy(
-              getFontFamily(attrs).map((font) => ({
-                family: font,
-                styles: usedFontObj[font] || fontObj[font],
-              })),
-              'family'
-            );
+            settings.fontFamily[layer.id] = getUniqueFontFamily(attrs);
             settings.fontSize[layer.id] = getFontSize(attrs);
             settings.lineHeight[layer.id] = getLineHeight(attrs);
             settings.letterSpacing[layer.id] = getLetterSpacing(attrs);
@@ -743,13 +737,20 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
     };
   }, [JSON.stringify(layers.map((l) => l.id)), updateLayerProps]);
   const fontStyles = useCallback((fontList: FontData[]) => {
-    const fontStyles = ['Italic Bold', 'Bold', 'Italic'];
+    const fontStyles: string[] = [];
     fontList.forEach((font) => {
-      fontStyles.forEach((s, index) => {
-        if (!font.styles?.find((i) => i.name.includes(s))) {
-          fontStyles.splice(index, 1);
+      if (!font.name.includes('Italic')) {
+        fontStyles.push('Italic');
+      }
+
+      if (font.name.includes('Bold')) {
+        const weight = parseInt(font.style);
+        if (weight < 600) {
+          fontStyles.push('Bold');
         }
-      });
+      } else {
+        fontStyles.push('Bold');
+      }
     });
     return fontStyles;
   }, []);
@@ -759,7 +760,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
     if (editingLayer) {
       const editor = textEditor?.editor;
       if (editor) {
-        setFontFamily(font.family)(editor.state, editor.dispatch);
+        setFontFamily(font.name)(editor.state, editor.dispatch);
         const styles = fontStyles([font]);
         if (!styles.includes('Bold')) {
           unsetBoldOfBlock(editor.state, editor.dispatch);
@@ -776,7 +777,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
             hiddenEditor.state,
             hiddenEditor.dispatch
           );
-          setFontFamily(font.family)(hiddenEditor.state, hiddenEditor.dispatch);
+          setFontFamily(font.name)(hiddenEditor.state, hiddenEditor.dispatch);
           const styles = fontStyles([font]);
           if (!styles.includes('Bold')) {
             unsetBoldOfBlock(hiddenEditor.state, hiddenEditor.dispatch);
@@ -791,7 +792,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         const editor = layer.data.editor;
         if (editor) {
           selectAll(editor.state, editor.dispatch);
-          setFontFamily(font.family)(editor.state, editor.dispatch);
+          setFontFamily(font.name)(editor.state, editor.dispatch);
           const styles = fontStyles([font]);
           if (!styles.includes('Bold')) {
             unsetBoldOfBlock(editor.state, editor.dispatch);
@@ -994,9 +995,9 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         switch (type) {
           case 'BOLD': {
             const fonts = editingLayer.data.props.fonts.reduce((acc, f) => {
-              acc[f.family] = f.styles;
+              acc[f.name] = f;
               return acc;
-            }, {} as Record<string, FontStyle[]>);
+            }, {} as Record<string, FontStyle>);
 
             let supported = true;
             editor.state.doc.nodesBetween(
@@ -1006,7 +1007,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
                 const attrs = getAllAttrs(node);
                 const fontFamily = getFontFamily(attrs);
                 const check = fontFamily.every(
-                  (f) => fonts[f] && fonts[f].find((s) => s.style.includes('Bold'))
+                  (f) => fonts[f] && fonts[f].name.includes('Bold')
                 );
                 if (!check) {
                   supported = false;
@@ -1605,7 +1606,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         css={{ minWidth: 70 }}
         onClick={() => {
           actions.setSidebarTab();
-          actions.setSidebar('TEXT_EFFECT')
+          actions.setSidebar('TEXT_EFFECT');
         }}
       >
         Effects

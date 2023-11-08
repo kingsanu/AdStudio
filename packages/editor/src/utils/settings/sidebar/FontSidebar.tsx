@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -19,8 +20,13 @@ import SearchIcon from '@canva/icons/SearchIcon';
 import ArrowRightIcon from '@canva/icons/ArrowRightIcon';
 import ArrowDownIcon from '@canva/icons/ArrowDownIcon';
 import styled from '@emotion/styled';
-import { handleFontStyleName } from '@canva/utils/fontHelper';
+import {
+  groupFontsByFamily,
+  handleFontStyle,
+  handleFontStyleName,
+} from '@canva/utils/fontHelper';
 import FontStyle from './FontStyle';
+import { some } from 'lodash';
 
 const ListItem = styled('div')`
   height: 40px;
@@ -46,22 +52,26 @@ const ListItem = styled('div')`
   }
 `;
 
-const FontDisplay = styled('span')<{fontStyle: string}>(({fontStyle}) => `
+const FontDisplay = styled('span')<{ fontStyle: string }>(
+  ({ fontStyle }) => `
     text-transform: capitalize;
-    ${handleFontStyleName(fontStyle)};
-`);
+    ${handleFontStyle(fontStyle)};
+`
+);
 
 const flatFonts = (fonts: FontDataApi[]): FontData[] => {
-      return fonts.reduce((acc: FontData[], font: FontDataApi) => {
-        return acc.concat(font.styles.map((s) => {
-            return {
-                family: font.family,
-                name: s.name,
-                url: s.url,
-                style: s.style
-            };
-        }));
-      }, []);
+  return fonts.reduce((acc: FontData[], font: FontDataApi) => {
+    return acc.concat(
+      font.styles.map((s) => {
+        return {
+          family: font.family,
+          name: s.name,
+          url: s.url,
+          style: s.style,
+        };
+      })
+    );
+  }, []);
 };
 interface FontSidebarProps extends SidebarProps {
   selected: FontData[];
@@ -77,7 +87,10 @@ const FontSidebar: ForwardRefRenderFunction<
   const { getFonts } = useContext(EditorContext);
   const { usedFonts } = useUsedFont();
   const { actions, fontList } = useEditor((state) => ({
-    fontList: state.fontList,
+    fontList: useMemo(
+      () => groupFontsByFamily(state.fontList),
+      [state.fontList]
+    ),
   }));
   const [isLoading, setIsLoading] = useState(false);
   const [keyword, setKeyword] = useState('');
@@ -228,14 +241,11 @@ const FontSidebar: ForwardRefRenderFunction<
           <div css={{ padding: '16px 20px', fontWeight: 700 }}>
             Document fonts
           </div>
-          {/* {usedFonts.map((font, idx) => (
-            <>
-              <ListItem
-                key={idx + '-' + font.family}
-                onClick={() => onChangeFontFamily(font)}
-              >
+          {usedFonts.map((font, idx) => (
+            <div key={idx + '-' + font.family}>
+              <ListItem onClick={() => onChangeFontFamily(font)}>
                 <span>
-                  {font.styles?.length > 1 && (
+                  {font.styles && font.styles?.length > 1 && (
                     <button
                       onClick={(e) => {
                         e.preventDefault();
@@ -254,48 +264,49 @@ const FontSidebar: ForwardRefRenderFunction<
                   )}
                 </span>
                 <span css={{ fontFamily: font.family }}>{font.family}</span>
-                {selected.map((s) => s.styles[0].name).includes(font.family) && (
-                  <span>
-                    <CheckIcon />
-                  </span>
-                )}
+                {openingItems.indexOf(idx) === -1 &&
+                  some(font.styles, (fontStyle) =>
+                    selected.map((s) => s.name).includes(fontStyle.name)
+                  ) && (
+                    <span>
+                      <CheckIcon />
+                    </span>
+                  )}
               </ListItem>
               {openingRecentItems.indexOf(idx) > -1 &&
+                font.styles &&
                 font.styles?.length > 1 &&
                 font.styles.map((fontStyle, subIdx) => (
                   <ListItem
                     css={{ marginLeft: 16 }}
                     key={subIdx + '-' + fontStyle.name}
-                    onClick={() =>
-                    onChangeFontFamily({
-                        family: font.family,
-                        styles: [fontStyle]
-                    })
-                    }
+                    onClick={() => onChangeFontFamily(fontStyle)}
                   >
                     <span></span>
-                      <FontDisplay css={{
-                          fontFamily: `'${font.styles[0].name}'`,
-                        }} fontStyle={fontStyle.style}>{fontStyle.style}</FontDisplay>
+                    <FontDisplay
+                      css={{
+                        fontFamily: `'${fontStyle.name}'`,
+                      }}
+                      fontStyle={fontStyle.style}
+                    >
+                      {handleFontStyleName(fontStyle.style)}
+                    </FontDisplay>
                     <span>
-                      {selected
-                        .map((s) => s.family)
-                        .includes(fontStyle.style) && <CheckIcon />}
+                      {selected.map((s) => s.name).includes(fontStyle.name) && (
+                        <CheckIcon />
+                      )}
                     </span>
                   </ListItem>
                 ))}
-            </>
-          ))} */}
+            </div>
+          ))}
           <div css={{ borderTop: '1px solid rgba(217, 219, 228, 0.6)' }}>
             <div css={{ padding: '16px 20px', fontWeight: 700 }}>Fonts</div>
             {fontList.map((font, idx) => (
-              <>
-                <ListItem
-                  key={idx + '-' + font.name}
-                  onClick={() => onChangeFontFamily(font)}
-                >
+              <div key={idx + '-' + font.name}>
+                <ListItem onClick={() => onChangeFontFamily(font)}>
                   <span>
-                    {/* {font.styles?.length > 1 && (
+                    {font.styles && font.styles?.length > 1 && (
                       <button
                         onClick={(e) => {
                           e.preventDefault();
@@ -311,44 +322,52 @@ const FontSidebar: ForwardRefRenderFunction<
                           <ArrowDownIcon />
                         )}
                       </button>
-                    )} */}
-                  </span>
-                  <FontDisplay css={{
-                          fontFamily: `'${font.name}'`,
-                        }} fontStyle={font.style}>{font.name}</FontDisplay>
-                      <span></span>
-                  <span>
-                    {selected.map((s) => s.name).includes(font.family) && (
-                      <CheckIcon />
                     )}
                   </span>
+                  <FontDisplay
+                    css={{
+                      fontFamily: `'${font.name}'`,
+                    }}
+                    fontStyle={font.style}
+                  >
+                    {!font.styles?.length ? font.name : font.family}
+                  </FontDisplay>
+                  <span></span>
+                  <span>
+                    {openingItems.indexOf(idx) === -1 &&
+                      some(font.styles, (fontStyle) =>
+                        selected.map((s) => s.name).includes(fontStyle.name)
+                      ) && <CheckIcon />}
+                  </span>
                 </ListItem>
-                {/* {openingItems.indexOf(idx) > -1 &&
+                {openingItems.indexOf(idx) > -1 &&
+                  font.styles &&
                   font.styles?.length > 1 &&
                   font.styles.map((fontStyle, subIdx) => (
                     <ListItem
                       css={{ marginLeft: 16 }}
                       key={subIdx + '-' + fontStyle.name}
-                      onClick={() =>
-                        onChangeFontFamily({
-                          family: font.family,
-                          styles: [fontStyle]
-                        })
-                      }
+                      onClick={() => onChangeFontFamily(fontStyle)}
                     >
                       <span></span>
-                      <FontDisplay css={{
+                      <FontDisplay
+                        css={{
                           fontFamily: `'${fontStyle.name}'`,
-                        }} fontStyle={fontStyle.style}>{fontStyle.style}</FontDisplay>
+                        }}
+                        fontStyle={fontStyle.style}
+                      >
+                        {handleFontStyleName(fontStyle.style)}
+                      </FontDisplay>
                       <span>
-                        {selected[0]?.styles?.map((s) => s.name)
-                          .find((f) => f === fontStyle.name) && <CheckIcon />}
+                        {selected
+                          .map((s) => s.name)
+                          .includes(fontStyle.name) && <CheckIcon />}
                       </span>
                     </ListItem>
-                  ))} */}
-              </>
+                  ))}
+              </div>
             ))}
-            {isLoading && <div>Loading...</div>}
+            {isLoading && <div css={{ padding: 16 }}>Loading...</div>}
           </div>
         </div>
       </div>

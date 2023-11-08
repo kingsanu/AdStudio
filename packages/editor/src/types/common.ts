@@ -28,6 +28,7 @@ export type FontData = {
   family: string;
   style: string;
   url: string;
+  styles?: FontData[];
 };
 
 export type HorizontalGuideline = {

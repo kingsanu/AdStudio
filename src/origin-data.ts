@@ -22,15 +22,15 @@ export const data = [
         },
         locked: false,
         child: [
-          'ca_JHAIsmQ',
-          'ca_ZYFoyvD',
-          'ca_BDuifjn',
-          'ca_Io4Tpyd',
-          'ca_hH5QKUl',
+          'ca_YJ6evhC',
+          'ca_6xAidWb',
+          'ca_ptWwZOg',
+          'ca_aydxMTo',
+          'ca_9zWlMTn',
         ],
         parent: null,
       },
-      ca_JHAIsmQ: {
+      ca_YJ6evhC: {
         type: {
           resolvedName: 'ShapeLayer',
         },
@@ -53,12 +53,12 @@ export const data = [
         child: [],
         parent: 'ROOT',
       },
-      ca_ZYFoyvD: {
+      ca_6xAidWb: {
         type: {
           resolvedName: 'TextLayer',
         },
         props: {
-          text: '<p style="text-align: center;font-family: AR One Sans;font-size: 42px;color: rgb(0, 0, 0);line-height: 1.4;letter-spacing: normal;"><span style="color: rgb(0, 0, 0);">CANVA</span></p><p style="text-align: center;font-family: AR One Sans;font-size: 42px;color: rgb(0, 0, 0);line-height: 1.4;letter-spacing: normal;"><span style="color: rgb(0, 0, 0);">DESIGN EDITOR 2</span></p>',
+          text: '<p style="text-align: center;font-family: \'ABeeZee Regular\';font-size: 42px;color: rgb(0, 0, 0);line-height: 1.4;letter-spacing: normal;"><em><span style="color: rgb(0, 0, 0);">CANVA</span></em></p><p style="text-align: center;font-family: \'ABeeZee Regular\';font-size: 42px;color: rgb(0, 0, 0);line-height: 1.4;letter-spacing: normal;"><em><span style="color: rgb(0, 0, 0);">DESIGN EDITOR 2</span></em></p>',
           position: {
             x: 493.42598067182416,
             y: 234.10241062386683,
@@ -73,10 +73,24 @@ export const data = [
           rotate: 0,
           fonts: [
             {
-              family: 'AR One Sans',
-              name: 'AR One Sans Bold 500',
-              style: '500',
-              url: 'http://fonts.gstatic.com/s/aronesans/v2/TUZezwhrmbFp0Srr_tH6fv6RcUejHO_u7GF5aXfv-U2QzBLF6gslWk39DWg3no5mBF4.woff2',
+              family: 'ABeeZee',
+              name: 'ABeeZee Regular',
+              url: 'http://fonts.gstatic.com/s/abeezee/v22/esDR31xSG-6AGleN6teukbcHCpE.woff2',
+              style: 'regular',
+              styles: [
+                {
+                  family: 'ABeeZee',
+                  name: 'ABeeZee Regular',
+                  url: 'http://fonts.gstatic.com/s/abeezee/v22/esDR31xSG-6AGleN6teukbcHCpE.woff2',
+                  style: 'regular',
+                },
+                {
+                  family: 'ABeeZee',
+                  name: 'ABeeZee Italic',
+                  url: 'http://fonts.gstatic.com/s/abeezee/v22/esDT31xSG-6AGleN2tCkkJUCGpG-GQ.woff2',
+                  style: 'italic',
+                },
+              ],
             },
           ],
           colors: ['rgb(0, 0, 0)'],
@@ -87,12 +101,12 @@ export const data = [
         child: [],
         parent: 'ROOT',
       },
-      ca_BDuifjn: {
+      ca_ptWwZOg: {
         type: {
           resolvedName: 'TextLayer',
         },
         props: {
-          text: '<p style="text-align: center;font-family: ADLaM Display;text-transform: uppercase;font-size: 18px;color: rgb(0, 0, 0);line-height: 1.4;letter-spacing: normal;"><span style="color: rgb(0, 0, 0);">DEVELOPED WITH REACTJS 2 2</span></p>',
+          text: '<p style="text-align: center;font-family: \'AR One Sans Bold 700\';text-transform: uppercase;font-size: 18px;color: rgb(0, 0, 0);line-height: 1.4;letter-spacing: normal;"><span style="color: rgb(0, 0, 0);">DEVELOPED WITH REACTJS 2 2</span></p>',
           position: {
             x: 660.2715231788078,
             y: 440.2251655629139,
@@ -107,10 +121,10 @@ export const data = [
           rotate: 0,
           fonts: [
             {
-              family: 'ADLaM Display',
-              name: 'ADLaM Display Regular',
-              style: 'regular',
-              url: 'http://fonts.gstatic.com/s/adlamdisplay/v1/KFOhCnGXkPOLlhx6jD8_b1ZECsTYkYBPY3o.woff2',
+              family: 'AR One Sans',
+              name: 'AR One Sans Bold 700',
+              url: 'http://fonts.gstatic.com/s/aronesans/v2/TUZezwhrmbFp0Srr_tH6fv6RcUejHO_u7GF5aXfv-U2QzBLF6gslWpj6DWg3no5mBF4.woff2',
+              style: '700',
             },
           ],
           colors: ['rgb(0, 0, 0)'],
@@ -121,12 +135,12 @@ export const data = [
         child: [],
         parent: 'ROOT',
       },
-      ca_Io4Tpyd: {
+      ca_aydxMTo: {
         type: {
           resolvedName: 'TextLayer',
         },
         props: {
-          text: '<p style="text-align: center;font-family: Abhaya Libre;text-transform: uppercase;font-size: 18px;color: rgb(0, 0, 0);line-height: 1.4;letter-spacing: normal;"><span style="color: rgb(0, 0, 0);">FB: kabiattacker</span></p><p style="text-align: center;font-family: Abhaya Libre;text-transform: uppercase;font-size: 18px;color: rgb(0, 0, 0);line-height: 1.4;letter-spacing: normal;"><span style="color: rgb(0, 0, 0);">Kan 2</span></p>',
+          text: '<p style="text-align: center;font-family: \'Abel Regular\';text-transform: uppercase;font-size: 18px;color: rgb(0, 0, 0);line-height: 1.4;letter-spacing: normal;"><span style="color: rgb(0, 0, 0);">FB: kabiattacker</span></p><p style="text-align: center;font-family: \'Abel Regular\';text-transform: uppercase;font-size: 18px;color: rgb(0, 0, 0);line-height: 1.4;letter-spacing: normal;"><span style="color: rgb(0, 0, 0);">Kan 2</span></p>',
           position: {
             x: 621.3132707356951,
             y: 833.6742115595997,
@@ -141,10 +155,10 @@ export const data = [
           rotate: 0,
           fonts: [
             {
-              family: 'Abhaya Libre',
-              name: 'Abhaya Libre Regular',
+              family: 'Abel',
+              name: 'Abel Regular',
+              url: 'http://fonts.gstatic.com/s/abel/v18/MwQ5bhbm2POE6V1LPJp6qGI.woff2',
               style: 'regular',
-              url: 'http://fonts.gstatic.com/s/abhayalibre/v14/e3tmeuGtX-Co5MNzeAOqinEgfkPWovdU4w.woff2',
             },
           ],
           colors: ['rgb(0, 0, 0)'],
@@ -156,12 +170,12 @@ export const data = [
         child: [],
         parent: 'ROOT',
       },
-      ca_hH5QKUl: {
+      ca_9zWlMTn: {
         type: {
           resolvedName: 'TextLayer',
         },
         props: {
-          text: '<p style="text-align: center;font-family: Abel;text-transform: uppercase;font-size: 18px;color: rgb(0, 0, 0);line-height: 1.4;letter-spacing: normal;"><span style="color: rgb(0, 0, 0);">CONTACT: lnkhanh91@GMAIL.COM</span></p><p style="text-align: center;font-family: Abel;text-transform: uppercase;font-size: 18px;color: rgb(0, 0, 0);line-height: 1.4;letter-spacing: normal;"><span style="color: rgb(0, 0, 0);">Kan 2</span></p>',
+          text: '<p style="text-align: center;font-family: \'Abhaya Libre Bold 500\';text-transform: uppercase;font-size: 18px;color: rgb(0, 0, 0);line-height: 1.4;letter-spacing: normal;"><span style="color: rgb(0, 0, 0);">CONTACT: lnkhanh91@GMAIL.COM</span></p><p style="text-align: center;font-family: \'Abhaya Libre Bold 500\';text-transform: uppercase;font-size: 18px;color: rgb(0, 0, 0);line-height: 1.4;letter-spacing: normal;"><span style="color: rgb(0, 0, 0);">Kan 2</span></p>',
           position: {
             x: 673.3443708609268,
             y: 757.6742115595997,
@@ -176,10 +190,10 @@ export const data = [
           rotate: 0,
           fonts: [
             {
-              family: 'Abel',
-              name: 'Abel Regular',
-              style: 'regular',
-              url: 'http://fonts.gstatic.com/s/abel/v18/MwQ5bhbm2POE6V1LPJp6qGI.woff2',
+              family: 'Abhaya Libre',
+              name: 'Abhaya Libre Bold 500',
+              url: 'http://fonts.gstatic.com/s/abhayalibre/v14/e3t5euGtX-Co5MNzeAOqinEYj2ryr9xI6oYtBA.woff2',
+              style: '500',
             },
           ],
           colors: ['rgb(0, 0, 0)'],
