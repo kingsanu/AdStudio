@@ -12,13 +12,22 @@ export type CursorPosition = {
   clientY: number;
 };
 
-export type Font = {
-  style?: 'Bold' | 'Italic' | 'Bold_Italic';
-  urls: string[];
+export type FontStyle = {
+  name: string;
+  style: string;
+  url: string;
 };
+
+export type FontDataApi = {
+  family: string;
+  styles: FontStyle[];
+};
+
 export type FontData = {
   name: string;
-  fonts: Font[];
+  family: string;
+  style: string;
+  url: string;
 };
 
 export type HorizontalGuideline = {
@@ -40,10 +49,9 @@ export type DeepPartial<T> = T extends object
     }
   : T;
 export type GetFontQuery = Partial<{
-  limit: string;
-  offset: string;
-  q: string;
-  name: string[];
+  ps: string;
+  pi: string;
+  kw: string;
 }>;
 
 export type Rect = {

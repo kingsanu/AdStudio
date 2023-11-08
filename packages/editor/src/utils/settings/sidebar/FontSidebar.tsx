@@ -1,197 +1,359 @@
 import React, {
-    FormEvent,
-    forwardRef,
-    ForwardRefRenderFunction,
-    useCallback,
-    useContext,
-    useEffect,
-    useRef,
-    useState,
+  FormEvent,
+  forwardRef,
+  ForwardRefRenderFunction,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
 } from 'react';
 import Sidebar, { SidebarProps } from './Sidebar';
-import FontStyle from './FontStyle';
-import { FontData } from '@canva/types';
+import { FontData, FontDataApi } from '@canva/types';
 import { EditorContext } from '@canva/components/editor/EditorContext';
 import { useUsedFont } from '@canva/hooks/useUsedFont';
 import { useEditor } from '@canva/hooks';
 import ArrowLeftIcon from '@canva/icons/ArrowLeftIcon';
 import CheckIcon from '@canva/icons/CheckIcon';
 import SearchIcon from '@canva/icons/SearchIcon';
+import ArrowRightIcon from '@canva/icons/ArrowRightIcon';
+import ArrowDownIcon from '@canva/icons/ArrowDownIcon';
+import styled from '@emotion/styled';
+import { handleFontStyleName } from '@canva/utils/fontHelper';
+import FontStyle from './FontStyle';
 
+const ListItem = styled('div')`
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 0 12px;
+  :hover: {
+    background: #f9f9f9;
+  }
+
+  > span:nth-of-type(1) {
+    flex: 0 1 auto;
+    width: 24px;
+    margin: 6px 8px 0 0;
+    color: rgb(169 169 173);
+  }
+
+  > span:nth-of-type(2) {
+    margin-right: auto;
+    font-size: 16px;
+  }
+`;
+
+const FontDisplay = styled('span')<{fontStyle: string}>(({fontStyle}) => `
+    text-transform: capitalize;
+    ${handleFontStyleName(fontStyle)};
+`);
+
+const flatFonts = (fonts: FontDataApi[]): FontData[] => {
+      return fonts.reduce((acc: FontData[], font: FontDataApi) => {
+        return acc.concat(font.styles.map((s) => {
+            return {
+                family: font.family,
+                name: s.name,
+                url: s.url,
+                style: s.style
+            };
+        }));
+      }, []);
+};
 interface FontSidebarProps extends SidebarProps {
-    selected: FontData[];
-    onChangeFontFamily: (font: FontData) => void;
+  selected: FontData[];
+  onChangeFontFamily: (font: FontData) => void;
 }
-const FontSidebar: ForwardRefRenderFunction<HTMLDivElement, FontSidebarProps> = (
-    { selected, onChangeFontFamily, ...props },
-    ref,
-) => {
-    const dataRef = useRef(false);
-    const qRef = useRef<HTMLInputElement>(null);
-    const scrollRef = useRef<HTMLDivElement>(null);
-    const { getFonts } = useContext(EditorContext);
-    const { usedFonts } = useUsedFont();
-    const { actions, fontList } = useEditor((state) => ({ fontList: state.fontList }));
-    const [isLoading, setIsLoading] = useState(false);
-    const [keyword, setKeyword] = useState('');
+const FontSidebar: ForwardRefRenderFunction<
+  HTMLDivElement,
+  FontSidebarProps
+> = ({ selected, onChangeFontFamily, ...props }, ref) => {
+  const dataRef = useRef(false);
+  const qRef = useRef<HTMLInputElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const { getFonts } = useContext(EditorContext);
+  const { usedFonts } = useUsedFont();
+  const { actions, fontList } = useEditor((state) => ({
+    fontList: state.fontList,
+  }));
+  const [isLoading, setIsLoading] = useState(false);
+  const [keyword, setKeyword] = useState('');
+  const [offset, setOffset] = useState(0);
+  const [openingRecentItems, setOpeningRecentItems] = useState<number[]>([]);
+  const [openingItems, setOpeningItems] = useState<number[]>([]);
 
-    const loadFontList = useCallback(
-        async (offset = 0) => {
-            dataRef.current = true;
-            setIsLoading(true);
-            const res = await getFonts({ limit: 30 + '', offset: offset + '', q: keyword });
-            if (offset) {
-                actions.appendFontList(res);
-            } else {
-                actions.setFontList(res);
-            }
-            setIsLoading(false);
-            if (res.length > 0) {
-                dataRef.current = false;
-            }
-        },
-        [getFonts, actions, setIsLoading, keyword],
-    );
+  const loadFontList = useCallback(
+    async (offset = 0) => {
+      dataRef.current = true;
+      setIsLoading(true);
+      const res = await getFonts({ ps: 30 + '', pi: offset + '', kw: keyword });
+      if (offset) {
+        actions.appendFontList(flatFonts(res));
+      } else {
+        actions.setFontList(flatFonts(res));
+      }
+      setIsLoading(false);
+      if (res.length > 0) {
+        dataRef.current = false;
+      }
+    },
+    [getFonts, actions, setIsLoading, keyword]
+  );
 
-    useEffect(() => {
-        loadFontList();
-    }, [loadFontList]);
+  useEffect(() => {
+    loadFontList();
+  }, [loadFontList]);
 
-    useEffect(() => {
-        const handleLoadMore = async (e: Event) => {
-            const node = e.target as HTMLDivElement;
-            if (node.scrollHeight - node.scrollTop - 80 <= node.clientHeight && !dataRef.current) {
-                await loadFontList(fontList.length);
-            }
-        };
-        scrollRef.current?.addEventListener('scroll', handleLoadMore);
-        return () => {
-            scrollRef.current?.removeEventListener('scroll', handleLoadMore);
-        };
-    }, [loadFontList, fontList]);
-
-    const handleSearch = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        if (scrollRef.current) {
-            scrollRef.current.scrollTop = 0;
-        }
-        setKeyword(qRef.current?.value || '');
-        await loadFontList(0);
+  useEffect(() => {
+    const handleLoadMore = async (e: Event) => {
+      const node = e.target as HTMLDivElement;
+      if (
+        node.scrollHeight - node.scrollTop - 80 <= node.clientHeight &&
+        !dataRef.current
+      ) {
+        setOffset(offset + 1);
+        await loadFontList(offset + 1);
+      }
     };
+    scrollRef.current?.addEventListener('scroll', handleLoadMore);
+    return () => {
+      scrollRef.current?.removeEventListener('scroll', handleLoadMore);
+    };
+  }, [loadFontList, fontList]);
 
-    return (
-        <Sidebar ref={ref} {...props}>
-            <FontStyle />
-            <div css={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-                <div
-                    css={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                        height: 48,
-                        borderBottom: '1px solid rgba(57,76,96,.15)',
-                        padding: '0 20px',
-                    }}
-                >
-                    <p
-                        css={{
-                            lineHeight: '48px',
-                            fontWeight: 600,
-                            color: '#181C32',
-                            flexGrow: 1,
-                        }}
-                    >
-                        Font
-                    </p>
-                    <div
-                        css={{
-                            fontSize: 20,
-                            flexShrink: 0,
-                            width: 32,
-                            height: 32,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}
-                        onClick={() => {
-                            actions.setSidebar();
-                        }}
-                    >
-                        <ArrowLeftIcon />
-                    </div>
-                </div>
-                <div css={{ borderRadius: 4, boxShadow: '0 0 0 1px rgba(43,59,74,.3)', margin: 16 }}>
-                    <div
-                        css={{ height: 40, borderRadius: 4, padding: '0 12px', display: 'flex', alignItems: 'center' }}
-                    >
-                        <div css={{ fontSize: 24, marginRight: 8, flexShrink: 0 }}>
-                            <SearchIcon />
-                        </div>
-                        <form onSubmit={handleSearch}>
-                            <input ref={qRef} type={'text'} css={{ width: '100%', height: '100%' }} />
-                        </form>
-                    </div>
-                </div>
-                <div ref={scrollRef} css={{ flexGrow: 1, overflowY: 'auto' }}>
-                    <div css={{ padding: '16px 20px', fontWeight: 700 }}>Document fonts</div>
-                    {usedFonts.map((font) => (
-                        <div
-                            key={font.name}
-                            css={{
-                                height: 40,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                cursor: 'pointer',
-                                padding: '0 24px',
-                                ':hover': {
-                                    background: '#F9F9F9',
-                                },
-                            }}
-                            onClick={() => onChangeFontFamily(font)}
-                        >
-                            <span css={{ fontFamily: font.name }}>{font.name}</span>
-                            {selected.map((s) => s.name).includes(font.name) && (
-                                <span>
-                                    <CheckIcon />
-                                </span>
-                            )}
-                        </div>
-                    ))}
-                    <div css={{ borderTop: '1px solid rgba(217, 219, 228, 0.6)' }}>
-                        <div css={{ padding: '16px 20px', fontWeight: 700 }}>Fonts</div>
-                        {fontList.map((font) => (
-                            <div
-                                key={font.name}
-                                css={{
-                                    height: 40,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    cursor: 'pointer',
-                                    padding: '0 24px',
-                                    ':hover': {
-                                        background: '#F9F9F9',
-                                    },
-                                }}
-                                onClick={() => onChangeFontFamily(font)}
-                            >
-                                <span css={{ fontFamily: font.name }}>{font.name}</span>
-                                {selected.map((s) => s.name).includes(font.name) && (
-                                    <span>
-                                        <CheckIcon />
-                                    </span>
-                                )}
-                            </div>
-                        ))}
-                        {isLoading && <div>Loading...</div>}
-                    </div>
-                </div>
+  const handleSearch = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+    setKeyword(qRef.current?.value || '');
+    await loadFontList(0);
+  };
+
+  const handleToggleChildren = (items: number[], itemIndex: number) => {
+    const idx = items.indexOf(itemIndex);
+    const listIdx = [...items];
+
+    if (idx !== -1) {
+      listIdx.splice(idx, 1);
+      return listIdx;
+    }
+    listIdx.push(itemIndex);
+    return listIdx;
+  };
+
+  return (
+    <Sidebar ref={ref} {...props}>
+      <FontStyle />
+      <div
+        css={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          overflowY: 'auto',
+        }}
+      >
+        <div
+          css={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            height: 48,
+            borderBottom: '1px solid rgba(57,76,96,.15)',
+            padding: '0 20px',
+          }}
+        >
+          <p
+            css={{
+              lineHeight: '48px',
+              fontWeight: 600,
+              color: '#181C32',
+              flexGrow: 1,
+            }}
+          >
+            Font
+          </p>
+          <div
+            css={{
+              fontSize: 20,
+              flexShrink: 0,
+              width: 32,
+              height: 32,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            onClick={() => {
+              actions.setSidebar();
+            }}
+          >
+            <ArrowLeftIcon />
+          </div>
+        </div>
+        <div
+          css={{
+            borderRadius: 4,
+            boxShadow: '0 0 0 1px rgba(43,59,74,.3)',
+            margin: 16,
+          }}
+        >
+          <div
+            css={{
+              height: 40,
+              borderRadius: 4,
+              padding: '0 12px',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <div css={{ fontSize: 24, marginRight: 8, flexShrink: 0 }}>
+              <SearchIcon />
             </div>
-        </Sidebar>
-    );
+            <form onSubmit={handleSearch}>
+              <input
+                ref={qRef}
+                type={'text'}
+                css={{ width: '100%', height: '100%' }}
+              />
+            </form>
+          </div>
+        </div>
+        <div ref={scrollRef} css={{ flexGrow: 1, overflowY: 'auto' }}>
+          <div css={{ padding: '16px 20px', fontWeight: 700 }}>
+            Document fonts
+          </div>
+          {/* {usedFonts.map((font, idx) => (
+            <>
+              <ListItem
+                key={idx + '-' + font.family}
+                onClick={() => onChangeFontFamily(font)}
+              >
+                <span>
+                  {font.styles?.length > 1 && (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setOpeningRecentItems(
+                          handleToggleChildren(openingRecentItems, idx)
+                        );
+                      }}
+                    >
+                      {openingRecentItems.indexOf(idx) === -1 ? (
+                        <ArrowRightIcon />
+                      ) : (
+                        <ArrowDownIcon />
+                      )}
+                    </button>
+                  )}
+                </span>
+                <span css={{ fontFamily: font.family }}>{font.family}</span>
+                {selected.map((s) => s.styles[0].name).includes(font.family) && (
+                  <span>
+                    <CheckIcon />
+                  </span>
+                )}
+              </ListItem>
+              {openingRecentItems.indexOf(idx) > -1 &&
+                font.styles?.length > 1 &&
+                font.styles.map((fontStyle, subIdx) => (
+                  <ListItem
+                    css={{ marginLeft: 16 }}
+                    key={subIdx + '-' + fontStyle.name}
+                    onClick={() =>
+                    onChangeFontFamily({
+                        family: font.family,
+                        styles: [fontStyle]
+                    })
+                    }
+                  >
+                    <span></span>
+                      <FontDisplay css={{
+                          fontFamily: `'${font.styles[0].name}'`,
+                        }} fontStyle={fontStyle.style}>{fontStyle.style}</FontDisplay>
+                    <span>
+                      {selected
+                        .map((s) => s.family)
+                        .includes(fontStyle.style) && <CheckIcon />}
+                    </span>
+                  </ListItem>
+                ))}
+            </>
+          ))} */}
+          <div css={{ borderTop: '1px solid rgba(217, 219, 228, 0.6)' }}>
+            <div css={{ padding: '16px 20px', fontWeight: 700 }}>Fonts</div>
+            {fontList.map((font, idx) => (
+              <>
+                <ListItem
+                  key={idx + '-' + font.name}
+                  onClick={() => onChangeFontFamily(font)}
+                >
+                  <span>
+                    {/* {font.styles?.length > 1 && (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setOpeningItems(
+                            handleToggleChildren(openingItems, idx)
+                          );
+                        }}
+                      >
+                        {openingItems.indexOf(idx) === -1 ? (
+                          <ArrowRightIcon />
+                        ) : (
+                          <ArrowDownIcon />
+                        )}
+                      </button>
+                    )} */}
+                  </span>
+                  <FontDisplay css={{
+                          fontFamily: `'${font.name}'`,
+                        }} fontStyle={font.style}>{font.name}</FontDisplay>
+                      <span></span>
+                  <span>
+                    {selected.map((s) => s.name).includes(font.family) && (
+                      <CheckIcon />
+                    )}
+                  </span>
+                </ListItem>
+                {/* {openingItems.indexOf(idx) > -1 &&
+                  font.styles?.length > 1 &&
+                  font.styles.map((fontStyle, subIdx) => (
+                    <ListItem
+                      css={{ marginLeft: 16 }}
+                      key={subIdx + '-' + fontStyle.name}
+                      onClick={() =>
+                        onChangeFontFamily({
+                          family: font.family,
+                          styles: [fontStyle]
+                        })
+                      }
+                    >
+                      <span></span>
+                      <FontDisplay css={{
+                          fontFamily: `'${fontStyle.name}'`,
+                        }} fontStyle={fontStyle.style}>{fontStyle.style}</FontDisplay>
+                      <span>
+                        {selected[0]?.styles?.map((s) => s.name)
+                          .find((f) => f === fontStyle.name) && <CheckIcon />}
+                      </span>
+                    </ListItem>
+                  ))} */}
+              </>
+            ))}
+            {isLoading && <div>Loading...</div>}
+          </div>
+        </div>
+      </div>
+    </Sidebar>
+  );
 };
 
 export default forwardRef<HTMLDivElement, FontSidebarProps>(FontSidebar);

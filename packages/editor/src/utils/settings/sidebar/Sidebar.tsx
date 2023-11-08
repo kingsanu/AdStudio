@@ -17,7 +17,6 @@ const Sidebar: ForwardRefRenderFunction<HTMLDivElement, PropsWithChildren<Sideba
                 background: '#fff',
                 width: '100%',
                 height: '100%',
-                position: 'absolute',
                 overflowY: 'auto',
                 pointerEvents: 'auto',
                 '@media (max-width: 900px)': {

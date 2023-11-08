@@ -83,7 +83,7 @@ export const GlobalStyle: FC<GlobalStyleProps> = ({ fonts, mode = 'view' }) => {
         `}
       />
       {fonts.map((font) => (
-        <FontStyle key={font.name} font={font} />
+        <FontStyle key={font.family} font={font} />
       ))}
     </Fragment>
   );

@@ -172,7 +172,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       state.sideBarTab = null;
       state.openPageSettings = !state.openPageSettings;
     },
-    setSidebarTab: (tab: string | null) => {
+    setSidebarTab: (tab: string | null = null) => {
       state.openPageSettings = false;
       state.sideBarTab = tab;
     },

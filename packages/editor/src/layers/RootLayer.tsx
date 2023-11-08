@@ -4,7 +4,7 @@ import { LayerComponent } from '@canva/types';
 import { RootContentProps, RootContent, ImageContentProps } from '.';
 
 export interface RootLayerProps extends Omit<RootContentProps, 'image'> {
-    image?: ImageContentProps['image'];
+    image?: ImageContentProps['image']|null;
 }
 const RootLayer: LayerComponent<PropsWithChildren<RootLayerProps>> = ({
     boxSize,

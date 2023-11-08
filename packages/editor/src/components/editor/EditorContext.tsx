@@ -1,4 +1,4 @@
-import { EditorActions, EditorQuery, EditorState, FontData, GetFontQuery } from '@canva/types';
+import { EditorActions, EditorQuery, EditorState, FontDataApi, GetFontQuery } from '@canva/types';
 import { createContext } from 'react';
 
 export type EditorConfig = {
@@ -8,7 +8,7 @@ export type EditorContext = {
     getState: () => EditorState;
     query: EditorQuery;
     actions: EditorActions;
-    getFonts: (query: GetFontQuery) => Promise<FontData[]>;
+    getFonts: (query: GetFontQuery) => Promise<FontDataApi[]>;
     config: EditorConfig;
 };
 

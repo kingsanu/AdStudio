@@ -32,7 +32,7 @@ export const setFontFamily: (fontFamily: string) => Command = (fontFamily) => {
             let { attrs } = node;
             attrs = {
                 ...attrs,
-                fontFamily,
+                fontFamily
             };
 
             tr.setNodeMarkup(pos, nodeType, attrs, node.marks);

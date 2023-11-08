@@ -46,7 +46,7 @@ const toDOM = (node: Node): DOMOutputSpec => {
     }
 
     if (fontFamily) {
-        style += `font-family: ${fontFamily};`;
+        style += `font-family: '${fontFamily}';`;
     }
     if (textTransform) {
         style += `text-transform: ${textTransform};`;

@@ -126,7 +126,10 @@ const CommonSettings = () => {
           gridGap: 8,
         }}
       >
-        <SettingButton css={{minWidth: 75}} onClick={() => actions.setSidebar('LAYER_MANAGEMENT')}>
+        <SettingButton css={{minWidth: 75}} onClick={() => {
+          actions.setSidebarTab();
+          actions.setSidebar('LAYER_MANAGEMENT');
+      }}>
           <span css={{ padding: '0 4px' }}>Position</span>
         </SettingButton>
 

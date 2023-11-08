@@ -147,11 +147,8 @@ const Sidebar = () => {
       </div>
       <div
         css={{
-          width: 360,
-          position: 'absolute',
+          width: state.sidebar ? 360 : 0,
           overflow: 'hidden',
-          top: 0,
-          left: 73,
           height: '100%',
           pointerEvents: 'none',
         }}
