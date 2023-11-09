@@ -160,9 +160,9 @@ const TextContent: FC<{ onClose: () => void }> = ({ onClose }) => {
           text='Add a heading'
           css={{
             fontSize: 28,
-            height: 60,
+            height: 'auto',
             fontWeight: 600,
-            fontFamily: 'Canva Sans'
+            padding: '10px 6px'
           }}
         />
         <DefaultTextButton

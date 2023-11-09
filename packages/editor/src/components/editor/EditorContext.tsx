@@ -3,6 +3,13 @@ import { createContext } from 'react';
 
 export type EditorConfig = {
     assetPath: string;
+    frame: {
+        defaultImage: {
+            url: string;
+            width: number;
+            height: number;
+        }
+    }
 };
 export type EditorContext = {
     getState: () => EditorState;

@@ -45,6 +45,13 @@ const Test = () => {
         <Editor
             config={{
                 assetPath: './assets',
+                frame: {
+                    defaultImage: {
+                        url: "./assets/images/frame-placeholder.png",
+                        width: 1200,
+                        height: 800
+                    }
+                }
             }}
             getFonts={getFonts}
         >

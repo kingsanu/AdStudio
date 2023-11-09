@@ -16,7 +16,7 @@ interface Frame {
 const FrameContent: FC<{ onClose: () => void }> = ({ onClose }) => {
   const [frames, setFrames] = useState<Frame[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { actions } = useEditor();
+  const { actions, query } = useEditor();
 
   useEffect(() => {
     async function fetchFrames() {
@@ -28,6 +28,11 @@ const FrameContent: FC<{ onClose: () => void }> = ({ onClose }) => {
   }, []);
 
   const addFrame = async (frame: Frame, position?: Delta) => {
+    const pageSize = query.getPageSize();
+    const pageRatio = pageSize.width / pageSize.height
+    const frameRatio = frame.width / frame.height
+    const scale = pageRatio > frameRatio ? pageSize.height * .5 / frame.height : pageSize.width * .5 / frame.width
+    
     actions.addFrameLayer({
       type: {
         resolvedName: 'FrameLayer',
@@ -35,22 +40,26 @@ const FrameContent: FC<{ onClose: () => void }> = ({ onClose }) => {
       props: {
         position,
         boxSize: {
-          width: frame.width,
-          height: frame.height,
+          width: frame.width * scale,
+          height: frame.height * scale,
         },
         rotate: 0,
         clipPath: frame.clipPath,
+        scale,
         image: {
           boxSize: {
             width: frame.width,
             height: frame.height,
           },
-          position,
+          position: {
+            x: 0,
+            y: 0
+          },
           rotate: 0,
           thumb: frame.img,
           url: frame.img,
         },
-      },
+      }
     });
     if (isMobile) {
       onClose();
