@@ -4,6 +4,7 @@ import React, {
   FocusEvent,
   FocusEventHandler,
   KeyboardEvent,
+  SVGProps,
   useEffect,
   useState,
 } from 'react';
@@ -25,6 +26,7 @@ export interface ReactSearchAutocompleteProps<T> {
   onSelect?: (result: T) => void;
   onFocus?: FocusEventHandler<HTMLInputElement>;
   onClear?: Function;
+  svgIcon?: SVGProps<SVGSVGElement>;
   showIcon?: boolean;
   showClear?: boolean;
   maxResults?: number;
@@ -50,6 +52,7 @@ export default function SearchBox<T>({
   onSelect = () => {},
   onFocus = () => {},
   onClear = () => {},
+  svgIcon,
   showIcon = true,
   showClear = true,
   maxResults = MAX_RESULTS,
@@ -134,12 +137,6 @@ export default function SearchBox<T>({
     setSearchString(result[resultStringKeyName]);
     setHighlightedItem(0);
   };
-
-  // const fuseResults = (keyword: string) =>
-  //   fuse
-  //     .search(keyword, { limit: maxResults })
-  //     .map((result) => ({ ...result.item }))
-  //     .slice(0, maxResults);
 
   const callOnSearch = (keyword: string) => {
     onSearch(keyword);
@@ -231,6 +228,7 @@ export default function SearchBox<T>({
             onFocus={handleOnFocus}
             onClear={onClear}
             placeholder={placeholder}
+            svgIcon={svgIcon}
             showIcon={showIcon}
             showClear={showClear}
             setHighlightedItem={handleSetHighlightedItem}

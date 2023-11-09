@@ -2,6 +2,7 @@ import {
   ChangeEventHandler,
   FocusEvent,
   FocusEventHandler,
+  SVGProps,
   useRef,
 } from 'react';
 import styled from 'styled-components';
@@ -17,6 +18,7 @@ interface SearchInputProps {
   onFocus: FocusEventHandler<HTMLInputElement>;
   onClear: Function;
   placeholder: string;
+  svgIcon?: SVGProps<SVGSVGElement>;
   showIcon: boolean;
   showClear: boolean;
   maxLength: number;
@@ -31,6 +33,7 @@ export default function SearchInput({
   onFocus,
   onClear,
   placeholder,
+  svgIcon,
   showIcon = true,
   showClear = true,
   maxLength,
@@ -53,7 +56,7 @@ export default function SearchInput({
 
   return (
     <StyledSearchInput>
-      <SearchIcon showIcon={showIcon} />
+      <SearchIcon icon={svgIcon} showIcon={showIcon} />
       <input
         type='text'
         ref={ref}

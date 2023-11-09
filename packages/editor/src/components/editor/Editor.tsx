@@ -1,11 +1,11 @@
 import { FC, PropsWithChildren } from 'react';
 import { EditorConfig, EditorContext } from './EditorContext';
-import { FontData, GetFontQuery } from '@canva/types';
+import { FontDataApi, GetFontQuery } from '@canva/types';
 import { useEditorStore } from '../../hooks/useEditorStore';
 
 export type EditorProps = {
     config: EditorConfig;
-    getFonts: (query: GetFontQuery) => Promise<FontData[]>;
+    getFonts: (query: GetFontQuery) => Promise<FontDataApi[]>;
 };
 
 const Editor: FC<PropsWithChildren<EditorProps>> = ({ getFonts, config, children }) => {

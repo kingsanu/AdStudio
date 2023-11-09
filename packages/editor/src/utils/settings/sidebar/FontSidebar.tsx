@@ -1,5 +1,4 @@
 import React, {
-  FormEvent,
   forwardRef,
   ForwardRefRenderFunction,
   useCallback,
@@ -16,7 +15,6 @@ import { useUsedFont } from '@canva/hooks/useUsedFont';
 import { useEditor } from '@canva/hooks';
 import ArrowLeftIcon from '@canva/icons/ArrowLeftIcon';
 import CheckIcon from '@canva/icons/CheckIcon';
-import SearchIcon from '@canva/icons/SearchIcon';
 import ArrowRightIcon from '@canva/icons/ArrowRightIcon';
 import ArrowDownIcon from '@canva/icons/ArrowDownIcon';
 import styled from '@emotion/styled';
@@ -27,6 +25,9 @@ import {
 } from '@canva/utils/fontHelper';
 import FontStyle from './FontStyle';
 import { some } from 'lodash';
+import FontSearchBox from '../components/FontSearchBox';
+import TrendingIcon from '@canva/icons/TrendingIcon';
+import DocumentIcon from '@canva/icons/DocumentIcon';
 
 const ListItem = styled('div')`
   height: 40px;
@@ -82,7 +83,6 @@ const FontSidebar: ForwardRefRenderFunction<
   FontSidebarProps
 > = ({ selected, onChangeFontFamily, ...props }, ref) => {
   const dataRef = useRef(false);
-  const qRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { getFonts } = useContext(EditorContext);
   const { usedFonts } = useUsedFont();
@@ -137,12 +137,11 @@ const FontSidebar: ForwardRefRenderFunction<
     };
   }, [loadFontList, fontList]);
 
-  const handleSearch = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSearch = async (keyword: string) => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = 0;
     }
-    setKeyword(qRef.current?.value || '');
+    setKeyword(keyword);
     await loadFontList(0);
   };
 
@@ -209,37 +208,21 @@ const FontSidebar: ForwardRefRenderFunction<
             <ArrowLeftIcon />
           </div>
         </div>
-        <div
-          css={{
-            borderRadius: 4,
-            boxShadow: '0 0 0 1px rgba(43,59,74,.3)',
-            margin: 16,
-          }}
-        >
+        <div css={{ padding: '16px 16px 0' }}>
+          <FontSearchBox onSearch={handleSearch} />
+        </div>
+        <div ref={scrollRef} css={{ flexGrow: 1, overflowY: 'auto' }}>
           <div
             css={{
-              height: 40,
-              borderRadius: 4,
-              padding: '0 12px',
+              padding: '16px 16px 8px 8px',
+              fontWeight: 700,
               display: 'flex',
+              columnGap: 8,
               alignItems: 'center',
             }}
           >
-            <div css={{ fontSize: 24, marginRight: 8, flexShrink: 0 }}>
-              <SearchIcon />
-            </div>
-            <form onSubmit={handleSearch}>
-              <input
-                ref={qRef}
-                type={'text'}
-                css={{ width: '100%', height: '100%' }}
-              />
-            </form>
-          </div>
-        </div>
-        <div ref={scrollRef} css={{ flexGrow: 1, overflowY: 'auto' }}>
-          <div css={{ padding: '16px 20px', fontWeight: 700 }}>
-            Document fonts
+            <DocumentIcon css={{ width: 24 }} />
+            <span>Document fonts</span>
           </div>
           {usedFonts.map((font, idx) => (
             <div key={idx + '-' + font.family}>
@@ -263,15 +246,15 @@ const FontSidebar: ForwardRefRenderFunction<
                     </button>
                   )}
                 </span>
-                <span css={{ fontFamily: font.family }}>{font.family}</span>
-                {openingItems.indexOf(idx) === -1 &&
-                  some(font.styles, (fontStyle) =>
-                    selected.map((s) => s.name).includes(fontStyle.name)
-                  ) && (
-                    <span>
-                      <CheckIcon />
-                    </span>
-                  )}
+                <FontDisplay
+                  css={{
+                    fontFamily: `'${font.name}'`,
+                  }}
+                  fontStyle={font.style}
+                >
+                  {!font.styles?.length ? font.name : font.family}
+                </FontDisplay>
+                <span></span>
               </ListItem>
               {openingRecentItems.indexOf(idx) > -1 &&
                 font.styles &&
@@ -291,17 +274,23 @@ const FontSidebar: ForwardRefRenderFunction<
                     >
                       {handleFontStyleName(fontStyle.style)}
                     </FontDisplay>
-                    <span>
-                      {selected.map((s) => s.name).includes(fontStyle.name) && (
-                        <CheckIcon />
-                      )}
-                    </span>
+                    <span></span>
                   </ListItem>
                 ))}
             </div>
           ))}
           <div css={{ borderTop: '1px solid rgba(217, 219, 228, 0.6)' }}>
-            <div css={{ padding: '16px 20px', fontWeight: 700 }}>Fonts</div>
+            <div
+              css={{
+                padding: '16px 16px 8px 8px',
+                fontWeight: 700,
+                display: 'flex',
+                columnGap: 8,
+              }}
+            >
+              <TrendingIcon />
+              <span>Popular fonts</span>
+            </div>
             {fontList.map((font, idx) => (
               <div key={idx + '-' + font.name}>
                 <ListItem onClick={() => onChangeFontFamily(font)}>
@@ -332,7 +321,6 @@ const FontSidebar: ForwardRefRenderFunction<
                   >
                     {!font.styles?.length ? font.name : font.family}
                   </FontDisplay>
-                  <span></span>
                   <span>
                     {openingItems.indexOf(idx) === -1 &&
                       some(font.styles, (fontStyle) =>

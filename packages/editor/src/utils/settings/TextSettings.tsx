@@ -222,7 +222,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
           name: usedFont.name,
           url: usedFont.url,
           style: usedFont.style,
-          styles: filter(fontList, (f) => f.family === usedFont.family),
+          styles: filter(fontList, (f) => f.family === usedFont.family && f.name !== usedFont.name),
         };
       }),
       'name'
