@@ -6,7 +6,7 @@ import PreviewModal from './PreviewModal';
 import axios from 'axios';
 import { isArray } from 'lodash';
 import AppLayerSettings from './layout/AppLayerSettings';
-import { FontData, GetFontQuery } from '@canva/types';
+import { FontDataApi, GetFontQuery } from '@canva/types';
 import { Editor } from '@canva/components/editor';
 import { PageControl } from '@canva/utils/settings';
 
@@ -28,7 +28,7 @@ const Test = () => {
 
             return params;
         };
-        return axios.get<FontData[]>(`/fonts?${buildParams(query)}`).then((res) => res.data);
+        return axios.get<FontDataApi[]>(`/fonts?${buildParams(query)}`).then((res) => res.data);
     }, []);
     const [viewPortHeight, setViewPortHeight] = useState<number>();
     useEffect(() => {

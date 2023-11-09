@@ -145,7 +145,6 @@ const LayerContextMenu: ForwardRefRenderFunction<HTMLDivElement> = (_, ref) => {
         }
     };
     const handleShowLayers = () => {
-        actions.setSidebarTab();
         actions.setSidebar('LAYER_MANAGEMENT');
         actions.hideContextMenu();
     };

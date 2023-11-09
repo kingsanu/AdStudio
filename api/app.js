@@ -8,6 +8,7 @@ const fs = require('fs');
 app.listen(4000, () => {
   console.log('Server has started! Open http://localhost:4000');
 });
+app.use(express.static(__dirname + '/public')); //Serves resources from public folder
 
 function paginateArrayWithFilter(array, size = 30, index = 0, keyword = '') {
   const startIndex = index * size;

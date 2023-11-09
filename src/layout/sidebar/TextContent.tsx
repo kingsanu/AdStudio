@@ -27,25 +27,29 @@ const simpleTxtLayer = (
     resolvedName: 'TextLayer',
   },
   props: {
-    text: `<p style="font-family: Roboto; color: rgb(0, 0, 0); font-size: ${fontSize}px; text-align: center"><strong>${text}</strong></p>`,
     position,
     boxSize,
     scale: 1,
     rotate: 0,
+    text: `<p style="text-align: center;font-family: 'Canva Sans Regular';font-size: ${fontSize}px;color: rgb(0, 0, 0);line-height: 1.4;letter-spacing: normal;"><strong><span style="color: rgb(0, 0, 0);">${text}</span></strong></p>`,
     fonts: [
       {
-        name: 'Roboto',
-        fonts: [
+        family: 'Canva Sans',
+        name: 'Canva Sans Regular',
+        url: 'http://fonts.gstatic.com/s/alexandria/v3/UMBCrPdDqW66y0Y2usFeQCH18mulUxBvI9r7TqbCHJ8BRq0b.woff2',
+        style: 'regular',
+        styles: [
           {
-            style: 'Bold',
-            urls: [
-              'https://lidojs-fonts.s3.us-east-2.amazonaws.com/Roboto/Roboto-Bold.woff2',
-            ],
+            family: 'Canva Sans',
+            name: 'Canva Sans Bold 300',
+            url: 'http://fonts.gstatic.com/s/alexandria/v3/UMBCrPdDqW66y0Y2usFeQCH18mulUxBvI9qlTqbCHJ8BRq0b.woff2',
+            style: '300',
           },
           {
-            urls: [
-              'https://lidojs-fonts.s3.us-east-2.amazonaws.com/Roboto/Roboto-Regular.woff2',
-            ],
+            family: 'Canva Sans',
+            name: 'Canva Sans Bold 500',
+            url: 'http://fonts.gstatic.com/s/alexandria/v3/UMBCrPdDqW66y0Y2usFeQCH18mulUxBvI9rJTqbCHJ8BRq0b.woff2',
+            style: '500',
           },
         ],
       },
@@ -121,7 +125,11 @@ const TextContent: FC<{ onClose: () => void }> = ({ onClose }) => {
     >
       <CloseSidebarButton onClose={onClose} />
       <div>
-        <Button onClick={() => handleAddNewText()} text='Add a text box' style={{width: '100%'}} />
+        <Button
+          onClick={() => handleAddNewText()}
+          text='Add a text box'
+          style={{ width: '100%' }}
+        />
       </div>
       <p
         css={{
@@ -144,9 +152,9 @@ const TextContent: FC<{ onClose: () => void }> = ({ onClose }) => {
               'Add a heading',
               {
                 width: 400,
-                height: 100,
+                height: 70,
               },
-              50
+              45
             )
           }
           text='Add a heading'
@@ -154,6 +162,7 @@ const TextContent: FC<{ onClose: () => void }> = ({ onClose }) => {
             fontSize: 28,
             height: 60,
             fontWeight: 600,
+            fontFamily: 'Canva Sans'
           }}
         />
         <DefaultTextButton
@@ -162,14 +171,14 @@ const TextContent: FC<{ onClose: () => void }> = ({ onClose }) => {
               'Add a subheading',
               {
                 width: 300,
-                height: 52,
+                height: 45,
               },
-              14
+              32
             )
           }
           text='Add a subheading'
           css={{
-            fontSize: 14,
+            fontSize: 18,
             height: 52,
             fontWeight: 600,
           }}
@@ -180,9 +189,9 @@ const TextContent: FC<{ onClose: () => void }> = ({ onClose }) => {
               'Add a little bit of body text',
               {
                 width: 300,
-                height: 48,
+                height: 22,
               },
-              14
+              16
             )
           }
           text='Add a little bit of body text'

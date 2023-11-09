@@ -89,7 +89,7 @@ const Sidebar = () => {
             {state.sideBarTab === 'Template' && (
               <TemplateContent
                 onClose={() => {
-                  actions.setSidebarTab(null);
+                  actions.setSidebarTab();
                   actions.setSidebar();
                 }}
               />
@@ -97,7 +97,7 @@ const Sidebar = () => {
             {state.sideBarTab === 'Text' && (
               <TextContent
                 onClose={() => {
-                  actions.setSidebarTab(null);
+                  actions.setSidebarTab();
                   actions.setSidebar();
                 }}
               />
@@ -105,7 +105,7 @@ const Sidebar = () => {
             {state.sideBarTab === 'Frame' && (
               <FrameContent
                 onClose={() => {
-                  actions.setSidebarTab(null);
+                  actions.setSidebarTab();
                   actions.setSidebar();
                 }}
               />
@@ -113,7 +113,7 @@ const Sidebar = () => {
             {state.sideBarTab === 'Image' && (
               <ImageContent
                 onClose={() => {
-                  actions.setSidebarTab(null);
+                  actions.setSidebarTab();
                   actions.setSidebar();
                 }}
               />
@@ -121,7 +121,7 @@ const Sidebar = () => {
             {state.sideBarTab === 'Video' && (
               <VideoContent
                 onClose={() => {
-                  actions.setSidebarTab(null);
+                  actions.setSidebarTab();
                   actions.setSidebar();
                 }}
               />
@@ -129,7 +129,7 @@ const Sidebar = () => {
             {state.sideBarTab === 'Shape' && (
               <ShapeContent
                 onClose={() => {
-                  actions.setSidebarTab(null);
+                  actions.setSidebarTab();
                   actions.setSidebar();
                 }}
               />
@@ -138,7 +138,7 @@ const Sidebar = () => {
             <UploadContent
               visibility={state.sideBarTab === 'Upload'}
               onClose={() => {
-                actions.setSidebarTab(null);
+                actions.setSidebarTab();
                 actions.setSidebar();
               }}
             />
@@ -151,6 +151,11 @@ const Sidebar = () => {
           overflow: 'hidden',
           height: '100%',
           pointerEvents: 'none',
+          ...(state.sideBarTab ? {
+            position: 'absolute',
+            top: 0,
+            left: 73
+          } : {})
         }}
         id={'settings'}
       />

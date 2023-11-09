@@ -2,6 +2,25 @@
   "kind": "webfonts#webfontList",
   "items": [
     {
+      "family": "Canva Sans",
+      "variants": [
+        "300",
+        "regular",
+        "500"
+      ],
+      "subsets": ["arabic", "latin", "latin-ext", "utf8"],
+      "version": "v3",
+      "lastModified": "2023-03-21",
+      "files": {
+        "300": "http://fonts.gstatic.com/s/alexandria/v3/UMBCrPdDqW66y0Y2usFeQCH18mulUxBvI9qlTqbCHJ8BRq0b.woff2",
+        "500": "http://fonts.gstatic.com/s/alexandria/v3/UMBCrPdDqW66y0Y2usFeQCH18mulUxBvI9rJTqbCHJ8BRq0b.woff2",
+        "regular": "http://fonts.gstatic.com/s/alexandria/v3/UMBCrPdDqW66y0Y2usFeQCH18mulUxBvI9r7TqbCHJ8BRq0b.woff2"
+      },
+      "category": "sans-serif",
+      "kind": "webfonts#webfont",
+      "menu": "http://fonts.gstatic.com/s/alexandria/v3/UMBCrPdDqW66y0Y2usFeQCH18mulUxBvI9r7TpbGFp4.woff2"
+    },
+    {
       "family": "ABeeZee",
       "variants": ["regular", "italic"],
       "subsets": ["latin", "latin-ext"],

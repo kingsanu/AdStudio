@@ -37,7 +37,6 @@ const ColorSettings: FC<PropsWithChildren<ColorSettingsProps>> = ({
     return (
         <Fragment>
             <SettingButton onClick={() => {
-                actions.setSidebarTab();
                 actions.setSidebar('CHOOSING_COLOR');
         }}>
                 {!children && (

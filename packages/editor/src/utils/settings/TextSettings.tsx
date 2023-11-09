@@ -1317,7 +1317,6 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
               sidebar === 'FONT_FAMILY' ? 'rgba(57,76,96,.15)' : '#fff',
           }}
           onClick={() => {
-            actions.setSidebarTab();
             actions.setSidebar('FONT_FAMILY');
           }}
         >
@@ -1451,7 +1450,9 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
           justifyContent: 'center',
           fontSize: 24,
         }}
-        onClick={() => actions.setSidebar('CHOOSING_COLOR')}
+        onClick={() => {
+          actions.setSidebar('CHOOSING_COLOR')
+        }}
       >
         <TextAUnderlineIcon />
         <div
@@ -1605,7 +1606,6 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
       <SettingButton
         css={{ minWidth: 70 }}
         onClick={() => {
-          actions.setSidebarTab();
           actions.setSidebar('TEXT_EFFECT');
         }}
       >

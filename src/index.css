@@ -1,6 +1,6 @@
 html,body {
   margin: 0;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Canva Sans', sans-serif;
   color: #5E6278;
   font-size: 14px;
 }
@@ -106,6 +106,7 @@ textarea {
   padding: 0;
   line-height: inherit;
   color: inherit;
+  font-family: 'Canva Sans', sans-serif;
 }
 
 pre,

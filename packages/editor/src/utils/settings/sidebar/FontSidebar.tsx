@@ -13,7 +13,6 @@ import { FontData, FontDataApi } from '@canva/types';
 import { EditorContext } from '@canva/components/editor/EditorContext';
 import { useUsedFont } from '@canva/hooks/useUsedFont';
 import { useEditor } from '@canva/hooks';
-import ArrowLeftIcon from '@canva/icons/ArrowLeftIcon';
 import CheckIcon from '@canva/icons/CheckIcon';
 import ArrowRightIcon from '@canva/icons/ArrowRightIcon';
 import ArrowDownIcon from '@canva/icons/ArrowDownIcon';
@@ -169,45 +168,6 @@ const FontSidebar: ForwardRefRenderFunction<
           overflowY: 'auto',
         }}
       >
-        <div
-          css={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            height: 48,
-            borderBottom: '1px solid rgba(57,76,96,.15)',
-            padding: '0 20px',
-          }}
-        >
-          <p
-            css={{
-              lineHeight: '48px',
-              fontWeight: 600,
-              color: '#181C32',
-              flexGrow: 1,
-            }}
-          >
-            Font
-          </p>
-          <div
-            css={{
-              fontSize: 20,
-              flexShrink: 0,
-              width: 32,
-              height: 32,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            onClick={() => {
-              actions.setSidebar();
-            }}
-          >
-            <ArrowLeftIcon />
-          </div>
-        </div>
         <div css={{ padding: '16px 16px 0' }}>
           <FontSearchBox onSearch={handleSearch} />
         </div>
@@ -252,7 +212,7 @@ const FontSidebar: ForwardRefRenderFunction<
                   }}
                   fontStyle={font.style}
                 >
-                  {!font.styles?.length ? font.name : font.family}
+                  {font.family} ({handleFontStyleName(font.style)})
                 </FontDisplay>
                 <span></span>
               </ListItem>

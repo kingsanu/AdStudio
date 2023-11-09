@@ -127,7 +127,6 @@ const CommonSettings = () => {
         }}
       >
         <SettingButton css={{minWidth: 75}} onClick={() => {
-          actions.setSidebarTab();
           actions.setSidebar('LAYER_MANAGEMENT');
       }}>
           <span css={{ padding: '0 4px' }}>Position</span>
