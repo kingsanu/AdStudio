@@ -31,6 +31,8 @@
       "@canva/drag-and-drop/*": ["packages/editor/src/drag-and-drop/*"],
       "@canva/search-autocomplete": ["packages/editor/src/search-autocomplete"],
       "@canva/search-autocomplete/*": ["packages/editor/src/search-autocomplete/*"],
+      "@canva/tooltip": ["packages/editor/src/tooltip"],
+      "@canva/tooltip/*": ["packages/editor/src/tooltip/*"],
       "@canva/icons/*": ["packages/editor/src/icons/*"],
       "@canva/utils": ["packages/editor/src/utils"],
       "@canva/utils/*": ["packages/editor/src/utils/*"],

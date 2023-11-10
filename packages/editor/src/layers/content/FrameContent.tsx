@@ -29,7 +29,6 @@ export const FrameContent: FC<FrameContentProps> = ({
   color,
   gradientBackground,
 }) => {
-  console.log(clipPath)
   return (
     <div
       css={{

@@ -1,3 +1,5 @@
+import { Tooltip as ReactTooltip } from '@canva/tooltip';
+import { generateRandomID } from '@canva/utils/identityGenerator';
 import { ForwardRefRenderFunction, PropsWithChildren, forwardRef } from 'react';
 
 interface Props {
@@ -5,43 +7,64 @@ interface Props {
   className?: string;
   disabled?: boolean;
   isActive?: boolean;
+  tooltip?: string;
+  styles?: {
+    color: string;
+    disabledColor: string;
+  };
 }
 const EditorButton: ForwardRefRenderFunction<
   HTMLButtonElement,
   PropsWithChildren<Props>
 > = (
-  { children, disabled = false, isActive = false, className = '', ...props },
+  {
+    children,
+    disabled = false,
+    isActive = false,
+    className = '',
+    styles = {
+      color: '#0d1216',
+      disabledColor: 'rgba(64,87,109,.4)',
+    },
+    tooltip,
+    ...props
+  },
   ref
 ) => {
+  const btnId = 'btn_' + generateRandomID();
   return (
-    <button
-      ref={ref}
-      className={className}
-      {...props}
-      css={{
-        padding: '0 4px',
-        display: 'flex',
-        height: 32,
-        minWidth: 32,
-        alignItems: 'center',
-        justifyContent: 'center',
-        transition: 'background-color 0.3s ease',
-        borderRadius: 6,
-        fontSize: 14,
-        fontWeight: 400,
-        ...(disabled
-          ? { color: 'rgba(64,87,109,.4)', cursor: 'not-allowed' }
-          : {
-              color: '#0d1216',
-              ':hover': {
-                backgroundColor: 'rgba(64,87,109,.2)',
-              },
-              ...(isActive ? { backgroundColor: 'rgba(64,87,109,.2)' } : {}),
-            }),
-      }}
-    >
-      {children}
-    </button>
+    <>
+      <button
+        ref={ref}
+        data-tooltip-id={btnId}
+        className={className}
+        {...props}
+        css={{
+          padding: '0 4px',
+          display: 'flex',
+          height: 32,
+          minWidth: 32,
+          alignItems: 'center',
+          justifyContent: 'center',
+          transition: 'background-color 0.3s ease',
+          borderRadius: 6,
+          fontSize: 14,
+          fontWeight: 400,
+          ...(disabled
+            ? { color: styles.disabledColor, cursor: 'not-allowed' }
+            : {
+                color: styles.color,
+                ':hover': {
+                  backgroundColor: 'rgba(64,87,109,.2)',
+                },
+                ...(isActive ? { backgroundColor: 'rgba(64,87,109,.2)' } : {}),
+              }),
+        }}
+      >
+        {children}
+      </button>
+      {tooltip && <ReactTooltip id={btnId} content={tooltip} />}
+    </>
   );
 };
 

@@ -95,7 +95,7 @@ export class History {
         const { inversePatches } = this.timeline[this.pointer];
         this.pointer = this.pointer - 1;
         const patches = inversePatches.filter((patch) => {
-            return patch.path[0] !== 'textEditor'; //textEditor doesn't work with history
+            return patch.path[0] !== 'textEditor'; // TextEditor doesn't work with history
         });
         return applyPatches(state, patches);
     }
@@ -108,7 +108,7 @@ export class History {
         this.pointer = this.pointer + 1;
         const { patches } = this.timeline[this.pointer];
         const p = patches.filter((patch) => {
-            return patch.path[0] !== 'textEditor'; //textEditor doesn't work with history
+            return patch.path[0] !== 'textEditor'; // TextEditor doesn't work with history
         });
         return applyPatches(state, p);
     }

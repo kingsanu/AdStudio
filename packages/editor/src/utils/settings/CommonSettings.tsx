@@ -9,6 +9,7 @@ import { isRootLayer } from '../layer/layers';
 import LockIcon from '@canva/icons/LockIcon';
 import LockOpenIcon from '@canva/icons/LockOpenIcon';
 import TransparencyIcon from '@canva/icons/TransparencyIcon';
+import SettingDivider from './components/SettingDivider';
 
 const CommonSettings = () => {
   const transparencyButtonRef = useRef<HTMLDivElement>(null);
@@ -138,13 +139,7 @@ const CommonSettings = () => {
               (isRootLayer(selectedLayers[0]) &&
                 selectedLayers[0].data.props.image)) && (
               <Fragment>
-                <div
-                  css={{
-                    height: 24,
-                    width: `1px`,
-                    background: 'rgba(57,76,96,.15)',
-                  }}
-                />
+                <SettingDivider />
                 <SettingButton
                   ref={transparencyButtonRef}
                   css={{ fontSize: 20, minWidth: 30 }}

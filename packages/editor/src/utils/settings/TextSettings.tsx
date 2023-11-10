@@ -7,7 +7,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-
+import { Tooltip as ReactTooltip } from '@canva/tooltip';
 import FontSidebar from './sidebar/FontSidebar';
 import TextEffectSidebar from './sidebar/TextEffectSidebar';
 import ColorSidebar from './sidebar/ColorSidebar';
@@ -222,7 +222,10 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
           name: usedFont.name,
           url: usedFont.url,
           style: usedFont.style,
-          styles: filter(fontList, (f) => f.family === usedFont.family && f.name !== usedFont.name),
+          styles: filter(
+            fontList,
+            (f) => f.family === usedFont.family && f.name !== usedFont.name
+          ),
         };
       }),
       'name'
@@ -1354,24 +1357,22 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
             borderRadius: 4,
           }}
         >
-          <div
+          <SettingButton
             css={{
-              width: 32,
-              height: 32,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              cursor: 'pointer',
-              fontSize: 12,
+              borderRadius: 0,
             }}
             onClick={decreaseFontSize}
+            tooltip='Decrease font size'
           >
             <MinusIcon />
-          </div>
+          </SettingButton>
           <div
             ref={fontSizeRef}
             css={{
-              width: 32,
+              width: 42,
               height: 32,
               borderLeft: '1px solid rgba(43,59,74,.3)',
               borderRight: '1px solid rgba(43,59,74,.3)',
@@ -1379,9 +1380,10 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
             onClick={() => setOpenFontSizeSelection(true)}
           >
             <input
+              data-tooltip-id='btn-change-fontsize'
               ref={fontSizeInputRef}
               css={{
-                width: 28,
+                width: 38,
                 height: '100%',
                 outline: 0,
                 border: 0,
@@ -1427,23 +1429,27 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
               })}
             </div>
           </Popover>
-          <div
+          <SettingButton
             css={{
-              width: 32,
-              height: 32,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              fontSize: 12,
+              borderRadius: 0,
             }}
             onClick={increaseFontSize}
+            tooltip='Increase font size'
           >
             <PlusIcon />
-          </div>
+          </SettingButton>
+          <ReactTooltip
+            id='btn-change-fontsize'
+            content='Font size'
+            place={openFontSizeSelection ? 'left' : 'bottom'}
+          />
         </div>
       </div>
-      <div
+      <SettingButton
         css={{
           position: 'relative',
           display: 'flex',
@@ -1451,8 +1457,9 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
           fontSize: 24,
         }}
         onClick={() => {
-          actions.setSidebar('CHOOSING_COLOR')
+          actions.setSidebar('CHOOSING_COLOR');
         }}
+        tooltip='Text color'
       >
         <TextAUnderlineIcon />
         <div
@@ -1465,10 +1472,11 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         >
           <div
             css={{
-              paddingTop: '22.2222%',
+              paddingBottom: '16%',
               height: 0,
               position: 'relative',
-              width: '100%',
+              margin: 'auto',
+              width: '80%',
             }}
           >
             <span
@@ -1483,12 +1491,13 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
             />
           </div>
         </div>
-      </div>
+      </SettingButton>
       <SettingButton
         css={{ fontSize: 24 }}
         disabled={!fontStyles(fontFamily).includes('Bold')}
         isActive={isBold}
         onClick={() => toggleStyle('BOLD')}
+        tooltip='Bold'
       >
         <FormatBoldIcon />
       </SettingButton>
@@ -1497,6 +1506,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         disabled={!fontStyles(fontFamily).includes('Italic')}
         isActive={isItalic}
         onClick={() => toggleStyle('ITALIC')}
+        tooltip='Italics'
       >
         <FormatItalicIcon />
       </SettingButton>
@@ -1504,6 +1514,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         css={{ fontSize: 24 }}
         isActive={isUnderline}
         onClick={() => toggleStyle('UNDERLINE')}
+        tooltip='Underline'
       >
         <FormatUnderlineIcon />
       </SettingButton>
@@ -1511,6 +1522,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         css={{ fontSize: 24 }}
         isActive={isUppercase}
         onClick={() => toggleStyle('UPPERCASE')}
+        tooltip='Uppercase'
       >
         <FormatUppercaseIcon />
       </SettingButton>
@@ -1522,6 +1534,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         css={{ fontSize: 24 }}
         isActive={isAlignLeft}
         onClick={() => updateTextAlign('left')}
+        tooltip='Left'
       >
         <TextAlignLeftIcon />
       </SettingButton>
@@ -1529,6 +1542,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         css={{ fontSize: 24 }}
         isActive={isAlignCenter}
         onClick={() => updateTextAlign('center')}
+        tooltip='Center'
       >
         <TextAlignCenterIcon />
       </SettingButton>
@@ -1536,6 +1550,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         css={{ fontSize: 24 }}
         isActive={isAlignRight}
         onClick={() => updateTextAlign('right')}
+        tooltip='Right'
       >
         <TextAlignRightIcon />
       </SettingButton>
@@ -1543,6 +1558,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         css={{ fontSize: 24 }}
         isActive={isAlignJustify}
         onClick={() => updateTextAlign('justify')}
+        tooltip='Justify'
       >
         <TextAlignJustifyIcon />
       </SettingButton>
@@ -1554,6 +1570,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         css={{ fontSize: 24 }}
         isActive={isBulletList}
         onClick={toggleBulletList}
+        tooltip='List'
       >
         <ListBulletsIcon />
       </SettingButton>
@@ -1561,6 +1578,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         css={{ fontSize: 24 }}
         isActive={isOrderedList}
         onClick={toggleOrderedList}
+        tooltip='List'
       >
         <ListNumbersIcon />
       </SettingButton>
@@ -1569,6 +1587,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         ref={spacingRef}
         css={{ fontSize: 24 }}
         onClick={() => setOpenSpacingSetting(true)}
+        tooltip='Spacing'
       >
         <LineSpacingIcon />
       </SettingButton>

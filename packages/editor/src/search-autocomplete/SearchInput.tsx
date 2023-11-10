@@ -92,7 +92,7 @@ const StyledSearchInput = styled.div`
   > input {
     width: 100%;
 
-    padding: 0 0 0 13px;
+    padding: 2px 0 0 13px;
 
     border: none;
     outline: none;

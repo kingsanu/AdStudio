@@ -7,16 +7,18 @@ import {
 } from 'react';
 interface SettingButtonProps extends HTMLProps<HTMLElement> {
   isActive?: boolean;
+  tooltip?: string;
 }
 const SettingButton: ForwardRefRenderFunction<
   HTMLDivElement,
   PropsWithChildren<SettingButtonProps>
-> = ({ children, disabled, onClick, ...props }, ref) => {
+> = ({ children, tooltip, disabled, onClick, ...props }, ref) => {
   return (
     <EditorButton
       ref={ref as any}
       onClick={(e) => !disabled && onClick && onClick(e)}
       disabled={disabled}
+      tooltip={tooltip}
       {...props}
     >
       {children}

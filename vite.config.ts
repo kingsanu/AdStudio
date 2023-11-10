@@ -60,6 +60,12 @@ export default defineConfig({
           new URL('./packages/editor/src/search-autocomplete', import.meta.url)
         ),
       },
+      {
+        find: '@canva/tooltip',
+        replacement: fileURLToPath(
+          new URL('./packages/editor/src/tooltip', import.meta.url)
+        ),
+      },
     ],
   },
   plugins: [
