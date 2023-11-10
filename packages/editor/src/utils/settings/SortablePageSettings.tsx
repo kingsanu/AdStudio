@@ -78,12 +78,14 @@ const SortableItem = SortableElement(
               />
             </div>
             <div>
-              <span>{idx + 1} -&nbsp;</span>
-              <EditInlineInput
-                text={item.name}
-                placeholder='Add page title'
-                onSetText={onSetText}
-              />
+              <span css={{whiteSpace: 'nowrap'}}>{idx + 1} &#8226;&nbsp;</span>
+              <div css={{width: '96%'}}>
+                <EditInlineInput
+                  text={item.name}
+                  placeholder='Add page title'
+                  onSetText={onSetText}
+                />
+              </div>
             </div>
           </PageGridItem>
           <EditorButton

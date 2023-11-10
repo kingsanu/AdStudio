@@ -8,6 +8,8 @@ type InlineEditProps = {
   styles?: { placeholderColor: string };
   handleStyle?: (isFocus: boolean) => Interpolation<Theme>;
   inputCss?: Interpolation<Theme>;
+  autoRow?: boolean;
+  maxLength?: number;
 };
 
 const EditInlineInput: React.FC<InlineEditProps> = ({
@@ -17,21 +19,42 @@ const EditInlineInput: React.FC<InlineEditProps> = ({
   handleStyle,
   styles = { placeholderColor: '#73757b' },
   inputCss = null,
+  autoRow = true,
+  maxLength = 120
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<any>(null); // HTMLTextAreaElement|HTMLInputElement
   const [textDraft, setTextDraft] = useState('');
   const handleDoubleClick = (e: { preventDefault: () => void }) => {
     e.preventDefault();
     setTextDraft(text);
     setIsEditing(true);
   };
+  const overflowStyle = !autoRow ? {
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
+    overflow: 'hidden',
+    maxWidth: 450,
+    display: 'block'
+  } : {};
   const handleBlur = () => {
+    if (inputRef.current?.value.length > maxLength) {
+      console.warn('Maximum is ' + maxLength);
+      return;
+    }
     setIsFocused(false);
     handleSubmit();
   };
-  const handleKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyPress = (
+    event: KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
+    if (autoRow) {
+      (event.target as HTMLTextAreaElement).style.height = 'inherit';
+      (event.target as HTMLTextAreaElement).style.height = `${
+        (event.target as HTMLTextAreaElement).scrollHeight
+      }px`;
+    }
     setTextDraft(inputRef.current?.value || '');
     if (event.key === 'Enter') {
       handleSubmit();
@@ -50,6 +73,10 @@ const EditInlineInput: React.FC<InlineEditProps> = ({
   useEffect(() => {
     if (isEditing && inputRef.current) {
       inputRef.current.focus();
+      if (autoRow) {
+        const scrollHeight = inputRef.current.scrollHeight;
+        inputRef.current.style.height = scrollHeight + 'px';
+      }
     }
   }, [isEditing]);
 
@@ -60,28 +87,62 @@ const EditInlineInput: React.FC<InlineEditProps> = ({
           <div
             css={{
               position: 'relative',
+              width: '100%',
             }}
           >
-            <input
-              ref={inputRef}
-              defaultValue={text}
-              onFocus={() => setIsFocused(true)}
-              onBlur={handleBlur}
-              onKeyDown={handleKeyPress}
-              css={{
-                position: 'absolute',
-                border: 'none',
-                borderBottom: '1px dashed #000',
-                backgroundColor: 'transparent',
-                width: 'calc(100% + 10px)',
-                fontWeight: 'bold',
-                color: 'inherit',
-                font: 'inherit',
-                zIndex: 1,
-                ...(inputCss ? (inputCss as Record<string, Theme>) : {}),
-              }}
-            />
-            <span css={{ opacity: 0 }}>{textDraft}</span>
+            {autoRow ? (
+              <textarea
+                ref={inputRef}
+                defaultValue={text}
+                onFocus={() => setIsFocused(true)}
+                rows={1}
+                onBlur={handleBlur}
+                onKeyDown={handleKeyPress}
+                css={{
+                  position: 'absolute',
+                  border: 'none',
+                  left: 0,
+                  top: 0,
+                  borderBottom: '1px dashed #000',
+                  backgroundColor: 'transparent',
+                  width: '100%',
+                  fontWeight: 'bold',
+                  color: 'inherit',
+                  font: 'inherit',
+                  zIndex: 1,
+                  resize: 'none',
+                  ...(inputCss ? (inputCss as Record<string, Theme>) : {}),
+                }}
+              ></textarea>
+            ) : (
+              <input
+                ref={inputRef}
+                defaultValue={text}
+                onFocus={() => setIsFocused(true)}
+                onBlur={handleBlur}
+                onKeyDown={handleKeyPress}
+                css={{
+                  position: 'absolute',
+                  border: 'none',
+                  left: 0,
+                  top: 0,
+                  borderBottom: '1px dashed #000',
+                  backgroundColor: 'transparent',
+                  width: '100%',
+                  fontWeight: 'bold',
+                  color: 'inherit',
+                  font: 'inherit',
+                  zIndex: 1,
+                  resize: 'none',
+                  ...(inputCss ? (inputCss as Record<string, Theme>) : {}),
+                }}
+              />
+            )}
+            <span
+              css={{ opacity: 0, ...overflowStyle as Record<string, Theme> }}
+            >
+              {textDraft}
+            </span>
           </div>
         ) : (
           <span
@@ -91,6 +152,7 @@ const EditInlineInput: React.FC<InlineEditProps> = ({
               fontWeight: 'bold',
               font: 'inherit',
               cursor: 'text',
+              ...overflowStyle as Record<string, Theme>
             }}
           >
             {text || placeholder}

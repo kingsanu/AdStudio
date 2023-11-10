@@ -51,6 +51,7 @@ const HeaderLayout: ForwardRefRenderFunction<
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
+        zIndex: 1,
         '@media (max-width: 900px)': {
           padding: 12,
         },
@@ -73,6 +74,7 @@ const HeaderLayout: ForwardRefRenderFunction<
           <EditInlineInput
             text={name}
             placeholder='Untitled design'
+            autoRow={false}
             styles={{
               placeholderColor: 'hsla(0,0%,100%,.5)',
             }}
@@ -85,6 +87,8 @@ const HeaderLayout: ForwardRefRenderFunction<
                 color: '#fff',
                 borderRadius: 6,
                 padding: 8,
+                minHeight: 18,
+                minWidth: 18,
                 border: `1px solid ${
                   isFocus ? 'hsla(0,0%,100%,.8)' : 'transparent'
                 }`,
@@ -114,9 +118,10 @@ const HeaderLayout: ForwardRefRenderFunction<
             onClick={actions.history.undo}
             disabled={!query.history.canUndo()}
             styles={{
-                disabledColor: 'hsla(0,0%,100%,.4)',
-                color: '#fff'
+              disabledColor: 'hsla(0,0%,100%,.4)',
+              color: '#fff',
             }}
+            tooltip='Undo'
           >
             <BackIcon />
           </EditorButton>
@@ -124,9 +129,10 @@ const HeaderLayout: ForwardRefRenderFunction<
             onClick={actions.history.redo}
             disabled={!query.history.canRedo()}
             styles={{
-                disabledColor: 'hsla(0,0%,100%,.4)',
-                color: '#fff'
+              disabledColor: 'hsla(0,0%,100%,.4)',
+              color: '#fff',
             }}
+            tooltip='Redo'
           >
             <NextIcon />
           </EditorButton>
