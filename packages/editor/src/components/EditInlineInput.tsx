@@ -139,7 +139,7 @@ const EditInlineInput: React.FC<InlineEditProps> = ({
               />
             )}
             <span
-              css={{ opacity: 0, ...overflowStyle as Record<string, Theme> }}
+              css={{ opacity: 0, margin: '0 6px', ...overflowStyle as Record<string, Theme> }}
             >
               {textDraft}
             </span>

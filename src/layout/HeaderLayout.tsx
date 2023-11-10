@@ -6,6 +6,9 @@ import React, {
   useState,
 } from 'react';
 import { downloadObjectAsJson } from '../utils/download';
+import DropdownButton, {
+  DropdownMenuItem,
+} from '@canva/components/dropdown-button/DropdownButton';
 import { useEditor } from '@canva/hooks';
 import PlayArrowIcon from '@canva/icons/PlayArrowIcon';
 import CanvaIcon from '@canva/icons/CanvaIcon';
@@ -16,6 +19,37 @@ import NextIcon from '@canva/icons/NextIcon';
 import BackIcon from '@canva/icons/BackIcon';
 import SyncedIcon from '@canva/icons/SyncedIcon';
 
+const menuData: DropdownMenuItem[] = [
+  {
+    label: 'File',
+    type: 'submenu',
+    items: [
+      { label: 'New', shortcut: 'Ctrl + N', type: 'normal' },
+      { label: 'Open', shortcut: 'Ctrl + O', type: 'normal' },
+      { label: 'Save', shortcut: 'Ctrl + S', type: 'normal' },
+    ],
+  },
+  { label: 'Divider', type: 'divider' },
+  {
+    label: 'Export',
+    shortcut: 'Ctrl + E',
+    type: 'normal',
+  },
+  {
+    label: 'Print',
+    shortcut: '⌘F',
+    type: 'normal',
+  },
+  {
+    label: 'View',
+    type: 'submenu',
+    items: [
+      { label: 'Zoom In', shortcut: 'Ctrl + E', type: 'normal' },
+      { label: 'Zoom Out', type: 'normal' },
+    ],
+  },
+  { label: 'Close', type: 'normal' },
+];
 interface HeaderLayoutProps {
   openPreview: () => void;
 }
@@ -65,6 +99,11 @@ const HeaderLayout: ForwardRefRenderFunction<
       >
         <div css={{ color: 'white' }}>
           <CanvaIcon fill='currentColor' />
+        </div>
+      </div>
+      <div css={{ marginRight: 'auto' }}>
+        <div css={{ margin: '0 16px' }}>
+          <DropdownButton text='File' items={menuData} />
         </div>
       </div>
       <div
