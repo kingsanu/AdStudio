@@ -10,6 +10,7 @@ import LockIcon from '@canva/icons/LockIcon';
 import LockOpenIcon from '@canva/icons/LockOpenIcon';
 import TransparencyIcon from '@canva/icons/TransparencyIcon';
 import SettingDivider from './components/SettingDivider';
+import QuickBoxDialog from '@canva/components/dialog/QuickBoxDialog';
 
 const CommonSettings = () => {
   const transparencyButtonRef = useRef<HTMLDivElement>(null);
@@ -186,16 +187,8 @@ const CommonSettings = () => {
             </SettingButton>
           </Fragment>
         )}
-        <Popover
-          open={openResizeSetting}
-          anchorEl={resizeButtonRef.current}
-          placement={'bottom-end'}
-          onClose={() => setOpenResizeSetting(false)}
-          offsets={{
-            'bottom-end': { x: 0, y: 8 },
-          }}
-        >
-          <div css={{ padding: 16, width: 240 }}>
+        <QuickBoxDialog open={openResizeSetting} onClose={() => setOpenResizeSetting(false)}>
+          <div css={{ padding: '0 16px 16px', width: 240 }}>
             <div css={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
               <div>
                 <div css={{ fontSize: 12, fontWeight: 600 }}>Width</div>
@@ -266,7 +259,8 @@ const CommonSettings = () => {
               </div>
             </div>
           </div>
-        </Popover>
+        </QuickBoxDialog>
+
         {selectedLayerIds.length > 0 && (
           <SettingButton
             css={{ fontSize: 20 }}

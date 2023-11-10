@@ -39,11 +39,6 @@ const EditInlineInput: React.FC<InlineEditProps> = ({
     display: 'block'
   } : {};
   const handleBlur = () => {
-    if (inputRef.current?.value.length > maxLength) {
-      console.warn('Maximum is ' + maxLength);
-      return;
-    }
-    setIsFocused(false);
     handleSubmit();
   };
   const handleKeyPress = (
@@ -65,6 +60,11 @@ const EditInlineInput: React.FC<InlineEditProps> = ({
   };
 
   const handleSubmit = () => {
+    if (inputRef.current?.value.length > maxLength) {
+      console.warn('Maximum is ' + maxLength);
+      return;
+    }
+    setIsFocused(false);
     setIsEditing(false);
     setTextDraft('');
     onSetText(inputRef.current?.value || '');
