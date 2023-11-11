@@ -5,7 +5,6 @@ import ImageContent from './sidebar/ImageContent';
 import UploadContent from './sidebar/UploadContent';
 import TemplateContent from './sidebar/TemplateContent';
 import FrameContent from './sidebar/FrameContent';
-import VideoContent from './sidebar/VideoContent';
 import { useEditor } from '@canva/hooks';
 
 // Icons
@@ -13,7 +12,6 @@ import LayoutIcon from '@canva/icons/LayoutIcon';
 import TextIcon from '@canva/icons/TextIcon';
 import ElementsIcon from '@canva/icons/ElementsIcon';
 import UploadIcon from '@canva/icons/UploadIcon';
-import VideoIcon from '@canva/icons/VideoIcon';
 import ImageIcon from '@canva/icons/ImageIcon';
 import Notes from '@canva/utils/settings/sidebar/Notes';
 
@@ -21,14 +19,6 @@ const tabs = [
   {
     name: 'Template',
     icon: <LayoutIcon />,
-  },
-  {
-    name: 'Shape',
-    icon: <ElementsIcon />,
-  },
-  {
-    name: 'Frame',
-    icon: <ElementsIcon />,
   },
   {
     name: 'Text',
@@ -39,8 +29,12 @@ const tabs = [
     icon: <ImageIcon />,
   },
   {
-    name: 'Video',
-    icon: <VideoIcon />,
+    name: 'Shape',
+    icon: <ElementsIcon />,
+  },
+  {
+    name: 'Frame',
+    icon: <ElementsIcon />,
   },
   {
     name: 'Upload',
@@ -118,14 +112,6 @@ const Sidebar = () => {
                 }}
               />
             )}
-            {state.sideBarTab === 'Video' && (
-              <VideoContent
-                onClose={() => {
-                  actions.setSidebarTab();
-                  actions.setSidebar();
-                }}
-              />
-            )}
             {state.sideBarTab === 'Shape' && (
               <ShapeContent
                 onClose={() => {
@@ -151,11 +137,14 @@ const Sidebar = () => {
           overflow: 'hidden',
           height: '100%',
           pointerEvents: 'none',
-          ...(state.sideBarTab ? {
-            position: 'absolute',
-            top: 0,
-            left: 73
-          } : {})
+          zIndex: 4,
+          ...(state.sideBarTab
+            ? {
+                position: 'absolute',
+                top: 0,
+                left: 73,
+              }
+            : {}),
         }}
         id={'settings'}
       />

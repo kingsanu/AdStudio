@@ -172,7 +172,6 @@ export const useZoomPage = (
       if (touches.length !== 2) {
         return;
       }
-
       transformRef.current.touchStart = [touches[0], touches[1]];
       transformRef.current.lastTouch = [touches[0], touches[1]];
       pageZoomStart();

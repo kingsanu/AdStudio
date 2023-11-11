@@ -65,6 +65,7 @@ const LayerSidebar: ForwardRefRenderFunction<
   };
 
   const handleClickOption = (e: React.MouseEvent) => {
+    e.preventDefault();
     actions.showContextMenu(getPosition(e.nativeEvent));
   };
 
@@ -115,23 +116,6 @@ const LayerSidebar: ForwardRefRenderFunction<
             >
               Layers
             </p>
-            <div
-              css={{
-                fontSize: 20,
-                flexShrink: 0,
-                width: 32,
-                height: 32,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-              onClick={() => {
-                actions.setSidebar();
-              }}
-            >
-              <ArrowLeftIcon />
-            </div>
           </div>
 
           <div

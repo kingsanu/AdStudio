@@ -147,7 +147,7 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
   };
 
   const isDisabledResize = useMemo(
-    () => size.width < 100 || size.height < 100,
+    () => size?.width < 100 || size.height < 100,
     [size]
   );
 
@@ -263,7 +263,7 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
             </div>
           )}
           <div css={{ marginTop: 12 }}>
-            <div
+            <button
               css={{
                 background: !isDisabledResize ? '#3a3a4c' : '#8383A2',
                 padding: '8px 14px',
@@ -274,11 +274,13 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
                 fontSize: 16,
                 textAlign: 'center',
                 fontWeight: 700,
+                width: '100%'
               }}
               onClick={handleResize}
+              disabled={isDisabledResize}
             >
               Resize
-            </div>
+            </button>
           </div>
         </div>
       </QuickBoxDialog>

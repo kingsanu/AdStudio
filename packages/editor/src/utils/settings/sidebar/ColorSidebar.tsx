@@ -11,7 +11,6 @@ import { getGradientBackground } from '@canva/layers';
 import { GradientStyle } from '@canva/types';
 import { isRootLayer, isShapeLayer, isTextLayer, isFrameLayer } from '@canva/utils/layer/layers';
 import { ColorParser, hex2rgbString } from '@canva/color-picker/utils';
-import ArrowLeftIcon from '@canva/icons/ArrowLeftIcon';
 
 interface ColorSidebarProps extends SidebarProps {
     selected: string | null;
@@ -141,24 +140,6 @@ const ColorSidebar: ForwardRefRenderFunction<HTMLDivElement, ColorSidebarProps> 
                 >
                     Colors
                 </p>
-                <div
-                    css={{
-                        fontSize: 20,
-                        flexShrink: 0,
-                        width: 32,
-                        height: 32,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    }}
-                    onClick={() => {
-                        actions.setSidebar();
-                    }}
-                >
-                    
-                    <ArrowLeftIcon />
-                </div>
             </div>
             <div css={{ padding: '0 20px', display: 'grid', rowGap: 24 }}>
                 <div>

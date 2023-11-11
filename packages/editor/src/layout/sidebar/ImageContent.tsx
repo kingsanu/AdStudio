@@ -6,6 +6,9 @@ import { useEditor } from '@canva/hooks';
 import Draggable from '@canva/layers/core/Dragable';
 import { Delta } from '@canva/types';
 import CloseSidebarButton from './CloseButton';
+import ImageSearchBox from './components/ImageSearchBox';
+import HorizontalCarousel from '@canva/components/carousel/HorizontalCarousel';
+import OutlineButton from '@canva/components/button/OutlineButton';
 
 const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
   const [images, setImages] = useState<{ img: string }[]>([]);
@@ -47,9 +50,33 @@ const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
         flexDirection: 'column',
         overflowY: 'auto',
         display: 'flex',
+        padding: 16,
       }}
     >
       <CloseSidebarButton onClose={onClose} />
+      <div
+        css={{
+          marginBottom: 16,
+        }}
+      >
+        <ImageSearchBox />
+        <div css={{ paddingTop: 8 }}>
+          <HorizontalCarousel>
+            <div className='carousel-item'>
+              <OutlineButton onClick={() => {}}>Christmas</OutlineButton>
+            </div>
+            <div className='carousel-item'>
+              <OutlineButton onClick={() => {}}>Background</OutlineButton>
+            </div>
+            <div className='carousel-item'>
+              <OutlineButton onClick={() => {}}>Thanksgiving</OutlineButton>
+            </div>
+            <div className='carousel-item'>
+              <OutlineButton onClick={() => {}}>Black</OutlineButton>
+            </div>
+          </HorizontalCarousel>
+        </div>
+      </div>
       <div
         css={{ flexDirection: 'column', overflowY: 'auto', display: 'flex' }}
       >
@@ -59,7 +86,6 @@ const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
             overflowY: 'auto',
             display: 'grid',
             gridTemplateColumns: 'repeat(3,minmax(0,1fr))',
-            padding: '16px',
             gridGap: 8,
           }}
         >

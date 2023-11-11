@@ -21,6 +21,7 @@ import { Delta, ShapeType } from '@canva/types';
 import { useEditor } from '@canva/hooks';
 import Draggable from '@canva/layers/core/Dragable';
 import CloseSidebarButton from './CloseButton';
+import ShapeSearchBox from './components/ShapeSearchBox';
 
 type Shape = {
   type: ShapeType;
@@ -281,10 +282,16 @@ const ShapeContent: FC<{ onClose: () => void }> = ({ onClose }) => {
         flexDirection: 'column',
         overflowY: 'auto',
         display: 'flex',
+        padding: 16
       }}
     >
       <CloseSidebarButton onClose={onClose} />
-      <div css={{ padding: '16px' }}>
+      <div css={{
+        marginBottom: 16
+      }}>
+        <ShapeSearchBox />
+      </div>
+      <div>
         <div
           css={{
             flexGrow: 1,

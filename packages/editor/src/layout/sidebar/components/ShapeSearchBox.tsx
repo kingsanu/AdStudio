@@ -26,7 +26,7 @@ const items = [
   },
 ];
 interface Props {}
-const TemplateSearchBox: FC<Props> = () => {
+const ShapeSearchBox: FC<Props> = () => {
   const [suggestItems, setSuggestItems] = useState([]);
   const fuse = new Fuse(items, defaultFuseOptions);
   fuse.setCollection(items);
@@ -63,7 +63,7 @@ const TemplateSearchBox: FC<Props> = () => {
   return (
     <SearchBox
       items={suggestItems}
-      placeholder='Search templates'
+      placeholder='Search shapes'
       onSearch={handleOnSearch}
       onHover={handleOnHover}
       onSelect={handleOnSelect}
@@ -74,4 +74,4 @@ const TemplateSearchBox: FC<Props> = () => {
   );
 };
 
-export default TemplateSearchBox;
+export default ShapeSearchBox;

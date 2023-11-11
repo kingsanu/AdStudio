@@ -200,8 +200,8 @@ export const useEditorStore = () => {
         scale: 1,
         activePage: 0,
         pageSize: {
-            width: 0,
-            height: 0,
+            width: 1640,
+            height: 924,
         },
         pages: [],
         fontList: [],

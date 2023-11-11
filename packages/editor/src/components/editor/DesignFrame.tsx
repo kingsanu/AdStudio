@@ -29,7 +29,6 @@ import { isMobile } from 'react-device-detect';
 import PageSettings from '@canva/utils/settings/PageSettings';
 import { unpack } from '@canva/utils/minifier';
 import useDebouncedEffect from '@canva/hooks/useDebouncedEffect';
-import PlusIcon from '@canva/icons/PlusIcon';
 import { toPng } from 'html-to-image';
 
 interface DesignFrameProps {

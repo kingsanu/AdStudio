@@ -10,7 +10,6 @@ import { TextLayerProps } from '@canva/layers/TextLayer';
 import { Layer } from '@canva/types';
 import { isTextLayer } from '@canva/utils/layer/layers';
 import { ColorParser, hex2rgbString } from '@canva/color-picker/utils';
-import ArrowLeftIcon from '@canva/icons/ArrowLeftIcon';
 
 const getEffectList = (assetPath: string) => [
     {
@@ -172,23 +171,6 @@ const TextEffectSidebar: ForwardRefRenderFunction<HTMLDivElement, TextEffectSide
                 >
                     Text Effects
                 </p>
-                <div
-                    css={{
-                        fontSize: 20,
-                        flexShrink: 0,
-                        width: 32,
-                        height: 32,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    }}
-                    onClick={() => {
-                        actions.setSidebar();
-                    }}
-                >
-                    <ArrowLeftIcon />
-                </div>
             </div>
             <div css={{ padding: '24px 16px' }}>
                 <p>Style</p>

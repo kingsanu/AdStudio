@@ -5,6 +5,7 @@ import { useEditor } from '@canva/hooks';
 import Draggable from '@canva/layers/core/Dragable';
 import { Delta } from '@canva/types';
 import CloseSidebarButton from './CloseButton';
+import FrameSearchBox from './components/FrameSearchBox';
 
 interface Frame {
   img: string;
@@ -29,10 +30,13 @@ const FrameContent: FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const addFrame = async (frame: Frame, position?: Delta) => {
     const pageSize = query.getPageSize();
-    const pageRatio = pageSize.width / pageSize.height
-    const frameRatio = frame.width / frame.height
-    const scale = pageRatio > frameRatio ? pageSize.height * .5 / frame.height : pageSize.width * .5 / frame.width
-    
+    const pageRatio = pageSize.width / pageSize.height;
+    const frameRatio = frame.width / frame.height;
+    const scale =
+      pageRatio > frameRatio
+        ? (pageSize.height * 0.5) / frame.height
+        : (pageSize.width * 0.5) / frame.width;
+
     actions.addFrameLayer({
       type: {
         resolvedName: 'FrameLayer',
@@ -53,13 +57,13 @@ const FrameContent: FC<{ onClose: () => void }> = ({ onClose }) => {
           },
           position: {
             x: 0,
-            y: 0
+            y: 0,
           },
           rotate: 0,
           thumb: frame.img,
           url: frame.img,
         },
-      }
+      },
     });
     if (isMobile) {
       onClose();
@@ -73,9 +77,17 @@ const FrameContent: FC<{ onClose: () => void }> = ({ onClose }) => {
         flexDirection: 'column',
         overflowY: 'auto',
         display: 'flex',
+        padding: 16,
       }}
     >
       <CloseSidebarButton onClose={onClose} />
+      <div
+        css={{
+          marginBottom: 16,
+        }}
+      >
+        <FrameSearchBox />
+      </div>
       <div
         css={{ flexDirection: 'column', overflowY: 'auto', display: 'flex' }}
       >
@@ -86,7 +98,6 @@ const FrameContent: FC<{ onClose: () => void }> = ({ onClose }) => {
             display: 'grid',
             gridTemplateColumns: 'repeat(3,minmax(0,1fr))',
             gridGap: 8,
-            padding: '16px',
           }}
         >
           {isLoading && <div>Loading...</div>}

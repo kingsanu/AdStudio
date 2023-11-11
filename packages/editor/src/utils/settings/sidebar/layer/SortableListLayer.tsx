@@ -78,6 +78,7 @@ const SortableItem = SortableElement(
           css={{
             borderColor: isSelected ? '#3d8eff' : 'transparent',
           }}
+          onContextMenu={onOpenContextMenu}
           onMouseDown={onSelectLayer}
         >
           <div

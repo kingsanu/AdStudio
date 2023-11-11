@@ -1,4 +1,3 @@
-import React from 'react';
 import { useEditor, useLayer, useSelectedLayers } from '../hooks';
 import { LayerComponent } from '@canva/types';
 import { VideoContentProps, VideoContent } from './content/VideoContent';

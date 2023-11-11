@@ -8,16 +8,15 @@ import { copy } from '@canva/utils/menu/actions/copy';
 import { duplicate } from '@canva/utils/menu/actions/duplicate';
 
 const useShortcut = (frameEle: HTMLElement | null) => {
-  const { actions, state, activePage, rootLayer, scale, selectedLayers } = useEditor(
-    (state) => ({
+  const { actions, state, activePage, rootLayer, scale, selectedLayers } =
+    useEditor((state) => ({
       rootLayer:
         state.pages[state.activePage] &&
         state.pages[state.activePage].layers.ROOT,
       activePage: state.activePage,
       scale: state.scale,
-      selectedLayers: state.selectedLayers
-    })
-  );
+      selectedLayers: state.selectedLayers,
+    }));
   const { selectedLayerIds } = useSelectedLayers();
   const handlePaste = useCallback(async () => {
     await paste({ actions });
@@ -201,28 +200,37 @@ const useShortcut = (frameEle: HTMLElement | null) => {
     [actions, handleCopy, handlePaste, handleDuplicate, handleDelete]
   );
 
-  const zoomStep = 0.05;
+  const zoomStep = 0.02;
   useEffect(() => {
+    let animationFrameId: number;
+
     const handleZoomDesktop = (e: WheelEvent) => {
       if (e.ctrlKey) {
         const s = Math.exp((-e.deltaY * zoomStep) / 3);
         const newScale = +Math.min(Math.max(scale * s, 0.1), 5).toFixed(5);
-        actions.setScale(newScale);
+        cancelAnimationFrame(animationFrameId);
 
-        // const target = e.currentTarget as HTMLTextAreaElement;
-        
+        animationFrameId = requestAnimationFrame(() => {
+          actions.setScale(newScale);
+        });
+
         e.preventDefault();
         e.stopPropagation();
       }
     };
 
-    frameEle?.addEventListener('wheel', handleZoomDesktop, {
-      passive: false,
-    });
+    if (frameEle) {
+      frameEle?.addEventListener('wheel', handleZoomDesktop, {
+        passive: false,
+      });
+    }
     return () => {
-      frameEle?.removeEventListener('wheel', handleZoomDesktop);
+      if (frameEle) {
+        frameEle?.removeEventListener('wheel', handleZoomDesktop);
+      }
+      cancelAnimationFrame(animationFrameId);
     };
-  }, [scale]);
+  }, [frameEle, scale]);
 
   useEffect(() => {
     frameEle?.addEventListener('keydown', handleKeydown);

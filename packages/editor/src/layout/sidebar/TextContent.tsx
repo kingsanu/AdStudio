@@ -9,10 +9,9 @@ import Draggable from '@canva/layers/core/Dragable';
 import { generateRandomID } from '@canva/utils/identityGenerator';
 import Button from '@canva/components/button/Button';
 import CloseSidebarButton from './CloseButton';
-import OutlineButton from '@canva/components/button/OutlineButton';
 import styled from '@emotion/styled';
 
-const DefaultTextButton = styled(OutlineButton)`
+const DefaultTextButton = styled(Button)`
   background-color: #313334;
   color: #fff;
 `;
