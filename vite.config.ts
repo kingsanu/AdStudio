@@ -37,6 +37,12 @@ export default defineConfig({
         ),
       },
       {
+        find: '@canva/layout',
+        replacement: fileURLToPath(
+          new URL('./packages/editor/src/layout', import.meta.url)
+        ),
+      },
+      {
         find: '@canva/icons',
         replacement: fileURLToPath(
           new URL('./packages/editor/src/icons', import.meta.url)

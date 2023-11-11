@@ -7,6 +7,7 @@ import GridViewIcon from '@canva/icons/GridViewIcon';
 import CheckIcon from '@canva/icons/CheckIcon';
 import EditorButton from '@canva/components/EditorButton';
 import NotesIcon from '@canva/icons/NotesIcon';
+import GithubIcon from '@canva/icons/GIthubIcon';
 
 const PageControl = () => {
   const labelScaleOptionRef = useRef<HTMLDivElement>(null);
@@ -29,6 +30,7 @@ const PageControl = () => {
         alignItems: 'center',
         padding: '0 8px',
         fontWeight: 700,
+        zIndex: 999
       }}
     >
       <div css={{ flexGrow: 1 }}>
@@ -76,6 +78,7 @@ const PageControl = () => {
         </div>
         <SettingButton
           ref={labelScaleOptionRef}
+          tooltip='Zoom'
           onClick={() => setOpenScaleOptions(true)}
         >
           <div css={{ width: 48, textAlign: 'center' }}>
@@ -119,11 +122,20 @@ const PageControl = () => {
         </Popover>
         <EditorButton
           isActive={isOpenPageSettings}
+          tooltip='Grid view'
           onClick={() => {
             actions.togglePageSettings();
           }}
         >
           <GridViewIcon />
+        </EditorButton>
+        <EditorButton
+          tooltip='Source code'
+          onClick={() => {
+            actions.goToGithubPage();
+          }}
+        >
+          <GithubIcon />
         </EditorButton>
       </div>
     </div>

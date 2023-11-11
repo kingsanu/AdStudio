@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import LayerSidebar from './sidebar/LayerSidebar';
 import SettingButton from './SettingButton';
 import Popover from '@canva/components/popover/Popover';
@@ -10,16 +10,10 @@ import LockIcon from '@canva/icons/LockIcon';
 import LockOpenIcon from '@canva/icons/LockOpenIcon';
 import TransparencyIcon from '@canva/icons/TransparencyIcon';
 import SettingDivider from './components/SettingDivider';
-import QuickBoxDialog from '@canva/components/dialog/QuickBoxDialog';
 
 const CommonSettings = () => {
   const transparencyButtonRef = useRef<HTMLDivElement>(null);
-  const resizeButtonRef = useRef<HTMLDivElement>(null);
-  const widthRef = useRef<HTMLInputElement>(null);
-  const heightRef = useRef<HTMLInputElement>(null);
   const [openTransparencySetting, setOpenTransparencySetting] = useState(false);
-  const [openResizeSetting, setOpenResizeSetting] = useState(false);
-  const [lockSiteAspect, setLockSizeAspect] = useState(false);
   const { selectedLayers, selectedLayerIds } = useSelectedLayers();
   const { actions, activePage, sidebar, pageSize, isPageLocked } = useEditor(
     (state) => ({
@@ -87,37 +81,6 @@ const CommonSettings = () => {
     setOpenTransparencySetting(false);
   }, [JSON.stringify(selectedLayerIds)]);
 
-  const handleChangeSize = (value: string, type: 'width' | 'height') => {
-    const ratio = size.width / size.height;
-    const v = parseInt(value, 10);
-    if (type === 'width') {
-      if (lockSiteAspect) {
-        (heightRef.current as HTMLInputElement).value = String(
-          Math.round((v / ratio) * 10) / 10
-        );
-      }
-      setSize({ ...size, width: v });
-    }
-    if (type === 'height') {
-      if (lockSiteAspect) {
-        (widthRef.current as HTMLInputElement).value = String(
-          Math.round(v * ratio * 10) / 10
-        );
-      }
-      setSize({ ...size, height: v });
-    }
-  };
-
-  const isDisabledResize = useMemo(
-    () => size.width < 100 || size.height < 100,
-    [size]
-  );
-
-  const handleResize = () => {
-    if (isDisabledResize) return;
-    actions.changePageSize(size);
-    setOpenResizeSetting(false);
-  };
   return (
     <Fragment>
       <div
@@ -128,9 +91,12 @@ const CommonSettings = () => {
           gridGap: 8,
         }}
       >
-        <SettingButton css={{minWidth: 75}} onClick={() => {
-          actions.setSidebar('LAYER_MANAGEMENT');
-      }}>
+        <SettingButton
+          css={{ minWidth: 75 }}
+          onClick={() => {
+            actions.setSidebar('LAYER_MANAGEMENT');
+          }}
+        >
           <span css={{ padding: '0 4px' }}>Position</span>
         </SettingButton>
 
@@ -169,107 +135,19 @@ const CommonSettings = () => {
             )}
           </Fragment>
         )}
-        {!isPageLocked && (
-          <Fragment>
-            <div
-              css={{
-                height: 24,
-                width: `1px`,
-                background: 'rgba(57,76,96,.15)',
-              }}
-            />
-            <SettingButton
-              ref={resizeButtonRef}
-              css={{minWidth: 75}}
-              onClick={() => setOpenResizeSetting(true)}
-            >
-              <span css={{ padding: '0 4px' }}>Resize</span>
-            </SettingButton>
-          </Fragment>
-        )}
-        <QuickBoxDialog open={openResizeSetting} onClose={() => setOpenResizeSetting(false)}>
-          <div css={{ padding: '0 16px 16px', width: 240 }}>
-            <div css={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
-              <div>
-                <div css={{ fontSize: 12, fontWeight: 600 }}>Width</div>
-                <div
-                  css={{
-                    border: '1px solid rgba(43,59,74,.3)',
-                    height: 40,
-                    padding: '0 12px',
-                    width: 80,
-                    borderRadius: 4,
-                  }}
-                >
-                  <input
-                    ref={widthRef}
-                    css={{ width: '100%', minWidth: 8, height: '100%' }}
-                    onChange={(e) => handleChangeSize(e.target.value, 'width')}
-                    defaultValue={size.width}
-                  />
-                </div>
-              </div>
-              <div>
-                <div css={{ fontSize: 12, fontWeight: 600 }}>Height</div>
-                <div
-                  css={{
-                    border: '1px solid rgba(43,59,74,.3)',
-                    height: 40,
-                    padding: '0 12px',
-                    width: 80,
-                    borderRadius: 4,
-                  }}
-                >
-                  <input
-                    ref={heightRef}
-                    css={{ width: '100%', minWidth: 8, height: '100%' }}
-                    onChange={(e) => handleChangeSize(e.target.value, 'height')}
-                    defaultValue={size.height}
-                  />
-                </div>
-              </div>
-              <div
-                css={{ fontSize: 20, cursor: 'pointer', margin: '10px 0' }}
-                onClick={() => setLockSizeAspect(!lockSiteAspect)}
-              >
-                {lockSiteAspect ? <LockIcon /> : <LockOpenIcon />}
-              </div>
-            </div>
-            {isDisabledResize && (
-              <div css={{ color: '#db1436' }}>
-                Dimensions must be at least 100px and no more than 8000px.
-              </div>
-            )}
-            <div css={{ marginTop: 12 }}>
-              <div
-                css={{
-                  background: !isDisabledResize ? '#3a3a4c' : '#8383A2',
-                  padding: '8px 14px',
-                  lineHeight: 1,
-                  color: '#FFF',
-                  borderRadius: 4,
-                  cursor: !isDisabledResize ? 'pointer' : 'not-allowed',
-                  fontSize: 16,
-                  textAlign: 'center',
-                  fontWeight: 700,
-                }}
-                onClick={handleResize}
-              >
-                Resize
-              </div>
-            </div>
-          </div>
-        </QuickBoxDialog>
 
         {selectedLayerIds.length > 0 && (
-          <SettingButton
-            css={{ fontSize: 20 }}
-            isActive={isLocked}
-            onClick={toggleLock}
-          >
-            {isLocked && <LockIcon />}
-            {!isLocked && <LockOpenIcon />}
-          </SettingButton>
+          <>
+            <SettingDivider />
+            <SettingButton
+              css={{ fontSize: 20 }}
+              isActive={isLocked}
+              onClick={toggleLock}
+            >
+              {isLocked && <LockIcon />}
+              {!isLocked && <LockOpenIcon />}
+            </SettingButton>
+          </>
         )}
       </div>
       {sidebar === 'LAYER_MANAGEMENT' && <LayerSidebar open={true} />}

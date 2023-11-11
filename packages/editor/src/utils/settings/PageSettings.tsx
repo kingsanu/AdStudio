@@ -67,7 +67,7 @@ const PageSettings: FC<PageSettingsProps> = ({ onChangePage }) => {
         width: '100%',
         position: 'absolute',
         background: '#fff',
-        zIndex: 2050,
+        zIndex: 3,
         '@media (max-width: 900px)': {
           height: `calc(100% - 73px)`,
         },

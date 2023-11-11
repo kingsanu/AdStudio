@@ -222,6 +222,7 @@ export const useEditorStore = () => {
         selectData: {
             status: false,
         },
+        downloadCmd: -1
     });
 
     const actions = useMemo<EditorActions>(() => {

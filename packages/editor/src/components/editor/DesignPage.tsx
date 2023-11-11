@@ -7,7 +7,6 @@ import React, {
 } from 'react';
 import PageElement from '@canva/layers/core/PageElement';
 import { useEditor, useSelectedLayers } from '../../hooks';
-import { toPng } from 'html-to-image';
 import { useLinkedRef } from '../../hooks/useLinkedRef';
 import {
   BoxData,
@@ -43,7 +42,6 @@ import TrashIcon from '@canva/icons/TrashIcon';
 import ArrowUpIcon from '@canva/icons/ArrowUpIcon';
 import ArrowDownIcon from '@canva/icons/ArrowDownIcon';
 import AddNewPageIcon from '@canva/icons/AddNewPageIcon';
-import DownloadIcon from '@canva/icons/DownloadIcon';
 import EditInlineInput from '../EditInlineInput';
 
 export interface PageProps {
@@ -303,20 +301,6 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
     onRotateEnd: handleRotate,
   });
 
-  const handleDownload = async (pageIndex: number) => {
-    if (displayRef.current) {
-      try {
-        const dataUrl = await toPng(displayRef.current);
-        const link = document.createElement('a');
-        link.download = `design-id-page-${pageIndex + 1}.png`;
-        link.href = dataUrl;
-        link.click();
-      } catch (e) {
-        window.alert('Cannot download: ' + (e as Error).message);
-      }
-    }
-  };
-
   return (
     <PageProvider pageIndex={pageIndex}>
       <div
@@ -447,24 +431,6 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
             onClick={() => actions.duplicatePage(pageIndex)}
           >
             <DuplicateIcon />
-          </div>
-          <div
-            css={{
-              marginLeft: 8,
-              width: 28,
-              height: 28,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: 4,
-              cursor: 'pointer',
-              ':hover': {
-                background: 'rgba(64, 87, 109, 0.07)',
-              },
-            }}
-            onClick={() => handleDownload(pageIndex)}
-          >
-            <DownloadIcon />
           </div>
           <div
             css={{

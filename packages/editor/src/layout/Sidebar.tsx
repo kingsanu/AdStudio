@@ -1,4 +1,4 @@
-import SidebarTab from '../tabs/TabList';
+import SidebarTab from './TabList';
 import TextContent from './sidebar/TextContent';
 import ShapeContent from './sidebar/ShapeContent';
 import ImageContent from './sidebar/ImageContent';

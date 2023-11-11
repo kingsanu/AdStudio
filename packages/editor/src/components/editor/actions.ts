@@ -1146,5 +1146,12 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
 
       state.imageEditor = undefined;
     },
+    fireDownloadCmd(cmdEnum: -1 | 0 | 1) {
+      console.log(cmdEnum)
+      state.downloadCmd = cmdEnum;
+    },
+    goToGithubPage() {
+      window?.open('https://github.com/', '_blank')?.focus();
+    }
   };
 };

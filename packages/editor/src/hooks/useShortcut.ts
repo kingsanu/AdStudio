@@ -192,6 +192,10 @@ const useShortcut = (frameEle: HTMLElement | null) => {
           handleZoomIn();
           e.preventDefault();
           break;
+        case normalizeKeyName('Mod-h'):
+          actions.goToGithubPage();
+          e.preventDefault();
+          break;
       }
     },
     [actions, handleCopy, handlePaste, handleDuplicate, handleDelete]

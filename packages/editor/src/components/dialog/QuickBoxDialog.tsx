@@ -16,7 +16,7 @@ const QuickBoxDialog: ForwardRefRenderFunction<
       css={{
         position: 'absolute',
         right: 10,
-        top: 55,
+        top: 120,
         minWidth: 150,
         zIndex: 1,
         backgroundColor: '#fff',

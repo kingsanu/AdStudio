@@ -5,80 +5,99 @@ import { useEditor } from '@canva/hooks';
 import { getGradientBackground } from '@canva/layers';
 import { GradientStyle } from '@canva/types';
 import { ColorParser } from '../../color-picker/utils';
+import SettingDivider from './components/SettingDivider';
 
 interface ColorSettingsProps {
+  colors: string[];
+  gradient?: { colors: string[]; style: GradientStyle } | null;
+  useGradient?: boolean;
+  onChange: (color: string) => void;
+  onChangeGradient?: (gradient: {
     colors: string[];
-    gradient?: { colors: string[]; style: GradientStyle } | null;
-    useGradient?: boolean;
-    onChange: (color: string) => void;
-    onChangeGradient?: (gradient: { colors: string[]; style: GradientStyle }) => void;
+    style: GradientStyle;
+  }) => void;
 }
 const ColorSettings: FC<PropsWithChildren<ColorSettingsProps>> = ({
-    colors,
-    gradient,
-    useGradient,
-    children,
-    onChange,
-    onChangeGradient,
+  colors,
+  gradient,
+  useGradient,
+  children,
+  onChange,
+  onChangeGradient,
 }) => {
-    const { actions, sidebar } = useEditor((state) => ({
-        sidebar: state.sidebar,
-    }));
+  const { actions, sidebar } = useEditor((state) => ({
+    sidebar: state.sidebar,
+  }));
 
-    const linearGradient = useMemo(() => {
-        if ((colors.length === 0 || (colors.length === 1 && new ColorParser(colors[0]).white() === 100)) && !gradient) {
-            return 'conic-gradient(red, yellow, lime, aqua, blue, magenta, red)';
-        }
-        if (gradient) {
-            return getGradientBackground(gradient.colors, gradient.style);
-        }
-        return colors.map((color) => `linear-gradient(to right, ${color}, ${color})`).join(', ');
-    }, [colors]);
-    return (
-        <Fragment>
-            <SettingButton onClick={() => {
-                actions.setSidebar('CHOOSING_COLOR');
-        }}>
-                {!children && (
-                    <div
-                        css={{
-                            width: 24,
-                            height: 24,
-                            boxShadow: 'inset 0 0 0 1px rgba(57,76,96,.15)',
-                            borderRadius: 2,
-                            position: 'relative',
-                            overflow: 'hidden',
-                        }}
-                    >
-                        <div
-                            css={{
-                                backgroundColor: '#fff',
-                                backgroundPosition: '0 0, 6px 6px',
-                                backgroundSize: '12px 12px',
-                                inset: 0,
-                                position: 'absolute',
-                                backgroundImage:
-                                    'linear-gradient(-45deg,rgba(57,76,96,.15) 25%,transparent 25%,transparent 75%,rgba(57,76,96,.15) 75%),linear-gradient(-45deg,rgba(57,76,96,.15) 25%,transparent 25%,transparent 75%,rgba(57,76,96,.15) 75%)',
-                            }}
-                        >
-                            <div css={{ position: 'absolute', inset: 0, background: linearGradient }} />
-                        </div>
-                    </div>
-                )}
-                {children}
-            </SettingButton>
-            {sidebar === 'CHOOSING_COLOR' && (
-                <ColorSidebar
-                    open={true}
-                    selected={colors.length === 1 ? colors[0] : null}
-                    gradient={gradient}
-                    useGradient={useGradient}
-                    onChangeGradient={onChangeGradient}
-                    onSelect={onChange}
-                />
-            )}
-        </Fragment>
-    );
+  const linearGradient = useMemo(() => {
+    if (
+      (colors.length === 0 ||
+        (colors.length === 1 && new ColorParser(colors[0]).white() === 100)) &&
+      !gradient
+    ) {
+      return 'conic-gradient(red, yellow, lime, aqua, blue, magenta, red)';
+    }
+    if (gradient) {
+      return getGradientBackground(gradient.colors, gradient.style);
+    }
+    return colors
+      .map((color) => `linear-gradient(to right, ${color}, ${color})`)
+      .join(', ');
+  }, [colors]);
+  return (
+    <Fragment>
+      <SettingButton
+        onClick={() => {
+          actions.setSidebar('CHOOSING_COLOR');
+        }}
+      >
+        {!children && (
+          <div
+            css={{
+              width: 24,
+              height: 24,
+              boxShadow: 'inset 0 0 0 1px rgba(57,76,96,.15)',
+              borderRadius: 2,
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              css={{
+                backgroundColor: '#fff',
+                backgroundPosition: '0 0, 6px 6px',
+                backgroundSize: '12px 12px',
+                inset: 0,
+                position: 'absolute',
+                backgroundImage:
+                  'linear-gradient(-45deg,rgba(57,76,96,.15) 25%,transparent 25%,transparent 75%,rgba(57,76,96,.15) 75%),linear-gradient(-45deg,rgba(57,76,96,.15) 25%,transparent 25%,transparent 75%,rgba(57,76,96,.15) 75%)',
+              }}
+            >
+              <div
+                css={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: linearGradient,
+                }}
+              />
+            </div>
+          </div>
+        )}
+        {children}
+      </SettingButton>
+      <SettingDivider />
+      {sidebar === 'CHOOSING_COLOR' && (
+        <ColorSidebar
+          open={true}
+          selected={colors.length === 1 ? colors[0] : null}
+          gradient={gradient}
+          useGradient={useGradient}
+          onChangeGradient={onChangeGradient}
+          onSelect={onChange}
+        />
+      )}
+    </Fragment>
+  );
 };
 
 export default ColorSettings;

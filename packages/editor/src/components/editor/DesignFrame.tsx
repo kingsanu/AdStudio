@@ -30,6 +30,7 @@ import PageSettings from '@canva/utils/settings/PageSettings';
 import { unpack } from '@canva/utils/minifier';
 import useDebouncedEffect from '@canva/hooks/useDebouncedEffect';
 import PlusIcon from '@canva/icons/PlusIcon';
+import { toPng } from 'html-to-image';
 
 interface DesignFrameProps {
   data: any;
@@ -62,6 +63,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
     imageEditor,
     pageSize,
     openPageSettings,
+    downloadCmd,
   } = useEditor((state) => {
     const hoveredPage = parseInt(Object.keys(state.hoveredLayer)[0]);
     const hoverLayerId = state.hoveredLayer[hoveredPage];
@@ -81,6 +83,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
       imageEditor: state.imageEditor,
       pageSize: state.pageSize,
       openPageSettings: state.openPageSettings,
+      downloadCmd: state.downloadCmd,
     };
   });
 
@@ -100,6 +103,20 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
     // actions.setData(serializedData);
     actions.setData(data);
   }, [data, actions]);
+
+  useEffect(() => {
+    if (downloadCmd === -1) return;
+    // Download active page
+    if (downloadCmd === 1) {
+      handleDownload(activePage);
+      return;
+    }
+    // Download all pages
+    if (downloadCmd === 0) {
+      pages.forEach((_, idx) => handleDownload(idx));
+      return;
+    }
+  }, [downloadCmd]);
 
   useDebouncedEffect(
     () => {
@@ -147,7 +164,21 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
       });
     }, 16);
   };
-
+  const handleDownload = async (pageIndex: number) => {
+    const pageContentEl =
+      pageRef.current[pageIndex]?.querySelector('.page-content');
+    if (pageContentEl) {
+      try {
+        const dataUrl = await toPng(pageContentEl as HTMLElement);
+        const link = document.createElement('a');
+        link.download = `design-id-page-${pageIndex + 1}.png`;
+        link.href = dataUrl;
+        link.click();
+      } catch (e) {
+        window.alert('Cannot download: ' + (e as Error).message);
+      }
+    }
+  };
   const { tmpSelected, onSelectStart } = useSelectLayer({
     frameRef: frameRef,
     pageListRef: pageRef,

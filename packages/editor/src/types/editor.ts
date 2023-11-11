@@ -75,6 +75,7 @@ export interface EditorState {
         rotate?: number;
         cursor?: CursorPosition;
     };
+    downloadCmd: -1 | 0 | 1;
 }
 
 export type CoreEditorActions = ReturnType<typeof ActionMethods>;

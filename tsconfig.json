@@ -36,6 +36,7 @@
       "@canva/icons/*": ["packages/editor/src/icons/*"],
       "@canva/utils": ["packages/editor/src/utils"],
       "@canva/utils/*": ["packages/editor/src/utils/*"],
+      "@canva/layout/*": ["packages/editor/src/layout/*"],
       "@canva/hooks": ["packages/editor/src/hooks"],
       "@canva/hooks/*": ["packages/editor/src/hooks/*"],
       "@canva/types": ["packages/editor/src/types"],
