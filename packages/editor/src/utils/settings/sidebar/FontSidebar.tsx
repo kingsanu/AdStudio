@@ -22,11 +22,14 @@ import {
   handleFontStyle,
   handleFontStyleName,
 } from '@canva/utils/fontHelper';
+import { getRandomItems } from '@canva/utils';
 import FontStyle from './FontStyle';
 import { some } from 'lodash';
 import FontSearchBox from '../components/FontSearchBox';
 import TrendingIcon from '@canva/icons/TrendingIcon';
 import DocumentIcon from '@canva/icons/DocumentIcon';
+import HorizontalCarousel from '@canva/components/carousel/HorizontalCarousel';
+import OutlineButton from '@canva/components/button/OutlineButton';
 
 const ListItem = styled('div')`
   height: 40px;
@@ -96,6 +99,7 @@ const FontSidebar: ForwardRefRenderFunction<
   const [offset, setOffset] = useState(0);
   const [openingRecentItems, setOpeningRecentItems] = useState<number[]>([]);
   const [openingItems, setOpeningItems] = useState<number[]>([]);
+  const [randomFonts, setRandomFonts] = useState<FontData[] | null>(null);
 
   const loadFontList = useCallback(
     async (offset = 0) => {
@@ -120,6 +124,12 @@ const FontSidebar: ForwardRefRenderFunction<
   }, [loadFontList]);
 
   useEffect(() => {
+    if (!randomFonts && fontList.length) {
+      setRandomFonts(getRandomItems(fontList));
+    }
+  }, [fontList]);
+
+  useEffect(() => {
     const handleLoadMore = async (e: Event) => {
       const node = e.target as HTMLDivElement;
       if (
@@ -130,11 +140,12 @@ const FontSidebar: ForwardRefRenderFunction<
         await loadFontList(offset + 1);
       }
     };
+
     scrollRef.current?.addEventListener('scroll', handleLoadMore);
     return () => {
       scrollRef.current?.removeEventListener('scroll', handleLoadMore);
     };
-  }, [loadFontList, fontList]);
+  }, [loadFontList]);
 
   const handleSearch = async (keyword: string) => {
     if (scrollRef.current) {
@@ -170,6 +181,26 @@ const FontSidebar: ForwardRefRenderFunction<
       >
         <div css={{ padding: '16px 16px 0' }}>
           <FontSearchBox onSearch={handleSearch} />
+          <div css={{ marginTop: 8 }}>
+            {randomFonts && (
+              <HorizontalCarousel>
+                {randomFonts.map((font, idx) => (
+                  <div key={`rdf-` + idx} className='carousel-item'>
+                    <OutlineButton onClick={() => onChangeFontFamily(font)}>
+                      <FontDisplay
+                        css={{
+                          fontFamily: `'${font.name}'`,
+                        }}
+                        fontStyle={font.style}
+                      >
+                        {!font.styles?.length ? font.name : font.family}
+                      </FontDisplay>
+                    </OutlineButton>
+                  </div>
+                ))}
+              </HorizontalCarousel>
+            )}
+          </div>
         </div>
         <div ref={scrollRef} css={{ flexGrow: 1, overflowY: 'auto' }}>
           <div

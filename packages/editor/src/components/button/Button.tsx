@@ -8,7 +8,7 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const Button = React.forwardRef(
   (
-    { icon, text, onClick, type = 'button', style, ...rest }: ButtonProps,
+    { icon, text, onClick, type = 'button', style, children, ...rest }: ButtonProps,
     ref: ForwardedRef<HTMLButtonElement>
   ) => {
     return (
@@ -17,7 +17,7 @@ const Button = React.forwardRef(
         type={type}
         onClick={onClick}
         css={{
-          border: '1px solid #000',
+          border: 0,
           borderRadius: 4,
           cursor: 'pointer',
           color: '#fff',
@@ -25,6 +25,7 @@ const Button = React.forwardRef(
           transition: 'background-color 0.3s ease',
           height: 40,
           padding: '0 6px',
+          boxShadow: 'inset 0 0 0 1px rgba(57,76,96,.15)',
           fontWeight: 400,
           '&:hover': {
             backgroundColor: '#7300e6'
@@ -35,6 +36,7 @@ const Button = React.forwardRef(
       >
         {icon && <span css={{ marginRight: 5 }}>{icon}</span>}
         {text && <span css={{ verticalAlign: 'middle' }}>{text}</span>}
+        {children}
       </button>
     );
   }
