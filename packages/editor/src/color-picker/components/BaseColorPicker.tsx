@@ -56,7 +56,7 @@ export const BaseColorPicker = ({
     };
     const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
         const text = e.clipboardData.getData('text');
-        const hexValue = `${text.replaceAll(/([^a-f0-9])/g, '')}`.slice(0, 6);
+        const hexValue = `${text.replaceAll(/([^a-fA-F0-9])/g, '')}`.slice(0, 6);
         updateValue(hexValue);
         (e.target as HTMLInputElement).value = `#${hexValue}`;
         e.preventDefault();

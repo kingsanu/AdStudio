@@ -123,91 +123,13 @@ const TextContent: FC<{ onClose: () => void }> = ({ onClose }) => {
       }}
     >
       <CloseSidebarButton onClose={onClose} />
-      <div>
+      <div css={{ marginBottom: 16 }}>
         <Button
           onClick={() => handleAddNewText()}
           text='Add a text box'
           style={{ width: '100%' }}
         />
       </div>
-      <p
-        css={{
-          fontWeight: 600,
-          margin: '16px 0',
-        }}
-      >
-        Default text styles
-      </p>
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          rowGap: 8,
-        }}
-      >
-        <DefaultTextButton
-          onClick={() =>
-            handleAddNewText(
-              'Add a heading',
-              {
-                width: 400,
-                height: 70,
-              },
-              45
-            )
-          }
-          text='Add a heading'
-          css={{
-            fontSize: 28,
-            height: 'auto',
-            fontWeight: 600,
-            padding: '10px 6px'
-          }}
-        />
-        <DefaultTextButton
-          onClick={() =>
-            handleAddNewText(
-              'Add a subheading',
-              {
-                width: 300,
-                height: 45,
-              },
-              32
-            )
-          }
-          text='Add a subheading'
-          css={{
-            fontSize: 18,
-            height: 52,
-            fontWeight: 600,
-          }}
-        />
-        <DefaultTextButton
-          onClick={() =>
-            handleAddNewText(
-              'Add a little bit of body text',
-              {
-                width: 300,
-                height: 22,
-              },
-              16
-            )
-          }
-          text='Add a little bit of body text'
-          css={{
-            fontSize: 14,
-            height: 48,
-          }}
-        />
-      </div>
-      <p
-        css={{
-          fontWeight: 600,
-          margin: '16px 0',
-        }}
-      >
-        Font combinations
-      </p>
       <div
         css={{
           flexDirection: 'column',
@@ -215,10 +137,87 @@ const TextContent: FC<{ onClose: () => void }> = ({ onClose }) => {
           display: 'flex',
         }}
       >
+        <p
+          css={{
+            fontWeight: 600,
+            margin: '0 16px 16px 0',
+          }}
+        >
+          Default text styles
+        </p>
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            rowGap: 8,
+          }}
+        >
+          <DefaultTextButton
+            onClick={() =>
+              handleAddNewText(
+                'Add a heading',
+                {
+                  width: 400,
+                  height: 70,
+                },
+                45
+              )
+            }
+            text='Add a heading'
+            css={{
+              fontSize: 28,
+              height: 'auto',
+              fontWeight: 600,
+              padding: '10px 6px',
+            }}
+          />
+          <DefaultTextButton
+            onClick={() =>
+              handleAddNewText(
+                'Add a subheading',
+                {
+                  width: 300,
+                  height: 45,
+                },
+                32
+              )
+            }
+            text='Add a subheading'
+            css={{
+              fontSize: 18,
+              height: 52,
+              fontWeight: 600,
+            }}
+          />
+          <DefaultTextButton
+            onClick={() =>
+              handleAddNewText(
+                'Add a little bit of body text',
+                {
+                  width: 300,
+                  height: 22,
+                },
+                16
+              )
+            }
+            text='Add a little bit of body text'
+            css={{
+              fontSize: 14,
+              height: 48,
+            }}
+          />
+        </div>
+        <p
+          css={{
+            fontWeight: 600,
+            margin: '16px 0',
+          }}
+        >
+          Font combinations
+        </p>
         <div
           css={{
             flexGrow: 1,
-            overflowY: 'auto',
             display: 'grid',
             gridTemplateColumns: 'repeat(2,minmax(0,1fr))',
             gridGap: 8,

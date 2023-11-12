@@ -207,7 +207,7 @@ const useShortcut = (frameEle: HTMLElement | null) => {
     const handleZoomDesktop = (e: WheelEvent) => {
       if (e.ctrlKey) {
         const s = Math.exp((-e.deltaY * zoomStep) / 3);
-        const newScale = +Math.min(Math.max(scale * s, 0.1), 5).toFixed(5);
+        const newScale = +Math.min(Math.max(scale * s, 0.1), 5).toFixed(4);
         cancelAnimationFrame(animationFrameId);
 
         animationFrameId = requestAnimationFrame(() => {

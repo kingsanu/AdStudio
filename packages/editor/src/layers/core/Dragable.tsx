@@ -19,7 +19,6 @@ const Draggable: FC<PropsWithChildren<DrapableProps>> = ({
 
   const handleMouseDown = (e: any) => {
     setIsClick(true);
-    setIsDragging(true);
 
     setTimeout(() => {
       if (isClick) {
@@ -34,7 +33,7 @@ const Draggable: FC<PropsWithChildren<DrapableProps>> = ({
     const offsetX = e.nativeEvent.offsetX;
     const offsetY = e.nativeEvent.offsetY;
     const offsetW = ref.current?.offsetWidth || 0;
-    const offsetH = ref.current?.offsetHeight || 0;
+    const offsetH = ref.current?.offsetHeight ? ref.current?.offsetHeight / 2 : 0;
 
     setPosition({ x: e.clientX - offsetX, y: e.clientY - offsetY - offsetH });
     setSize({ w: offsetW, h: offsetH });

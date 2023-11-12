@@ -60,6 +60,13 @@ const getEffectList = (assetPath: string) => [
             color: '#000000',
         },
     },
+    {
+        value: 'neon',
+        img: `${assetPath}/text/effects/echo.png`,
+        settings: {
+            intensity: 50
+        },
+    },
 ];
 
 type TextEffectSidebarProps = SidebarProps;
@@ -68,6 +75,7 @@ const TextEffectSidebar: ForwardRefRenderFunction<HTMLDivElement, TextEffectSide
         config: { assetPath },
     } = useContext(EditorContext);
     const addColorRef = useRef<HTMLDivElement>(null);
+    const effectUsingColor: string[] = ['shadow', 'lift', 'splice', 'echo'];
     const [openColorPicker, setOpenColorPicker] = useState(false);
     const { selectedLayers } = useSelectedLayers();
     const { actions, activePage } = useEditor((state) => ({
@@ -250,7 +258,7 @@ const TextEffectSidebar: ForwardRefRenderFunction<HTMLDivElement, TextEffectSide
                                                 }}
                                             />
                                         )}
-                                        {settingKey === 'color' && (
+                                        {settingKey === 'color' && effectUsingColor.includes(effect) && (
                                             <div css={{ display: 'flex', alignItems: 'center' }}>
                                                 <div
                                                     css={{
