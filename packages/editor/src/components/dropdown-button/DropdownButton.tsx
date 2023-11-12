@@ -7,9 +7,10 @@ export type DropdownMenuItem = {
   shortcut?: string;
   action?: (...args: any[]) => void;
   icon?: ReactNode;
-  type?: 'normal' | 'submenu' | 'divider';
+  type?: 'normal' | 'submenu' | 'divider' | 'groupname';
   items?: DropdownMenuItem[];
   disabled?: boolean;
+  hint?: string;
 };
 interface Props {
   text: string;
@@ -41,13 +42,20 @@ const DropdownButton: FC<Props> = ({ text, header, items }) => {
   const renderMenuItem = (item: DropdownMenuItem, index: number) => {
     if (item.type === 'divider') {
       return <div key={index} className='menu-divider'></div>;
+    } else if (item.type === 'groupname') {
+      return (
+        <p key={index} className='menu-groupname'>
+          {item.label}
+        </p>
+      );
     }
 
+    const menuItemClassName = `menu-item ${
+      item.type === 'submenu' ? 'with-submenu' : ''
+    }`;
+
     return (
-      <div
-        key={index}
-        className={`menu-item ${item.type === 'submenu' ? 'with-submenu' : ''}`}
-      >
+      <div key={index} className={menuItemClassName}>
         <button
           disabled={item.disabled}
           onClick={(...args: any[]) => {
@@ -57,7 +65,18 @@ const DropdownButton: FC<Props> = ({ text, header, items }) => {
           }}
         >
           {item?.icon}
-          <span>{item.label}</span>
+          <p
+            css={{
+              maxWidth: '100%',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              fontSize: 13,
+            }}
+          >
+            {item.label}
+          </p>
+          {item.hint && <p className='hint'>{item.hint}</p>}
           {item.type === 'submenu' && (
             <span className='submenu-arrow'>
               <ArrowRightIcon />
@@ -71,25 +90,9 @@ const DropdownButton: FC<Props> = ({ text, header, items }) => {
         </button>
         {item.items && (
           <div className='submenu'>
-            {item.items.map((submenuItem, subIndex) => (
-              <div key={subIndex} className='submenu-item'>
-                <button
-                  onClick={(...args: any[]) => {
-                    if (submenuItem.disabled || !submenuItem.action) return;
-                    submenuItem.action(...args);
-                    setShowMenu(false);
-                  }}
-                >
-                  {submenuItem?.icon}
-                  <span>{submenuItem.label}</span>
-                  {submenuItem.shortcut && (
-                    <span className='shortcut'>
-                      <kbd>{submenuItem.shortcut}</kbd>
-                    </span>
-                  )}
-                </button>
-              </div>
-            ))}
+            {item.items.map((submenuItem, subIndex) =>
+              renderMenuItem(submenuItem, subIndex)
+            )}
           </div>
         )}
       </div>

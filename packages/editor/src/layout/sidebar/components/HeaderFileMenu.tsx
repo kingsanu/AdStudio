@@ -18,6 +18,9 @@ import ExportIcon from '@canva/icons/ExportIcon';
 import EditorButton from '@canva/components/EditorButton';
 import PlayArrowIcon from '@canva/icons/PlayArrowIcon';
 import PreviewModal from './PreviewModal';
+import FacebookIcon from '@canva/icons/FacebookIcon';
+import InstagramIcon from '@canva/icons/InstagramIcon';
+import { BoxSize } from '@canva/types';
 
 interface Props {
   designName: string;
@@ -38,16 +41,77 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
 
   // Resize
   const [openResizeSetting, setOpenResizeSetting] = useState(false);
-  const [size, setSize] = useState(pageSize);
+  const [isCreating, setIsCreating] = useState(false);
+  const [size, setSize] = useState({
+    width: 0,
+    height: 0,
+  });
   const [lockSiteAspect, setLockSizeAspect] = useState(false);
   const widthRef = useRef<HTMLInputElement>(null);
   const heightRef = useRef<HTMLInputElement>(null);
   const menuData: DropdownMenuItem[] = [
     {
       label: 'Create new design',
-      type: 'normal',
+      type: 'submenu',
       icon: <AddNewPageIcon />,
-      action: () => {},
+      items: [
+        {
+          label: 'Custom size',
+          type: 'normal',
+          icon: <ResizeIcon />,
+          action: () => {
+            setSize({
+              width: 0,
+              height: 0,
+            });
+            setIsCreating(true);
+            setOpenResizeSetting(true);
+          },
+        },
+        {
+          label: 'Suggested',
+          type: 'groupname',
+        },
+        {
+          label: 'Facebook Post (Landscape)',
+          type: 'normal',
+          icon: <FacebookIcon />,
+          hint: '940 × 788 px',
+          action: () => {
+            handleCloseResizeBox();
+            createNew({
+              width: 940,
+              height: 688,
+            });
+          },
+        },
+        {
+          label: 'Facebook Cover',
+          type: 'normal',
+          icon: <FacebookIcon />,
+          hint: '1640 × 924 px',
+          action: () => {
+            handleCloseResizeBox();
+            createNew({
+              width: 1640,
+              height: 924,
+            });
+          },
+        },
+        {
+          label: 'Instagram Post (Square)',
+          type: 'normal',
+          icon: <InstagramIcon />,
+          hint: '1080 × 1080 px',
+          action: () => {
+            handleCloseResizeBox();
+            createNew({
+              width: 1080,
+              height: 1080,
+            });
+          },
+        },
+      ],
     },
     { label: 'Divider', type: 'divider' },
     {
@@ -99,6 +163,8 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
           icon: <ResizeIcon />,
           disabled: isPageLocked,
           action: () => {
+            setIsCreating(false);
+            setSize(pageSize);
             setOpenResizeSetting(true);
           },
         },
@@ -147,12 +213,12 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
   };
 
   const isDisabledResize = useMemo(
-    () => size?.width < 100 || size.height < 100,
+    () => (size?.width || 0) < 100 || (size?.height || 0) < 100,
     [size]
   );
 
   const handleChangeSize = (value: string, type: 'width' | 'height') => {
-    const ratio = size.width / size.height;
+    const ratio = (size?.width || 0) / (size?.height || 0);
     const v = parseInt(value, 10);
     if (type === 'width') {
       if (lockSiteAspect) {
@@ -160,7 +226,7 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
           Math.round((v / ratio) * 10) / 10
         );
       }
-      setSize({ ...size, width: v });
+      setSize({ ...size, width: v || 0 });
     }
     if (type === 'height') {
       if (lockSiteAspect) {
@@ -168,13 +234,55 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
           Math.round(v * ratio * 10) / 10
         );
       }
-      setSize({ ...size, height: v });
+      setSize({ ...size, height: v || 0 });
     }
   };
 
   const handleResize = () => {
     if (isDisabledResize) return;
-    actions.changePageSize(size);
+    if (isCreating) {
+      createNew(size);
+    } else {
+      actions.changePageSize(size);
+    }
+    handleCloseResizeBox();
+  };
+
+  const createNew = (boxSize: BoxSize) => {
+    actions.setData([
+      {
+        name: '',
+        notes: '',
+        layers: {
+          ROOT: {
+            type: {
+              resolvedName: 'RootLayer',
+            },
+            props: {
+              boxSize,
+              position: {
+                x: 0,
+                y: 0,
+              },
+              rotate: 0,
+              color: 'rgb(255, 255, 255)',
+              image: null,
+            },
+            locked: false,
+            child: [],
+            parent: null,
+          },
+        },
+      },
+    ]);
+  };
+
+  const handleCloseResizeBox = () => {
+    setIsCreating(false);
+    setSize({
+      width: 0,
+      height: 0,
+    });
     setOpenResizeSetting(false);
   };
 
@@ -189,7 +297,12 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
               {designName || 'Untitled design'}
             </div>
             <div
-              css={{ fontSize: 13, color: '#909090', marginTop: 8 }}
+              css={{
+                fontSize: 13,
+                color: '#909090',
+                marginTop: 8,
+                fontFamily: 'Arial',
+              }}
             >{`${pageSize.width}px x ${pageSize.height}px`}</div>
           </div>
         }
@@ -201,10 +314,7 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
         onChange={handleImport}
         css={{ display: 'none' }}
       />
-      <QuickBoxDialog
-        open={openResizeSetting}
-        onClose={() => setOpenResizeSetting(false)}
-      >
+      <QuickBoxDialog open={openResizeSetting} onClose={handleCloseResizeBox}>
         <div css={{ padding: '0 16px 16px', width: 300 }}>
           <div css={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
             <div>
@@ -224,7 +334,7 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
                   ref={widthRef}
                   css={{ width: '100%', minWidth: 8, height: '100%' }}
                   onChange={(e) => handleChangeSize(e.target.value, 'width')}
-                  defaultValue={size.width}
+                  value={size?.width || ''}
                 />
               </div>
             </div>
@@ -245,7 +355,7 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
                   ref={heightRef}
                   css={{ width: '100%', minWidth: 8, height: '100%' }}
                   onChange={(e) => handleChangeSize(e.target.value, 'height')}
-                  defaultValue={size.height}
+                  value={size?.height || ''}
                 />
               </div>
             </div>
@@ -274,12 +384,12 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
                 fontSize: 16,
                 textAlign: 'center',
                 fontWeight: 700,
-                width: '100%'
+                width: '100%',
               }}
               onClick={handleResize}
               disabled={isDisabledResize}
             >
-              Resize
+              {isCreating ? 'Create new design' : 'Resize'}
             </button>
           </div>
         </div>

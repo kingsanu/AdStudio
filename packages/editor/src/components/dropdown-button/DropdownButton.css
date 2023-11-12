@@ -36,8 +36,7 @@
     border: 1px solid #e3e6e9;
 }
 
-.menu-item>button,
-.submenu-item>button {
+.menu-item>button {
     padding: 8px 16px;
     cursor: pointer;
     display: flex;
@@ -46,25 +45,37 @@
     line-height: 22px;
     width: 100%;
 }
-.menu-item>button:disabled,
-.submenu-item>button:disabled {
+
+.menu-item>button:disabled {
     color: #b2b2b2;
     cursor: not-allowed;
 }
-.menu-item>button>svg,
-.submenu-item>button>svg {
+
+.menu-item>button>svg {
     margin-right: 5px;
 }
-
-.menu-item:hover,
-.submenu-item:hover {
+.menu-item>button p.hint {
+    display: none;
+    font-size: 12px;
+    margin-left: 5px;
+    font-family: 'Arial';
+}
+.menu-item:hover>button {
     background-color: rgba(64, 87, 109, .07);
 }
-
+.menu-item:hover>button p.hint {
+    display: block;
+}
 .menu-divider {
     height: 1px;
     background-color: rgba(57, 76, 96, .15);
     margin: 8px 0;
+}
+
+.menu-groupname {
+    margin: 8px 20px;
+    color: rgba(13, 18, 22, .7);
+    font-size: 12px;
 }
 
 .with-submenu {
