@@ -67,6 +67,23 @@ const getEffectList = (assetPath: string) => [
             intensity: 50
         },
     },
+    {
+        value: 'glitch',
+        img: `${assetPath}/text/effects/echo.png`,
+        settings: {
+            offset: 30,
+            direction: 90,
+            color: '#000000',
+        },
+    },
+    {
+        value: 'outline',
+        img: `${assetPath}/text/effects/echo.png`,
+        settings: {
+            thickness: 50,
+            color: '#000000',
+        },
+    },
 ];
 
 type TextEffectSidebarProps = SidebarProps;
@@ -177,11 +194,11 @@ const TextEffectSidebar: ForwardRefRenderFunction<HTMLDivElement, TextEffectSide
                         flexGrow: 1,
                     }}
                 >
-                    Text Effects
+                    Effects
                 </p>
             </div>
             <div css={{ padding: '24px 16px' }}>
-                <p>Style</p>
+                <p css={{marginBottom: 24}}>Style</p>
                 <div
                     css={{
                         display: 'grid',

@@ -95,6 +95,20 @@ export const getTextEffectStyle = (
     res['span'] = {
       color: 'var(--color-override)!important',
     };
+  } else if (effect === 'glitch') {
+    const radians = ((settings?.direction || 0) * Math.PI) / 180;
+    const offset = settings?.offset || 0;
+
+    const x = offset * 0.00183334 * fontSize * Math.sin(radians);
+    const y = offset * 0.00183334 * fontSize * Math.cos(radians);
+
+    res.textShadow = `rgb(0, 255, 255) ${x}px ${y}px 0px, 
+                 rgb(255, 0, 255) ${x * -1}px ${y * -1}px 0px`;
+
+    res['--color-override'] = textColor;
+    res['span'] = {
+      color: 'var(--color-override)!important',
+    };
   }
   return res;
 };
