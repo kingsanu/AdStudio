@@ -1,6 +1,5 @@
 import { FC, useEffect, useState } from 'react';
 import axios from 'axios';
-import { getThumbnail } from '../../utils/thumbnail';
 import { isMobile } from 'react-device-detect';
 import { useEditor } from '@canva/hooks';
 import { BoxSize, Delta, LayerId, SerializedLayers } from '@canva/types';
@@ -246,14 +245,13 @@ const TextContent: FC<{ onClose: () => void }> = ({ onClose }) => {
                 }}
               >
                 <img
-                  src={getThumbnail(img)}
+                  src={img}
                   css={{
                     position: 'absolute',
                     top: 0,
-                    left: 0,
-                    height: '100%',
-                    width: '100%',
+                    bottom: 0,
                     objectFit: 'cover',
+                    margin: 'auto'
                   }}
                 />
               </div>

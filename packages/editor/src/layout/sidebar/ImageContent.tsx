@@ -26,7 +26,7 @@ const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
   const addImage = async (thumb: string, url: string, position?: Delta) => {
     const img = new Image();
     img.onerror = (err) => {
-      // Sentry.captureException(err);
+      // Sentry.captureException(err); // TODO
       window.alert(err);
     };
     img.src = url;

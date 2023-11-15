@@ -81,7 +81,7 @@ const getEffectList = (assetPath: string) => [
         img: `${assetPath}/text/effects/echo.png`,
         settings: {
             thickness: 50,
-            color: '#000000',
+            color: '#000000'
         },
     },
 ];
@@ -92,7 +92,7 @@ const TextEffectSidebar: ForwardRefRenderFunction<HTMLDivElement, TextEffectSide
         config: { assetPath },
     } = useContext(EditorContext);
     const addColorRef = useRef<HTMLDivElement>(null);
-    const effectUsingColor: string[] = ['shadow', 'lift', 'splice', 'echo'];
+    const effectUsingColor: string[] = ['shadow', 'lift', 'splice', 'echo', 'outline'];
     const [openColorPicker, setOpenColorPicker] = useState(false);
     const { selectedLayers } = useSelectedLayers();
     const { actions, activePage } = useEditor((state) => ({
@@ -268,7 +268,7 @@ const TextEffectSidebar: ForwardRefRenderFunction<HTMLDivElement, TextEffectSide
                                             <Slider
                                                 label={settingKey}
                                                 min={settingKey === 'direction' ? -180 : 0}
-                                                max={settingKey === 'direction' ? 180 : 100}
+                                                max={settingKey === 'direction' ? 180 : effect !== 'outline' ? 100 : 200}
                                                 defaultValue={value as number}
                                                 onChange={(value) => {
                                                     handleChangeSetting(settingKey, value);

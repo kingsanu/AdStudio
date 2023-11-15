@@ -68,8 +68,10 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       const res: [LayerId, Layer<LayerComponentProps>][] = [];
       layers[layerId].child.forEach((childId) => {
         const childLayer = decodeLayer(layers[childId], newParentId);
-        res.push([childLayer.id, childLayer]);
-        layer.data.child.push(childLayer.id);
+        if (childLayer?.data) {
+          res.push([childLayer.id, childLayer]);
+          layer.data?.child.push(childLayer.id);
+        }
       });
       return res;
     };
@@ -1075,14 +1077,16 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
         } | null;
       }
     ) {
-      state.imageEditor = cloneDeep({
-        pageIndex,
-        layerId,
-        boxSize,
-        position,
-        rotate,
-        image,
-      });
+      if (image?.url) {
+        state.imageEditor = cloneDeep({
+          pageIndex,
+          layerId,
+          boxSize,
+          position,
+          rotate,
+          image,
+        });
+      }
     },
     updateImageEditor(
       data: DeepPartial<{

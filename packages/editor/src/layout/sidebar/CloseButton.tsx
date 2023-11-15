@@ -8,7 +8,7 @@ const CloseSidebarButton: FC<{ onClose: () => void }> = ({ onClose }) => {
         right: 1,
         top: '50%',
         transform: 'translate(100%,-50%)',
-        zIndex: 1
+        zIndex: 5
       }}
     >
       <button css={{ position: 'relative', display: 'grid' }} onClick={onClose}>
