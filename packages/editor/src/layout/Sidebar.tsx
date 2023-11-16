@@ -14,6 +14,7 @@ import ElementsIcon from '@canva/icons/ElementsIcon';
 import UploadIcon from '@canva/icons/UploadIcon';
 import ImageIcon from '@canva/icons/ImageIcon';
 import Notes from '@canva/utils/settings/sidebar/Notes';
+import FrameIcon from '@canva/icons/FrameIcon';
 
 const tabs = [
   {
@@ -34,7 +35,7 @@ const tabs = [
   },
   {
     name: 'Frame',
-    icon: <ElementsIcon />,
+    icon: <FrameIcon />,
   },
   {
     name: 'Upload',

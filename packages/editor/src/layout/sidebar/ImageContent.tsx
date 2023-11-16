@@ -1,6 +1,5 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import { getThumbnail } from '../../utils/thumbnail';
 import { isMobile } from 'react-device-detect';
 import { useEditor } from '@canva/hooks';
 import Draggable from '@canva/layers/core/Dragable';
@@ -10,24 +9,73 @@ import ImageSearchBox from './components/ImageSearchBox';
 import HorizontalCarousel from '@canva/components/carousel/HorizontalCarousel';
 import OutlineButton from '@canva/components/button/OutlineButton';
 
+const recommendKeywords = [
+  'animal',
+  'sport',
+  'love',
+  'scene',
+  'dog',
+  'cat',
+  'whale',
+];
+
 const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
   const [images, setImages] = useState<{ img: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  useEffect(() => {
-    async function fetchImages() {
-      const response = await axios.get<{ img: string }[]>('/images');
-      setImages(response.data);
-      setIsLoading(false);
-    }
-    fetchImages();
-  }, []);
-
   const { actions } = useEditor();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [offset, setOffset] = useState(0);
+  const dataRef = useRef(false);
+  const [keyword, setKeyword] = useState('');
+
+  const loadData = useCallback(
+    async (offset = 0, kw = '') => {
+      dataRef.current = true;
+      setIsLoading(true);
+      const res: any = await axios.get(`/images?ps=18&pi=${offset}&kw=${kw}`);
+      setImages((frames) => [...frames, ...res.data]);
+      setIsLoading(false);
+      if (res.data.length > 0) {
+        dataRef.current = false;
+      }
+    },
+    [setIsLoading]
+  );
+
+  useEffect(() => {
+    loadData(offset, keyword);
+  }, [offset, keyword]);
+
+  useEffect(() => {
+    const handleLoadMore = async (e: Event) => {
+      const node = e.target as HTMLDivElement;
+      if (
+        node.scrollHeight - node.scrollTop - 80 <= node.clientHeight &&
+        !dataRef.current
+      ) {
+        setOffset((prevOffset) => prevOffset + 1);
+      }
+    };
+
+    scrollRef.current?.addEventListener('scroll', handleLoadMore);
+    return () => {
+      scrollRef.current?.removeEventListener('scroll', handleLoadMore);
+    };
+  }, [loadData]);
+
+  const handleSearch = async (kw: string) => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+    setOffset(0);
+    setKeyword(kw);
+    setImages([]);
+  };
+
   const addImage = async (thumb: string, url: string, position?: Delta) => {
     const img = new Image();
     img.onerror = (err) => {
-      // Sentry.captureException(err); // TODO
-      window.alert(err);
+      console.error(err);
     };
     img.src = url;
     img.crossOrigin = 'anonymous';
@@ -54,26 +102,22 @@ const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
       }}
     >
       <CloseSidebarButton onClose={onClose} />
-      <div
-        css={{
-          marginBottom: 16,
-        }}
-      >
-        <ImageSearchBox />
+      <div>
+        <ImageSearchBox searchString={keyword} onStartSearch={handleSearch} />
         <div css={{ paddingTop: 8 }}>
           <HorizontalCarousel>
-            <div className='carousel-item'>
-              <OutlineButton onClick={() => {}}>Christmas</OutlineButton>
-            </div>
-            <div className='carousel-item'>
-              <OutlineButton onClick={() => {}}>Background</OutlineButton>
-            </div>
-            <div className='carousel-item'>
-              <OutlineButton onClick={() => {}}>Thanksgiving</OutlineButton>
-            </div>
-            <div className='carousel-item'>
-              <OutlineButton onClick={() => {}}>Black</OutlineButton>
-            </div>
+            {recommendKeywords.map((kw) => (
+              <div key={kw} className='carousel-item'>
+                <OutlineButton
+                  onClick={() => {
+                    setKeyword(kw);
+                    handleSearch(kw);
+                  }}
+                >
+                  {kw}
+                </OutlineButton>
+              </div>
+            ))}
           </HorizontalCarousel>
         </div>
       </div>
@@ -81,6 +125,7 @@ const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
         css={{ flexDirection: 'column', overflowY: 'auto', display: 'flex' }}
       >
         <div
+          ref={scrollRef}
           css={{
             flexGrow: 1,
             overflowY: 'auto',
@@ -89,17 +134,16 @@ const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
             gridGap: 8,
           }}
         >
-          {isLoading && <div>Loading...</div>}
           {images.map((item, idx) => (
             <Draggable
               key={idx}
               onDrop={(pos) => {
                 if (pos) {
-                  addImage(getThumbnail(item.img), item.img, pos);
+                  addImage(item.img, item.img, pos);
                 }
               }}
               onClick={() => {
-                addImage(getThumbnail(item.img), item.img);
+                addImage(item.img, item.img);
               }}
             >
               <div
@@ -111,7 +155,7 @@ const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
                 }}
               >
                 <img
-                  src={getThumbnail(item.img)}
+                  src={item.img}
                   loading='lazy'
                   css={{
                     position: 'absolute',
@@ -125,6 +169,7 @@ const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
               </div>
             </Draggable>
           ))}
+          {isLoading && <div>Loading...</div>}
         </div>
       </div>
     </div>

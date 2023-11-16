@@ -41,29 +41,11 @@ function searchKeywords(query, data) {
   const lowerCaseQuery = query.toLowerCase();
   const uniqueKeywords = new Set();
 
-  data.forEach(item => {
+  data.forEach((item) => {
     const lowerCaseDesc = item.desc.toLowerCase();
     const keywords = lowerCaseDesc.split(' ');
 
-    keywords.forEach(keyword => {
-      if (keyword.includes(lowerCaseQuery)) {
-        uniqueKeywords.add(keyword);
-      }
-    });
-  });
-
-  return Array.from(uniqueKeywords);
-}
-
-function searchKeywords(query, data) {
-  const lowerCaseQuery = query.toLowerCase();
-  const uniqueKeywords = new Set();
-
-  data.forEach(item => {
-    const lowerCaseDesc = item.desc.toLowerCase();
-    const keywords = lowerCaseDesc.split(' ');
-
-    keywords.forEach(keyword => {
+    keywords.forEach((keyword) => {
       if (keyword.includes(lowerCaseQuery)) {
         uniqueKeywords.add(keyword);
       }
@@ -96,7 +78,7 @@ app.get('/api/draft-fonts', async (req, res) => {
         }),
       };
     });
-    res.send({data: filtered});
+    res.send({ data: filtered });
   });
 });
 
@@ -142,7 +124,9 @@ app.get('/api/texts', async (req, res) => {
       return;
     }
     const { ps, pi, kw } = req.query;
-    res.send(paginateArrayWithFilter(JSON.parse(jsonString).data, +ps, +pi, kw));
+    res.send(
+      paginateArrayWithFilter(JSON.parse(jsonString).data, +ps, +pi, kw)
+    );
   });
 });
 
@@ -157,7 +141,7 @@ app.get('/api/text-suggestion', async (req, res) => {
       return;
     }
     const rs = searchKeywords(req.query.kw, JSON.parse(jsonString).data);
-    res.send(rs.map((kw, idx) => ({id: idx+1, name: kw})));
+    res.send(rs.map((kw, idx) => ({ id: idx + 1, name: kw })));
   });
 });
 
@@ -172,7 +156,9 @@ app.get('/api/frames', async (req, res) => {
       return;
     }
     const { ps, pi, kw } = req.query;
-    res.send(paginateArrayWithFilter(JSON.parse(jsonString).data, +ps, +pi, kw));
+    res.send(
+      paginateArrayWithFilter(JSON.parse(jsonString).data, +ps, +pi, kw)
+    );
   });
 });
 
@@ -187,12 +173,44 @@ app.get('/api/frame-suggestion', async (req, res) => {
       return;
     }
     const rs = searchKeywords(req.query.kw, JSON.parse(jsonString).data);
-    res.send(rs.map((kw, idx) => ({id: idx+1, name: kw})));
+    res.send(rs.map((kw, idx) => ({ id: idx + 1, name: kw })));
   });
 });
 
 /**
- * Get images
+ * Search shapes
+ */
+app.get('/api/shapes', async (req, res) => {
+  fs.readFile('./json/shapes.json', 'utf8', (err, jsonString) => {
+    if (err) {
+      console.error(err);
+      res.send(null);
+      return;
+    }
+    const { ps, pi, kw } = req.query;
+    res.send(
+      paginateArrayWithFilter(JSON.parse(jsonString).data, +ps, +pi, kw)
+    );
+  });
+});
+
+/**
+ * Search shape keywords
+ */
+app.get('/api/shape-suggestion', async (req, res) => {
+  fs.readFile('./json/shapes.json', 'utf8', (err, jsonString) => {
+    if (err) {
+      console.error(err);
+      res.send(null);
+      return;
+    }
+    const rs = searchKeywords(req.query.kw, JSON.parse(jsonString).data);
+    res.send(rs.map((kw, idx) => ({ id: idx + 1, name: kw })));
+  });
+});
+
+/**
+ * Search images
  */
 app.get('/api/images', async (req, res) => {
   fs.readFile('./json/images.json', 'utf8', (err, jsonString) => {
@@ -201,6 +219,24 @@ app.get('/api/images', async (req, res) => {
       res.send(null);
       return;
     }
-    res.send(JSON.parse(jsonString).data);
+    const { ps, pi, kw } = req.query;
+    res.send(
+      paginateArrayWithFilter(JSON.parse(jsonString).data, +ps, +pi, kw)
+    );
+  });
+});
+
+/**
+ * Search image keywords
+ */
+app.get('/api/image-suggestion', async (req, res) => {
+  fs.readFile('./json/images.json', 'utf8', (err, jsonString) => {
+    if (err) {
+      console.error(err);
+      res.send(null);
+      return;
+    }
+    const rs = searchKeywords(req.query.kw, JSON.parse(jsonString).data);
+    res.send(rs.map((kw, idx) => ({ id: idx + 1, name: kw })));
   });
 });

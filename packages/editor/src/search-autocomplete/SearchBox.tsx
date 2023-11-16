@@ -1,4 +1,3 @@
-import { default as Fuse, IFuseOptions } from 'fuse.js';
 import React, {
   ChangeEvent,
   FocusEvent,
@@ -9,18 +8,16 @@ import React, {
   useState,
 } from 'react';
 import styled, { ThemeProvider } from 'styled-components';
-import { DefaultTheme, defaultFuseOptions, defaultTheme } from './utils/config';
+import { DefaultTheme, defaultTheme } from './utils/config';
 import { debounce } from './utils';
 import Results, { Item } from './Suggested';
 import SearchInput from './SearchInput';
-import SearchIcon from '@canva/icons/SearchIcon';
 
 export const DEFAULT_INPUT_DEBOUNCE = 200;
 export const MAX_RESULTS = 10;
 
 export interface ReactSearchAutocompleteProps<T> {
   items: T[];
-  fuseOptions?: IFuseOptions<T>;
   inputDebounce?: number;
   onSearch?: (keyword: string) => void;
   onHover?: (result: T) => void;
@@ -46,7 +43,6 @@ export interface ReactSearchAutocompleteProps<T> {
 
 export default function SearchBox<T>({
   items = [],
-  fuseOptions = defaultFuseOptions,
   inputDebounce = DEFAULT_INPUT_DEBOUNCE,
   onSearch = () => {},
   onHover = () => {},
@@ -70,11 +66,6 @@ export default function SearchBox<T>({
   className,
 }: ReactSearchAutocompleteProps<T>) {
   const theme = { ...defaultTheme, ...styling };
-  const options = { ...defaultFuseOptions, ...fuseOptions };
-
-  const fuse = new Fuse(items, options);
-  fuse.setCollection(items);
-
   const [searchString, setSearchString] = useState<string>(inputSearchString);
   const [results, setResults] = useState<any[]>([]);
   const [highlightedItem, setHighlightedItem] = useState<number>(-1);

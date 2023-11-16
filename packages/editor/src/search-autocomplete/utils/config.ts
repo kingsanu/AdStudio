@@ -1,5 +1,3 @@
-import { IFuseOptions } from 'fuse.js'
-
 export interface DefaultTheme {
   height?: string
   border?: string
@@ -36,13 +34,4 @@ const defaultTheme: DefaultTheme = {
   searchIconMargin: '0 0 0 8px'
 }
 
-const defaultFuseOptions: IFuseOptions<any> = {
-  shouldSort: true,
-  threshold: 0.6,
-  location: 0,
-  distance: 100,
-  minMatchCharLength: 1,
-  keys: ['name']
-}
-
-export { defaultTheme, defaultFuseOptions }
+export { defaultTheme }

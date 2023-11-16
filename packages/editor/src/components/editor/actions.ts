@@ -885,7 +885,7 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
         width = height * shapeRatio;
         scale = height / dl.props.boxSize.height;
       }
-
+      console.log(dl)
       state.pages[state.activePage].layers[layerId] = {
         id: layerId,
         data: mergeWithoutArray(cloneDeep(dl), {
