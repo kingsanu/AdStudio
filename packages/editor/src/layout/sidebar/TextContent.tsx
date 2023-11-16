@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { isMobile } from 'react-device-detect';
 import { useEditor } from '@canva/hooks';
@@ -9,6 +9,7 @@ import { generateRandomID } from '@canva/utils/identityGenerator';
 import Button from '@canva/components/button/Button';
 import CloseSidebarButton from './CloseButton';
 import styled from '@emotion/styled';
+import TextSearchBox from './components/TextSearchBox';
 
 const DefaultTextButton = styled(Button)`
   background-color: #313334;
@@ -68,16 +69,57 @@ const TextContent: FC<{ onClose: () => void }> = ({ onClose }) => {
   const { actions, state } = useEditor();
   const [texts, setTexts] = useState<Text[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [offset, setOffset] = useState(0);
+  const dataRef = useRef(false);
+  const [keyword, setKeyword] = useState('');
+
+  const loadData = useCallback(
+    async (offset = 0, kw = '') => {
+      dataRef.current = true;
+      setIsLoading(true);
+      const res: any = await axios.get<Text[]>(
+        `/texts?ps=6&pi=${offset}&kw=${kw}`
+      );
+      setTexts((texts) => [...texts, ...res.data]);
+      setIsLoading(false);
+      if (res.data.length > 0) {
+        dataRef.current = false;
+      }
+    },
+    [setIsLoading]
+  );
 
   useEffect(() => {
-    async function fetchTexts() {
-      const response = await axios.get<Text[]>('/texts');
-      setTexts(response.data);
-      setIsLoading(false);
-    }
+    loadData(offset, keyword);
+  }, [offset, keyword]);
 
-    fetchTexts();
-  }, []);
+  useEffect(() => {
+    const handleLoadMore = async (e: Event) => {
+      const node = e.target as HTMLDivElement;
+      if (
+        node.scrollHeight - node.scrollTop - 80 <= node.clientHeight &&
+        !dataRef.current
+      ) {
+        setOffset((prevOffset) => prevOffset + 1);
+      }
+    };
+
+    scrollRef.current?.addEventListener('scroll', handleLoadMore);
+    return () => {
+      scrollRef.current?.removeEventListener('scroll', handleLoadMore);
+    };
+  }, [loadData]);
+
+  const handleSearch = async (kw: string) => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+    setOffset(0);
+    setKeyword(kw);
+    setTexts([]);
+  };
+
   const handleAddText = (data: {
     rootId: LayerId;
     layers: SerializedLayers;
@@ -122,6 +164,13 @@ const TextContent: FC<{ onClose: () => void }> = ({ onClose }) => {
       }}
     >
       <CloseSidebarButton onClose={onClose} />
+      <div
+        css={{
+          marginBottom: 16,
+        }}
+      >
+        <TextSearchBox onStartSearch={handleSearch} />
+      </div>
       <div css={{ marginBottom: 16 }}>
         <Button
           onClick={() => handleAddNewText()}
@@ -130,6 +179,7 @@ const TextContent: FC<{ onClose: () => void }> = ({ onClose }) => {
         />
       </div>
       <div
+        ref={scrollRef}
         css={{
           flexDirection: 'column',
           overflowY: 'auto',
@@ -223,7 +273,6 @@ const TextContent: FC<{ onClose: () => void }> = ({ onClose }) => {
             padding: '16px',
           }}
         >
-          {isLoading && <div>Loading...</div>}
           {texts.map(({ img, data }, idx) => (
             <Draggable
               key={idx}
@@ -251,12 +300,13 @@ const TextContent: FC<{ onClose: () => void }> = ({ onClose }) => {
                     top: 0,
                     bottom: 0,
                     objectFit: 'cover',
-                    margin: 'auto'
+                    margin: 'auto',
                   }}
                 />
               </div>
             </Draggable>
           ))}
+          {isLoading && <div>Loading...</div>}
         </div>
       </div>
     </div>

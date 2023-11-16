@@ -29,6 +29,7 @@ export const FrameContent: FC<FrameContentProps> = ({
   color,
   gradientBackground,
 }) => {
+  const frameBg = 'http://localhost:4000/images/frame-bg.jpg'; // TODO
   return (
     <div
       css={{
@@ -57,7 +58,7 @@ export const FrameContent: FC<FrameContentProps> = ({
           }}
         >
           <img
-            src={image.url}
+            src={image.url || frameBg}
             css={{
               objectFit: 'fill',
               width: '100%',

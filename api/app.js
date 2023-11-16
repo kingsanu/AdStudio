@@ -14,7 +14,6 @@ function paginateArrayWithFilter(array, size = 30, index = 0, keyword = '') {
   const startIndex = index * size;
   const endIndex = startIndex + size;
   let filteredArray = array;
-  console.log(startIndex, endIndex)
   if (keyword && keyword !== '') {
     const lowerCaseKeyword = keyword.toLowerCase();
     filteredArray = array.filter((item) =>
@@ -133,7 +132,7 @@ app.get('/api/templates', async (req, res) => {
 });
 
 /**
- * Get text templates
+ * Search text templates
  */
 app.get('/api/texts', async (req, res) => {
   fs.readFile('./json/texts.json', 'utf8', (err, jsonString) => {
@@ -142,12 +141,28 @@ app.get('/api/texts', async (req, res) => {
       res.send(null);
       return;
     }
-    res.send(JSON.parse(jsonString).data);
+    const { ps, pi, kw } = req.query;
+    res.send(paginateArrayWithFilter(JSON.parse(jsonString).data, +ps, +pi, kw));
   });
 });
 
 /**
- * Get frames
+ * Search text keywords
+ */
+app.get('/api/text-suggestion', async (req, res) => {
+  fs.readFile('./json/texts.json', 'utf8', (err, jsonString) => {
+    if (err) {
+      console.error(err);
+      res.send(null);
+      return;
+    }
+    const rs = searchKeywords(req.query.kw, JSON.parse(jsonString).data);
+    res.send(rs.map((kw, idx) => ({id: idx+1, name: kw})));
+  });
+});
+
+/**
+ * Search frames
  */
 app.get('/api/frames', async (req, res) => {
   fs.readFile('./json/frames.json', 'utf8', (err, jsonString) => {
@@ -175,7 +190,6 @@ app.get('/api/frame-suggestion', async (req, res) => {
     res.send(rs.map((kw, idx) => ({id: idx+1, name: kw})));
   });
 });
-
 
 /**
  * Get images
