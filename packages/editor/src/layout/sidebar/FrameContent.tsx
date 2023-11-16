@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { isMobile } from 'react-device-detect';
 import { useEditor } from '@canva/hooks';
@@ -18,16 +18,56 @@ const FrameContent: FC<{ onClose: () => void }> = ({ onClose }) => {
   const [frames, setFrames] = useState<Frame[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { actions, query } = useEditor();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [offset, setOffset] = useState(0);
+  const dataRef = useRef(false);
+  const [keyword, setKeyword] = useState('');
+
+  const loadData = useCallback(
+    async (offset = 0, kw = '') => {
+      dataRef.current = true;
+      setIsLoading(true);
+      const res: any = await axios.get<Frame[]>(
+        `/frames?ps=18&pi=${offset}&kw=${kw}`
+      );
+      setFrames((frames) => [...frames, ...res.data]);
+      setIsLoading(false);
+      if (res.data.length > 0) {
+        dataRef.current = false;
+      }
+    },
+    [setIsLoading]
+  );
 
   useEffect(() => {
-    async function fetchFrames() {
-      const response = await axios.get<Frame[]>('/frames');
-      setFrames(response.data);
-      setIsLoading(false);
-    }
-    fetchFrames();
-  }, []);
+    loadData(offset, keyword);
+  }, [offset, keyword]);
 
+  useEffect(() => {
+    const handleLoadMore = async (e: Event) => {
+      const node = e.target as HTMLDivElement;
+      if (
+        node.scrollHeight - node.scrollTop - 80 <= node.clientHeight &&
+        !dataRef.current
+      ) {
+        setOffset((prevOffset) => prevOffset + 1);
+      }
+    };
+
+    scrollRef.current?.addEventListener('scroll', handleLoadMore);
+    return () => {
+      scrollRef.current?.removeEventListener('scroll', handleLoadMore);
+    };
+  }, [loadData]);
+
+  const handleSearch = async (kw: string) => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+    setOffset(0);
+    setKeyword(kw);
+    setFrames([]);
+  };
   const addFrame = async (frame: Frame, position?: Delta) => {
     const pageSize = query.getPageSize();
     const pageRatio = pageSize.width / pageSize.height;
@@ -48,7 +88,7 @@ const FrameContent: FC<{ onClose: () => void }> = ({ onClose }) => {
           height: frame.height * scale,
         },
         rotate: 0,
-        clipPath: frame.clipPath,
+        clipPath: `path("${frame.clipPath}")`,
         scale,
         image: {
           boxSize: {
@@ -86,12 +126,13 @@ const FrameContent: FC<{ onClose: () => void }> = ({ onClose }) => {
           marginBottom: 16,
         }}
       >
-        <FrameSearchBox />
+        <FrameSearchBox onStartSearch={handleSearch} />
       </div>
       <div
         css={{ flexDirection: 'column', overflowY: 'auto', display: 'flex' }}
       >
         <div
+          ref={scrollRef}
           css={{
             flexGrow: 1,
             overflowY: 'auto',
@@ -100,7 +141,6 @@ const FrameContent: FC<{ onClose: () => void }> = ({ onClose }) => {
             gridGap: 8,
           }}
         >
-          {isLoading && <div>Loading...</div>}
           {frames.map((frame, index) => (
             <Draggable
               key={index}
@@ -138,6 +178,7 @@ const FrameContent: FC<{ onClose: () => void }> = ({ onClose }) => {
               </div>
             </Draggable>
           ))}
+          {isLoading && <div>Loading...</div>}
         </div>
       </div>
     </div>

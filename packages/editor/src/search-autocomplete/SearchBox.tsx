@@ -13,6 +13,7 @@ import { DefaultTheme, defaultFuseOptions, defaultTheme } from './utils/config';
 import { debounce } from './utils';
 import Results, { Item } from './Suggested';
 import SearchInput from './SearchInput';
+import SearchIcon from '@canva/icons/SearchIcon';
 
 export const DEFAULT_INPUT_DEBOUNCE = 200;
 export const MAX_RESULTS = 10;
@@ -238,7 +239,7 @@ export default function SearchBox<T>({
             results={results}
             onClick={handleOnClick}
             setSearchString={setSearchString}
-            showIcon={showIcon}
+            searchIcon={null}
             maxResults={maxResults}
             resultStringKeyName={resultStringKeyName}
             formatResult={formatResult}

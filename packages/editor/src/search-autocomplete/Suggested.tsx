@@ -1,4 +1,4 @@
-import { MouseEvent, ReactNode } from 'react';
+import { MouseEvent, ReactNode, SVGProps } from 'react';
 import styled from 'styled-components';
 import { SearchIcon } from './SearchIcon';
 
@@ -11,7 +11,7 @@ export interface ResultsProps<T> {
   setHighlightedItem: Function;
   setSearchString: Function;
   formatResult?: Function;
-  showIcon: boolean;
+  searchIcon?: SVGProps<SVGSVGElement> | null;
   maxResults: number;
   resultStringKeyName: string;
   showNoResultsFlag?: boolean;
@@ -22,7 +22,7 @@ export default function Results<T>({
   results = [] as any,
   onClick,
   setSearchString,
-  showIcon,
+  searchIcon,
   maxResults,
   resultStringKeyName = 'name',
   highlightedItem,
@@ -59,7 +59,7 @@ export default function Results<T>({
     return (
       <ResultsWrapper>
         <li data-test='no-results-message'>
-          <SearchIcon showIcon={showIcon} />
+          {searchIcon && <SearchIcon showIcon={true} />}
           <div className='ellipsis'>{showNoResultsText}</div>
         </li>
       </ResultsWrapper>
@@ -81,7 +81,7 @@ export default function Results<T>({
           onMouseDown={(event) => handleMouseDown({ event, result })}
           onClick={() => handleClick(result)}
         >
-          <SearchIcon showIcon={showIcon} />
+          {searchIcon && <SearchIcon showIcon={true} />}
           <div
             className='ellipsis'
             title={result[resultStringKeyName] as string}

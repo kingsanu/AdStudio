@@ -14,7 +14,7 @@ function paginateArrayWithFilter(array, size = 30, index = 0, keyword = '') {
   const startIndex = index * size;
   const endIndex = startIndex + size;
   let filteredArray = array;
-
+  console.log(startIndex, endIndex)
   if (keyword && keyword !== '') {
     const lowerCaseKeyword = keyword.toLowerCase();
     filteredArray = array.filter((item) =>
@@ -35,6 +35,43 @@ function handleFontStyleName(fontName, style) {
 
   if (!fontStrong) return fontName + ' Regular';
   return fontName + ` Bold ${fontStrong}`;
+}
+
+function searchKeywords(query, data) {
+  if (!query) return [];
+  const lowerCaseQuery = query.toLowerCase();
+  const uniqueKeywords = new Set();
+
+  data.forEach(item => {
+    const lowerCaseDesc = item.desc.toLowerCase();
+    const keywords = lowerCaseDesc.split(' ');
+
+    keywords.forEach(keyword => {
+      if (keyword.includes(lowerCaseQuery)) {
+        uniqueKeywords.add(keyword);
+      }
+    });
+  });
+
+  return Array.from(uniqueKeywords);
+}
+
+function searchKeywords(query, data) {
+  const lowerCaseQuery = query.toLowerCase();
+  const uniqueKeywords = new Set();
+
+  data.forEach(item => {
+    const lowerCaseDesc = item.desc.toLowerCase();
+    const keywords = lowerCaseDesc.split(' ');
+
+    keywords.forEach(keyword => {
+      if (keyword.includes(lowerCaseQuery)) {
+        uniqueKeywords.add(keyword);
+      }
+    });
+  });
+
+  return Array.from(uniqueKeywords);
 }
 
 /**
@@ -119,9 +156,26 @@ app.get('/api/frames', async (req, res) => {
       res.send(null);
       return;
     }
-    res.send(JSON.parse(jsonString).data);
+    const { ps, pi, kw } = req.query;
+    res.send(paginateArrayWithFilter(JSON.parse(jsonString).data, +ps, +pi, kw));
   });
 });
+
+/**
+ * Search frame keywords
+ */
+app.get('/api/frame-suggestion', async (req, res) => {
+  fs.readFile('./json/frames.json', 'utf8', (err, jsonString) => {
+    if (err) {
+      console.error(err);
+      res.send(null);
+      return;
+    }
+    const rs = searchKeywords(req.query.kw, JSON.parse(jsonString).data);
+    res.send(rs.map((kw, idx) => ({id: idx+1, name: kw})));
+  });
+});
+
 
 /**
  * Get images
