@@ -78,7 +78,7 @@ const ShapeContent: FC<{ onClose: () => void }> = ({ onClose }) => {
         ? (pageSize.height * 0.5) / shape.height
         : (pageSize.width * 0.5) / shape.width;
 
-    actions.addFrameLayer({
+    actions.addShapeLayer({
       type: {
         resolvedName: 'ShapeLayer',
       },
@@ -92,6 +92,10 @@ const ShapeContent: FC<{ onClose: () => void }> = ({ onClose }) => {
         clipPath: shape.clipPath,
         scale,
         color: shape.background,
+        shapeSize: {
+          width: shape.width,
+          height: shape.height
+        }
       },
     });
     if (isMobile) {

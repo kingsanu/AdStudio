@@ -3,12 +3,10 @@ import {
   GradientStyle,
   LayerComponentProps,
   ShapeBorderStyle,
-  ShapeType,
 } from '../../types';
 import { getGradientBackground } from '..';
 
 export interface ShapeContentProps extends LayerComponentProps {
-  shape: ShapeType;
   clipPath: string;
   scale: number;
   roundedCorners: number;
@@ -22,6 +20,10 @@ export interface ShapeContentProps extends LayerComponentProps {
     weight: number;
     color: string;
   } | null;
+  shapeSize: {
+    width: number;
+    height: number;
+  };
 }
 export const ShapeContent: FC<ShapeContentProps> = ({
   clipPath,
@@ -31,6 +33,7 @@ export const ShapeContent: FC<ShapeContentProps> = ({
   scale,
   border,
   roundedCorners,
+  shapeSize,
 }) => {
   const getDashArray = () => {
     switch (border?.style) {
@@ -44,38 +47,47 @@ export const ShapeContent: FC<ShapeContentProps> = ({
         return undefined;
     }
   };
+  const svgWidth = boxSize.width / scale / shapeSize.width;
+  const svgHeight = boxSize.height / scale / shapeSize.height;
   return (
     <div
       css={{
         position: 'relative',
         width: boxSize.width / scale,
         height: boxSize.height / scale,
+        overflow: 'hidden'
       }}
     >
       <div
         css={{
           clipPath: `path("${clipPath}")`,
-          width: '100%',
-          height: '100%',
+          width: shapeSize.width + 'px',
+          height: shapeSize.height + 'px',
           background: gradientBackground
             ? getGradientBackground(
                 gradientBackground.colors,
                 gradientBackground.style
               )
             : color,
+          transform: `scale(${svgWidth}, ${svgHeight})`,
+          transformOrigin: '0 0',
         }}
       />
+
       {border && (
         <svg
           viewBox={`0 0 ${boxSize.width / scale} ${boxSize.height / scale}`}
-          css={{ position: 'absolute', inset: 0 }}
+          css={{
+            position: 'absolute',
+            inset: 0,
+            transform: `scale(${svgWidth}, ${svgHeight})`,
+            transformOrigin: '0 0',
+          }}
         >
-          {roundedCorners && (
+          {roundedCorners > 0 && (
             <defs>
               <clipPath id='roundedCorners'>
-                <path
-                  d={clipPath}
-                />
+                <path d={clipPath} />
               </clipPath>
             </defs>
           )}
@@ -87,6 +99,7 @@ export const ShapeContent: FC<ShapeContentProps> = ({
             strokeWidth={border.weight}
             strokeDasharray={getDashArray()}
             clipPath={clipPath}
+            vectorEffect={'non-scaling-stroke'}
           />
         </svg>
       )}

@@ -12,7 +12,7 @@ const ShapeLayer: LayerComponent<ShapeLayerProps> = ({
   gradientBackground,
   roundedCorners = 0,
   border,
-  shape,
+  shapeSize,
 }) => {
   const handleDoubleClick = () => {
     // TODO: Add text
@@ -30,8 +30,8 @@ const ShapeLayer: LayerComponent<ShapeLayerProps> = ({
       onDoubleClick={handleDoubleClick}
     >
       <ShapeContent
-        shape={shape}
         boxSize={boxSize}
+        shapeSize={shapeSize}
         clipPath={clipPath}
         scale={scale}
         rotate={rotate}

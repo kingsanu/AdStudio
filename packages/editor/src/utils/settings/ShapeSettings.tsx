@@ -15,6 +15,7 @@ import ThreeDashesIcon from '@canva/icons/ThreeDashesIcon';
 import DotsIcon from '@canva/icons/DotsIcon';
 import NotAllowedIcon from '@canva/icons/NotAllowedIcon';
 import SquareBoldIcon from '@canva/icons/SquareBoldIcon';
+import SettingDivider from './components/SettingDivider';
 
 interface ShapeSettingsProps {
   layers: Layer<ShapeLayerProps>[];
@@ -195,6 +196,7 @@ const ShapeSettings: FC<ShapeSettingsProps> = ({ layers }) => {
         >
           <ShapeSettingsIcon />
         </SettingButton>
+        <SettingDivider />
         <Popover
           open={openBorderSetting}
           anchorEl={borderRef.current}
@@ -247,14 +249,15 @@ const ShapeSettings: FC<ShapeSettingsProps> = ({ layers }) => {
               onChange={updateBorderWeight}
             />
 
-            {layers.length === 1 &&
-              layers[0].data.props.shape === 'rectangle' && (
+            {/* TODO: Coming soon */}
+            {/* {layers.length === 1 &&
+              (
                 <Slider
                   label={'Corner Rounding'}
                   value={roundedCorners}
                   onChange={updateRoundedCorners}
                 />
-              )}
+              )} */}
           </div>
         </Popover>
       </div>

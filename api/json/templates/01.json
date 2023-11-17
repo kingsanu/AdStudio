@@ -1,277 +1,231 @@
 [
-    {
-        "name": "",
-        "notes": "",
-        "layers": {
-            "ROOT": {
-                "type": {
-                    "resolvedName": "RootLayer"
-                },
-                "props": {
-                    "boxSize": {
-                        "width": 1640,
-                        "height": 924
-                    },
-                    "position": {
-                        "x": 0,
-                        "y": 0
-                    },
-                    "rotate": 0,
-                    "color": "rgb(0, 0, 0)",
-                    "image": null,
-                    "gradientBackground": null
-                },
-                "locked": false,
-                "child": [
-                    "ca_bAYiaU7",
-                    "ca_C5JksVE",
-                    "ca_7ZQLu2C",
-                    "ca_bRO6EnP"
-                ],
-                "parent": null
-            },
-            "ca_bAYiaU7": {
-                "type": {
-                    "resolvedName": "ShapeLayer"
-                },
-                "props": {
-                    "position": {
-                        "x": 1059.5040331316914,
-                        "y": -23.27872860635695
-                    },
-                    "boxSize": {
-                        "width": 993.3773431132844,
-                        "height": 993.3773431132844,
-                        "x": 714.5093724531376,
-                        "y": -37.9486552567237
-                    },
-                    "rotate": 0,
-                    "clipPath": "path(\"M 64 0 L 256 0 L 192 256 L 0 256 L 64 0 Z\")",
-                    "scale": 3.8803802465362676,
-                    "color": "rgb(230, 0, 18)",
-                    "gradientBackground": null,
-                    "transparency": 1
-                },
-                "locked": false,
-                "child": [],
-                "parent": "ROOT"
-            },
-            "ca_C5JksVE": {
-                "type": {
-                    "resolvedName": "GroupLayer"
-                },
-                "props": {
-                    "position": {
-                        "x": 870.0433016298138,
-                        "y": 136.21799211834235
-                    },
-                    "boxSize": {
-                        "width": 636.4091279543602,
-                        "height": 636.4091279543603,
-                        "x": 606.9299103504482,
-                        "y": 163.35533822330876
-                    },
-                    "scale": 1.308272767786836,
-                    "rotate": 0,
-                    "transparency": 1
-                },
-                "locked": false,
-                "child": [
-                    "ca_CqCWkjO",
-                    "ca_ZafPpxj"
-                ],
-                "parent": "ROOT"
-            },
-            "ca_CqCWkjO": {
-                "type": {
-                    "resolvedName": "ShapeLayer"
-                },
-                "props": {
-                    "position": {
-                        "x": 0,
-                        "y": 0
-                    },
-                    "boxSize": {
-                        "width": 486.4498777506113,
-                        "height": 486.4498777506113,
-                        "x": 809.0488997555012,
-                        "y": 217.14506927465357
-                    },
-                    "rotate": 0,
-                    "clipPath": "path(\"M 128 0 C 57.3076 0 0 57.3076 0 128 C 0 198.692 57.3076 256 128 256 C 198.692 256 256 198.692 256 128 C 256 57.3076 198.692 0 128 0 Z\")",
-                    "scale": 1.9001948349633253,
-                    "color": "rgb(230, 0, 18)",
-                    "transparency": 1,
-                    "gradientBackground": null
-                },
-                "locked": false,
-                "child": [],
-                "parent": "ca_C5JksVE"
-            },
-            "ca_ZafPpxj": {
-                "type": {
-                    "resolvedName": "FrameLayer"
-                },
-                "props": {
-                    "position": {
-                        "x": 12.224938875305611,
-                        "y": 12.22493887530564
-                    },
-                    "boxSize": {
-                        "width": 462,
-                        "height": 462
-                    },
-                    "rotate": 0,
-                    "clipPath": "path(\"M 500 250.003 C 500 388.069 388.069 500 250 500 C 111.929 500 0 388.069 0 250.003 C 0 111.93 111.929 0 250 0 C 388.071 0 500 111.93 500 250.003 Z\")",
-                    "scale": 0.924,
-                    "image": {
-                        "boxSize": {
-                            "width": 500,
-                            "height": 750
-                        },
-                        "position": {
-                            "x": 0,
-                            "y": -125
-                        },
-                        "rotate": 0,
-                        "thumb": "http://localhost:4000/images/photos/animals/003.jpg",
-                        "url": "http://localhost:4000/images/photos/animals/003.jpg"
-                    },
-                    "transparency": 1
-                },
-                "locked": false,
-                "child": [],
-                "parent": "ca_C5JksVE"
-            },
-            "ca_7ZQLu2C": {
-                "type": {
-                    "resolvedName": "TextLayer"
-                },
-                "props": {
-                    "position": {
-                        "x": 238.02597960628543,
-                        "y": 313.7582975263734
-                    },
-                    "boxSize": {
-                        "width": 486.4600528044839,
-                        "height": 82.59182118917317,
-                        "x": 175.73573017317892,
-                        "y": 231.94423856945727
-                    },
-                    "scale": 1.3109812887170342,
-                    "rotate": 0,
-                    "text": "<p style=\"text-align: center;font-family: 'Alfa Slab One Regular';font-size: 45px;color: rgb(0, 0, 0);line-height: 1.4;letter-spacing: 0.182em;\"><strong><span style=\"color: rgb(0, 0, 0);\">WELCOME!</span></strong></p>",
-                    "fonts": [
-                        {
-                            "family": "Alfa Slab One",
-                            "name": "Alfa Slab One Regular",
-                            "url": "http://fonts.gstatic.com/s/alfaslabone/v19/6NUQ8FmMKwSEKjnm5-4v-4Jh6dBretWvYmE.woff2",
-                            "style": "regular",
-                            "styles": []
-                        }
-                    ],
-                    "colors": [
-                        "rgb(0, 0, 0)"
-                    ],
-                    "fontSizes": [
-                        45
-                    ],
-                    "effect": {
-                        "name": "outline",
-                        "settings": {
-                            "thickness": 25,
-                            "color": "rgb(255, 255, 255)"
-                        }
-                    },
-                    "transparency": 1
-                },
-                "locked": false,
-                "child": [],
-                "parent": "ROOT"
-            },
-            "ca_bRO6EnP": {
-                "type": {
-                    "resolvedName": "TextLayer"
-                },
-                "props": {
-                    "position": {
-                        "x": 78.29531261925226,
-                        "y": 384.03217027534276
-                    },
-                    "boxSize": {
-                        "width": 805.9213867785503,
-                        "height": 237.47011404398754,
-                        "x": 212.81344289254488,
-                        "y": 441.67674400520934
-                    },
-                    "scale": 3.7693668895871038,
-                    "rotate": 0,
-                    "text": "<p style=\"text-align: center;font-family: 'Alumni Sans Pinstripe Regular';font-size: 45px;color: rgb(255, 255, 255);line-height: 1.4;letter-spacing: normal;\"><span style=\"color: rgb(255, 255, 255);\">Canva Editor</span></p>",
-                    "fonts": [
-                        {
-                            "family": "Alumni Sans Pinstripe",
-                            "name": "Alumni Sans Pinstripe Regular",
-                            "url": "http://fonts.gstatic.com/s/alumnisanspinstripe/v6/ZgNNjOFFPq_AUJD1umyS30W-Xub8zD1ObhezZ7VIpcDA5w.woff2",
-                            "style": "regular",
-                            "styles": [
-                                {
-                                    "family": "Alumni Sans Pinstripe",
-                                    "name": "Alumni Sans Pinstripe Italic",
-                                    "url": "http://fonts.gstatic.com/s/alumnisanspinstripe/v6/ZgNDjOFFPq_AUJD1umyS30W-Xub8zD1ObheDYL9Jh8XQ5_cY.woff2",
-                                    "style": "italic"
-                                },
-                                {
-                                    "family": "Alumni Sans Pinstripe",
-                                    "name": "Alumni Sans Pinstripe Italic",
-                                    "url": "http://fonts.gstatic.com/s/alumnisanspinstripe/v6/ZgNDjOFFPq_AUJD1umyS30W-Xub8zD1ObheDYL9Jh8XQ5_cY.woff2",
-                                    "style": "italic"
-                                },
-                                {
-                                    "family": "Alumni Sans Pinstripe",
-                                    "name": "Alumni Sans Pinstripe Italic",
-                                    "url": "http://fonts.gstatic.com/s/alumnisanspinstripe/v6/ZgNDjOFFPq_AUJD1umyS30W-Xub8zD1ObheDYL9Jh8XQ5_cY.woff2",
-                                    "style": "italic"
-                                },
-                                {
-                                    "family": "Alumni Sans Pinstripe",
-                                    "name": "Alumni Sans Pinstripe Italic",
-                                    "url": "http://fonts.gstatic.com/s/alumnisanspinstripe/v6/ZgNDjOFFPq_AUJD1umyS30W-Xub8zD1ObheDYL9Jh8XQ5_cY.woff2",
-                                    "style": "italic"
-                                },
-                                {
-                                    "family": "Alumni Sans Pinstripe",
-                                    "name": "Alumni Sans Pinstripe Italic",
-                                    "url": "http://fonts.gstatic.com/s/alumnisanspinstripe/v6/ZgNDjOFFPq_AUJD1umyS30W-Xub8zD1ObheDYL9Jh8XQ5_cY.woff2",
-                                    "style": "italic"
-                                },
-                                {
-                                    "family": "Alumni Sans Pinstripe",
-                                    "name": "Alumni Sans Pinstripe Italic",
-                                    "url": "http://fonts.gstatic.com/s/alumnisanspinstripe/v6/ZgNDjOFFPq_AUJD1umyS30W-Xub8zD1ObheDYL9Jh8XQ5_cY.woff2",
-                                    "style": "italic"
-                                },
-                                {
-                                    "family": "Alumni Sans Pinstripe",
-                                    "name": "Alumni Sans Pinstripe Italic",
-                                    "url": "http://fonts.gstatic.com/s/alumnisanspinstripe/v6/ZgNDjOFFPq_AUJD1umyS30W-Xub8zD1ObheDYL9Jh8XQ5_cY.woff2",
-                                    "style": "italic"
-                                }
-                            ]
-                        }
-                    ],
-                    "colors": [
-                        "rgb(255, 255, 255)"
-                    ],
-                    "fontSizes": [
-                        45
-                    ],
-                    "effect": null,
-                    "transparency": 1
-                },
-                "locked": false,
-                "child": [],
-                "parent": "ROOT"
+  {
+    "name": "",
+    "notes": "",
+    "layers": {
+      "ROOT": {
+        "type": {
+          "resolvedName": "RootLayer"
+        },
+        "props": {
+          "boxSize": {
+            "width": 1640,
+            "height": 924
+          },
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "rotate": 0,
+          "color": "rgb(0, 0, 0)",
+          "image": null,
+          "gradientBackground": null
+        },
+        "locked": false,
+        "child": ["ca_FoXJ5k0", "ca_d4zoBCV", "ca_iHEFq5s", "ca_fmOv210"],
+        "parent": null
+      },
+      "ca_FoXJ5k0": {
+        "type": {
+          "resolvedName": "TextLayer"
+        },
+        "props": {
+          "position": {
+            "x": 238.02597960628543,
+            "y": 313.7582975263734
+          },
+          "boxSize": {
+            "width": 486.4600528044839,
+            "height": 82.59182118917317,
+            "x": 175.73573017317892,
+            "y": 231.94423856945727
+          },
+          "scale": 1.3109812887170342,
+          "rotate": 0,
+          "text": "<p style=\"text-align: center;font-family: 'Alfa Slab One Regular';font-size: 45px;color: rgb(0, 0, 0);line-height: 1.4;letter-spacing: 0.182em;\"><strong><span style=\"color: rgb(0, 0, 0);\">WELCOME!</span></strong></p>",
+          "fonts": [
+            {
+              "family": "Alfa Slab One",
+              "name": "Alfa Slab One Regular",
+              "url": "http://fonts.gstatic.com/s/alfaslabone/v19/6NUQ8FmMKwSEKjnm5-4v-4Jh6dBretWvYmE.woff2",
+              "style": "regular",
+              "styles": []
             }
-        }
+          ],
+          "colors": ["rgb(0, 0, 0)"],
+          "fontSizes": [45],
+          "effect": {
+            "name": "outline",
+            "settings": {
+              "thickness": 25,
+              "color": "rgb(255, 255, 255)"
+            }
+          },
+          "transparency": 1
+        },
+        "locked": false,
+        "child": [],
+        "parent": "ROOT"
+      },
+      "ca_d4zoBCV": {
+        "type": {
+          "resolvedName": "TextLayer"
+        },
+        "props": {
+          "position": {
+            "x": 78.29531261925226,
+            "y": 384.03217027534276
+          },
+          "boxSize": {
+            "width": 805.9213867785503,
+            "height": 237.47011404398754,
+            "x": 212.81344289254488,
+            "y": 441.67674400520934
+          },
+          "scale": 3.7693668895871038,
+          "rotate": 0,
+          "text": "<p style=\"text-align: center;font-family: 'Alumni Sans Pinstripe Regular';font-size: 45px;color: rgb(255, 255, 255);line-height: 1.4;letter-spacing: normal;\"><span style=\"color: rgb(255, 255, 255);\">Canva Editor</span></p>",
+          "fonts": [
+            {
+              "family": "Alumni Sans Pinstripe",
+              "name": "Alumni Sans Pinstripe Regular",
+              "url": "http://fonts.gstatic.com/s/alumnisanspinstripe/v6/ZgNNjOFFPq_AUJD1umyS30W-Xub8zD1ObhezZ7VIpcDA5w.woff2",
+              "style": "regular",
+              "styles": [
+                {
+                  "family": "Alumni Sans Pinstripe",
+                  "name": "Alumni Sans Pinstripe Italic",
+                  "url": "http://fonts.gstatic.com/s/alumnisanspinstripe/v6/ZgNDjOFFPq_AUJD1umyS30W-Xub8zD1ObheDYL9Jh8XQ5_cY.woff2",
+                  "style": "italic"
+                }
+              ]
+            }
+          ],
+          "colors": ["rgb(255, 255, 255)"],
+          "fontSizes": [45],
+          "effect": null,
+          "transparency": 1
+        },
+        "locked": false,
+        "child": [],
+        "parent": "ROOT"
+      },
+      "ca_iHEFq5s": {
+        "type": {
+          "resolvedName": "ShapeLayer"
+        },
+        "props": {
+          "position": {
+            "x": 1018,
+            "y": -56.23277270266345
+          },
+          "boxSize": {
+            "width": 1102,
+            "height": 1102,
+            "x": 589,
+            "y": 231
+          },
+          "rotate": 0,
+          "clipPath": "M 64 0 L 256 0 L 192 256 L 0 256 L 64 0 Z",
+          "scale": 4.3046875,
+          "color": "rgb(230, 0, 18)",
+          "gradientBackground": null,
+          "transparency": 1,
+          "shapeSize": {
+            "width": 256,
+            "height": 256
+          }
+        },
+        "locked": false,
+        "child": [],
+        "parent": "ROOT"
+      },
+      "ca_fmOv210": {
+        "type": {
+          "resolvedName": "GroupLayer"
+        },
+        "props": {
+          "position": {
+            "x": 948.2166993978026,
+            "y": 215.25829752637338
+          },
+          "boxSize": {
+            "width": 489,
+            "height": 488.99999999999994
+          },
+          "scale": 1,
+          "rotate": 0,
+          "transparency": 1
+        },
+        "locked": false,
+        "child": ["ca_sYmxS83", "ca_wCigp7Z"],
+        "parent": "ROOT"
+      },
+      "ca_sYmxS83": {
+        "type": {
+          "resolvedName": "ShapeLayer"
+        },
+        "props": {
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "boxSize": {
+            "width": 489,
+            "height": 489,
+            "x": 371,
+            "y": 73.25829752637338
+          },
+          "rotate": 0,
+          "clipPath": "M 128 0 C 57.3076 0 0 57.3076 0 128 C 0 198.692 57.3076 256 128 256 C 198.692 256 256 198.692 256 128 C 256 57.3076 198.692 0 128 0 Z",
+          "scale": 1.91015625,
+          "color": "rgb(230, 0, 18)",
+          "gradientBackground": null,
+          "transparency": 1,
+          "shapeSize": {
+            "width": 256,
+            "height": 256
+          }
+        },
+        "locked": false,
+        "child": [],
+        "parent": "ca_fmOv210"
+      },
+      "ca_wCigp7Z": {
+        "type": {
+          "resolvedName": "FrameLayer"
+        },
+        "props": {
+          "position": {
+            "x": 13.5,
+            "y": 13.5
+          },
+          "boxSize": {
+            "width": 462,
+            "height": 462
+          },
+          "rotate": 0,
+          "clipPath": "path(\"M 500 250.003 C 500 388.069 388.069 500 250 500 C 111.929 500 0 388.069 0 250.003 C 0 111.93 111.929 0 250 0 C 388.071 0 500 111.93 500 250.003 Z\")",
+          "scale": 0.924,
+          "image": {
+            "boxSize": {
+              "width": 500,
+              "height": 750
+            },
+            "position": {
+              "x": 0,
+              "y": -125
+            },
+            "rotate": 0,
+            "thumb": "http://localhost:4000/images/photos/animals/003.jpg",
+            "url": "http://localhost:4000/images/photos/animals/003.jpg"
+          },
+          "transparency": 1
+        },
+        "locked": false,
+        "child": [],
+        "parent": "ca_fmOv210"
+      }
     }
+  }
 ]
