@@ -16,8 +16,8 @@ const LongDashIcon: React.FC<IconProps> = ({ className = '' }: IconProps) => {
         y1='50%'
         y2='50%'
         stroke='currentColor'
-        stroke-width='2'
-        shape-rendering='crispEdges'
+        strokeWidth='2'
+        shapeRendering='crispEdges'
       ></line>
     </svg>
   );

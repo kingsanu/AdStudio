@@ -13,7 +13,7 @@ const SquareBoldIcon: React.FC<IconProps> = ({ className = '' }: IconProps) => {
       <g>
         <rect
           rx='0.02'
-          stroke-width='6'
+          strokeWidth='6'
           id='svg_3'
           height='18'
           width='18'

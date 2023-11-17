@@ -1,6 +1,26 @@
 {
     "data": [
         {
+            "img": "http://localhost:4000/images/photos/illustrations/001.jpg",
+            "desc": "illustration art"
+        },
+        {
+            "img": "http://localhost:4000/images/photos/illustrations/002.jpg",
+            "desc": "illustration art"
+        },
+        {
+            "img": "http://localhost:4000/images/photos/arts/001.jpg",
+            "desc": "art"
+        },
+        {
+            "img": "http://localhost:4000/images/photos/arts/002.jpg",
+            "desc": "art"
+        },
+        {
+            "img": "http://localhost:4000/images/photos/arts/003.jpg",
+            "desc": "art"
+        },
+        {
             "img": "http://localhost:4000/images/photos/nature/001.jpg",
             "desc": "scene beauty nature beach ocean"
         },

@@ -10,6 +10,9 @@ const ShapeLayer: LayerComponent<ShapeLayerProps> = ({
   position,
   color,
   gradientBackground,
+  roundedCorners = 0,
+  border,
+  shape,
 }) => {
   const handleDoubleClick = () => {
     // TODO: Add text
@@ -22,11 +25,12 @@ const ShapeLayer: LayerComponent<ShapeLayerProps> = ({
       style={{
         width: boxSize.width / (scale || 1),
         height: boxSize.height / (scale || 1),
-        transform: `scale(${scale || 1})`
+        transform: `scale(${scale || 1})`,
       }}
       onDoubleClick={handleDoubleClick}
     >
       <ShapeContent
+        shape={shape}
         boxSize={boxSize}
         clipPath={clipPath}
         scale={scale}
@@ -34,6 +38,8 @@ const ShapeLayer: LayerComponent<ShapeLayerProps> = ({
         position={position}
         color={color}
         gradientBackground={gradientBackground}
+        border={border}
+        roundedCorners={roundedCorners}
       />
     </div>
   );

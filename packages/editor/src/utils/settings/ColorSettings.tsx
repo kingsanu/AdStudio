@@ -12,6 +12,7 @@ interface ColorSettingsProps {
   gradient?: { colors: string[]; style: GradientStyle } | null;
   useGradient?: boolean;
   onChange: (color: string) => void;
+  onClickCallback?: () => void;
   onChangeGradient?: (gradient: {
     colors: string[];
     style: GradientStyle;
@@ -24,6 +25,7 @@ const ColorSettings: FC<PropsWithChildren<ColorSettingsProps>> = ({
   children,
   onChange,
   onChangeGradient,
+  onClickCallback,
 }) => {
   const { actions, sidebar } = useEditor((state) => ({
     sidebar: state.sidebar,
@@ -49,6 +51,7 @@ const ColorSettings: FC<PropsWithChildren<ColorSettingsProps>> = ({
       <SettingButton
         onClick={() => {
           actions.setSidebar('CHOOSING_COLOR');
+          if (onClickCallback) onClickCallback();
         }}
       >
         {!children && (
@@ -85,7 +88,6 @@ const ColorSettings: FC<PropsWithChildren<ColorSettingsProps>> = ({
         )}
         {children}
       </SettingButton>
-      <SettingDivider />
       {sidebar === 'CHOOSING_COLOR' && (
         <ColorSidebar
           open={true}

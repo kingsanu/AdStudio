@@ -19,9 +19,9 @@ const ThreeDashesIcon: React.FC<IconProps> = ({
         y1='50%'
         y2='50%'
         stroke='currentColor'
-        stroke-dasharray='6 2'
-        stroke-width='2'
-        shape-rendering='crispEdges'
+        strokeDasharray='6 2'
+        strokeWidth='2'
+        shapeRendering='crispEdges'
       ></line>
     </svg>
   );

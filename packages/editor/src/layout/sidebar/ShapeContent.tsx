@@ -89,7 +89,7 @@ const ShapeContent: FC<{ onClose: () => void }> = ({ onClose }) => {
           height: shape.height * scale,
         },
         rotate: 0,
-        clipPath: `path("${shape.clipPath}")`,
+        clipPath: shape.clipPath,
         scale,
         color: shape.background,
       },

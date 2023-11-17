@@ -91,6 +91,7 @@ const CommonSettings = () => {
           gridGap: 8,
         }}
       >
+        <SettingDivider />
         <SettingButton
           css={{ minWidth: 75 }}
           onClick={() => {
