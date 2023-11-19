@@ -423,7 +423,6 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
           }),
         };
       };
-
       page.layers.ROOT = decodeLayer(serializedPage.layers.ROOT, null);
       const deserializeChild = (layerId: LayerId, newLayerId: LayerId) => {
         const res: [LayerId, Layer<LayerComponentProps>][] = [];

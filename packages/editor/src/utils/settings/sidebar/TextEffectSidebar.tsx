@@ -62,14 +62,14 @@ const getEffectList = (assetPath: string) => [
     },
     {
         value: 'neon',
-        img: `${assetPath}/text/effects/echo.png`,
+        img: `${assetPath}/text/effects/neon.png`,
         settings: {
             intensity: 50
         },
     },
     {
         value: 'glitch',
-        img: `${assetPath}/text/effects/echo.png`,
+        img: `${assetPath}/text/effects/glitch.png`,
         settings: {
             offset: 30,
             direction: 90,
@@ -78,7 +78,7 @@ const getEffectList = (assetPath: string) => [
     },
     {
         value: 'outline',
-        img: `${assetPath}/text/effects/echo.png`,
+        img: `${assetPath}/text/effects/outline.png`,
         settings: {
             thickness: 50,
             color: '#000000'

@@ -100,7 +100,7 @@ app.get('/api/fonts', async (req, res) => {
 });
 
 /**
- * Get templates
+ * Search templates
  */
 app.get('/api/templates', async (req, res) => {
   fs.readFile('./json/templates.json', 'utf8', (err, jsonString) => {
@@ -109,7 +109,25 @@ app.get('/api/templates', async (req, res) => {
       res.send(null);
       return;
     }
-    res.send(JSON.parse(jsonString).data);
+    const { ps, pi, kw } = req.query;
+    res.send(
+      paginateArrayWithFilter(JSON.parse(jsonString).data, +ps, +pi, kw)
+    );
+  });
+});
+
+/**
+ * Search template keywords
+ */
+app.get('/api/template-suggestion', async (req, res) => {
+  fs.readFile('./json/templates.json', 'utf8', (err, jsonString) => {
+    if (err) {
+      console.error(err);
+      res.send(null);
+      return;
+    }
+    const rs = searchKeywords(req.query.kw, JSON.parse(jsonString).data);
+    res.send(rs.map((kw, idx) => ({ id: idx + 1, name: kw })));
   });
 });
 

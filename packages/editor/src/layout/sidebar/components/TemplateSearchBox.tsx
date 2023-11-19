@@ -1,38 +1,39 @@
 import { FC, useState } from 'react';
 import { SearchBox } from '@canva/search-autocomplete';
+import axios from 'axios';
 
-interface Props {}
-const TemplateSearchBox: FC<Props> = () => {
+interface Props {
+  searchString: string;
+  onStartSearch: (kw: string) => void;
+}
+const TemplateSearchBox: FC<Props> = ({ searchString, onStartSearch }) => {
   const [suggestItems, setSuggestItems] = useState([]);
-  const handleOnSearch = (keyword: any) => {
+  const handleOnSearch = async (keyword: any) => {
     // onSearch will have as the first callback parameter
     // the string searched and for the second the results.
-    let newResults: any = [];
-    setSuggestItems(newResults);
+    const response = await axios.get('/template-suggestion?kw=' + keyword);
+    setSuggestItems(response?.data || []);
   };
 
-  const handleOnHover = (result: any) => {
-    // the item hovered
-    console.log(result);
-  };
+  const handleOnHover = (result: any) => {};
 
   const handleOnSelect = (item: any) => {
     // the item selected
-    console.log(item);
+    onStartSearch(item.name);
   };
 
-  const handleOnFocus = () => {
-    console.log('Focused');
-  };
+  const handleOnFocus = () => {};
 
   return (
     <SearchBox
       items={suggestItems}
+      inputSearchString={searchString}
       placeholder='Search templates'
       onSearch={handleOnSearch}
       onHover={handleOnHover}
       onSelect={handleOnSelect}
       onFocus={handleOnFocus}
+      onClear={() => onStartSearch('')}
       autoFocus
       styling={{ zIndex: 4 }}
     />

@@ -1,6 +1,48 @@
 {
     "data": [
         {
+            "img": "http://localhost:4000/images/frames/parallelogram/001.png",
+            "clipPath": "M 485 334 L 0 291.536 L 0 0 L 485 42.4636 Z",
+            "width": "485",
+            "height": "334",
+            "desc": "shape parallelogram square"
+        },
+        {
+            "img": "http://localhost:4000/images/frames/parallelogram/002.png",
+            "clipPath": "M 484 286.713 L 0 317 L 0 30.2866 L 484 0 L 484 286.713 Z",
+            "width": "484",
+            "height": "317",
+            "desc": "shape parallelogram square"
+        },
+        {
+            "img": "http://localhost:4000/images/frames/parallelogram/003.png",
+            "clipPath": "M 64 0 L 256 0 L 192 256 L 0 256 L 64 0 Z",
+            "width": "256",
+            "height": "256",
+            "desc": "shape parallelogram square"
+        },
+        {
+            "img": "http://localhost:4000/images/frames/parallelogram/004.png",
+            "clipPath": "M 192 0 L 0 0 L 64 256 L 256 256 L 192 0 Z",
+            "width": "256",
+            "height": "256",
+            "desc": "shape parallelogram square"
+        },
+        {
+            "img": "http://localhost:4000/images/frames/parallelogram/005.png",
+            "clipPath": "M 337 0 L 215.733 500 L 0 500 L 119.855 0 L 337 0 Z",
+            "width": "337",
+            "height": "500",
+            "desc": "shape parallelogram square"
+        },
+        {
+            "img": "http://localhost:4000/images/frames/parallelogram/006.png",
+            "clipPath": "M 490 0 c -93.2 0 -186.8 0 -280 0 c 0 5 0 15 0 20 h -10 c 0 5 0 15 0 20 h -10 c 0 8.9 0 21.1 0 30 h -10 c 0 5 0 15 0 20 h -10 c 0 5 0 15 0 20 h -10 c 0 8.9 0 21.1 0 30 h -10 c 0 5 0 15 0 20 h -10 c 0 5 0 15 0 20 h -10 c 0 8.9 0 21.1 0 30 h -10 c 0 5 0 15 0 20 h -10 c 0 8.9 0 21.1 0 30 h -10 c 0 5 0 15 0 20 H 90 c 0 8.9 0 21.1 0 30 H 80 c 0 5 0 15 0 20 H 70 c 0 5 0 15 0 20 H 60 c 0 8.9 0 21.1 0 30 H 50 c 0 5 0 15 0 20 H 40 c 0 5 0 15 0 20 H 30 c 0 8.9 0 21.1 0 30 H 20 c 0 5 0 15 0 20 H 10 c 0 5 0 15 0 20 H 0 v 10 c 103.2 0 206.8 0 310 0 v -10 h 10 c 0 -5 0 -15 0 -20 h 10 c 0 -8.9 0 -21.1 0 -30 h 10 c 0 -5 0 -15 0 -20 h 10 c 0 -8.9 0 -21.1 0 -30 h 10 c 0 -5 0 -15 0 -20 h 10 c 0 -8.9 0 -21.1 0 -30 h 10 c 0 -5 0 -15 0 -20 h 10 c 0 -8.9 0 -21.1 0 -30 h 10 c 0 -8.9 0 -21.1 0 -30 h 10 c 0 -5 0 -15 0 -20 h 10 c 0 -8.9 0 -21.1 0 -30 h 10 c 0 -5 0 -15 0 -20 h 10 c 0 -8.9 0 -21.1 0 -30 h 10 c 0 -8.9 0 -21.1 0 -30 h 10 c 0 -8.9 0 -21.1 0 -30 h 10 c 0 -5 0 -15 0 -20 h 10 c 0 -8.9 0 -21.1 0 -30 h 10 c 0 -5 0 -15 0 -20 h 10 c 0 -8.9 0 -21.1 0 -30 H 490 Z",
+            "width": "500",
+            "height": "500",
+            "desc": "shape parallelogram square"
+        },
+        {
             "img": "http://localhost:4000/images/frames/word/A.png",
             "clipPath": "M 84.2927 216.353 L 168.697 216.353 L 185.087 265.1 L 256 265.1 L 164.125 0 L 92.0976 0 L 0 265 L 68.3484 265 L 84.2927 216.353 Z M 126.662 87.765 L 149.408 157.977 L 103.582 157.977 L 126.662 87.765 Z",
             "width": "256",
