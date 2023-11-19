@@ -231,4 +231,4 @@ If you'd like to contribute to this project, please follow our [contribution gui
 License
 -------
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the **MIT License with No Resale Clause**. See the [LICENSE](LICENSE) file for details.
