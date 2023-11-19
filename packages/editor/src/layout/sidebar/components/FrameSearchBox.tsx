@@ -32,7 +32,7 @@ const FrameSearchBox: FC<Props> = ({ onStartSearch }) => {
   return (
     <SearchBox
       items={suggestItems}
-      placeholder='Search frames'
+      placeholder={config.placeholders?.searchFrame || 'Search frames'}
       onSearch={handleOnSearch}
       onHover={handleOnHover}
       onSelect={handleOnSelect}

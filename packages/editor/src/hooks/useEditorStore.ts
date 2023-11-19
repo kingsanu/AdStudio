@@ -43,6 +43,8 @@ const ignoreHistoryForActions: string[] = [
     'setSelectData',
     'setSidebar',
     'imageEditor',
+    'fireDownloadCmd',
+    'goToGithubPage'
 ];
 
 const autoHistoryForActions: string[] = [
@@ -223,15 +225,13 @@ export const useEditorStore = () => {
             status: false,
         },
         downloadCmd: -1,
-        saving: false
+        githubLink: 'https://github.com/' // TODO
     });
 
     const actions = useMemo<EditorActions>(() => {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         const actionKeys: (keyof CoreEditorActions)[] = Object.keys(methods(null));
         const coreActions = actionKeys.reduce((accum, type) => {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             accum[type] = (...payload) => dispatch({ type, payload });
             return accum;

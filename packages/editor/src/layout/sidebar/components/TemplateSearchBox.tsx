@@ -30,7 +30,7 @@ const TemplateSearchBox: FC<Props> = ({ searchString, onStartSearch }) => {
     <SearchBox
       items={suggestItems}
       inputSearchString={searchString}
-      placeholder='Search templates'
+      placeholder={config.placeholders?.searchTemplate || 'Search templates'}
       onSearch={handleOnSearch}
       onHover={handleOnHover}
       onSelect={handleOnSelect}

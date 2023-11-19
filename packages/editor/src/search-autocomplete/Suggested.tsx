@@ -126,7 +126,8 @@ const StyledResults = styled.div`
     > li {
       display: flex;
       align-items: center;
-      padding: 4px 0 4px 0;
+      padding: 8px 0;
+      cursor: pointer;
 
       > div {
         margin-left: 13px;

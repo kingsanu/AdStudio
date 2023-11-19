@@ -62,7 +62,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
     imageEditor,
     pageSize,
     openPageSettings,
-    downloadCmd,
+    downloadCmd
   } = useEditor((state) => {
     const hoveredPage = parseInt(Object.keys(state.hoveredLayer)[0]);
     const hoverLayerId = state.hoveredLayer[hoveredPage];
@@ -85,7 +85,6 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
       downloadCmd: state.downloadCmd,
     };
   });
-
   const {
     pageTransform,
     onZoomStart,
@@ -101,6 +100,9 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
     // const serializedData: SerializedPage[] = unpack([...data]);
     // actions.setData(serializedData);
     actions.setData(data);
+    setTimeout(() => {
+      actions.setScale(.59);
+    }, 16);
   }, [data, actions]);
 
   useEffect(() => {

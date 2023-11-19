@@ -6,15 +6,6 @@ import {
 import { createContext } from 'react';
 
 export type EditorConfig = {
-  frame: {
-    defaultImage: {
-      url: string;
-      width: number;
-      height: number;
-    };
-  };
-
-  //
   apis: {
     url: string;
     searchFonts: string;
@@ -29,6 +20,13 @@ export type EditorConfig = {
     shapeKeywordSuggestion: string;
     frameKeywordSuggestion: string;
   };
+  placeholders?: {
+    searchTemplate?: string;
+    searchText?: string;
+    searchImage?: string;
+    searchShape?: string;
+    searchFrame?: string;
+  }
   editorAssetsUrl: string;
   imageKeywordSuggestions?: string;
   templateKeywordSuggestions?: string;

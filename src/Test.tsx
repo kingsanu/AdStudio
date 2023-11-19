@@ -1,14 +1,9 @@
 import { CanvaEditor } from '@canva/components/editor';
 import { data } from './sampleData';
-// import { useEditorStore } from '@canva/hooks/useEditorStore';
-const editorConfig = {
-  frame: {
-    defaultImage: {
-      url: './assets/images/frame-placeholder.png',
-      width: 1200,
-      height: 800,
-    },
-  },
+import {  useState } from 'react';
+import { EditorConfig } from '@canva/components/editor/EditorContext';
+
+const editorConfig: EditorConfig = {
   apis: {
     url: 'http://localhost:4000/api',
     searchFonts: '/fonts',
@@ -23,6 +18,13 @@ const editorConfig = {
     shapeKeywordSuggestion: '/shape-suggestion',
     frameKeywordSuggestion: '/frame-suggestion',
   },
+  placeholders: {
+    searchTemplate: 'Search templates',
+    searchText: 'Search texts',
+    searchImage: 'Search images',
+    searchShape: 'Search shapes',
+    searchFrame: 'Search frames'
+  },
   editorAssetsUrl: 'http://localhost:4000/editor',
   imageKeywordSuggestions: 'animal,sport,love,scene,dog,cat,whale',
   templateKeywordSuggestions:
@@ -30,26 +32,26 @@ const editorConfig = {
 };
 
 const Test = () => {
-  // const { actions } = useEditorStore();
+  const [saving, setSaving] = useState(false);
   const name = '';
   const handleOnChanges = (changes: any) => {
     console.log('On changes');
     console.log(changes);
     
-    // actions.setSaveStatus(true);
-    // setTimeout(() => {
-    //   actions.setSaveStatus(false);
-    // }, 3e3);
+    setSaving(true);
+    setTimeout(() => {
+      setSaving(false);
+    }, 1e3);
   };
 
   const handleOnDesignNameChanges = (newName: string) => {
     console.log('On name changes');
     console.log(newName);
     
-    // actions.setSaveStatus(true);
-    // setTimeout(() => {
-    //   actions.setSaveStatus(false);
-    // }, 3e3);
+    setSaving(true);
+    setTimeout(() => {
+      setSaving(false);
+    }, 1e3);
   };
   return (
     <CanvaEditor
@@ -58,6 +60,7 @@ const Test = () => {
         editorConfig: data,
       }}
       config={editorConfig}
+      saving={saving}
       onChanges={handleOnChanges}
       onDesignNameChanges={handleOnDesignNameChanges}
     />

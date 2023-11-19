@@ -28,7 +28,7 @@ const ShapeSearchBox: FC<Props> = ({ onStartSearch }) => {
   return (
     <SearchBox
       items={suggestItems}
-      placeholder='Search shapes'
+      placeholder={config.placeholders?.searchShape || 'Search shapes'}
       onSearch={handleOnSearch}
       onHover={handleOnHover}
       onSelect={handleOnSelect}

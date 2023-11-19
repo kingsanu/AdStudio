@@ -30,7 +30,7 @@ const TextSearchBox: FC<Props> = ({onStartSearch}) => {
   return (
     <SearchBox
       items={suggestItems}
-      placeholder='Search texts'
+      placeholder={config.placeholders?.searchText || 'Search texts'}
       onSearch={handleOnSearch}
       onHover={handleOnHover}
       onSelect={handleOnSelect}

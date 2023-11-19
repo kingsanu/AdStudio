@@ -71,6 +71,7 @@ export interface EditorState {
     };
     downloadCmd: -1 | 0 | 1;
     saving: boolean;
+    githubLink: string;
 }
 
 export type CoreEditorActions = ReturnType<typeof ActionMethods>;

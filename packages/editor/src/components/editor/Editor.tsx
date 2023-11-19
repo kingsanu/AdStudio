@@ -12,6 +12,7 @@ export type EditorProps = {
     name: string;
     editorConfig: any;
   };
+  saving?: boolean;
   config: EditorConfig;
   onChanges: (changes: any) => void;
   onDesignNameChanges: (name: any) => void;
@@ -20,6 +21,7 @@ export type EditorProps = {
 const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
   data,
   config,
+  saving,
   onChanges,
   onDesignNameChanges
 }) => {
@@ -37,6 +39,7 @@ const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
       window.removeEventListener('resize', windowHeight);
     };
   }, []);
+
   return (
     <EditorContext.Provider value={{ config, getState, actions, query }}>
       <div
@@ -48,7 +51,7 @@ const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
           maxHeight: viewPortHeight ? `${viewPortHeight}px` : 'auto',
         }}
       >
-        <HeaderLayout designName={data?.name || ''} onChanges={onDesignNameChanges} />
+        <HeaderLayout designName={data?.name || ''} saving={saving || false} onChanges={onDesignNameChanges} />
         <div
           css={{
             display: 'flex',

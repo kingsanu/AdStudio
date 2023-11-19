@@ -1,8 +1,7 @@
 import { LayerComponent } from '@canva/types';
 import { FrameContent, FrameContentProps } from './content/FrameContent';
 import { useEditor, useLayer, useSelectedLayers } from '@canva/hooks';
-import { useContext, useEffect, useState } from 'react';
-import { EditorContext } from '@canva/components/editor/EditorContext';
+import { useEffect, useState } from 'react';
 
 export type FrameLayerProps = FrameContentProps;
 const FrameLayer: LayerComponent<FrameLayerProps> = ({
@@ -16,7 +15,6 @@ const FrameLayer: LayerComponent<FrameLayerProps> = ({
   gradientBackground,
 }) => {
   const { actions, pageIndex, id } = useLayer();
-  const { config } = useContext(EditorContext);
   const { selectedLayerIds } = useSelectedLayers();
   const [newImg, setNewImg] = useState<any>(null);
   const { imageEditor } = useEditor((state) => ({
@@ -38,37 +36,9 @@ const FrameLayer: LayerComponent<FrameLayerProps> = ({
     }
   }, [image]);
   useEffect(() => {
-    setNewImg(
-      !image && !color && !gradientBackground
-        ? (() => {
-            const defaultRatio =
-                config.frame.defaultImage.width /
-                config.frame.defaultImage.height,
-              imageRatio = boxSize.width / boxSize.height,
-              width =
-                defaultRatio > imageRatio
-                  ? (boxSize.height / scale) * defaultRatio
-                  : boxSize.width / scale,
-              height =
-                defaultRatio > imageRatio
-                  ? boxSize.height / scale
-                  : (boxSize.width / scale) * defaultRatio;
-            return {
-              boxSize: {
-                width,
-                height,
-              },
-              position: {
-                x: -(width - boxSize.width / scale) / 2,
-                y: -(height - boxSize.height / scale) / 2,
-              },
-              rotate: 0,
-              url: config.frame.defaultImage.url,
-              thumb: config.frame.defaultImage.url,
-            };
-          })()
-        : image
-    );
+    if (image) {
+      setNewImg(image);
+    }
   }, [image, color, gradientBackground]);
 
   const handleDoubleClick = () => {

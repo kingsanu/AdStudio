@@ -30,7 +30,7 @@ const ImageSearchBox: FC<Props> = ({ searchString, onStartSearch }) => {
     <SearchBox
       items={suggestItems}
       inputSearchString={searchString}
-      placeholder='Search photos'
+      placeholder={config.placeholders?.searchImage || 'Search photos'}
       onSearch={handleOnSearch}
       onHover={handleOnHover}
       onSelect={handleOnSelect}

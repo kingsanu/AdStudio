@@ -109,18 +109,19 @@ const TemplateContent: FC<{ onClose: () => void }> = ({ onClose }) => {
         />
         <div css={{ paddingTop: 8 }}>
           <HorizontalCarousel>
-            {config.templateKeywordSuggestions && config.templateKeywordSuggestions.split(',').map((kw) => (
-              <div key={kw} className='carousel-item'>
-                <OutlineButton
-                  onClick={() => {
-                    setKeyword(kw);
-                    handleSearch(kw);
-                  }}
-                >
-                  {kw}
-                </OutlineButton>
-              </div>
-            ))}
+            {config.templateKeywordSuggestions &&
+              config.templateKeywordSuggestions.split(',').map((kw) => (
+                <div key={kw} className='carousel-item'>
+                  <OutlineButton
+                    onClick={() => {
+                      setKeyword(kw);
+                      handleSearch(kw);
+                    }}
+                  >
+                    {kw}
+                  </OutlineButton>
+                </div>
+              ))}
           </HorizontalCarousel>
         </div>
       </div>
@@ -140,10 +141,26 @@ const TemplateContent: FC<{ onClose: () => void }> = ({ onClose }) => {
           {templates.map((item, index) => (
             <div
               key={index}
-              css={{ cursor: 'pointer' }}
+              css={{ cursor: 'pointer', position: 'relative' }}
               onClick={() => addPages(JSON.parse(item.data))}
             >
               <img src={item.img} loading='lazy' />
+              {item.pages > 1 && (
+                <span
+                  css={{
+                    position: 'absolute',
+                    bottom: 5,
+                    right: 5,
+                    backgroundColor: 'rgba(17,23,29,.6)',
+                    padding: '1px 6px',
+                    borderRadius: 6,
+                    color: '#fff',
+                    fontSize: 10,
+                  }}
+                >
+                  {item.pages}
+                </span>
+              )}
             </div>
           ))}
           {isLoading && <div>Loading...</div>}

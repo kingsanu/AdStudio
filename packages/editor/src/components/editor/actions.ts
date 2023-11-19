@@ -1,5 +1,4 @@
 import {
-  CoreEditorQuery,
   DeepPartial,
   EditorState,
   HorizontalGuideline,
@@ -43,7 +42,7 @@ import { ImageContentProps } from '@canva/layers';
 import { TextLayerProps } from '@canva/layers/TextLayer';
 import { arrayMoveMutable } from '@canva/drag-and-drop/DDUtils';
 
-export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
+export const ActionMethods = (state: EditorState) => {
   const addLayerTreeToParent = (
     pageIndex: number,
     { rootId, layers }: SerializedLayerTree,
@@ -1153,12 +1152,8 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       console.log(cmdEnum)
       state.downloadCmd = cmdEnum;
     },
-    setSaveStatus(stt: boolean) {
-      console.log(123, stt)
-      state.saving = stt;
-    },
     goToGithubPage() {
-      window?.open('https://github.com/', '_blank')?.focus();
+      window?.open(state.githubLink, '_blank')?.focus();
     }
   };
 };

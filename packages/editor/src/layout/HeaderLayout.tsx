@@ -12,18 +12,15 @@ import SyncingIcon from '@canva/icons/SyncingIcon';
 
 interface HeaderLayoutProps {
   designName: string;
+  saving: boolean;
   onChanges: (str: string) => void;
 }
 const HeaderLayout: ForwardRefRenderFunction<
   HTMLDivElement,
   HeaderLayoutProps
-> = ({ designName, onChanges }, ref) => {
+> = ({ designName, saving, onChanges }, ref) => {
   const [name, setName] = useState(designName);
-  const { actions, query, saving } = useEditor((state) => {
-    return {
-      saving: state.saving
-    };
-  });
+  const { actions, query } = useEditor();
   return (
     <div
       ref={ref}
@@ -90,7 +87,6 @@ const HeaderLayout: ForwardRefRenderFunction<
             }}
           />
           <div css={{ color: 'hsla(0,0%,100%,.7)' }}>
-            {saving ? '...' : 'sss'}
             {saving ? <SyncingIcon /> : <SyncedIcon />}
           </div>
         </div>
