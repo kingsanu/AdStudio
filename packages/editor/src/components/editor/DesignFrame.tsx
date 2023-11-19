@@ -43,7 +43,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
   const contextMenuRef = useRef<HTMLDivElement>(null);
   const { usedFonts } = useUsedFont();
   const {
-    config: { assetPath },
+    config: { editorAssetsUrl },
   } = useContext(EditorContext);
   useShortcut(frameRef.current);
   const {
@@ -272,7 +272,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
     if (rotateData.status) {
       const cursor = Math.round((rotateData.rotate || 0) / 10);
       return {
-        cursor: `url('${assetPath}/cursors/rotate/${
+        cursor: `url('${editorAssetsUrl}/cursors/rotate/${
           cursor === 36 ? 0 : cursor
         }.png') 12 12, auto;`,
       };
@@ -291,7 +291,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
         (resizeData.rotate || 0) + rd[resizeData.direction || 'bottom'] + 90;
       const file = Math.round((rotate % 180) / 10);
       return {
-        cursor: `url('${assetPath}/cursors/resize/${file}.png') 12 12, auto`,
+        cursor: `url('${editorAssetsUrl}/cursors/resize/${file}.png') 12 12, auto`,
       };
     } else if (dragData.status) {
       return {

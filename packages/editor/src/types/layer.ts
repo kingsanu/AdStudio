@@ -3,7 +3,6 @@ import { BoxSize, DeepPartial, Delta } from './common';
 import { EditorActions, EditorState } from './editor';
 import { TextEditor } from '@canva/components/text-editor/interfaces';
 import { ImageContentProps } from '@canva/layers';
-import { VideoContentProps } from '@canva/layers/content/VideoContent';
 
 export type LayerId = string;
 
@@ -132,7 +131,6 @@ export type LayerActions = {
     rotate: number;
     boxSize: BoxSize;
     image?: ImageContentProps['image'] | null;
-    video?: VideoContentProps['video'] | null;
   }) => void;
 };
 

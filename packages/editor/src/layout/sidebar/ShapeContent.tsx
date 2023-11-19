@@ -16,7 +16,7 @@ type Shape = {
   background: string;
 };
 const ShapeContent: FC<{ onClose: () => void }> = ({ onClose }) => {
-  const { actions, query } = useEditor();
+  const { actions, query, config } = useEditor();
   const [shapes, setShapes] = useState<Shape[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -29,7 +29,7 @@ const ShapeContent: FC<{ onClose: () => void }> = ({ onClose }) => {
       dataRef.current = true;
       setIsLoading(true);
       const res: any = await axios.get<Shape[]>(
-        `/shapes?ps=40&pi=${offset}&kw=${kw}`
+        `${config.apis.url}${config.apis.searchShapes}?ps=40&pi=${offset}&kw=${kw}`
       );
       setShapes((shapes) => [...shapes, ...res.data]);
       setIsLoading(false);

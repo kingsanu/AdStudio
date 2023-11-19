@@ -32,7 +32,7 @@ const ResizeHandler: FC<ResizeHandlerProps> = ({
     onResizeStart,
 }) => {
     const {
-        config: { assetPath },
+        config: { editorAssetsUrl },
     } = useContext(EditorContext);
     const rd = {
         left: 90,
@@ -62,7 +62,7 @@ const ResizeHandler: FC<ResizeHandlerProps> = ({
                     ? `inset(0 ${HANDLER_SIZE / 2}px)`
                     : `inset(${HANDLER_SIZE / 2}px 0)`,
                 ':hover': {
-                    cursor: `url('${assetPath}/cursors/resize/${file}.png') 12 12, auto`,
+                    cursor: `url('${editorAssetsUrl}/cursors/resize/${file}.png') 12 12, auto`,
                 },
             }}
             onTouchStart={(e) => {

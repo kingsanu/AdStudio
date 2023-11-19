@@ -1,16 +1,14 @@
-import React, {
+import {
   forwardRef,
   ForwardRefRenderFunction,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
 import Sidebar, { SidebarProps } from './Sidebar';
-import { FontData, FontDataApi } from '@canva/types';
-import { EditorContext } from '@canva/components/editor/EditorContext';
+import { FontData, FontDataApi, GetFontQuery } from '@canva/types';
 import { useUsedFont } from '@canva/hooks/useUsedFont';
 import { useEditor } from '@canva/hooks';
 import CheckIcon from '@canva/icons/CheckIcon';
@@ -24,12 +22,13 @@ import {
 } from '@canva/utils/fontHelper';
 import { getRandomItems } from '@canva/utils';
 import FontStyle from './FontStyle';
-import { some } from 'lodash';
+import { isArray, some } from 'lodash';
 import FontSearchBox from '../components/FontSearchBox';
 import TrendingIcon from '@canva/icons/TrendingIcon';
 import DocumentIcon from '@canva/icons/DocumentIcon';
 import HorizontalCarousel from '@canva/components/carousel/HorizontalCarousel';
 import OutlineButton from '@canva/components/button/OutlineButton';
+import axios from 'axios';
 
 const ListItem = styled('div')`
   height: 40px;
@@ -86,9 +85,9 @@ const FontSidebar: ForwardRefRenderFunction<
 > = ({ selected, onChangeFontFamily, ...props }, ref) => {
   const dataRef = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { getFonts } = useContext(EditorContext);
   const { usedFonts } = useUsedFont();
-  const { actions, fontList } = useEditor((state) => ({
+  const { actions, fontList, config } = useEditor((state, config) => ({
+    config,
     fontList: useMemo(
       () => groupFontsByFamily(state.fontList),
       [state.fontList]
@@ -100,6 +99,24 @@ const FontSidebar: ForwardRefRenderFunction<
   const [openingRecentItems, setOpeningRecentItems] = useState<number[]>([]);
   const [openingItems, setOpeningItems] = useState<number[]>([]);
   const [randomFonts, setRandomFonts] = useState<FontData[] | null>(null);
+  const getFonts = useCallback((query: GetFontQuery) => {
+    const buildParams = (data: Record<string, string | string[]>) => {
+      const params = new URLSearchParams();
+
+      Object.entries(data).forEach(([key, value]) => {
+        if (isArray(value)) {
+          value.forEach((v) => params.append(key, v));
+        } else {
+          params.append(key, value);
+        }
+      });
+
+      return params;
+    };
+    return axios
+      .get<FontDataApi[]>(`${config.apis.url}${config.apis.searchFonts}?${buildParams(query)}`)
+      .then((res) => res.data);
+  }, []);
 
   const loadFontList = useCallback(
     async (offset = 0) => {

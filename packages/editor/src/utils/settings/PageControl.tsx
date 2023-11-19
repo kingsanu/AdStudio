@@ -7,7 +7,7 @@ import GridViewIcon from '@canva/icons/GridViewIcon';
 import CheckIcon from '@canva/icons/CheckIcon';
 import EditorButton from '@canva/components/EditorButton';
 import NotesIcon from '@canva/icons/NotesIcon';
-import GithubIcon from '@canva/icons/GIthubIcon';
+import GithubIcon from '@canva/icons/GithubIcon';
 
 const PageControl = () => {
   const labelScaleOptionRef = useRef<HTMLDivElement>(null);

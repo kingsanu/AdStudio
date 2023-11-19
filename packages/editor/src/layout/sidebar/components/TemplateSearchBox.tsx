@@ -1,17 +1,19 @@
 import { FC, useState } from 'react';
 import { SearchBox } from '@canva/search-autocomplete';
 import axios from 'axios';
+import { useEditor } from '@canva/hooks';
 
 interface Props {
   searchString: string;
   onStartSearch: (kw: string) => void;
 }
 const TemplateSearchBox: FC<Props> = ({ searchString, onStartSearch }) => {
+  const { config } = useEditor();
   const [suggestItems, setSuggestItems] = useState([]);
   const handleOnSearch = async (keyword: any) => {
     // onSearch will have as the first callback parameter
     // the string searched and for the second the results.
-    const response = await axios.get('/template-suggestion?kw=' + keyword);
+    const response = await axios.get(`${config.apis.url}${config.apis.templateKeywordSuggestion}?kw=` + keyword);
     setSuggestItems(response?.data || []);
   };
 

@@ -1,7 +1,6 @@
 import { FC, HTMLProps } from 'react';
 import { GradientStyle, LayerComponentProps } from '../../types';
 import { getGradientBackground, ImageContent, ImageContentProps } from '..';
-import { VideoContent, VideoContentProps } from './VideoContent';
 
 export interface RootContentProps extends LayerComponentProps, Omit<HTMLProps<HTMLDivElement>, 'color'> {
     color: string | null;
@@ -10,14 +9,12 @@ export interface RootContentProps extends LayerComponentProps, Omit<HTMLProps<HT
         style: GradientStyle;
     } | null;
     image?: ImageContentProps['image'] | null;
-    video?: VideoContentProps['video'] | null;
 }
 export const RootContent: FC<RootContentProps> = ({
     boxSize,
     color,
     gradientBackground,
     image,
-    video,
     position,
     rotate,
     ...props
@@ -48,11 +45,6 @@ export const RootContent: FC<RootContentProps> = ({
             {image && (
                 <div css={{ width: boxSize.width, height: boxSize.height }}>
                     <ImageContent image={image} boxSize={boxSize} rotate={rotate} position={position} />
-                </div>
-            )}
-            {video && (
-                <div css={{ width: boxSize.width, height: boxSize.height }}>
-                    <VideoContent video={video} boxSize={boxSize} rotate={rotate} position={position} />
                 </div>
             )}
         </div>

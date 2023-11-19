@@ -17,7 +17,7 @@ interface Frame {
 const FrameContent: FC<{ onClose: () => void }> = ({ onClose }) => {
   const [frames, setFrames] = useState<Frame[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { actions, query } = useEditor();
+  const { actions, query, config } = useEditor();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [offset, setOffset] = useState(0);
   const dataRef = useRef(false);
@@ -28,7 +28,7 @@ const FrameContent: FC<{ onClose: () => void }> = ({ onClose }) => {
       dataRef.current = true;
       setIsLoading(true);
       const res: any = await axios.get<Frame[]>(
-        `/frames?ps=18&pi=${offset}&kw=${kw}`
+        `${config.apis.url}${config.apis.searchFrames}?ps=18&pi=${offset}&kw=${kw}`
       );
       setFrames((frames) => [...frames, ...res.data]);
       setIsLoading(false);

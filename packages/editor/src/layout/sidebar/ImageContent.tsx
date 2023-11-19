@@ -9,20 +9,10 @@ import ImageSearchBox from './components/ImageSearchBox';
 import HorizontalCarousel from '@canva/components/carousel/HorizontalCarousel';
 import OutlineButton from '@canva/components/button/OutlineButton';
 
-const recommendKeywords = [
-  'animal',
-  'sport',
-  'love',
-  'scene',
-  'dog',
-  'cat',
-  'whale',
-];
-
 const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
   const [images, setImages] = useState<{ img: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { actions } = useEditor();
+  const { actions, config } = useEditor();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [offset, setOffset] = useState(0);
   const dataRef = useRef(false);
@@ -32,7 +22,7 @@ const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
     async (offset = 0, kw = '') => {
       dataRef.current = true;
       setIsLoading(true);
-      const res: any = await axios.get(`/images?ps=18&pi=${offset}&kw=${kw}`);
+      const res: any = await axios.get(`${config.apis.url}${config.apis.searchImages}?ps=18&pi=${offset}&kw=${kw}`);
       setImages((frames) => [...frames, ...res.data]);
       setIsLoading(false);
       if (res.data.length > 0) {
@@ -106,7 +96,7 @@ const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
         <ImageSearchBox searchString={keyword} onStartSearch={handleSearch} />
         <div css={{ paddingTop: 8 }}>
           <HorizontalCarousel>
-            {recommendKeywords.map((kw) => (
+            {config.imageKeywordSuggestions && config.imageKeywordSuggestions.split(',').map((kw) => (
               <div key={kw} className='carousel-item'>
                 <OutlineButton
                   onClick={() => {

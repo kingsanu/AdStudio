@@ -222,7 +222,8 @@ export const useEditorStore = () => {
         selectData: {
             status: false,
         },
-        downloadCmd: -1
+        downloadCmd: -1,
+        saving: false
     });
 
     const actions = useMemo<EditorActions>(() => {

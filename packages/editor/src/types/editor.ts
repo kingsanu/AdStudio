@@ -18,12 +18,6 @@ export type ImageEditorData = {
         rotate: number;
         boxSize: BoxSize;
     } | null;
-    video?: {
-        url: string;
-        position: Delta;
-        rotate: number;
-        boxSize: BoxSize;
-    } | null;
 };
 export type SidebarType = 'TEXT_EFFECT' | 'FONT_FAMILY' | 'LAYER_MANAGEMENT' | 'CHOOSING_COLOR';
 
@@ -76,6 +70,7 @@ export interface EditorState {
         cursor?: CursorPosition;
     };
     downloadCmd: -1 | 0 | 1;
+    saving: boolean;
 }
 
 export type CoreEditorActions = ReturnType<typeof ActionMethods>;

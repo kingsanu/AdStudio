@@ -66,7 +66,7 @@ interface Text {
   data: string;
 }
 const TextContent: FC<{ onClose: () => void }> = ({ onClose }) => {
-  const { actions, state } = useEditor();
+  const { actions, state, config } = useEditor();
   const [texts, setTexts] = useState<Text[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -79,7 +79,7 @@ const TextContent: FC<{ onClose: () => void }> = ({ onClose }) => {
       dataRef.current = true;
       setIsLoading(true);
       const res: any = await axios.get<Text[]>(
-        `/texts?ps=6&pi=${offset}&kw=${kw}`
+        `${config.apis.url}${config.apis.searchTexts}?ps=6&pi=${offset}&kw=${kw}`
       );
       setTexts((texts) => [...texts, ...res.data]);
       setIsLoading(false);

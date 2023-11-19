@@ -25,7 +25,7 @@ const CornerResizeHandler: FC<CornerResizeHandlerProps> = ({
     onResizeStart,
 }) => {
     const {
-        config: { assetPath },
+        config: { editorAssetsUrl },
     } = useContext(EditorContext);
     const rd = {
         bottomLeft: 45,
@@ -69,7 +69,7 @@ const CornerResizeHandler: FC<CornerResizeHandlerProps> = ({
                     alignItems: 'center',
                     justifyContent: 'center',
                     ':hover': {
-                        cursor: `url('${assetPath}/cursors/resize/${file}.png') 12 12, auto`,
+                        cursor: `url('${editorAssetsUrl}/cursors/resize/${file}.png') 12 12, auto`,
                     },
                 }}
             >

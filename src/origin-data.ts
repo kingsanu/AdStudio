@@ -1,7 +1,7 @@
 export const data = [
   {
-    name: 'First page',
-    notes: 'Nothing to note.',
+    name: '',
+    notes: '',
     layers: {
       ROOT: {
         type: {

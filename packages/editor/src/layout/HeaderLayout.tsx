@@ -8,14 +8,22 @@ import NextIcon from '@canva/icons/NextIcon';
 import BackIcon from '@canva/icons/BackIcon';
 import SyncedIcon from '@canva/icons/SyncedIcon';
 import HeaderFileMenu from './sidebar/components/HeaderFileMenu';
+import SyncingIcon from '@canva/icons/SyncingIcon';
 
-interface HeaderLayoutProps {}
+interface HeaderLayoutProps {
+  designName: string;
+  onChanges: (str: string) => void;
+}
 const HeaderLayout: ForwardRefRenderFunction<
   HTMLDivElement,
   HeaderLayoutProps
-> = ({}, ref) => {
-  const [name, setName] = useState('');
-  const { actions, query } = useEditor();
+> = ({ designName, onChanges }, ref) => {
+  const [name, setName] = useState(designName);
+  const { actions, query, saving } = useEditor((state) => {
+    return {
+      saving: state.saving
+    };
+  });
   return (
     <div
       ref={ref}
@@ -59,6 +67,7 @@ const HeaderLayout: ForwardRefRenderFunction<
             }}
             onSetText={(newText) => {
               setName(newText);
+              onChanges(newText);
             }}
             handleStyle={(isFocus) => {
               return {
@@ -81,7 +90,8 @@ const HeaderLayout: ForwardRefRenderFunction<
             }}
           />
           <div css={{ color: 'hsla(0,0%,100%,.7)' }}>
-            <SyncedIcon />
+            {saving ? '...' : 'sss'}
+            {saving ? <SyncingIcon /> : <SyncedIcon />}
           </div>
         </div>
         <div

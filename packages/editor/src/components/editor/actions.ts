@@ -1153,6 +1153,10 @@ export const ActionMethods = (state: EditorState, query: CoreEditorQuery) => {
       console.log(cmdEnum)
       state.downloadCmd = cmdEnum;
     },
+    setSaveStatus(stt: boolean) {
+      console.log(123, stt)
+      state.saving = stt;
+    },
     goToGithubPage() {
       window?.open('https://github.com/', '_blank')?.focus();
     }

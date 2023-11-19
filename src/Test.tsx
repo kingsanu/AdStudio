@@ -1,130 +1,66 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import HeaderLayout from '../packages/editor/src/layout/HeaderLayout';
-import Sidebar from '../packages/editor/src/layout/Sidebar';
-import EditorContent from '../packages/editor/src/layout/pages/EditorContent';
-import axios from 'axios';
-import { isArray } from 'lodash';
-import AppLayerSettings from '../packages/editor/src/layout/AppLayerSettings';
-import { FontDataApi, GetFontQuery } from '@canva/types';
-import { Editor } from '@canva/components/editor';
-import { PageControl } from '@canva/utils/settings';
+import { CanvaEditor } from '@canva/components/editor';
+import { data } from './sampleData';
+// import { useEditorStore } from '@canva/hooks/useEditorStore';
+const editorConfig = {
+  frame: {
+    defaultImage: {
+      url: './assets/images/frame-placeholder.png',
+      width: 1200,
+      height: 800,
+    },
+  },
+  apis: {
+    url: 'http://localhost:4000/api',
+    searchFonts: '/fonts',
+    searchTemplates: '/templates',
+    searchTexts: '/texts',
+    searchImages: '/images',
+    searchShapes: '/shapes',
+    searchFrames: '/frames',
+    templateKeywordSuggestion: '/template-suggestion',
+    textKeywordSuggestion: '/text-suggestion',
+    imageKeywordSuggestion: '/image-suggestion',
+    shapeKeywordSuggestion: '/shape-suggestion',
+    frameKeywordSuggestion: '/frame-suggestion',
+  },
+  editorAssetsUrl: 'http://localhost:4000/editor',
+  imageKeywordSuggestions: 'animal,sport,love,scene,dog,cat,whale',
+  templateKeywordSuggestions:
+    'mother,sale,discount,fashion,model,deal,motivation,quote',
+};
 
 const Test = () => {
-  const leftSidebarRef = useRef<HTMLDivElement>(null);
+  // const { actions } = useEditorStore();
+  const name = '';
+  const handleOnChanges = (changes: any) => {
+    console.log('On changes');
+    console.log(changes);
+    
+    // actions.setSaveStatus(true);
+    // setTimeout(() => {
+    //   actions.setSaveStatus(false);
+    // }, 3e3);
+  };
 
-  const getFonts = useCallback((query: GetFontQuery) => {
-    const buildParams = (data: Record<string, string | string[]>) => {
-      const params = new URLSearchParams();
-
-      Object.entries(data).forEach(([key, value]) => {
-        if (isArray(value)) {
-          value.forEach((v) => params.append(key, v));
-        } else {
-          params.append(key, value);
-        }
-      });
-
-      return params;
-    };
-    return axios
-      .get<FontDataApi[]>(`/fonts?${buildParams(query)}`)
-      .then((res) => res.data);
-  }, []);
-  const [viewPortHeight, setViewPortHeight] = useState<number>();
-  useEffect(() => {
-    const windowHeight = () => {
-      setViewPortHeight(window.innerHeight);
-    };
-    window.addEventListener('resize', windowHeight);
-    windowHeight();
-    return () => {
-      window.removeEventListener('resize', windowHeight);
-    };
-  }, []);
+  const handleOnDesignNameChanges = (newName: string) => {
+    console.log('On name changes');
+    console.log(newName);
+    
+    // actions.setSaveStatus(true);
+    // setTimeout(() => {
+    //   actions.setSaveStatus(false);
+    // }, 3e3);
+  };
   return (
-    <Editor
-      config={{
-        assetPath: './assets',
-        frame: {
-          defaultImage: {
-            url: './assets/images/frame-placeholder.png',
-            width: 1200,
-            height: 800,
-          },
-        },
+    <CanvaEditor
+      data={{
+        name,
+        editorConfig: data,
       }}
-      getFonts={getFonts}
-    >
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          width: '100vw',
-          height: '100vh',
-          maxHeight: viewPortHeight ? `${viewPortHeight}px` : 'auto',
-        }}
-      >
-        <HeaderLayout />
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'row',
-            flex: 'auto',
-            overflow: 'auto',
-            background: '#EBECF0',
-            '@media (max-width: 900px)': {
-              flexDirection: 'column-reverse',
-            },
-          }}
-        >
-          <div
-            ref={leftSidebarRef}
-            css={{
-              display: 'flex',
-              background: 'white',
-            }}
-          >
-            <Sidebar />
-          </div>
-          <div
-            css={{
-              flexGrow: 1,
-              position: 'relative',
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'auto',
-            }}
-          >
-            <AppLayerSettings />
-            <div
-              css={{
-                flexGrow: 1,
-                overflow: 'auto',
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-            >
-              <EditorContent />
-            </div>
-            <div
-              css={{
-                height: 40,
-                background: '#fff',
-                borderTop: '1px solid rgba(57,76,96,.15)',
-                display: 'grid',
-                alignItems: 'center',
-                flexShrink: 0,
-                '@media (max-width: 900px)': {
-                  display: 'none',
-                },
-              }}
-            >
-              <PageControl />
-            </div>
-          </div>
-        </div>
-      </div>
-    </Editor>
+      config={editorConfig}
+      onChanges={handleOnChanges}
+      onDesignNameChanges={handleOnDesignNameChanges}
+    />
   );
 };
 

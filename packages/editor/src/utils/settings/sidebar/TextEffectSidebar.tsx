@@ -11,14 +11,14 @@ import { Layer } from '@canva/types';
 import { isTextLayer } from '@canva/utils/layer/layers';
 import { ColorParser, hex2rgbString } from '@canva/color-picker/utils';
 
-const getEffectList = (assetPath: string) => [
+const getEffectList = (assetUri: string) => [
     {
         value: 'none',
-        img: `${assetPath}/text/effects/none.png`,
+        img: `${assetUri}/text-effects/none.png`,
     },
     {
         value: 'shadow',
-        img: `${assetPath}/text/effects/shadow.png`,
+        img: `${assetUri}/text-effects/shadow.png`,
         settings: {
             offset: 50,
             direction: 45,
@@ -29,21 +29,21 @@ const getEffectList = (assetPath: string) => [
     },
     {
         value: 'lift',
-        img: `${assetPath}/text/effects/lift.png`,
+        img: `${assetUri}/text-effects/lift.png`,
         settings: {
             intensity: 50,
         },
     },
     {
         value: 'hollow',
-        img: `${assetPath}/text/effects/hollow.png`,
+        img: `${assetUri}/text-effects/hollow.png`,
         settings: {
             thickness: 50,
         },
     },
     {
         value: 'splice',
-        img: `${assetPath}/text/effects/splice.png`,
+        img: `${assetUri}/text-effects/splice.png`,
         settings: {
             thickness: 50,
             offset: 50,
@@ -53,7 +53,7 @@ const getEffectList = (assetPath: string) => [
     },
     {
         value: 'echo',
-        img: `${assetPath}/text/effects/echo.png`,
+        img: `${assetUri}/text-effects/echo.png`,
         settings: {
             offset: 50,
             direction: 45,
@@ -62,14 +62,14 @@ const getEffectList = (assetPath: string) => [
     },
     {
         value: 'neon',
-        img: `${assetPath}/text/effects/neon.png`,
+        img: `${assetUri}/text-effects/neon.png`,
         settings: {
             intensity: 50
         },
     },
     {
         value: 'glitch',
-        img: `${assetPath}/text/effects/glitch.png`,
+        img: `${assetUri}/text-effects/glitch.png`,
         settings: {
             offset: 30,
             direction: 90,
@@ -78,7 +78,7 @@ const getEffectList = (assetPath: string) => [
     },
     {
         value: 'outline',
-        img: `${assetPath}/text/effects/outline.png`,
+        img: `${assetUri}/text-effects/outline.png`,
         settings: {
             thickness: 50,
             color: '#000000'
@@ -89,7 +89,7 @@ const getEffectList = (assetPath: string) => [
 type TextEffectSidebarProps = SidebarProps;
 const TextEffectSidebar: ForwardRefRenderFunction<HTMLDivElement, TextEffectSidebarProps> = ({ ...props }, ref) => {
     const {
-        config: { assetPath },
+        config: { editorAssetsUrl },
     } = useContext(EditorContext);
     const addColorRef = useRef<HTMLDivElement>(null);
     const effectUsingColor: string[] = ['shadow', 'lift', 'splice', 'echo', 'outline'];
@@ -134,7 +134,7 @@ const TextEffectSidebar: ForwardRefRenderFunction<HTMLDivElement, TextEffectSide
                     });
                 } else {
                     const settings = cloneDeep(
-                        getEffectList(assetPath).find((e) => e.value === effect)?.settings as Record<string, unknown>,
+                        getEffectList(editorAssetsUrl).find((e) => e.value === effect)?.settings as Record<string, unknown>,
                     );
                     if (colors.length > 0) {
                         const c = new ColorParser(colors[0]);
@@ -207,7 +207,7 @@ const TextEffectSidebar: ForwardRefRenderFunction<HTMLDivElement, TextEffectSide
                         fontSize: 10,
                     }}
                 >
-                    {getEffectList(assetPath).map((ef) => (
+                    {getEffectList(editorAssetsUrl).map((ef) => (
                         <div key={ef.value}>
                             <div
                                 css={{ cursor: 'pointer', position: 'relative' }}
@@ -249,7 +249,7 @@ const TextEffectSidebar: ForwardRefRenderFunction<HTMLDivElement, TextEffectSide
                         <div
                             css={{
                                 gridRow: `${
-                                    Math.ceil((1 + getEffectList(assetPath).findIndex((e) => e.value === effect)) / 3) +
+                                    Math.ceil((1 + getEffectList(editorAssetsUrl).findIndex((e) => e.value === effect)) / 3) +
                                     1
                                 } / auto`,
                                 gridColumn: '1/-1',

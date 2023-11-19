@@ -8,17 +8,6 @@ import TemplateSearchBox from './components/TemplateSearchBox';
 import HorizontalCarousel from '@canva/components/carousel/HorizontalCarousel';
 import OutlineButton from '@canva/components/button/OutlineButton';
 
-const recommendKeywords = [
-  'mother',
-  'sale',
-  'discount',
-  'fashion',
-  'model',
-  'deal',
-  'motivation',
-  'quote',
-];
-
 interface Template {
   img: string;
   data: string;
@@ -27,7 +16,8 @@ interface Template {
 const TemplateContent: FC<{ onClose: () => void }> = ({ onClose }) => {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { actions, activePage } = useEditor((state) => ({
+  const { actions, activePage, config } = useEditor((state, config) => ({
+    config,
     activePage: state.activePage,
   }));
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -40,7 +30,7 @@ const TemplateContent: FC<{ onClose: () => void }> = ({ onClose }) => {
       dataRef.current = true;
       setIsLoading(true);
       const res: any = await axios.get(
-        `/templates?ps=18&pi=${offset}&kw=${kw}`
+        `${config.apis.url}${config.apis.searchTemplates}?ps=18&pi=${offset}&kw=${kw}`
       );
       setTemplates((templates) => [...templates, ...res.data]);
       setIsLoading(false);
@@ -119,7 +109,7 @@ const TemplateContent: FC<{ onClose: () => void }> = ({ onClose }) => {
         />
         <div css={{ paddingTop: 8 }}>
           <HorizontalCarousel>
-            {recommendKeywords.map((kw) => (
+            {config.templateKeywordSuggestions && config.templateKeywordSuggestions.split(',').map((kw) => (
               <div key={kw} className='carousel-item'>
                 <OutlineButton
                   onClick={() => {

@@ -10,7 +10,7 @@ interface ResizeHandlerProps {
 const RotateHandle: FC<ResizeHandlerProps> = ({ rotate, onRotateStart }) => {
     const { isRotating } = useEditor((state) => ({ isRotating: state.rotateData.status }));
     const {
-        config: { assetPath },
+        config: { editorAssetsUrl },
     } = useContext(EditorContext);
     const handleRotateStart = useCallback(
         (e: React.TouchEvent | React.MouseEvent) => {
@@ -45,7 +45,7 @@ const RotateHandle: FC<ResizeHandlerProps> = ({ rotate, onRotateStart }) => {
                         padding: 4,
                         color: '#0d1216',
                         ':hover': {
-                            cursor: `url('${assetPath}/cursors/rotate/${
+                            cursor: `url('${editorAssetsUrl}/cursors/rotate/${
                                 roundRotate === 36 ? 0 : roundRotate
                             }.png') 12 12, auto;`,
                         },
