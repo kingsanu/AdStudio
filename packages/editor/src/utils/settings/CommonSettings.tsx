@@ -1,14 +1,14 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import LayerSidebar from './sidebar/LayerSidebar';
 import SettingButton from './SettingButton';
-import Popover from '@canva/components/popover/Popover';
-import Slider from '@canva/components/slider/Slider';
-import { useSelectedLayers, useEditor } from '@canva/hooks';
-import { RootLayerProps } from '@canva/layers/RootLayer';
+import Popover from 'canva-editor/components/popover/Popover';
+import Slider from 'canva-editor/components/slider/Slider';
+import { useSelectedLayers, useEditor } from 'canva-editor/hooks';
+import { RootLayerProps } from 'canva-editor/layers/RootLayer';
 import { isRootLayer } from '../layer/layers';
-import LockIcon from '@canva/icons/LockIcon';
-import LockOpenIcon from '@canva/icons/LockOpenIcon';
-import TransparencyIcon from '@canva/icons/TransparencyIcon';
+import LockIcon from 'canva-editor/icons/LockIcon';
+import LockOpenIcon from 'canva-editor/icons/LockOpenIcon';
+import TransparencyIcon from 'canva-editor/icons/TransparencyIcon';
 import SettingDivider from './components/SettingDivider';
 
 const CommonSettings = () => {

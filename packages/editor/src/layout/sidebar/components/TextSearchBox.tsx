@@ -1,7 +1,7 @@
 import { FC, useState } from 'react';
-import { SearchBox } from '@canva/search-autocomplete';
+import { SearchBox } from 'canva-editor/search-autocomplete';
 import axios from 'axios';
-import { useEditor } from '@canva/hooks';
+import { useEditor } from 'canva-editor/hooks';
 
 interface Props {
   onStartSearch: (kw: string) => void;

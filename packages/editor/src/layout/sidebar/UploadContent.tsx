@@ -1,6 +1,6 @@
 import { ChangeEvent, FC, useRef, useState } from 'react';
 import { isMobile } from 'react-device-detect';
-import { useEditor } from '@canva/hooks';
+import { useEditor } from 'canva-editor/hooks';
 import CloseSidebarButton from './CloseButton';
 
 interface UploadContentProps {

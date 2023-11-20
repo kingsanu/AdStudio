@@ -13,11 +13,11 @@ import {
   LayerComponent,
   LayerData,
   Layers,
-} from '@canva/types';
+} from 'canva-editor/types';
 import { RootLayerProps } from '../../layers/RootLayer';
 import { resolvers } from '../resolvers';
 import { generateRandomID } from '../identityGenerator';
-import { FrameLayerProps } from '@canva/layers/FrameLayer';
+import { FrameLayerProps } from 'canva-editor/layers/FrameLayer';
 
 export const getRandomId = (): LayerId => generateRandomID();
 export const deserializeLayer = <P extends LayerComponentProps>(

@@ -7,47 +7,47 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { Tooltip as ReactTooltip } from '@canva/tooltip';
+import { Tooltip as ReactTooltip } from 'canva-editor/tooltip';
 import FontSidebar from './sidebar/FontSidebar';
 import TextEffectSidebar from './sidebar/TextEffectSidebar';
 import ColorSidebar from './sidebar/ColorSidebar';
 import { filter, isEqual, throttle, uniq, uniqBy } from 'lodash';
-import Popover from '@canva/components/popover/Popover';
-import Slider from '@canva/components/slider/Slider';
+import Popover from 'canva-editor/components/popover/Popover';
+import Slider from 'canva-editor/components/slider/Slider';
 import {
   unsetBoldOfBlock,
   toggleBold,
   setBold,
   unsetBold,
-} from '@canva/components/text-editor/core/command/bold';
+} from 'canva-editor/components/text-editor/core/command/bold';
 import {
   unsetItalicOfBlock,
   toggleItalic,
   setItalic,
   unsetItalic,
-} from '@canva/components/text-editor/core/command/italic';
-import { selectAll } from '@canva/components/text-editor/core/command/selectAll';
-import { selectNode } from '@canva/components/text-editor/core/command/selectNode';
-import { selectText } from '@canva/components/text-editor/core/command/selectText';
-import { setBulletList } from '@canva/components/text-editor/core/command/setBulletList';
-import { setFontFamily } from '@canva/components/text-editor/core/command/setFontFamily';
-import { setFontSize } from '@canva/components/text-editor/core/command/setFontSize';
-import { setLetterSpacing } from '@canva/components/text-editor/core/command/setLetterSpacing';
-import { setLineHeight } from '@canva/components/text-editor/core/command/setLineHeight';
-import { setOrderedList } from '@canva/components/text-editor/core/command/setOrderedList';
-import { setTextAlign } from '@canva/components/text-editor/core/command/setTextAlign';
-import { setTextTransform } from '@canva/components/text-editor/core/command/setTextTransform';
+} from 'canva-editor/components/text-editor/core/command/italic';
+import { selectAll } from 'canva-editor/components/text-editor/core/command/selectAll';
+import { selectNode } from 'canva-editor/components/text-editor/core/command/selectNode';
+import { selectText } from 'canva-editor/components/text-editor/core/command/selectText';
+import { setBulletList } from 'canva-editor/components/text-editor/core/command/setBulletList';
+import { setFontFamily } from 'canva-editor/components/text-editor/core/command/setFontFamily';
+import { setFontSize } from 'canva-editor/components/text-editor/core/command/setFontSize';
+import { setLetterSpacing } from 'canva-editor/components/text-editor/core/command/setLetterSpacing';
+import { setLineHeight } from 'canva-editor/components/text-editor/core/command/setLineHeight';
+import { setOrderedList } from 'canva-editor/components/text-editor/core/command/setOrderedList';
+import { setTextAlign } from 'canva-editor/components/text-editor/core/command/setTextAlign';
+import { setTextTransform } from 'canva-editor/components/text-editor/core/command/setTextTransform';
 import {
   setColorForBlock,
   setColor,
-} from '@canva/components/text-editor/core/command/textColor';
+} from 'canva-editor/components/text-editor/core/command/textColor';
 import {
   toggleUnderline,
   setUnderline,
   unsetUnderline,
-} from '@canva/components/text-editor/core/command/underline';
-import { isActive } from '@canva/components/text-editor/core/helper/isActive';
-import { isEmptyContent } from '@canva/components/text-editor/core/helper/isEmptyContent';
+} from 'canva-editor/components/text-editor/core/command/underline';
+import { isActive } from 'canva-editor/components/text-editor/core/helper/isActive';
+import { isEmptyContent } from 'canva-editor/components/text-editor/core/helper/isEmptyContent';
 import {
   getAllAttrs,
   getFontFamily,
@@ -58,18 +58,18 @@ import {
   getAllMarks,
   getAttrs,
   getMarkAttrs,
-} from '@canva/components/text-editor/mark';
-import { useSelectedLayers, useEditor } from '@canva/hooks';
-import { useUsedFont } from '@canva/hooks/useUsedFont';
-import { getTransformStyle } from '@canva/layers';
-import { TextLayerProps } from '@canva/layers/TextLayer';
+} from 'canva-editor/components/text-editor/mark';
+import { useSelectedLayers, useEditor } from 'canva-editor/hooks';
+import { useUsedFont } from 'canva-editor/hooks/useUsedFont';
+import { getTransformStyle } from 'canva-editor/layers';
+import { TextLayerProps } from 'canva-editor/layers/TextLayer';
 import {
   Layer,
   LayerId,
   FontData,
   FontStyle,
   LayerComponentProps,
-} from '@canva/types';
+} from 'canva-editor/types';
 import { getPositionChangesBetweenTwoCorners } from '../2d/getPositionChangesBetweenTwoCorners';
 import { visualCorners } from '../2d/visualCorners';
 import { getVirtualDomHeight } from '../dom/getVirtualDomHeight';
@@ -78,22 +78,22 @@ import { ColorParser } from '../../color-picker/utils';
 import SettingButton from './SettingButton';
 
 // Icons
-import CheckIcon from '@canva/icons/CheckIcon';
-import PlusIcon from '@canva/icons/PlusIcon';
-import ArrowDownIcon from '@canva/icons/ArrowDownIcon';
-import MinusIcon from '@canva/icons/MinusIcon';
-import FormatBoldIcon from '@canva/icons/FormatBoldIcon';
-import FormatItalicIcon from '@canva/icons/FormatItalicIcon';
-import FormatUnderlineIcon from '@canva/icons/FormatUnderlineIcon';
-import FormatUppercaseIcon from '@canva/icons/FormatUppercaseIcon';
-import TextAlignLeftIcon from '@canva/icons/TextAlignLeftIcon';
-import TextAlignCenterIcon from '@canva/icons/TextAlignCenterIcon';
-import TextAlignRightIcon from '@canva/icons/TextAlignRightIcon';
-import TextAlignJustifyIcon from '@canva/icons/TextAlignJustifyIcon';
-import TextAUnderlineIcon from '@canva/icons/TextAUnderlineIcon';
-import ListBulletsIcon from '@canva/icons/ListBulletsIcon';
-import ListNumbersIcon from '@canva/icons/ListNumbersIcon';
-import LineSpacingIcon from '@canva/icons/LineSpacingIcon';
+import CheckIcon from 'canva-editor/icons/CheckIcon';
+import PlusIcon from 'canva-editor/icons/PlusIcon';
+import ArrowDownIcon from 'canva-editor/icons/ArrowDownIcon';
+import MinusIcon from 'canva-editor/icons/MinusIcon';
+import FormatBoldIcon from 'canva-editor/icons/FormatBoldIcon';
+import FormatItalicIcon from 'canva-editor/icons/FormatItalicIcon';
+import FormatUnderlineIcon from 'canva-editor/icons/FormatUnderlineIcon';
+import FormatUppercaseIcon from 'canva-editor/icons/FormatUppercaseIcon';
+import TextAlignLeftIcon from 'canva-editor/icons/TextAlignLeftIcon';
+import TextAlignCenterIcon from 'canva-editor/icons/TextAlignCenterIcon';
+import TextAlignRightIcon from 'canva-editor/icons/TextAlignRightIcon';
+import TextAlignJustifyIcon from 'canva-editor/icons/TextAlignJustifyIcon';
+import TextAUnderlineIcon from 'canva-editor/icons/TextAUnderlineIcon';
+import ListBulletsIcon from 'canva-editor/icons/ListBulletsIcon';
+import ListNumbersIcon from 'canva-editor/icons/ListNumbersIcon';
+import LineSpacingIcon from 'canva-editor/icons/LineSpacingIcon';
 
 interface TextSettingsProps {
   layers: Layer<TextLayerProps>[];

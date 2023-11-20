@@ -1,13 +1,13 @@
 import React, { useRef, useState } from 'react';
 import SettingButton from './SettingButton';
-import Popover from '@canva/components/popover/Popover';
-import Slider from '@canva/components/slider/Slider';
-import { useEditor } from '@canva/hooks';
-import GridViewIcon from '@canva/icons/GridViewIcon';
-import CheckIcon from '@canva/icons/CheckIcon';
-import EditorButton from '@canva/components/EditorButton';
-import NotesIcon from '@canva/icons/NotesIcon';
-import GithubIcon from '@canva/icons/GithubIcon';
+import Popover from 'canva-editor/components/popover/Popover';
+import Slider from 'canva-editor/components/slider/Slider';
+import { useEditor } from 'canva-editor/hooks';
+import GridViewIcon from 'canva-editor/icons/GridViewIcon';
+import CheckIcon from 'canva-editor/icons/CheckIcon';
+import EditorButton from 'canva-editor/components/EditorButton';
+import NotesIcon from 'canva-editor/icons/NotesIcon';
+import GithubIcon from 'canva-editor/icons/GithubIcon';
 
 const PageControl = () => {
   const labelScaleOptionRef = useRef<HTMLDivElement>(null);

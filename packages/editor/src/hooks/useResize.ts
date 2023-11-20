@@ -1,14 +1,14 @@
 import { useMemo } from 'react';
 import { cloneDeep } from 'lodash';
-import { getTransformStyle } from '@canva/layers';
-import { BoxData, BoxSize, Delta } from '@canva/types';
-import { Direction } from '@canva/types/resize';
-import { angleBetweenPoints } from '@canva/utils/2d/angleBetwwenPoints';
-import { distanceBetweenPoints } from '@canva/utils/2d/distanceBetweenPoints';
-import { getPositionChangesBetweenTwoCorners } from '@canva/utils/2d/getPositionChangesBetweenTwoCorners';
-import { getSizeWithRatio } from '@canva/utils/2d/getSizeWithRatio';
-import { horizontalAndVerticalChange } from '@canva/utils/2d/horizontalAndVerticalChange';
-import { visualCorners } from '@canva/utils/2d/visualCorners';
+import { getTransformStyle } from 'canva-editor/layers';
+import { BoxData, BoxSize, Delta } from 'canva-editor/types';
+import { Direction } from 'canva-editor/types/resize';
+import { angleBetweenPoints } from 'canva-editor/utils/2d/angleBetwwenPoints';
+import { distanceBetweenPoints } from 'canva-editor/utils/2d/distanceBetweenPoints';
+import { getPositionChangesBetweenTwoCorners } from 'canva-editor/utils/2d/getPositionChangesBetweenTwoCorners';
+import { getSizeWithRatio } from 'canva-editor/utils/2d/getSizeWithRatio';
+import { horizontalAndVerticalChange } from 'canva-editor/utils/2d/horizontalAndVerticalChange';
+import { visualCorners } from 'canva-editor/utils/2d/visualCorners';
 import { useEditor } from '.';
 
 export const useResize = (getData: () => BoxData) => {

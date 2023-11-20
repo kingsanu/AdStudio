@@ -1,4 +1,4 @@
-import { Delta } from "@canva/types";
+import { Delta } from "canva-editor/types";
 
 // https://www.npmjs.com/package/transformation-matrix
 export const applyToPoint = (matrix: WebKitCSSMatrix, point: Delta) => ({

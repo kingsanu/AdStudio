@@ -1,9 +1,9 @@
 import { createElement, FC, useMemo } from 'react';
-import { Layer, LayerComponentProps } from '@canva/types';
-import { boundingRect } from '@canva/utils/2d/boundingRect';
-import { getTransformStyle } from '@canva/layers';
-import LayerProvider from '@canva/layers/core/LayerContext';
-import RenderLayer from '@canva/layers/core/RenderLayer';
+import { Layer, LayerComponentProps } from 'canva-editor/types';
+import { boundingRect } from 'canva-editor/utils/2d/boundingRect';
+import { getTransformStyle } from 'canva-editor/layers';
+import LayerProvider from 'canva-editor/layers/core/LayerContext';
+import RenderLayer from 'canva-editor/layers/core/RenderLayer';
 
 interface ReverseTransformLayerProps {
     layer: Layer<LayerComponentProps>;

@@ -1,5 +1,5 @@
 import React, { FC, PropsWithChildren, ReactElement, useState } from 'react';
-import ArrowRightIcon from '@canva/icons/ArrowRightIcon';
+import ArrowRightIcon from 'canva-editor/icons/ArrowRightIcon';
 interface ContextMenuItemProps {
     name: string;
     icon: ReactElement;

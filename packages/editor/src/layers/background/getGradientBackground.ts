@@ -1,4 +1,4 @@
-import { GradientStyle } from "@canva/types";
+import { GradientStyle } from "canva-editor/types";
 
 export const getGradientBackground = (colors: string[], style: GradientStyle) => {
     const percent = 100 / (colors.length - 1);

@@ -1,4 +1,4 @@
-import { Delta } from "@canva/types";
+import { Delta } from "canva-editor/types";
 
 export const isLineIntersection = (line1: [Delta, Delta], line2: [Delta, Delta]) => {
     const a_dx = line1[1].x - line1[0].x;

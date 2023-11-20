@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLayer, useEditor, useSelectedLayers } from '../hooks';
-import { Delta, BoxSize, LayerComponent } from '@canva/types';
+import { Delta, BoxSize, LayerComponent } from 'canva-editor/types';
 import { ImageContentProps, ImageContent } from '.';
 
 export interface ImageLayerProps extends ImageContentProps {

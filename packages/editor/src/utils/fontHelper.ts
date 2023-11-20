@@ -1,4 +1,4 @@
-import { FontData } from '@canva/types';
+import { FontData } from 'canva-editor/types';
 import { chain, filter, find, omit } from 'lodash';
 
 function groupFontsByFamily(fonts: FontData[]): FontData[] {

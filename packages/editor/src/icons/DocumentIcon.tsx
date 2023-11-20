@@ -1,4 +1,4 @@
-import { IconProps } from '@canva/types';
+import { IconProps } from 'canva-editor/types';
 import React from 'react';
 
 const DocumentIcon: React.FC<IconProps> = ({ className = '' }: IconProps) => {

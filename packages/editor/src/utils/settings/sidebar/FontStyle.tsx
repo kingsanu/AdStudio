@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { css, Global } from '@emotion/react';
-import { useEditor } from '@canva/hooks';
+import { useEditor } from 'canva-editor/hooks';
 
 const FontStyle = () => {
   const { fontList } = useEditor((state) => ({ fontList: state.fontList }));

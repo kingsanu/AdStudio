@@ -1,4 +1,4 @@
-import { LayerComponentProps, LayerComponent } from '@canva/types';
+import { LayerComponentProps, LayerComponent } from 'canva-editor/types';
 import React, { PropsWithChildren } from 'react';
 
 export interface GroupLayerProps extends LayerComponentProps {

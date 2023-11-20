@@ -1,5 +1,5 @@
-import EditInlineInput from '@canva/components/EditInlineInput';
-import { useEditor } from '@canva/hooks';
+import EditInlineInput from 'canva-editor/components/EditInlineInput';
+import { useEditor } from 'canva-editor/hooks';
 import React, { ChangeEvent } from 'react';
 interface Props {
   placeholder?: string;

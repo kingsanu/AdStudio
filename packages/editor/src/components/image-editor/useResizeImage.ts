@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { throttle } from 'lodash';
-import { BoxData, CursorPosition } from '@canva/types';
-import { CornerDirection } from '@canva/types/resize';
-import { useResize } from '@canva/hooks/useResize';
-import { getPosition } from '@canva/utils';
+import { BoxData, CursorPosition } from 'canva-editor/types';
+import { CornerDirection } from 'canva-editor/types/resize';
+import { useResize } from 'canva-editor/hooks/useResize';
+import { getPosition } from 'canva-editor/utils';
 
 type ResizeRef = {
     clientX: number;

@@ -1,5 +1,5 @@
-import { EditorState, Layer, LayerId, LayerComponentProps } from '@canva/types';
-import { serialize } from '@canva/utils/layer/page';
+import { EditorState, Layer, LayerId, LayerComponentProps } from 'canva-editor/types';
+import { serialize } from 'canva-editor/utils/layer/page';
 
 export const QueryMethods = (state: EditorState) => {
   return {

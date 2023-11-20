@@ -1,13 +1,13 @@
-import { SortableContainer, SortableElement } from '@canva/drag-and-drop';
-import { Layer, LayerComponentProps } from '@canva/types';
-import { isGroupLayer } from '@canva/utils/layer/layers';
-import MoreVertIcon from '@canva/icons/MoreVertIcon';
-import MoreHorizIcon from '@canva/icons/MoreHorizIcon';
-import GroupingIcon from '@canva/icons/GroupingIcon';
+import { SortableContainer, SortableElement } from 'canva-editor/drag-and-drop';
+import { Layer, LayerComponentProps } from 'canva-editor/types';
+import { isGroupLayer } from 'canva-editor/utils/layer/layers';
+import MoreVertIcon from 'canva-editor/icons/MoreVertIcon';
+import MoreHorizIcon from 'canva-editor/icons/MoreHorizIcon';
+import GroupingIcon from 'canva-editor/icons/GroupingIcon';
 import styled from '@emotion/styled';
 import ReverseTransformLayer from './ReverseTransformLayer';
 import { FC } from 'react';
-import { SortEnd } from '@canva/drag-and-drop/types';
+import { SortEnd } from 'canva-editor/drag-and-drop/types';
 
 type LayerSortableType = {
   items?: Array<Layer<LayerComponentProps>> | any;

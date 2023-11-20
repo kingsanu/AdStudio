@@ -1,9 +1,9 @@
 import { useEditor } from '../../hooks';
 import { TextLayerProps } from '../../layers/TextLayer';
 import EditorContent from './EditorContent';
-import { EffectSettings, Layer, LayerId } from '@canva/types';
-import { getTransformStyle } from '@canva/layers';
-import { getTextEffectStyle } from '@canva/layers/text'
+import { EffectSettings, Layer, LayerId } from 'canva-editor/types';
+import { getTransformStyle } from 'canva-editor/layers';
+import { getTextEffectStyle } from 'canva-editor/layers/text'
 
 const TextEditor = () => {
     const { editorScale, layer } = useEditor((state) => {

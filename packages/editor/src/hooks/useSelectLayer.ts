@@ -1,11 +1,11 @@
 import { RefObject, useCallback, useEffect, useState } from 'react';
 import { useEditor } from './useEditor';
 import { useLinkedRef } from './useLinkedRef';
-import { getTransformStyle } from '@canva/layers';
-import { LayerId, BoxData, Delta } from '@canva/types';
-import { getPosition } from '@canva/utils';
-import { isIntersection } from '@canva/utils/2d/isIntersection';
-import { visualCorners } from '@canva/utils/2d/visualCorners';
+import { getTransformStyle } from 'canva-editor/layers';
+import { LayerId, BoxData, Delta } from 'canva-editor/types';
+import { getPosition } from 'canva-editor/utils';
+import { isIntersection } from 'canva-editor/utils/2d/isIntersection';
+import { visualCorners } from 'canva-editor/utils/2d/visualCorners';
 
 export const useSelectLayer = ({
     frameRef,

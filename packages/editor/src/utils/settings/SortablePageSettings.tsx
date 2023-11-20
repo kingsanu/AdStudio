@@ -1,12 +1,12 @@
-import { SortableContainer, SortableElement } from '@canva/drag-and-drop';
-import { PageSize, Page as PageType } from '@canva/types';
+import { SortableContainer, SortableElement } from 'canva-editor/drag-and-drop';
+import { PageSize, Page as PageType } from 'canva-editor/types';
 import { FC } from 'react';
-import { SortEnd } from '@canva/drag-and-drop/types';
+import { SortEnd } from 'canva-editor/drag-and-drop/types';
 import { PageGridItem, PageGridItemContainer } from './PageGridView';
-import Page from '@canva/components/editor/Page';
-import EditInlineInput from '@canva/components/EditInlineInput';
-import EditorButton from '@canva/components/EditorButton';
-import PlusIcon from '@canva/icons/PlusIcon';
+import Page from 'canva-editor/components/editor/Page';
+import EditInlineInput from 'canva-editor/components/EditInlineInput';
+import EditorButton from 'canva-editor/components/EditorButton';
+import PlusIcon from 'canva-editor/icons/PlusIcon';
 
 type PageSortableType = {
   items?: Array<PageType> | any;

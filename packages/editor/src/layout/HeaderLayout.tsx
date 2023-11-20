@@ -1,14 +1,14 @@
 import { forwardRef, ForwardRefRenderFunction, useState } from 'react';
-import { useEditor } from '@canva/hooks';
-import CanvaIcon from '@canva/icons/CanvaIcon';
-import EditInlineInput from '@canva/components/EditInlineInput';
-import SettingDivider from '@canva/utils/settings/components/SettingDivider';
-import EditorButton from '@canva/components/EditorButton';
-import NextIcon from '@canva/icons/NextIcon';
-import BackIcon from '@canva/icons/BackIcon';
-import SyncedIcon from '@canva/icons/SyncedIcon';
+import { useEditor } from 'canva-editor/hooks';
+import CanvaIcon from 'canva-editor/icons/CanvaIcon';
+import EditInlineInput from 'canva-editor/components/EditInlineInput';
+import SettingDivider from 'canva-editor/utils/settings/components/SettingDivider';
+import EditorButton from 'canva-editor/components/EditorButton';
+import NextIcon from 'canva-editor/icons/NextIcon';
+import BackIcon from 'canva-editor/icons/BackIcon';
+import SyncedIcon from 'canva-editor/icons/SyncedIcon';
 import HeaderFileMenu from './sidebar/components/HeaderFileMenu';
-import SyncingIcon from '@canva/icons/SyncingIcon';
+import SyncingIcon from 'canva-editor/icons/SyncingIcon';
 
 interface HeaderLayoutProps {
   designName: string;

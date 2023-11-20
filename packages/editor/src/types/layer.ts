@@ -1,8 +1,8 @@
 import { FunctionComponent, ReactElement } from 'react';
 import { BoxSize, DeepPartial, Delta } from './common';
 import { EditorActions, EditorState } from './editor';
-import { TextEditor } from '@canva/components/text-editor/interfaces';
-import { ImageContentProps } from '@canva/layers';
+import { TextEditor } from 'canva-editor/components/text-editor/interfaces';
+import { ImageContentProps } from 'canva-editor/layers';
 
 export type LayerId = string;
 

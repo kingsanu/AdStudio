@@ -1,4 +1,4 @@
-import { DesignFrame } from '@canva/components/editor';
+import { DesignFrame } from 'canva-editor/components/editor';
 import { FC } from 'react';
 const defaultData = [
   {

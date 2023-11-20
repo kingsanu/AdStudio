@@ -1,5 +1,5 @@
 // ref: https://stackoverflow.com/questions/69147768/how-to-calculate-a-bounding-box-for-a-rectangle-rotated-around-its-center
-import { BoxSize, Delta } from "@canva/types";
+import { BoxSize, Delta } from "canva-editor/types";
 
 export const boundingRect = (boxSize: BoxSize, position: Delta, rotate: number) => {
     const radians = (rotate * Math.PI) / 180;

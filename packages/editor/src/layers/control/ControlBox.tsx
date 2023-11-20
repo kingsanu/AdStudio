@@ -3,8 +3,8 @@ import CornerResizeHandler, { HANDLER_CORNER_SIZE } from './CornerResizeHandler'
 import ResizeHandler, { HANDLER_SIZE } from './ResizeHandler';
 import RotateHandle from './RotateHandle';
 import { useEditor } from '../../hooks';
-import { BoxSize, Delta } from '@canva/types';
-import { Direction, ResizeCallback } from '@canva/types/resize';
+import { BoxSize, Delta } from 'canva-editor/types';
+import { Direction, ResizeCallback } from 'canva-editor/types/resize';
 import { useForwardedRef } from '../../hooks/useForwardedRef';
 import { PageContext } from '../core/PageContext';
 import { getTransformStyle } from '..';

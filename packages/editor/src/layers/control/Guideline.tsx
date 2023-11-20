@@ -1,4 +1,4 @@
-import { useEditor } from '@canva/hooks';
+import { useEditor } from 'canva-editor/hooks';
 import React, { FC } from 'react';
 
 const Guideline: FC = () => {

@@ -1,4 +1,4 @@
-import { CursorPosition } from "@canva/types";
+import { CursorPosition } from "canva-editor/types";
 
 export const distanceBetweenPoints = (oldPos: CursorPosition, newPos: CursorPosition, scale?: number) => {
     const xDiff = newPos.clientX - oldPos.clientX;

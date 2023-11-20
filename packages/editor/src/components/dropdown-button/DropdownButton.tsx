@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, FC, ReactNode } from 'react';
-import ArrowRightIcon from '@canva/icons/ArrowRightIcon';
+import ArrowRightIcon from 'canva-editor/icons/ArrowRightIcon';
 import './DropdownButton.css';
 
 export type DropdownMenuItem = {

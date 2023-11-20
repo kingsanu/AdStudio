@@ -18,7 +18,7 @@ import {
   SerializedLayer,
   SerializedLayerTree,
   SerializedPage,
-} from '@canva/types';
+} from 'canva-editor/types';
 import { cloneDeep, isArray, uniq } from 'lodash';
 import {
   deserializeLayer,
@@ -28,19 +28,19 @@ import {
   isRootLayer,
   isTextLayer,
   serializeLayers,
-} from '@canva/utils/layer/layers';
+} from 'canva-editor/utils/layer/layers';
 import { TextEditor } from '../text-editor/interfaces';
-import { getControlBoxSizeFromLayers } from '@canva/utils/layer/getControlBoxSizeFromLayers';
-import { Direction, EdgeDirection } from '@canva/types/resize';
-import { mergeWithoutArray } from '@canva/utils';
-import { boundingRect } from '@canva/utils/2d/boundingRect';
-import { RootLayerProps } from '@canva/layers/RootLayer';
-import { positionOfObjectInsideAnother } from '@canva/utils/2d/positionOfObjectInsideAnother';
-import { GroupLayerProps } from '@canva/layers/GroupLayer';
-import { getPositionWhenLayerCenter } from '@canva/utils/layer/getPositionWhenLayerCenter';
-import { ImageContentProps } from '@canva/layers';
-import { TextLayerProps } from '@canva/layers/TextLayer';
-import { arrayMoveMutable } from '@canva/drag-and-drop/DDUtils';
+import { getControlBoxSizeFromLayers } from 'canva-editor/utils/layer/getControlBoxSizeFromLayers';
+import { Direction, EdgeDirection } from 'canva-editor/types/resize';
+import { mergeWithoutArray } from 'canva-editor/utils';
+import { boundingRect } from 'canva-editor/utils/2d/boundingRect';
+import { RootLayerProps } from 'canva-editor/layers/RootLayer';
+import { positionOfObjectInsideAnother } from 'canva-editor/utils/2d/positionOfObjectInsideAnother';
+import { GroupLayerProps } from 'canva-editor/layers/GroupLayer';
+import { getPositionWhenLayerCenter } from 'canva-editor/utils/layer/getPositionWhenLayerCenter';
+import { ImageContentProps } from 'canva-editor/layers';
+import { TextLayerProps } from 'canva-editor/layers/TextLayer';
+import { arrayMoveMutable } from 'canva-editor/drag-and-drop/DDUtils';
 
 export const ActionMethods = (state: EditorState) => {
   const addLayerTreeToParent = (

@@ -1,6 +1,6 @@
 // ref: https://stackoverflow.com/questions/10962379/how-to-check-intersection-between-2-rotated-rectangles
 
-import { Delta } from "@canva/types";
+import { Delta } from "canva-editor/types";
 
 
 export const isIntersection = (rect1: Delta[], rect2: Delta[]) => {

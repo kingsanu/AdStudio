@@ -1,4 +1,4 @@
-import { EditorContext } from '@canva/components/editor/EditorContext';
+import { EditorContext } from 'canva-editor/components/editor/EditorContext';
 import { EditorQuery, EditorState } from '../types';
 import { useContext } from 'react';
 

@@ -1,4 +1,4 @@
-import EditorButton from '@canva/components/EditorButton';
+import EditorButton from 'canva-editor/components/EditorButton';
 import {
   forwardRef,
   ForwardRefRenderFunction,

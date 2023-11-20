@@ -1,6 +1,6 @@
 import { data } from './data';
-import { getPageSize } from '@canva/layers';
-import { Frame } from '@canva/components';
+import { getPageSize } from 'canva-editor/layers';
+import { Frame } from 'canva-editor/components';
 
 const Publish = () => {
     return null;

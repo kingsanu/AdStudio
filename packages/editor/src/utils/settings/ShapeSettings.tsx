@@ -1,20 +1,20 @@
 import { FC, Fragment, ReactElement, useMemo, useRef, useState } from 'react';
 import SettingButton from './SettingButton';
 import ColorSettings from './ColorSettings';
-import Popover from '@canva/components/popover/Popover';
-import Slider from '@canva/components/slider/Slider';
-import { useEditor } from '@canva/hooks';
-import { ShapeLayerProps } from '@canva/layers/ShapeLayer';
-import { Layer, ShapeBorderStyle, GradientStyle } from '@canva/types';
+import Popover from 'canva-editor/components/popover/Popover';
+import Slider from 'canva-editor/components/slider/Slider';
+import { useEditor } from 'canva-editor/hooks';
+import { ShapeLayerProps } from 'canva-editor/layers/ShapeLayer';
+import { Layer, ShapeBorderStyle, GradientStyle } from 'canva-editor/types';
 
 // Icons
-import ShapeSettingsIcon from '@canva/icons/ShapeSettingsIcon';
-import LongDashIcon from '@canva/icons/LongDashIcon';
-import TwoDashesIcon from '@canva/icons/TwoDashesIcon';
-import ThreeDashesIcon from '@canva/icons/ThreeDashesIcon';
-import DotsIcon from '@canva/icons/DotsIcon';
-import NotAllowedIcon from '@canva/icons/NotAllowedIcon';
-import SquareBoldIcon from '@canva/icons/SquareBoldIcon';
+import ShapeSettingsIcon from 'canva-editor/icons/ShapeSettingsIcon';
+import LongDashIcon from 'canva-editor/icons/LongDashIcon';
+import TwoDashesIcon from 'canva-editor/icons/TwoDashesIcon';
+import ThreeDashesIcon from 'canva-editor/icons/ThreeDashesIcon';
+import DotsIcon from 'canva-editor/icons/DotsIcon';
+import NotAllowedIcon from 'canva-editor/icons/NotAllowedIcon';
+import SquareBoldIcon from 'canva-editor/icons/SquareBoldIcon';
 import SettingDivider from './components/SettingDivider';
 
 interface ShapeSettingsProps {

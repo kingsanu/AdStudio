@@ -1,6 +1,6 @@
 import { isLineIntersection } from './isLineIntersection';
 import { cornersToLines } from './cornersToLines';
-import { Delta } from '@canva/types';
+import { Delta } from 'canva-editor/types';
 
 export const isBoxIntersectionAnother = (
     rect1: {

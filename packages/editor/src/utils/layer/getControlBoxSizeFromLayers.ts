@@ -1,4 +1,4 @@
-import { BoxData, LayerComponentProps, LayerId } from '@canva/types';
+import { BoxData, LayerComponentProps, LayerId } from 'canva-editor/types';
 import { boundingRect } from '../2d/boundingRect';
 
 export const getControlBoxSizeFromLayers = (data: Record<LayerId, LayerComponentProps>): BoxData | undefined => {

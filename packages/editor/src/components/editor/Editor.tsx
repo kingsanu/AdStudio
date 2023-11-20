@@ -1,11 +1,11 @@
 import { FC, PropsWithChildren, useEffect, useRef, useState } from 'react';
 import { EditorConfig, EditorContext } from './EditorContext';
 import { useEditorStore } from '../../hooks/useEditorStore';
-import HeaderLayout from '@canva/layout/HeaderLayout';
-import Sidebar from '@canva/layout/Sidebar';
-import EditorContent from '@canva/layout/pages/EditorContent';
-import AppLayerSettings from '@canva/layout/AppLayerSettings';
-import { PageControl } from '@canva/utils/settings';
+import HeaderLayout from 'canva-editor/layout/HeaderLayout';
+import Sidebar from 'canva-editor/layout/Sidebar';
+import EditorContent from 'canva-editor/layout/pages/EditorContent';
+import AppLayerSettings from 'canva-editor/layout/AppLayerSettings';
+import { PageControl } from 'canva-editor/utils/settings';
 
 export type EditorProps = {
   data?: {

@@ -2,7 +2,7 @@ import {
   EditorActions,
   EditorQuery,
   EditorState,
-} from '@canva/types';
+} from 'canva-editor/types';
 import { createContext } from 'react';
 
 export type EditorConfig = {

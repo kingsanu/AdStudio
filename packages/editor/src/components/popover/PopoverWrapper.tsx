@@ -9,7 +9,7 @@ import {
 } from 'react';
 import { throttle } from 'lodash';
 import { useForwardedRef } from '../../hooks/useForwardedRef';
-import { Delta } from '@canva/types';
+import { Delta } from 'canva-editor/types';
 
 type PopoverPlacement =
     | 'top'

@@ -1,6 +1,6 @@
-import { LayerComponent } from '@canva/types';
+import { LayerComponent } from 'canva-editor/types';
 import { FrameContent, FrameContentProps } from './content/FrameContent';
-import { useEditor, useLayer, useSelectedLayers } from '@canva/hooks';
+import { useEditor, useLayer, useSelectedLayers } from 'canva-editor/hooks';
 import { useEffect, useState } from 'react';
 
 export type FrameLayerProps = FrameContentProps;

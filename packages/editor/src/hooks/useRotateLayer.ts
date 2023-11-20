@@ -1,6 +1,6 @@
-import { BoxData, LayerId, LayerDataRef, Delta, CursorPosition } from '@canva/types';
-import { getPosition } from '@canva/utils';
-import { boundingRect } from '@canva/utils/2d/boundingRect';
+import { BoxData, LayerId, LayerDataRef, Delta, CursorPosition } from 'canva-editor/types';
+import { getPosition } from 'canva-editor/utils';
+import { boundingRect } from 'canva-editor/utils/2d/boundingRect';
 import { cloneDeep, throttle } from 'lodash';
 import { useRef } from 'react';
 import { useSelectedLayers, useEditor } from '.';

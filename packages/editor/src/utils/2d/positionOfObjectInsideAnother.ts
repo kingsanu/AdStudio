@@ -1,4 +1,4 @@
-import { BoxData } from '@canva/types';
+import { BoxData } from 'canva-editor/types';
 import { boundingRect } from './boundingRect';
 
 export const positionOfObjectInsideAnother = (parent: BoxData, child: BoxData) => {

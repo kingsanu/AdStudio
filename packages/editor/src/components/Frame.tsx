@@ -2,8 +2,8 @@ import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import PageRender from './PageRender';
 import { throttle } from 'lodash';
 import { GlobalStyle, getUsedFonts } from '../layers';
-import { SerializedPage } from '@canva/types';
-import { renderPages } from '@canva/utils/deserialize';
+import { SerializedPage } from 'canva-editor/types';
+import { renderPages } from 'canva-editor/utils/deserialize';
 
 type Timeout = ReturnType<typeof setTimeout>;
 let timeout: Timeout;

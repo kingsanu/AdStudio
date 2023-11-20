@@ -1,9 +1,9 @@
 import { useRef } from 'react';
 import { useEditor } from '../../hooks';
 import ImageEditorControl from './ImageEditorControl';
-import { positionOfObjectInsideAnother } from '@canva/utils/2d/positionOfObjectInsideAnother';
-import { getTransformStyle, scalePath } from '@canva/layers';
-import { isFrameLayer } from '@canva/utils/layer/layers';
+import { positionOfObjectInsideAnother } from 'canva-editor/utils/2d/positionOfObjectInsideAnother';
+import { getTransformStyle, scalePath } from 'canva-editor/layers';
+import { isFrameLayer } from 'canva-editor/utils/layer/layers';
 
 const ImageEditor = () => {
   const boxRef = useRef<HTMLDivElement>(null);

@@ -8,27 +8,27 @@ import {
 } from 'react';
 import { EditorContext } from './EditorContext';
 import DesignPage from './DesignPage';
-import { SerializedPage } from '@canva/types';
+import { SerializedPage } from 'canva-editor/types';
 import { useTrackingShiftKey } from '../../hooks/useTrackingShiftKey';
 import { useUsedFont } from '../../hooks/useUsedFont';
 import useShortcut from '../../hooks/useShortcut';
 import { useEditor, useSelectedLayers } from '../../hooks';
 import { useZoomPage } from '../../hooks/useZoomPage';
 import useClickOutside from '../../hooks/useClickOutside';
-import { isElementInViewport } from '@canva/utils/dom/isElementInViewport';
+import { isElementInViewport } from 'canva-editor/utils/dom/isElementInViewport';
 import { useSelectLayer } from '../../hooks/useSelectLayer';
 import { useDragLayer } from '../../hooks/useDragLayer';
-import { getPosition, isMouseEvent, isTouchEvent } from '@canva/utils';
-import { GlobalStyle, getTransformStyle } from '@canva/layers';
-import { visualCorners } from '@canva/utils/2d/visualCorners';
-import { isPointInsideBox } from '@canva/utils/2d/isPointInsideBox';
-import { rectangleInsideAnother } from '@canva/utils/2d/rectangleInsideAnother';
-import LayerContextMenu from '@canva/layers/core/context-menu/LayerContextMenu';
-import SelectionBox from '@canva/layers/core/SelectionBox';
+import { getPosition, isMouseEvent, isTouchEvent } from 'canva-editor/utils';
+import { GlobalStyle, getTransformStyle } from 'canva-editor/layers';
+import { visualCorners } from 'canva-editor/utils/2d/visualCorners';
+import { isPointInsideBox } from 'canva-editor/utils/2d/isPointInsideBox';
+import { rectangleInsideAnother } from 'canva-editor/utils/2d/rectangleInsideAnother';
+import LayerContextMenu from 'canva-editor/layers/core/context-menu/LayerContextMenu';
+import SelectionBox from 'canva-editor/layers/core/SelectionBox';
 import { isMobile } from 'react-device-detect';
-import PageSettings from '@canva/utils/settings/PageSettings';
-import { unpack } from '@canva/utils/minifier';
-import useDebouncedEffect from '@canva/hooks/useDebouncedEffect';
+import PageSettings from 'canva-editor/utils/settings/PageSettings';
+import { dataMapping, pack, unpack } from 'canva-editor/utils/minifier';
+import useDebouncedEffect from 'canva-editor/hooks/useDebouncedEffect';
 import { toPng } from 'html-to-image';
 
 interface DesignFrameProps {
@@ -97,10 +97,9 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
     onMovePageEnd,
   } = useZoomPage(frameRef, pageRef, pageContainerRef);
   useEffect(() => {
+    // console.log(pack(data, dataMapping))
     const serializedData: SerializedPage[] = unpack(data);
-    console.log(serializedData)
     actions.setData(serializedData);
-    // actions.setData(data);
     setTimeout(() => {
       actions.setScale(.59);
     }, 16);

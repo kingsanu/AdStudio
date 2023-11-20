@@ -1,6 +1,6 @@
 // ref: https://swharden.com/blog/2022-02-01-point-in-rectangle/
 
-import { Delta } from "@canva/types";
+import { Delta } from "canva-editor/types";
 
 export const isPointInsideBox = (
     point: Delta,

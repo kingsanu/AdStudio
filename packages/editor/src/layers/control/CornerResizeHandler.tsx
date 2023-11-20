@@ -1,5 +1,5 @@
-import { EditorContext } from '@canva/components/editor/EditorContext';
-import { CornerDirection, Direction } from '@canva/types/resize';
+import { EditorContext } from 'canva-editor/components/editor/EditorContext';
+import { CornerDirection, Direction } from 'canva-editor/types/resize';
 import React, { FC, useContext } from 'react';
 
 export const HANDLER_CORNER_SIZE = 16;

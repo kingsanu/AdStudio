@@ -2,10 +2,10 @@ import { useCallback, useEffect } from 'react';
 import { useEditor } from './useEditor';
 import { keyName } from 'w3c-keyname';
 import { useSelectedLayers } from './useSelectedLayers';
-import { paste } from '@canva/utils/menu/actions/paste';
-import { modifiers, normalizeKeyName } from '@canva/utils';
-import { copy } from '@canva/utils/menu/actions/copy';
-import { duplicate } from '@canva/utils/menu/actions/duplicate';
+import { paste } from 'canva-editor/utils/menu/actions/paste';
+import { modifiers, normalizeKeyName } from 'canva-editor/utils';
+import { copy } from 'canva-editor/utils/menu/actions/copy';
+import { duplicate } from 'canva-editor/utils/menu/actions/duplicate';
 
 const useShortcut = (frameEle: HTMLElement | null) => {
   const { actions, state, activePage, rootLayer, scale, selectedLayers } =

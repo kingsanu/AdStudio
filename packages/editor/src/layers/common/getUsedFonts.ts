@@ -1,4 +1,4 @@
-import { SerializedPage, FontData } from '@canva/types';
+import { SerializedPage, FontData } from 'canva-editor/types';
 import { isEqual, uniqWith } from 'lodash';
 import { TextContentProps } from '..';
 

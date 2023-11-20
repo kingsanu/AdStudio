@@ -3,13 +3,13 @@ import TextSettings from './TextSettings';
 import CommonSettings from './CommonSettings';
 import ShapeSettings from './ShapeSettings';
 import RootSettings from './RootSettings';
-import { useSelectedLayers, useEditor } from '@canva/hooks';
-import { RootLayerProps } from '@canva/layers/RootLayer';
-import { ShapeLayerProps } from '@canva/layers/ShapeLayer';
-import { TextLayerProps } from '@canva/layers/TextLayer';
-import { Layer } from '@canva/types';
+import { useSelectedLayers, useEditor } from 'canva-editor/hooks';
+import { RootLayerProps } from 'canva-editor/layers/RootLayer';
+import { ShapeLayerProps } from 'canva-editor/layers/ShapeLayer';
+import { TextLayerProps } from 'canva-editor/layers/TextLayer';
+import { Layer } from 'canva-editor/types';
 import { isRootLayer, isTextLayer, isShapeLayer, isFrameLayer } from '../layer/layers';
-import { FrameLayerProps } from '@canva/layers/FrameLayer';
+import { FrameLayerProps } from 'canva-editor/layers/FrameLayer';
 
 const LayerSettings = () => {
     const { selectedLayers, selectedLayerIds } = useSelectedLayers();

@@ -1,8 +1,8 @@
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { isMobile } from 'react-device-detect';
-import { Delta } from '@canva/types';
-import { useEditor } from '@canva/hooks';
-import Draggable from '@canva/layers/core/Dragable';
+import { Delta } from 'canva-editor/types';
+import { useEditor } from 'canva-editor/hooks';
+import Draggable from 'canva-editor/layers/core/Dragable';
 import CloseSidebarButton from './CloseButton';
 import ShapeSearchBox from './components/ShapeSearchBox';
 import axios from 'axios';

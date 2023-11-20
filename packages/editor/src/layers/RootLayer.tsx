@@ -1,6 +1,6 @@
 import { Fragment, PropsWithChildren } from 'react';
 import { useLayer } from '../hooks';
-import { LayerComponent } from '@canva/types';
+import { LayerComponent } from 'canva-editor/types';
 import { RootContentProps, RootContent, ImageContentProps } from '.';
 
 export interface RootLayerProps extends Omit<RootContentProps, 'image'> {

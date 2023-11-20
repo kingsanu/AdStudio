@@ -1,10 +1,10 @@
 import React, { FC, Fragment, PropsWithChildren, useEffect, useMemo, useRef, useState } from 'react';
-import { ColorPicker, ColorIcon } from '@canva/color-picker';
-import Popover from '@canva/components/popover/Popover';
-import { getGradientBackground } from '@canva/layers';
-import { ColorParser } from '@canva/color-picker/utils';
-import ArrowLeftIcon from '@canva/icons/ArrowLeftIcon';
-import PlusIcon from '@canva/icons/PlusIcon';
+import { ColorPicker, ColorIcon } from 'canva-editor/color-picker';
+import Popover from 'canva-editor/components/popover/Popover';
+import { getGradientBackground } from 'canva-editor/layers';
+import { ColorParser } from 'canva-editor/color-picker/utils';
+import ArrowLeftIcon from 'canva-editor/icons/ArrowLeftIcon';
+import PlusIcon from 'canva-editor/icons/PlusIcon';
 
 type GradientStyle = 'leftToRight' | 'topToBottom' | 'topLeftToBottomRight' | 'circleCenter' | 'circleTopLeft';
 interface GradientPickerProps {

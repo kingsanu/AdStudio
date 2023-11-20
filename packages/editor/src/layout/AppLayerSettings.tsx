@@ -1,5 +1,5 @@
-import { useSelectedLayers } from '@canva/hooks';
-import { LayerSettings } from '@canva/utils/settings';
+import { useSelectedLayers } from 'canva-editor/hooks';
+import { LayerSettings } from 'canva-editor/utils/settings';
 
 const AppLayerSettings = () => {
     const { selectedLayerIds } = useSelectedLayers();

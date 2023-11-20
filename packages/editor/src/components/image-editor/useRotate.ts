@@ -1,4 +1,4 @@
-import { getPosition } from '@canva/utils';
+import { getPosition } from 'canva-editor/utils';
 import { throttle } from 'lodash';
 
 export const useRotate = ({

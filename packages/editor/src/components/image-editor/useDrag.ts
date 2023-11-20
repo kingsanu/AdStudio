@@ -1,12 +1,12 @@
 import { useRef } from 'react';
 import { throttle } from 'lodash';
 import { useEditor } from '../../hooks';
-import { distanceBetweenPoints } from '@canva/utils/2d/distanceBetweenPoints';
-import { CursorPosition } from '@canva/types';
-import { horizontalAndVerticalChange } from '@canva/utils/2d/horizontalAndVerticalChange';
-import { angleBetweenPoints } from '@canva/utils/2d/angleBetwwenPoints';
-import { boundingRect } from '@canva/utils/2d/boundingRect';
-import { getPosition } from '@canva/utils';
+import { distanceBetweenPoints } from 'canva-editor/utils/2d/distanceBetweenPoints';
+import { CursorPosition } from 'canva-editor/types';
+import { horizontalAndVerticalChange } from 'canva-editor/utils/2d/horizontalAndVerticalChange';
+import { angleBetweenPoints } from 'canva-editor/utils/2d/angleBetwwenPoints';
+import { boundingRect } from 'canva-editor/utils/2d/boundingRect';
+import { getPosition } from 'canva-editor/utils';
 
 type DragData = {
     clientX: number;

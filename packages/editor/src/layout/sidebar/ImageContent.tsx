@@ -1,13 +1,13 @@
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { isMobile } from 'react-device-detect';
-import { useEditor } from '@canva/hooks';
-import Draggable from '@canva/layers/core/Dragable';
-import { Delta } from '@canva/types';
+import { useEditor } from 'canva-editor/hooks';
+import Draggable from 'canva-editor/layers/core/Dragable';
+import { Delta } from 'canva-editor/types';
 import CloseSidebarButton from './CloseButton';
 import ImageSearchBox from './components/ImageSearchBox';
-import HorizontalCarousel from '@canva/components/carousel/HorizontalCarousel';
-import OutlineButton from '@canva/components/button/OutlineButton';
+import HorizontalCarousel from 'canva-editor/components/carousel/HorizontalCarousel';
+import OutlineButton from 'canva-editor/components/button/OutlineButton';
 
 const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
   const [images, setImages] = useState<{ img: string }[]>([]);

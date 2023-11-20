@@ -1,4 +1,4 @@
-import { Direction } from '@canva/types/resize';
+import { Direction } from 'canva-editor/types/resize';
 import { visualCorners } from './visualCorners';
 
 type Corner = ReturnType<typeof visualCorners>;

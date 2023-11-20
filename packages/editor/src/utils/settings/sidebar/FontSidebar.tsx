@@ -8,26 +8,26 @@ import {
   useState,
 } from 'react';
 import Sidebar, { SidebarProps } from './Sidebar';
-import { FontData, FontDataApi, GetFontQuery } from '@canva/types';
-import { useUsedFont } from '@canva/hooks/useUsedFont';
-import { useEditor } from '@canva/hooks';
-import CheckIcon from '@canva/icons/CheckIcon';
-import ArrowRightIcon from '@canva/icons/ArrowRightIcon';
-import ArrowDownIcon from '@canva/icons/ArrowDownIcon';
+import { FontData, FontDataApi, GetFontQuery } from 'canva-editor/types';
+import { useUsedFont } from 'canva-editor/hooks/useUsedFont';
+import { useEditor } from 'canva-editor/hooks';
+import CheckIcon from 'canva-editor/icons/CheckIcon';
+import ArrowRightIcon from 'canva-editor/icons/ArrowRightIcon';
+import ArrowDownIcon from 'canva-editor/icons/ArrowDownIcon';
 import styled from '@emotion/styled';
 import {
   groupFontsByFamily,
   handleFontStyle,
   handleFontStyleName,
-} from '@canva/utils/fontHelper';
-import { getRandomItems } from '@canva/utils';
+} from 'canva-editor/utils/fontHelper';
+import { getRandomItems } from 'canva-editor/utils';
 import FontStyle from './FontStyle';
 import { isArray, some } from 'lodash';
 import FontSearchBox from '../components/FontSearchBox';
-import TrendingIcon from '@canva/icons/TrendingIcon';
-import DocumentIcon from '@canva/icons/DocumentIcon';
-import HorizontalCarousel from '@canva/components/carousel/HorizontalCarousel';
-import OutlineButton from '@canva/components/button/OutlineButton';
+import TrendingIcon from 'canva-editor/icons/TrendingIcon';
+import DocumentIcon from 'canva-editor/icons/DocumentIcon';
+import HorizontalCarousel from 'canva-editor/components/carousel/HorizontalCarousel';
+import OutlineButton from 'canva-editor/components/button/OutlineButton';
 import axios from 'axios';
 
 const ListItem = styled('div')`

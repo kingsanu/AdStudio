@@ -1,26 +1,26 @@
 import { ChangeEvent, FC, useMemo, useRef, useState } from 'react';
 import DropdownButton, {
   DropdownMenuItem,
-} from '@canva/components/dropdown-button/DropdownButton';
-import { useEditor } from '@canva/hooks';
-import { downloadObjectAsJson } from '@canva/utils/download';
-import QuickBoxDialog from '@canva/components/dialog/QuickBoxDialog';
-import UploadIcon from '@canva/icons/UploadIcon';
-import DownloadIcon from '@canva/icons/DownloadIcon';
-import AddNewPageIcon from '@canva/icons/AddNewPageIcon';
-import ResizeIcon from '@canva/icons/ResizeIcon';
-import LockIcon from '@canva/icons/LockIcon';
-import LockOpenIcon from '@canva/icons/LockOpenIcon';
-import SyncedIcon from '@canva/icons/SyncedIcon';
-import HelpIcon from '@canva/icons/HelpIcon';
-import ConfigurationIcon from '@canva/icons/ConfigurationIcon';
-import ExportIcon from '@canva/icons/ExportIcon';
-import EditorButton from '@canva/components/EditorButton';
-import PlayArrowIcon from '@canva/icons/PlayArrowIcon';
+} from 'canva-editor/components/dropdown-button/DropdownButton';
+import { useEditor } from 'canva-editor/hooks';
+import { downloadObjectAsJson } from 'canva-editor/utils/download';
+import QuickBoxDialog from 'canva-editor/components/dialog/QuickBoxDialog';
+import UploadIcon from 'canva-editor/icons/UploadIcon';
+import DownloadIcon from 'canva-editor/icons/DownloadIcon';
+import AddNewPageIcon from 'canva-editor/icons/AddNewPageIcon';
+import ResizeIcon from 'canva-editor/icons/ResizeIcon';
+import LockIcon from 'canva-editor/icons/LockIcon';
+import LockOpenIcon from 'canva-editor/icons/LockOpenIcon';
+import SyncedIcon from 'canva-editor/icons/SyncedIcon';
+import HelpIcon from 'canva-editor/icons/HelpIcon';
+import ConfigurationIcon from 'canva-editor/icons/ConfigurationIcon';
+import ExportIcon from 'canva-editor/icons/ExportIcon';
+import EditorButton from 'canva-editor/components/EditorButton';
+import PlayArrowIcon from 'canva-editor/icons/PlayArrowIcon';
 import PreviewModal from './PreviewModal';
-import FacebookIcon from '@canva/icons/FacebookIcon';
-import InstagramIcon from '@canva/icons/InstagramIcon';
-import { BoxSize } from '@canva/types';
+import FacebookIcon from 'canva-editor/icons/FacebookIcon';
+import InstagramIcon from 'canva-editor/icons/InstagramIcon';
+import { BoxSize } from 'canva-editor/types';
 
 interface Props {
   designName: string;

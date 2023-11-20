@@ -1,4 +1,4 @@
-import { BoxSize } from '@canva/types';
+import { BoxSize } from 'canva-editor/types';
 
 export const getPositionWhenLayerCenter = (editorSize: BoxSize, layerSize: BoxSize) => {
     return {

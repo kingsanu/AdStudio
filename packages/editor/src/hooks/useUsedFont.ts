@@ -1,5 +1,5 @@
-import { FontData } from '@canva/types';
-import { isTextLayer } from '@canva/utils/layer/layers';
+import { FontData } from 'canva-editor/types';
+import { isTextLayer } from 'canva-editor/utils/layer/layers';
 import { uniqBy } from 'lodash';
 import { useEditor } from '.';
 

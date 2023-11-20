@@ -8,10 +8,10 @@ import React, {
 import { throttle } from 'lodash';
 import { useEditor } from './useEditor';
 import { isMobile } from 'react-device-detect';
-import { getTransformStyle } from '@canva/layers';
-import { CursorPosition, GestureEvent } from '@canva/types';
-import { getPosition } from '@canva/utils';
-import { distanceBetweenPoints } from '@canva/utils/2d/distanceBetweenPoints';
+import { getTransformStyle } from 'canva-editor/layers';
+import { CursorPosition, GestureEvent } from 'canva-editor/types';
+import { getPosition } from 'canva-editor/utils';
+import { distanceBetweenPoints } from 'canva-editor/utils/2d/distanceBetweenPoints';
 
 export const useZoomPage = (
   frameRef: RefObject<HTMLDivElement | null>,

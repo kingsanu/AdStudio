@@ -1,4 +1,4 @@
-import { LayerComponentProps } from "@canva/types";
+import { LayerComponentProps } from "canva-editor/types";
 
 export const getTransformStyle = (props: Partial<LayerComponentProps & { rotate: number }>) => {
     const res: string[] = [];

@@ -1,8 +1,8 @@
 import { FC, useEffect, useRef, useState } from 'react';
-import { useEditor } from '@canva/hooks';
-import DuplicateIcon from '@canva/icons/DuplicateIcon';
-import TrashIcon from '@canva/icons/TrashIcon';
-import AddNewPageIcon from '@canva/icons/AddNewPageIcon';
+import { useEditor } from 'canva-editor/hooks';
+import DuplicateIcon from 'canva-editor/icons/DuplicateIcon';
+import TrashIcon from 'canva-editor/icons/TrashIcon';
+import AddNewPageIcon from 'canva-editor/icons/AddNewPageIcon';
 import SortablePageSettings from './SortablePageSettings';
 import { cloneDeep } from 'lodash';
 

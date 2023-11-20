@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useMemo } from 'react';
-import { CornerDirection } from '@canva/types/resize';
+import { CornerDirection } from 'canva-editor/types/resize';
 import { CSSObject } from '@emotion/react';
 
 interface ImageEditorHandlerProps {

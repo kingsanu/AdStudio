@@ -1,7 +1,7 @@
 import { css, Global } from '@emotion/react';
 import React, { FC, useMemo } from 'react';
 import { FontData } from '../../types';
-import { handleFontStyle } from '@canva/utils/fontHelper';
+import { handleFontStyle } from 'canva-editor/utils/fontHelper';
 
 export interface FontStyleProps {
     font: FontData;

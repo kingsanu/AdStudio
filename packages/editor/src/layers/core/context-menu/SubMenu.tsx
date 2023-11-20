@@ -1,5 +1,5 @@
-import { getTransformStyle } from '@canva/layers';
-import { Delta } from '@canva/types';
+import { getTransformStyle } from 'canva-editor/layers';
+import { Delta } from 'canva-editor/types';
 import React, { FC, PropsWithChildren, useEffect, useRef, useState } from 'react';
 
 interface SubMenuProps {

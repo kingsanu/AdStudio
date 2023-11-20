@@ -1,4 +1,4 @@
-import CloseIcon from '@canva/icons/CloseIcon';
+import CloseIcon from 'canva-editor/icons/CloseIcon';
 import { forwardRef, ForwardRefRenderFunction, PropsWithChildren } from 'react';
 import EditorButton from '../EditorButton';
 

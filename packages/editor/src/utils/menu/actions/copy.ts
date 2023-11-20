@@ -1,6 +1,6 @@
-import { EditorState } from '@canva/types/editor';
+import { EditorState } from 'canva-editor/types/editor';
 import { serializeLayers } from '../../layer/layers';
-import { LayerId, SerializedLayerTree } from '@canva/types';
+import { LayerId, SerializedLayerTree } from 'canva-editor/types';
 
 export const copy = async (state: EditorState, { pageIndex, layerIds }: { pageIndex: number; layerIds: LayerId[] }) => {
     const data: SerializedLayerTree[] = [];

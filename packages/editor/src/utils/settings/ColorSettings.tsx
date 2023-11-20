@@ -1,9 +1,9 @@
 import React, { FC, Fragment, PropsWithChildren, useMemo } from 'react';
 import SettingButton from './SettingButton';
 import ColorSidebar from './sidebar/ColorSidebar';
-import { useEditor } from '@canva/hooks';
-import { getGradientBackground } from '@canva/layers';
-import { GradientStyle } from '@canva/types';
+import { useEditor } from 'canva-editor/hooks';
+import { getGradientBackground } from 'canva-editor/layers';
+import { GradientStyle } from 'canva-editor/types';
 import { ColorParser } from '../../color-picker/utils';
 import SettingDivider from './components/SettingDivider';
 

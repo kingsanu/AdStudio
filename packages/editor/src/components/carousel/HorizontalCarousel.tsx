@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect, FC, ReactNode } from 'react';
-import ArrowRightIcon from '@canva/icons/ArrowRightIcon';
-import ArrowLeftIcon from '@canva/icons/ArrowLeftIcon';
+import ArrowRightIcon from 'canva-editor/icons/ArrowRightIcon';
+import ArrowLeftIcon from 'canva-editor/icons/ArrowLeftIcon';
 import './HorizontalCarousel.css';
 
 const HorizontalCarousel: FC<{ children: ReactNode }> = ({ children }) => {

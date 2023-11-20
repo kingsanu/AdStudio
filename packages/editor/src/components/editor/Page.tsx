@@ -1,5 +1,5 @@
-import PageProvider from '@canva/layers/core/PageContext';
-import PageElement from '@canva/layers/core/PageElement';
+import PageProvider from 'canva-editor/layers/core/PageContext';
+import PageElement from 'canva-editor/layers/core/PageElement';
 import { forwardRef, ForwardRefRenderFunction } from 'react';
 
 export interface PageProps {

@@ -1,4 +1,4 @@
-import { LayerComponentProps } from '@canva/types';
+import { LayerComponentProps } from 'canva-editor/types';
 import { JSXElementConstructor } from 'react';
 import { resolvers } from '../resolvers';
 

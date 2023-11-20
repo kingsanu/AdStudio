@@ -1,7 +1,7 @@
-import { BoxData } from '@canva/types';
+import { BoxData } from 'canva-editor/types';
 import { isPointInsideBox } from './isPointInsideBox';
 import { visualCorners } from './visualCorners';
-import { getTransformStyle } from '@canva/layers';
+import { getTransformStyle } from 'canva-editor/layers';
 
 export const rectangleInsideAnother = (active: BoxData, target: BoxData) => {
     const activeMatrix = new WebKitCSSMatrix(getTransformStyle({ rotate: active.rotate }));

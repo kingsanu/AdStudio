@@ -3,10 +3,10 @@ import {
   LayerId,
   SerializedLayer,
   SerializedPage,
-} from "@canva/types";
+} from "canva-editor/types";
 import { createElement, ReactElement } from "react";
 import { resolvers } from "./resolvers";
-import TransformLayer from "@canva/layers/core/TransformLayer";
+import TransformLayer from "canva-editor/layers/core/TransformLayer";
 
 const renderLayer = (
   layers: Record<LayerId, SerializedLayer>,

@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useRef,
 } from 'react';
-import PageElement from '@canva/layers/core/PageElement';
+import PageElement from 'canva-editor/layers/core/PageElement';
 import { useEditor, useSelectedLayers } from '../../hooks';
 import { useLinkedRef } from '../../hooks/useLinkedRef';
 import {
@@ -13,34 +13,34 @@ import {
   LayerComponentProps,
   LayerDataRef,
   LayerId,
-} from '@canva/types';
+} from 'canva-editor/types';
 import { useDisabledFeatures } from '../../hooks/useDisabledFeatures';
-import { getTransformStyle } from '@canva/layers';
-import { visualCorners } from '@canva/utils/2d/visualCorners';
-import { isPointInsideBox } from '@canva/utils/2d/isPointInsideBox';
-import { getPosition } from '@canva/utils';
+import { getTransformStyle } from 'canva-editor/layers';
+import { visualCorners } from 'canva-editor/utils/2d/visualCorners';
+import { isPointInsideBox } from 'canva-editor/utils/2d/isPointInsideBox';
+import { getPosition } from 'canva-editor/utils';
 import { ResizeCallbackData, useResizeLayer } from '../../hooks/useResizeLayer';
-import { isImageLayer } from '@canva/utils/layer/layers';
+import { isImageLayer } from 'canva-editor/utils/layer/layers';
 import { getImageSize } from '../../hooks/useResize';
-import { ImageLayerProps } from '@canva/layers/ImageLayer';
-import { getControlBoxSizeFromLayers } from '@canva/utils/layer/getControlBoxSizeFromLayers';
+import { ImageLayerProps } from 'canva-editor/layers/ImageLayer';
+import { getControlBoxSizeFromLayers } from 'canva-editor/utils/layer/getControlBoxSizeFromLayers';
 import { RotateCallbackData, useRotateLayer } from '../../hooks/useRotateLayer';
-import PageProvider from '@canva/layers/core/PageContext';
-import ControlBox from '@canva/layers/control/ControlBox';
-import Toolbar from '@canva/layers/control/Toolbar';
-import Guideline from '@canva/layers/control/Guideline';
-import LayerBorderBox from '@canva/layers/core/LayerBorderBox';
+import PageProvider from 'canva-editor/layers/core/PageContext';
+import ControlBox from 'canva-editor/layers/control/ControlBox';
+import Toolbar from 'canva-editor/layers/control/Toolbar';
+import Guideline from 'canva-editor/layers/control/Guideline';
+import LayerBorderBox from 'canva-editor/layers/core/LayerBorderBox';
 import ImageEditor from '../image-editor/ImageEditor';
 import TextEditor from '../text-editor/TextEditor';
 
 // Icons
-import LockIcon from '@canva/icons/LockIcon';
-import LockOpenIcon from '@canva/icons/LockOpenIcon';
-import DuplicateIcon from '@canva/icons/DuplicateIcon';
-import TrashIcon from '@canva/icons/TrashIcon';
-import ArrowUpIcon from '@canva/icons/ArrowUpIcon';
-import ArrowDownIcon from '@canva/icons/ArrowDownIcon';
-import AddNewPageIcon from '@canva/icons/AddNewPageIcon';
+import LockIcon from 'canva-editor/icons/LockIcon';
+import LockOpenIcon from 'canva-editor/icons/LockOpenIcon';
+import DuplicateIcon from 'canva-editor/icons/DuplicateIcon';
+import TrashIcon from 'canva-editor/icons/TrashIcon';
+import ArrowUpIcon from 'canva-editor/icons/ArrowUpIcon';
+import ArrowDownIcon from 'canva-editor/icons/ArrowDownIcon';
+import AddNewPageIcon from 'canva-editor/icons/AddNewPageIcon';
 import EditInlineInput from '../EditInlineInput';
 
 export interface PageProps {

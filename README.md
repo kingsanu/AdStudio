@@ -120,10 +120,10 @@ Usage
 Here's an example usage of the CanvaEditor component within a React component:
 
 ```javascript
-import { CanvaEditor } from '@canva/components/editor';
+import { CanvaEditor } from 'canva-editor/components/editor';
 import { data } from './sampleData';
 import {  useState } from 'react';
-import { EditorConfig } from '@canva/components/editor/EditorContext';
+import { EditorConfig } from 'canva-editor/components/editor/EditorContext';
 
 const editorConfig: EditorConfig = {
   apis: {

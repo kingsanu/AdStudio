@@ -6,9 +6,9 @@ import { ColorModel, ColorPickerBaseProps, HsvaColor } from '../types';
 import { useColorManipulation } from '../useColorManipulation';
 import { keyName } from 'w3c-keyname';
 import Alpha from './Alpha';
-import { modifiers, normalizeKeyName } from '@canva/utils/keyboard';
+import { modifiers, normalizeKeyName } from 'canva-editor/utils/keyboard';
 import { ColorParser, hex2hsv, hsv2hex } from '../utils';
-import ColorizeIcon from '@canva/icons/ColorizeIcon';
+import ColorizeIcon from 'canva-editor/icons/ColorizeIcon';
 
 interface Props<T extends string> extends Partial<ColorPickerBaseProps<T>> {
     colorModel: ColorModel<T>;

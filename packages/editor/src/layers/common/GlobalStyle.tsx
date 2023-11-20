@@ -1,7 +1,7 @@
 import { FC, Fragment } from 'react';
 import { css, Global } from '@emotion/react';
 import FontStyle from './FontStyle';
-import { FontData } from '@canva/types';
+import { FontData } from 'canva-editor/types';
 
 export interface GlobalStyleProps {
   fonts: FontData[];

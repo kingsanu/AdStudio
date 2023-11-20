@@ -1,16 +1,16 @@
 import React, { forwardRef, ForwardRefRenderFunction, useMemo, useState } from 'react';
 import Sidebar, { SidebarProps } from './Sidebar';
-import PlusIcon from '@canva/icons/PlusIcon';
+import PlusIcon from 'canva-editor/icons/PlusIcon';
 import { isEqual, uniq, uniqWith } from 'lodash';
 import GradientPicker from './GradientPicker';
 import ColorPickerPopover from './ColorPickerPopover';
 import { defaultColors } from '../default-colors';
-import { ColorIcon } from '@canva/color-picker';
-import { useEditor } from '@canva/hooks';
-import { getGradientBackground } from '@canva/layers';
-import { GradientStyle } from '@canva/types';
-import { isRootLayer, isShapeLayer, isTextLayer, isFrameLayer } from '@canva/utils/layer/layers';
-import { ColorParser, hex2rgbString } from '@canva/color-picker/utils';
+import { ColorIcon } from 'canva-editor/color-picker';
+import { useEditor } from 'canva-editor/hooks';
+import { getGradientBackground } from 'canva-editor/layers';
+import { GradientStyle } from 'canva-editor/types';
+import { isRootLayer, isShapeLayer, isTextLayer, isFrameLayer } from 'canva-editor/utils/layer/layers';
+import { ColorParser, hex2rgbString } from 'canva-editor/color-picker/utils';
 
 interface ColorSidebarProps extends SidebarProps {
     selected: string | null;

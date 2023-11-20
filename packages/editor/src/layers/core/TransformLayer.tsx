@@ -1,4 +1,4 @@
-import { BoxSize, Delta } from '@canva/types';
+import { BoxSize, Delta } from 'canva-editor/types';
 import React, { forwardRef, ForwardRefRenderFunction, PropsWithChildren } from 'react';
 import { getTransformStyle } from '..';
 

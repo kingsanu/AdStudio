@@ -1,4 +1,4 @@
-import { LayerId, BoxData } from '@canva/types';
+import { LayerId, BoxData } from 'canva-editor/types';
 import React, { forwardRef, ForwardRefRenderFunction, Fragment } from 'react';
 import { getTransformStyle } from '..';
 

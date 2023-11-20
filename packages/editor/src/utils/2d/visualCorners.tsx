@@ -1,4 +1,4 @@
-import { BoxSize, Delta } from '@canva/types';
+import { BoxSize, Delta } from 'canva-editor/types';
 import { applyToPoint } from '../applyToPoint';
 
 export const visualCorners = (size: BoxSize, matrix: WebKitCSSMatrix, position: Delta) => {

@@ -8,11 +8,11 @@ import React, {
 import reverse from 'lodash/reverse';
 import Sidebar, { SidebarProps } from './Sidebar';
 import ReverseTransformLayer from './layer/ReverseTransformLayer';
-import { useEditor, useSelectedLayers } from '@canva/hooks';
-import { getPosition } from '@canva/utils';
-import { PageContext } from '@canva/layers/core/PageContext';
-import ArrowLeftIcon from '@canva/icons/ArrowLeftIcon';
-import BackgroundSelectionIcon from '@canva/icons/BackgroundSelectionIcon';
+import { useEditor, useSelectedLayers } from 'canva-editor/hooks';
+import { getPosition } from 'canva-editor/utils';
+import { PageContext } from 'canva-editor/layers/core/PageContext';
+import ArrowLeftIcon from 'canva-editor/icons/ArrowLeftIcon';
+import BackgroundSelectionIcon from 'canva-editor/icons/BackgroundSelectionIcon';
 import { cloneDeep } from 'lodash';
 import SortableListLayer from './layer/SortableListLayer';
 

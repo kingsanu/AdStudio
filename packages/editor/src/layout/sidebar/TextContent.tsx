@@ -1,12 +1,12 @@
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { isMobile } from 'react-device-detect';
-import { useEditor } from '@canva/hooks';
-import { BoxSize, Delta, LayerId, SerializedLayers } from '@canva/types';
-import { getPositionWhenLayerCenter } from '@canva/utils/layer/getPositionWhenLayerCenter';
-import Draggable from '@canva/layers/core/Dragable';
-import { generateRandomID } from '@canva/utils/identityGenerator';
-import Button from '@canva/components/button/Button';
+import { useEditor } from 'canva-editor/hooks';
+import { BoxSize, Delta, LayerId, SerializedLayers } from 'canva-editor/types';
+import { getPositionWhenLayerCenter } from 'canva-editor/utils/layer/getPositionWhenLayerCenter';
+import Draggable from 'canva-editor/layers/core/Dragable';
+import { generateRandomID } from 'canva-editor/utils/identityGenerator';
+import Button from 'canva-editor/components/button/Button';
 import CloseSidebarButton from './CloseButton';
 import styled from '@emotion/styled';
 import TextSearchBox from './components/TextSearchBox';

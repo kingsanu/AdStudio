@@ -1,7 +1,7 @@
 import { FC, Fragment, PropsWithChildren, useRef, useState } from 'react';
-import { ColorPicker } from '@canva/color-picker';
-import Popover from '@canva/components/popover/Popover';
-import { ColorParser } from '@canva/color-picker/utils';
+import { ColorPicker } from 'canva-editor/color-picker';
+import Popover from 'canva-editor/components/popover/Popover';
+import { ColorParser } from 'canva-editor/color-picker/utils';
 
 interface ColorPickerProps {
     color: string;

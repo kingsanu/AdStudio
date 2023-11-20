@@ -1,11 +1,11 @@
 import { useEffect, useRef } from 'react';
 import { cloneDeep, throttle } from 'lodash';
 import { useResize } from './useResize';
-import { BoxData, LayerId, LayerDataRef, CursorPosition } from '@canva/types';
-import { Direction } from '@canva/types/resize';
-import { mergeWithoutArray, getPosition } from '@canva/utils';
-import { getVirtualDomHeight } from '@canva/utils/dom/getVirtualDomHeight';
-import { isImageLayer, isTextLayer } from '@canva/utils/layer/layers';
+import { BoxData, LayerId, LayerDataRef, CursorPosition } from 'canva-editor/types';
+import { Direction } from 'canva-editor/types/resize';
+import { mergeWithoutArray, getPosition } from 'canva-editor/utils';
+import { getVirtualDomHeight } from 'canva-editor/utils/dom/getVirtualDomHeight';
+import { isImageLayer, isTextLayer } from 'canva-editor/utils/layer/layers';
 import { useSelectedLayers, useEditor } from '.';
 export type ResizeCallbackData = {
     controlBox: BoxData;

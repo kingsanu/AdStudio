@@ -8,13 +8,13 @@ import {
   HistoryActions,
   Layer,
   LayerComponentProps,
-} from '@canva/types';
+} from 'canva-editor/types';
 import { enablePatches, produce, produceWithPatches } from 'immer';
-import { History, HISTORY_ACTIONS } from '@canva/utils/history';
-import { isTextLayer } from '@canva/utils/layer/layers';
-import { setContent } from '@canva/components/text-editor/core/helper/setContent';
-import { ActionMethods } from '@canva/components/editor/actions';
-import { QueryMethods } from '@canva/components/editor/query';
+import { History, HISTORY_ACTIONS } from 'canva-editor/utils/history';
+import { isTextLayer } from 'canva-editor/utils/layer/layers';
+import { setContent } from 'canva-editor/components/text-editor/core/helper/setContent';
+import { ActionMethods } from 'canva-editor/components/editor/actions';
+import { QueryMethods } from 'canva-editor/components/editor/query';
 
 type Action = {
   type: string;

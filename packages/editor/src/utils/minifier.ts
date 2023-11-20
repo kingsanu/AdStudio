@@ -1,6 +1,6 @@
 import { isEditorID } from './identityGenerator';
 
-const dataMapping: any = {
+export const dataMapping: any = {
   name: 'a',
   notes: 'b',
   layers: 'c',
@@ -37,6 +37,11 @@ const dataMapping: any = {
   clipPath: 'ah',
   shapeSize: 'ai',
   thumb: 'aj',
+  offset: 'ak',
+  direction: 'al',
+  blur: 'am',
+  border: 'an',
+  weight: 'ao',
 };
 
 function getAlphabetCharByOrder(order: number) {
@@ -55,7 +60,7 @@ function getAlphabetCharByOrder(order: number) {
   }
 }
 
-const pack = (obj: any, charCode = 1, mapping: any = {}): any => {
+const pack = (obj: any, mapping: any = {}, charCode = 1): any => {
   if (typeof obj !== 'object' || obj === null) {
     return [obj, mapping];
   }
@@ -64,7 +69,7 @@ const pack = (obj: any, charCode = 1, mapping: any = {}): any => {
     const packedArray = [];
 
     for (let i = 0; i < obj.length; i++) {
-      const [packedItem, updatedMapping] = pack(obj[i], charCode, mapping);
+      const [packedItem, updatedMapping] = pack(obj[i], mapping, charCode);
       packedArray.push(packedItem);
       mapping = updatedMapping;
     }
@@ -81,7 +86,7 @@ const pack = (obj: any, charCode = 1, mapping: any = {}): any => {
         }
       } else {
       }
-      const [packedValue, updatedMapping] = pack(obj[key], charCode, mapping);
+      const [packedValue, updatedMapping] = pack(obj[key], mapping, charCode);
       packedObj[mapping[key] || key] = packedValue;
       charCode = Math.max(charCode, Object.keys(updatedMapping).length + 1);
 

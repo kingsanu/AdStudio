@@ -1,6 +1,6 @@
 import { FC } from 'react';
-import { SearchBox } from '@canva/search-autocomplete';
-import SearchIcon from '@canva/icons/SearchIcon';
+import { SearchBox } from 'canva-editor/search-autocomplete';
+import SearchIcon from 'canva-editor/icons/SearchIcon';
 
 interface Props {
   onSearch: (keyword: string) => void;

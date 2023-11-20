@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useContext } from 'react';
-import { useEditor } from '@canva/hooks';
-import { EditorContext } from '@canva/components/editor/EditorContext';
-import RotateIcon from '@canva/icons/RotateIcon';
+import { useEditor } from 'canva-editor/hooks';
+import { EditorContext } from 'canva-editor/components/editor/EditorContext';
+import RotateIcon from 'canva-editor/icons/RotateIcon';
 
 interface ResizeHandlerProps {
     rotate: number;

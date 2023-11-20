@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useEditor, useLayer, useSelectedLayers } from '../hooks';
-import { createEditor } from '@canva/components/text-editor/core/helper/createEditor';
-import { LayerComponent } from '@canva/types';
+import { createEditor } from 'canva-editor/components/text-editor/core/helper/createEditor';
+import { LayerComponent } from 'canva-editor/types';
 import { TextContentProps, TextContent } from '.';
 
 export type TextLayerProps = TextContentProps;

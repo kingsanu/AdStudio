@@ -1,13 +1,13 @@
-import { useSelectedLayers, useEditor } from '@canva/hooks';
-import { boundingRect } from '@canva/utils/2d/boundingRect';
-import { isGroupLayer } from '@canva/utils/layer/layers';
+import { useSelectedLayers, useEditor } from 'canva-editor/hooks';
+import { boundingRect } from 'canva-editor/utils/2d/boundingRect';
+import { isGroupLayer } from 'canva-editor/utils/layer/layers';
 import React, { Fragment, useContext, useMemo, useRef } from 'react';
-import { duplicate } from '@canva/utils/menu/actions/duplicate';
+import { duplicate } from 'canva-editor/utils/menu/actions/duplicate';
 import { PageContext } from '../core/PageContext';
-import DuplicateIcon from '@canva/icons/DuplicateIcon';
-import TrashIcon from '@canva/icons/TrashIcon';
-import MoreHorizIcon from '@canva/icons/MoreHorizIcon';
-import LockIcon from '@canva/icons/LockIcon';
+import DuplicateIcon from 'canva-editor/icons/DuplicateIcon';
+import TrashIcon from 'canva-editor/icons/TrashIcon';
+import MoreHorizIcon from 'canva-editor/icons/MoreHorizIcon';
+import LockIcon from 'canva-editor/icons/LockIcon';
 
 const Toolbar = () => {
   const { pageIndex } = useContext(PageContext);

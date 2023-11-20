@@ -1,8 +1,8 @@
 import React, { forwardRef, ForwardRefRenderFunction, Fragment, PropsWithChildren } from 'react';
 import { useEditor } from '../../hooks';
-import { BoxSize, Delta, LayerType } from '@canva/types';
+import { BoxSize, Delta, LayerType } from 'canva-editor/types';
 import { getTransformStyle } from '..';
-import PlayArrowIcon from '@canva/icons/PlayArrowIcon';
+import PlayArrowIcon from 'canva-editor/icons/PlayArrowIcon';
 
 interface LayerBorderBoxProps {
     boxSize: BoxSize;

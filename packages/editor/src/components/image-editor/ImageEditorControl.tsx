@@ -5,11 +5,11 @@ import { ImageLayerProps } from '../../layers/ImageLayer';
 import { useResizeImage } from './useResizeImage';
 import { useLinkedRef } from '../../hooks/useLinkedRef';
 import { useDrag } from './useDrag';
-import { BoxData, ImageEditorData } from '@canva/types';
-import { distanceBetweenPoints } from '@canva/utils/2d/distanceBetweenPoints';
-import { horizontalAndVerticalChange } from '@canva/utils/2d/horizontalAndVerticalChange';
-import { angleBetweenPoints } from '@canva/utils/2d/angleBetwwenPoints';
-import { getTransformStyle } from '@canva/layers';
+import { BoxData, ImageEditorData } from 'canva-editor/types';
+import { distanceBetweenPoints } from 'canva-editor/utils/2d/distanceBetweenPoints';
+import { horizontalAndVerticalChange } from 'canva-editor/utils/2d/horizontalAndVerticalChange';
+import { angleBetweenPoints } from 'canva-editor/utils/2d/angleBetwwenPoints';
+import { getTransformStyle } from 'canva-editor/layers';
 
 const ImageEditorControl: FC = () => {
     const boxRef = useRef<HTMLDivElement>(null);

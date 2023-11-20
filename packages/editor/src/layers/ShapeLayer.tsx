@@ -1,4 +1,4 @@
-import { LayerComponent } from '@canva/types';
+import { LayerComponent } from 'canva-editor/types';
 import { ShapeContent, ShapeContentProps } from './content/ShapeContent';
 
 export type ShapeLayerProps = ShapeContentProps;

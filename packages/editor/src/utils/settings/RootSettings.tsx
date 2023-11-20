@@ -1,8 +1,8 @@
 import React, { FC, useMemo } from 'react';
 import ColorSettings from './ColorSettings';
-import { useEditor } from '@canva/hooks';
-import { RootLayerProps } from '@canva/layers/RootLayer';
-import { Layer, GradientStyle } from '@canva/types';
+import { useEditor } from 'canva-editor/hooks';
+import { RootLayerProps } from 'canva-editor/layers/RootLayer';
+import { Layer, GradientStyle } from 'canva-editor/types';
 
 interface RootSettingsProps {
     layer: Layer<RootLayerProps>;

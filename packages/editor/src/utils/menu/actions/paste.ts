@@ -1,5 +1,5 @@
-import { EditorActions } from '@canva/types/editor';
-import { LayerComponentProps, SerializedLayerTree } from '@canva/types';
+import { EditorActions } from 'canva-editor/types/editor';
+import { LayerComponentProps, SerializedLayerTree } from 'canva-editor/types';
 
 export const paste = async ({ actions }: { actions: EditorActions }) => {
     const data = await navigator.clipboard.readText();

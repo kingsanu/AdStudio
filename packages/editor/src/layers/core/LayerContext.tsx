@@ -1,4 +1,4 @@
-import { LayerId } from '@canva/types';
+import { LayerId } from 'canva-editor/types';
 import React, { createContext, FC, PropsWithChildren } from 'react';
 
 export const LayerContext = createContext<{ id: LayerId }>({} as { id: LayerId });

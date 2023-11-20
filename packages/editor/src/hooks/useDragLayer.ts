@@ -4,7 +4,7 @@ import { isMobile } from 'react-device-detect';
 import { RefObject, useEffect, useRef } from 'react';
 import { useLinkedRef } from './useLinkedRef';
 import { useTrackingShiftKey } from './useTrackingShiftKey';
-import { getPosition } from '@canva/utils';
+import { getPosition } from 'canva-editor/utils';
 import {
   BoxData,
   CursorPosition,
@@ -15,15 +15,15 @@ import {
   LayerDataRef,
   LayerId,
   VerticalGuideline,
-} from '@canva/types';
-import { getTransformStyle } from '@canva/layers';
-import { boundingRect } from '@canva/utils/2d/boundingRect';
-import { isPointInsideBox } from '@canva/utils/2d/isPointInsideBox';
-import { rectangleInsideAnother } from '@canva/utils/2d/rectangleInsideAnother';
-import { visualCorners } from '@canva/utils/2d/visualCorners';
-import { getControlBoxSizeFromLayers } from '@canva/utils/layer/getControlBoxSizeFromLayers';
+} from 'canva-editor/types';
+import { getTransformStyle } from 'canva-editor/layers';
+import { boundingRect } from 'canva-editor/utils/2d/boundingRect';
+import { isPointInsideBox } from 'canva-editor/utils/2d/isPointInsideBox';
+import { rectangleInsideAnother } from 'canva-editor/utils/2d/rectangleInsideAnother';
+import { visualCorners } from 'canva-editor/utils/2d/visualCorners';
+import { getControlBoxSizeFromLayers } from 'canva-editor/utils/layer/getControlBoxSizeFromLayers';
 import { useSelectedLayers } from '.';
-import { isFrameLayer, isImageLayer } from '@canva/utils/layer/layers';
+import { isFrameLayer, isImageLayer } from 'canva-editor/utils/layer/layers';
 
 export type DragCallbackData = {
   controlBox?: Delta;

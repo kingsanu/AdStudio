@@ -1,5 +1,5 @@
-import { Tooltip as ReactTooltip } from '@canva/tooltip';
-import { generateRandomID } from '@canva/utils/identityGenerator';
+import { Tooltip as ReactTooltip } from 'canva-editor/tooltip';
+import { generateRandomID } from 'canva-editor/utils/identityGenerator';
 import { ForwardRefRenderFunction, PropsWithChildren, forwardRef } from 'react';
 
 interface Props {

@@ -1,4 +1,4 @@
-import { EditorState } from '@canva/types/editor';
+import { EditorState } from 'canva-editor/types/editor';
 import { applyPatches, Patch } from 'immer';
 
 type Timeline = {

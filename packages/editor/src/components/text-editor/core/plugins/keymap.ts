@@ -1,7 +1,7 @@
 import { base, keyName } from 'w3c-keyname';
 import { Plugin, Command } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
-import { modifiers, normalizeKeyName } from '@canva/utils';
+import { modifiers, normalizeKeyName } from 'canva-editor/utils';
 
 function normalize(map: { [key: string]: Command }) {
     const copy: { [key: string]: Command } = Object.create(null);

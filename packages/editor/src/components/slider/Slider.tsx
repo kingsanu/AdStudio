@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useRef, useState } from 'react';
 import { throttle } from 'lodash';
-import { getPosition } from '@canva/utils';
+import { getPosition } from 'canva-editor/utils';
 
 interface SliderProps {
     label?: string;

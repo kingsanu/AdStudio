@@ -2,9 +2,9 @@ import { useCallback, useEffect, useState } from 'react';
 import Page from './Page';
 import { useEditor } from '../../hooks';
 import { useUsedFont } from '../../hooks/useUsedFont';
-import { GlobalStyle } from '@canva/layers';
-import ArrowBackIcon from '@canva/icons/ArrowBackIcon';
-import ArrowForwardIcon from '@canva/icons/ArrowForwardIcon';
+import { GlobalStyle } from 'canva-editor/layers';
+import ArrowBackIcon from 'canva-editor/icons/ArrowBackIcon';
+import ArrowForwardIcon from 'canva-editor/icons/ArrowForwardIcon';
 
 type Interval = ReturnType<typeof setTimeout>;
 let timeout: Interval;

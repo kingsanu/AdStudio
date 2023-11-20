@@ -1,12 +1,12 @@
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { isMobile } from 'react-device-detect';
-import { useEditor } from '@canva/hooks';
-import { PageSize, SerializedPage } from '@canva/types';
+import { useEditor } from 'canva-editor/hooks';
+import { PageSize, SerializedPage } from 'canva-editor/types';
 import CloseSidebarButton from './CloseButton';
 import TemplateSearchBox from './components/TemplateSearchBox';
-import HorizontalCarousel from '@canva/components/carousel/HorizontalCarousel';
-import OutlineButton from '@canva/components/button/OutlineButton';
+import HorizontalCarousel from 'canva-editor/components/carousel/HorizontalCarousel';
+import OutlineButton from 'canva-editor/components/button/OutlineButton';
 
 interface Template {
   img: string;

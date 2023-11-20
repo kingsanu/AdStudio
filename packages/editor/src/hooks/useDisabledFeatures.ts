@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { isFrameLayer, isGroupLayer, isShapeLayer, isTextLayer } from '@canva/utils/layer/layers';
+import { isFrameLayer, isGroupLayer, isShapeLayer, isTextLayer } from 'canva-editor/utils/layer/layers';
 import { useSelectedLayers } from '.';
 
 export const useDisabledFeatures = () => {

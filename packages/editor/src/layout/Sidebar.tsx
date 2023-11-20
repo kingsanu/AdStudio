@@ -5,16 +5,16 @@ import ImageContent from './sidebar/ImageContent';
 import UploadContent from './sidebar/UploadContent';
 import TemplateContent from './sidebar/TemplateContent';
 import FrameContent from './sidebar/FrameContent';
-import { useEditor } from '@canva/hooks';
+import { useEditor } from 'canva-editor/hooks';
 
 // Icons
-import LayoutIcon from '@canva/icons/LayoutIcon';
-import TextIcon from '@canva/icons/TextIcon';
-import ElementsIcon from '@canva/icons/ElementsIcon';
-import UploadIcon from '@canva/icons/UploadIcon';
-import ImageIcon from '@canva/icons/ImageIcon';
-import Notes from '@canva/utils/settings/sidebar/Notes';
-import FrameIcon from '@canva/icons/FrameIcon';
+import LayoutIcon from 'canva-editor/icons/LayoutIcon';
+import TextIcon from 'canva-editor/icons/TextIcon';
+import ElementsIcon from 'canva-editor/icons/ElementsIcon';
+import UploadIcon from 'canva-editor/icons/UploadIcon';
+import ImageIcon from 'canva-editor/icons/ImageIcon';
+import Notes from 'canva-editor/utils/settings/sidebar/Notes';
+import FrameIcon from 'canva-editor/icons/FrameIcon';
 
 const tabs = [
   {

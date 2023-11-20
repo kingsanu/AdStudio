@@ -1,4 +1,4 @@
-import { Delta } from "@canva/types";
+import { Delta } from "canva-editor/types";
 
 export const cornersToLines = ({
     nw,

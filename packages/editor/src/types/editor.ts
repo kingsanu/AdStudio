@@ -1,10 +1,10 @@
 import { Direction } from './resize';
-import { BoxData, BoxSize, CursorPosition, Delta, FontData, LayerId, PageSize } from '@canva/types';
+import { BoxData, BoxSize, CursorPosition, Delta, FontData, LayerId, PageSize } from 'canva-editor/types';
 import { HorizontalGuideline, VerticalGuideline } from './common';
 import { Page } from './page';
-import { TextEditor } from '@canva/components/text-editor/interfaces';
-import { QueryMethods } from '@canva/components/editor/query';
-import { ActionMethods } from '@canva/components/editor/actions';
+import { TextEditor } from 'canva-editor/components/text-editor/interfaces';
+import { QueryMethods } from 'canva-editor/components/editor/query';
+import { ActionMethods } from 'canva-editor/components/editor/actions';
 
 export type ImageEditorData = {
     layerId: LayerId;

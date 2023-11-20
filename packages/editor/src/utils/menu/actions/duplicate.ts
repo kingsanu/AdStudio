@@ -1,7 +1,7 @@
 import { serializeLayers } from '../../layer/layers';
 import { cloneDeep } from 'lodash';
-import { LayerComponentProps, LayerId, SerializedLayerTree } from '@canva/types';
-import { EditorActions, EditorState } from '@canva/types/editor';
+import { LayerComponentProps, LayerId, SerializedLayerTree } from 'canva-editor/types';
+import { EditorActions, EditorState } from 'canva-editor/types/editor';
 
 export const duplicate = (
     state: EditorState,
