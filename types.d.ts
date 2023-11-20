@@ -18,4 +18,10 @@ declare global {
     interface Window {
         EyeDropper?: EyeDropperConstructor;
     }
+    interface Array<T> {
+        findLastIndex(
+          predicate: (value: T, index: number, obj: T[]) => unknown,
+          thisArg?: any
+        ): number
+    }
 }

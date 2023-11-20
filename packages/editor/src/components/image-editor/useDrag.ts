@@ -23,7 +23,7 @@ export const useDrag = ({ getData, onDragStart }: { getData: () => number; onDra
         };
     });
     const dragData = useRef<DragData>();
-    const layer = imageEditor?.image ?? imageEditor?.video;
+    const layer = imageEditor?.image;
 
     const bindDragEvents = () => {
         window.addEventListener('mousemove', handleDrag);
@@ -77,15 +77,7 @@ export const useDrag = ({ getData, onDragStart }: { getData: () => number; onDra
                               y: rmy,
                           },
                       }
-                    : undefined,
-                video: imageEditor.video
-                    ? {
-                          position: {
-                              x: rmx,
-                              y: rmy,
-                          },
-                      }
-                    : undefined,
+                    : undefined
             });
         }
     }, 16);
@@ -115,15 +107,7 @@ export const useDrag = ({ getData, onDragStart }: { getData: () => number; onDra
                               y: rmy,
                           },
                       }
-                    : undefined,
-                video: imageEditor.video
-                    ? {
-                          position: {
-                              x: rmx,
-                              y: rmy,
-                          },
-                      }
-                    : undefined,
+                    : undefined
             });
         }
         unbindDragEvents();

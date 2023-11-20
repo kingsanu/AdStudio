@@ -97,9 +97,10 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
     onMovePageEnd,
   } = useZoomPage(frameRef, pageRef, pageContainerRef);
   useEffect(() => {
-    // const serializedData: SerializedPage[] = unpack([...data]);
-    // actions.setData(serializedData);
-    actions.setData(data);
+    const serializedData: SerializedPage[] = unpack(data);
+    console.log(serializedData)
+    actions.setData(serializedData);
+    // actions.setData(data);
     setTimeout(() => {
       actions.setScale(.59);
     }, 16);

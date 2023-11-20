@@ -61,7 +61,6 @@ const SortableItem = SortableElement(
   ({
     item,
     isSelected,
-    index,
     onSelectLayer,
     onOpenContextMenu,
   }: {

@@ -107,7 +107,7 @@ const LayerContextMenu: ForwardRefRenderFunction<HTMLDivElement> = (_, ref) => {
                     imageSize.boxSize.height = pageSize.height * 0.8;
                     imageSize.boxSize.width = imageSize.boxSize.height * imageRatio;
                 }
-                actions.addImageLayer({ url: image.url, thumb: image.thumb }, imageSize.boxSize);
+                actions.addImageLayer({ url: image.url, thumb: "" }, imageSize.boxSize);
                 actions.history.merge().setProp<RootLayerProps>(pageIndex, 'ROOT', {
                     image: null,
                 });

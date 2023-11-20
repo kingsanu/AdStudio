@@ -4,7 +4,7 @@ import { chain, filter, find, omit } from 'lodash';
 function groupFontsByFamily(fonts: FontData[]): FontData[] {
   return chain(fonts)
     .groupBy('family')
-    .map((group, key) => {
+    .map((group) => {
       // Case the font has only one style
       if (group.length === 1) {
         return {

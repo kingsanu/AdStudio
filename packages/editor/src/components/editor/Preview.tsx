@@ -127,7 +127,7 @@ const Preview = () => {
             </div>
             <div css={{ width: size.width, height: size.height }}>
                 <div css={{ position: 'relative' }}>
-                    {pages.map((page, index) => (
+                    {pages.map((_, index) => (
                         <div key={index}>
                             <Page
                                 pageIndex={index}

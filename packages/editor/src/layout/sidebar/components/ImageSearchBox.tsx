@@ -17,7 +17,7 @@ const ImageSearchBox: FC<Props> = ({ searchString, onStartSearch }) => {
     setSuggestItems(response?.data || []);
   };
 
-  const handleOnHover = (result: any) => {};
+  const handleOnHover = () => {};
 
   const handleOnSelect = (item: any) => {
     // the item selected

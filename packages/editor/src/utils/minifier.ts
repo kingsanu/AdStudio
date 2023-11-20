@@ -1,33 +1,42 @@
 import { isEditorID } from './identityGenerator';
 
 const dataMapping: any = {
-  locked: 'a',
-  layers: 'b',
-  ROOT: 'c',
-  type: 'd',
-  resolvedName: 'e',
-  props: 'f',
-  boxSize: 'g',
-  width: 'h',
-  height: 'i',
-  position: 'j',
-  x: 'k',
-  y: 'l',
-  rotate: 'm',
-  color: 'n',
-  image: 'o',
-  child: 'p',
-  parent: 'q',
-  shape: 'r',
-  text: 's',
-  scale: 't',
-  fonts: 'u',
-  name: 'v',
-  urls: 'w',
-  colors: 'x',
-  fontSizes: 'y',
+  name: 'a',
+  notes: 'b',
+  layers: 'c',
+  ROOT: 'd',
+  type: 'e',
+  resolvedName: 'f',
+  props: 'g',
+  boxSize: 'h',
+  width: 'i',
+  height: 'j',
+  position: 'k',
+  x: 'l',
+  y: 'm',
+  rotate: 'n',
+  color: 'o',
+  image: 'p',
+  gradientBackground: 'q',
+  locked: 'r',
+  child: 's',
+  parent: 't',
+  scale: 'u',
+  text: 'v',
+  fonts: 'w',
+  family: 'x',
+  url: 'y',
   style: 'z',
-  effect: 'aa',
+  styles: 'aa',
+  colors: 'ab',
+  fontSizes: 'ac',
+  effect: 'ad',
+  settings: 'ae',
+  thickness: 'af',
+  transparency: 'ag',
+  clipPath: 'ah',
+  shapeSize: 'ai',
+  thumb: 'aj',
 };
 
 function getAlphabetCharByOrder(order: number) {
@@ -66,7 +75,6 @@ const pack = (obj: any, charCode = 1, mapping: any = {}): any => {
   for (const key in obj) {
     if (obj.hasOwnProperty(key)) {
       if (!mapping[key]) {
-        console.log(key, isEditorID(key));
         if (!isEditorID(key)) {
           mapping[key] = getAlphabetCharByOrder(charCode);
           charCode++;

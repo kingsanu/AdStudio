@@ -18,7 +18,7 @@ const FrameSearchBox: FC<Props> = ({ onStartSearch }) => {
     setSuggestItems(response?.data || []);
   };
 
-  const handleOnHover = (result: any) => {
+  const handleOnHover = () => {
     // the item hovered
   };
 

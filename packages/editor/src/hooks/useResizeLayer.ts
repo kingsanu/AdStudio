@@ -5,7 +5,7 @@ import { BoxData, LayerId, LayerDataRef, CursorPosition } from '@canva/types';
 import { Direction } from '@canva/types/resize';
 import { mergeWithoutArray, getPosition } from '@canva/utils';
 import { getVirtualDomHeight } from '@canva/utils/dom/getVirtualDomHeight';
-import { isImageLayer, isVideoLayer, isTextLayer } from '@canva/utils/layer/layers';
+import { isImageLayer, isTextLayer } from '@canva/utils/layer/layers';
 import { useSelectedLayers, useEditor } from '.';
 export type ResizeCallbackData = {
     controlBox: BoxData;
@@ -60,15 +60,14 @@ export const useResizeLayer = ({
 
     const getNewSize = (clientX: number, clientY: number): BoxData => {
         const isImage = selectedLayers.length === 1 && isImageLayer(selectedLayers[0]);
-        const isVideo = selectedLayers.length === 1 && isVideoLayer(selectedLayers[0]);
         if (!scalable) {
             return getResized(
                 resizeRef.current.direction,
                 resizeRef.current,
                 { clientX, clientY },
-                (resizeRef.current.shiftKey && !isImage && !isVideo) ||
+                (resizeRef.current.shiftKey && !isImage) ||
                     selectedLayerIds.length > 1 ||
-                    ((isImage || isVideo) &&
+                    ((isImage) &&
                         !resizeRef.current.shiftKey &&
                         !['top', 'left', 'right', 'bottom'].includes(resizeRef.current.direction)),
             );
@@ -156,9 +155,9 @@ export const useResizeLayer = ({
                 lockAspect:
                     (!resizeRef.current.shiftKey &&
                         !['top', 'left', 'right', 'bottom'].includes(resizeRef.current.direction) &&
-                        (isImageLayer(selectedLayers[0]) || isVideoLayer(selectedLayers[0]))) ||
+                        (isImageLayer(selectedLayers[0]))) ||
                     (resizeRef.current.shiftKey &&
-                        (!isImageLayer(selectedLayers[0]) || !isVideoLayer(selectedLayers[0]))),
+                        (!isImageLayer(selectedLayers[0]))),
             });
         } else {
             onResize({
@@ -185,9 +184,9 @@ export const useResizeLayer = ({
                 lockAspect:
                     (!resizeRef.current.shiftKey &&
                         !['top', 'left', 'right', 'bottom'].includes(resizeRef.current.direction) &&
-                        (isImageLayer(selectedLayers[0]) || isVideoLayer(selectedLayers[0]))) ||
+                        (isImageLayer(selectedLayers[0]))) ||
                     (resizeRef.current.shiftKey &&
-                        (!isImageLayer(selectedLayers[0]) || !isVideoLayer(selectedLayers[0]))),
+                        (!isImageLayer(selectedLayers[0]))),
             });
         } else {
             onResizeStop({

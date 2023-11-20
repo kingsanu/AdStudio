@@ -12,7 +12,6 @@ const RootLayer: LayerComponent<PropsWithChildren<RootLayerProps>> = ({
     color,
     gradientBackground,
     image,
-    video,
     position,
     rotate,
     scale,
@@ -27,10 +26,9 @@ const RootLayer: LayerComponent<PropsWithChildren<RootLayerProps>> = ({
                 gradientBackground={gradientBackground}
                 color={color}
                 image={image}
-                video={video}
                 scale={scale}
                 onDoubleClick={() =>
-                    (image || video) && actions.openImageEditor({ boxSize, position, rotate, image, video })
+                    (image) && actions.openImageEditor({ boxSize, position, rotate, image })
                 }
             />
             {children}

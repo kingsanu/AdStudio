@@ -17,7 +17,7 @@ const ImageEditor = () => {
         : null,
     };
   });
-  const layer = imageEditor?.image ?? imageEditor?.video;
+  const layer = imageEditor?.image;
   if (!imageEditor || !originalLayer || !layer) {
     return null;
   }
@@ -55,13 +55,6 @@ const ImageEditor = () => {
                 pointerEvents: 'none',
                 objectFit: 'fill',
               }}
-            />
-          )}
-          {imageEditor.video && (
-            <video
-              css={{ objectFit: 'fill', width: '100%', height: '100%' }}
-              crossOrigin='anonymous'
-              src={layer.url}
             />
           )}
         </div>
@@ -120,13 +113,6 @@ const ImageEditor = () => {
                   pointerEvents: 'none',
                   objectFit: 'fill',
                 }}
-              />
-            )}
-            {imageEditor.video && (
-              <video
-                css={{ objectFit: 'fill', width: '100%', height: '100%' }}
-                crossOrigin='anonymous'
-                src={layer.url}
               />
             )}
           </div>

@@ -27,8 +27,8 @@ export const useLayer = <P extends LayerComponentProps, C>(collector?: (layer: L
             hover: (v) => editorActions.hoverLayer(pageIndex, typeof v === 'undefined' ? id : null),
             setTextEditor: (editor) => editorActions.setTextEditor(pageIndex, id, editor),
             openTextEditor: () => editorActions.openTextEditor(pageIndex, id),
-            openImageEditor: ({ boxSize, position, rotate, image, video }) =>
-                editorActions.openImageEditor(pageIndex, id, { boxSize, position, rotate, image, video }),
+            openImageEditor: ({ boxSize, position, rotate, image }) =>
+                editorActions.openImageEditor(pageIndex, id, { boxSize, position, rotate, image }),
         }),
         [id, editorActions],
     );

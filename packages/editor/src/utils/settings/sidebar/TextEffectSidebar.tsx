@@ -153,7 +153,7 @@ const TextEffectSidebar: ForwardRefRenderFunction<HTMLDivElement, TextEffectSide
                                 settings,
                             },
                         },
-                        (objVal, srcVal) => {
+                        (_, srcVal) => {
                             if (srcVal) {
                                 return srcVal;
                             }

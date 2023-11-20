@@ -20,10 +20,9 @@ import { visualCorners } from '@canva/utils/2d/visualCorners';
 import { isPointInsideBox } from '@canva/utils/2d/isPointInsideBox';
 import { getPosition } from '@canva/utils';
 import { ResizeCallbackData, useResizeLayer } from '../../hooks/useResizeLayer';
-import { isImageLayer, isVideoLayer } from '@canva/utils/layer/layers';
+import { isImageLayer } from '@canva/utils/layer/layers';
 import { getImageSize } from '../../hooks/useResize';
 import { ImageLayerProps } from '@canva/layers/ImageLayer';
-import { VideoLayerProps } from '@canva/layers/VideoLayer';
 import { getControlBoxSizeFromLayers } from '@canva/utils/layer/getControlBoxSizeFromLayers';
 import { RotateCallbackData, useRotateLayer } from '../../hooks/useRotateLayer';
 import PageProvider from '@canva/layers/core/PageContext';
@@ -212,41 +211,6 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
                   position: {
                     x: l.data.props.image.position.x * ratio,
                     y: l.data.props.image.position.y * ratio,
-                  },
-                  rotate: 0,
-                },
-              });
-          }
-        } else if (isVideoLayer(l)) {
-          const changeX = newSize.boxSize.width - l.data.props.boxSize.width;
-          const changeY = newSize.boxSize.height - l.data.props.boxSize.height;
-          const props = l.data.props;
-          if (!lockAspect) {
-            const videoSize = getImageSize(props, props.video, direction, {
-              width: changeX,
-              height: changeY,
-            });
-            actions.history.merge().setProp(pageIndex, layerId, {
-              ...videoSize,
-              position: {
-                x: newSize.position.x,
-                y: newSize.position.y,
-              },
-            });
-          } else {
-            const ratio = newSize.boxSize.width / l.data.props.boxSize.width;
-            actions.history
-              .merge()
-              .setProp<VideoLayerProps>(pageIndex, layerId, {
-                ...newSize,
-                video: {
-                  boxSize: {
-                    width: l.data.props.video.boxSize.width * ratio,
-                    height: l.data.props.video.boxSize.height * ratio,
-                  },
-                  position: {
-                    x: l.data.props.video.position.x * ratio,
-                    y: l.data.props.video.position.y * ratio,
                   },
                   rotate: 0,
                 },
