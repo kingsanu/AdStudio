@@ -2,6 +2,7 @@ import { ChangeEvent, FC, useRef, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import { useEditor } from 'canva-editor/hooks';
 import CloseSidebarButton from './CloseButton';
+import Button from 'canva-editor/components/button/Button';
 
 interface UploadContentProps {
   visibility: boolean;
@@ -57,16 +58,14 @@ const UploadContent: FC<UploadContentProps> = ({ visibility, onClose }) => {
       <div
         css={{
           margin: 16,
-          background: '#3a3a4c',
-          borderRadius: 8,
-          color: '#fff',
-          padding: '8px 16px',
-          cursor: 'pointer',
-          textAlign: 'center',
         }}
-        onClick={() => inputFileRef.current?.click()}
       >
-        Upload
+        <Button
+          css={{ width: '100%' }}
+          onClick={() => inputFileRef.current?.click()}
+        >
+          Upload
+        </Button>
       </div>
       <input
         ref={inputFileRef}

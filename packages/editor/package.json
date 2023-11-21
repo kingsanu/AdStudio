@@ -1,7 +1,7 @@
 {
   "name": "canva-editor",
   "private": false,
-  "version": "0.0.4",
+  "version": "0.0.5",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,6 +9,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
+  "homepage": "https://canva-editor-three.vercel.app",
   "repository": {
     "type": "git",
     "url": "https://github.com/kenvinlu/canva-editor"
@@ -72,5 +73,8 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "styled-components": "^6.0.8"
+  },
+  "bugs": {
+    "url": "https://github.com/kenvinlu/canva-editor/issues"
   }
 }

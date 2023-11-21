@@ -21,6 +21,7 @@ import PreviewModal from './PreviewModal';
 import FacebookIcon from 'canva-editor/icons/FacebookIcon';
 import InstagramIcon from 'canva-editor/icons/InstagramIcon';
 import { BoxSize } from 'canva-editor/types';
+import { dataMapping, pack, unpack } from 'canva-editor/utils/minifier';
 
 interface Props {
   designName: string;
@@ -184,7 +185,7 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
       type: 'normal',
       icon: <DownloadIcon />,
       action: () => {
-        downloadObjectAsJson('file', query.serialize());
+        downloadObjectAsJson('file', pack(query.serialize(), dataMapping)[0]);
       },
     },
     { label: 'Divider', type: 'divider' },
@@ -205,7 +206,7 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
       const reader = new FileReader();
       reader.onload = function () {
         const fileContent = JSON.parse(reader.result as string);
-        actions.setData(fileContent);
+        actions.setData(unpack(fileContent));
       };
       reader.readAsText(file);
       e.target.value = '';
