@@ -2,7 +2,6 @@ import { CanvaEditor } from 'canva-editor/components/editor';
 import { data } from './sampleData';
 import {  useState } from 'react';
 import { EditorConfig } from 'canva-editor/components/editor/EditorContext';
-// import { pack } from 'canva-editor/utils/minifier';
 
 const editorConfig: EditorConfig = {
   apis: {

@@ -7,6 +7,7 @@ import CloseSidebarButton from './CloseButton';
 import TemplateSearchBox from './components/TemplateSearchBox';
 import HorizontalCarousel from 'canva-editor/components/carousel/HorizontalCarousel';
 import OutlineButton from 'canva-editor/components/button/OutlineButton';
+import { unpack } from 'canva-editor/utils/minifier';
 
 interface Template {
   img: string;
@@ -75,12 +76,14 @@ const TemplateContent: FC<{ onClose: () => void }> = ({ onClose }) => {
     try {
       if (Array.isArray(data)) {
         data.forEach((page, idx) => {
-          actions.changePageSize(page.layers.ROOT.props.boxSize as PageSize);
-          actions.setPage(activePage + idx, page);
+          const serializedData: SerializedPage = unpack(page);
+          actions.changePageSize(serializedData.layers.ROOT.props.boxSize as PageSize);
+          actions.setPage(activePage + idx, serializedData);
         });
       } else {
-        actions.changePageSize(data.layers.ROOT.props.boxSize as PageSize);
-        actions.setPage(activePage, data);
+        const serializedData: SerializedPage = unpack(data);
+        actions.changePageSize(serializedData.layers.ROOT.props.boxSize as PageSize);
+        actions.setPage(activePage, serializedData);
       }
     } catch (err) {
       console.warn('Something went wrong!');

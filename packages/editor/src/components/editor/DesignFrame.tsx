@@ -62,7 +62,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
     imageEditor,
     pageSize,
     openPageSettings,
-    downloadCmd
+    downloadCmd,
   } = useEditor((state) => {
     const hoveredPage = parseInt(Object.keys(state.hoveredLayer)[0]);
     const hoverLayerId = state.hoveredLayer[hoveredPage];
@@ -97,11 +97,10 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
     onMovePageEnd,
   } = useZoomPage(frameRef, pageRef, pageContainerRef);
   useEffect(() => {
-    // console.log(pack(data, dataMapping))
     const serializedData: SerializedPage[] = unpack(data);
     actions.setData(serializedData);
     setTimeout(() => {
-      actions.setScale(.59);
+      actions.setScale(0.59);
     }, 16);
   }, [data, actions]);
 
@@ -121,7 +120,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
 
   useDebouncedEffect(
     () => {
-      if (onChanges) onChanges(query.serialize());
+      if (onChanges) onChanges(pack(query.serialize(), dataMapping)[0]);
     },
     500,
     [pages]
