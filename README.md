@@ -13,11 +13,11 @@ Before you begin, ensure that you have [Node.js](https://nodejs.org/) and [Yarn]
 
 1.  Clone the repository:
     
-    `git clone https://github.com/your-username/your-project.git`
+    `git clone https://github.com/lnkhanh/canva-editor.git`
     
 2.  Navigate to the project directory:
     
-    `cd your-project`
+    `cd canva-editor`
     
 3.  Install dependencies using Yarn:
     

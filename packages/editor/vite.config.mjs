@@ -12,8 +12,10 @@ const { EsLinter, linterPlugin } = EsLint;
 // https://vitejs.dev/config/
 export default defineConfig((configEnv) => ({
   plugins: [
-    react(),
-    dts({ include: 'src' }),
+    react({
+      jsxImportSource: '@emotion/react',
+    }),
+    dts({ include: 'src', insertTypesEntry: true }),
     tsconfigPaths(),
     libInjectCss(),
     linterPlugin({
@@ -21,14 +23,18 @@ export default defineConfig((configEnv) => ({
       linters: [new EsLinter({ configEnv })],
     }),
   ],
+  optimizeDeps: {
+    include: ['esm-dep > cjs-dep'],
+  },
   build: {
     // do not copy the contents of the public folder to the dist folder
+    sourcemap: true,
     copyPublicDir: false,
     lib: {
       // this is the file that exports our components
-      entry: resolve(__dirname, 'src/components/editor/index.ts'),
+      entry: resolve(__dirname, 'src/index.ts'),
       name: 'CanvaEditor',
-      fileName: 'canva-editor',
+      fileName: (format) => `canva-editor.${format}.js`,
     },
     rollupOptions: {
       external: [...Object.keys(packageJson.peerDependencies)],
@@ -36,8 +42,12 @@ export default defineConfig((configEnv) => ({
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
+          'styled-components': 'styled',
         },
       },
     },
-  },
+    commonjsOptions: {
+      exclude: ['canva-editor'],
+    },
+  }
 }));

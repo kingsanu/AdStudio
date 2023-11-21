@@ -236,7 +236,7 @@ export const useEditorStore = () => {
       status: false,
     },
     downloadCmd: -1,
-    githubLink: 'https://github.com/', // TODO
+    githubLink: 'https://github.com/lnkhanh/canva-editor/'
   });
 
   const actions = useMemo<EditorActions>(() => {

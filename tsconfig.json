@@ -1,16 +1,16 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ESNext",
     "useDefineForClassFields": true,
-    "lib": ["ES2020", "ES2021.String", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
+    "lib": ["esnext", "ES2021.String", "DOM", "DOM.Iterable"],
+    "module": "esnext",
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "jsxImportSource": "@emotion/react",
 
     /* Bundler mode */
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -19,35 +19,17 @@
 
     /* Linting */
     "strict": true,
+    "allowJs": true,
     "noUnusedLocals": false,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "rootDir": ".",
     "paths": {
-      "canva-editor/color-picker": ["packages/editor/src/color-picker"],
-      "canva-editor/color-picker/*": ["packages/editor/src/color-picker/*"],
-      "canva-editor/drag-and-drop": ["packages/editor/src/drag-and-drop"],
-      "canva-editor/drag-and-drop/*": ["packages/editor/src/drag-and-drop/*"],
-      "canva-editor/search-autocomplete": ["packages/editor/src/search-autocomplete"],
-      "canva-editor/search-autocomplete/*": ["packages/editor/src/search-autocomplete/*"],
-      "canva-editor/tooltip": ["packages/editor/src/tooltip"],
-      "canva-editor/tooltip/*": ["packages/editor/src/tooltip/*"],
-      "canva-editor/icons/*": ["packages/editor/src/icons/*"],
-      "canva-editor/utils": ["packages/editor/src/utils"],
-      "canva-editor/utils/*": ["packages/editor/src/utils/*"],
-      "canva-editor/layout/*": ["packages/editor/src/layout/*"],
-      "canva-editor/hooks": ["packages/editor/src/hooks"],
-      "canva-editor/hooks/*": ["packages/editor/src/hooks/*"],
-      "canva-editor/types": ["packages/editor/src/types"],
-      "canva-editor/types/*": ["packages/editor/src/types/*"],
-      "canva-editor/layers": ["packages/editor/src/layers"],
-      "canva-editor/layers/*": ["packages/editor/src/layers/*"],
-      "canva-editor/components": ["packages/editor/src/components"],
-      "canva-editor/components/*": ["packages/editor/src/components/*"]
+      "canva-editor/*": ["packages/editor/src/*"]
     }
   },
-  "include": ["**/*.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["**/*.d.ts", "**/*.ts", "**/*.tsx", "vite.config.mjs", "packages/editor/vite.config.mjs"],
   "exclude": ["**/node_modules", "**/dist"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

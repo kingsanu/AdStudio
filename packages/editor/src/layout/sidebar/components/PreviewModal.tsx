@@ -1,6 +1,7 @@
 import { FC } from 'react';
-import { Preview } from 'canva-editor/components/editor';
+// import { Preview } from 'canva-editor/components/editor';
 import CloseIcon from 'canva-editor/icons/CloseIcon';
+import Preview from 'canva-editor/components/editor/Preview';
 
 interface PreviewModalProps {
   onClose: () => void;

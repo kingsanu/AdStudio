@@ -2,7 +2,7 @@ export const hsv2rgb = ({ h, s, v, a }: { h: number; s: number; v: number; a: nu
     s = s / 100;
     v = v / 100;
 
-    let rgb = [];
+    let rgb: any = [];
     const c = v * s;
     const hh = h / 60;
     const x = c * (1 - Math.abs((hh % 2) - 1));

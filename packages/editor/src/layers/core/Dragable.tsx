@@ -39,7 +39,7 @@ const Draggable: FC<PropsWithChildren<DrapableProps>> = ({
     setSize({ w: offsetW, h: offsetH });
 
     function isInDropArea(e: MouseEvent) {
-      const dropArea = getElementByClassNearestTheCursorPosition(
+      const dropArea: any = getElementByClassNearestTheCursorPosition(
         e,
         'page-content'
       );
@@ -100,7 +100,7 @@ const Draggable: FC<PropsWithChildren<DrapableProps>> = ({
     const elements = document.querySelectorAll(`.${className}`);
 
     // Find the element that is closest to the cursor.
-    let closestElement = null;
+    let closestElement: Element | null = null;
     let closestDistance = Infinity;
 
     for (const element of elements) {

@@ -66,7 +66,7 @@ const pack = (obj: any, mapping: any = {}, charCode = 1): any => {
   }
 
   if (Array.isArray(obj)) {
-    const packedArray = [];
+    const packedArray: any = [];
 
     for (let i = 0; i < obj.length; i++) {
       const [packedItem, updatedMapping] = pack(obj[i], mapping, charCode);
@@ -100,7 +100,7 @@ const pack = (obj: any, mapping: any = {}, charCode = 1): any => {
 const unpack = (packed: any): any => {
   if (!packed) return packed;
   if (Array.isArray(packed)) {
-    const unpackedArray = [];
+    const unpackedArray: any = [];
     for (let i = 0; i < packed.length; i++) {
       unpackedArray.push(unpack(packed[i]));
     }

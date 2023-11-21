@@ -73,10 +73,5 @@ export default defineConfig({
         ),
       },
     ],
-  },
-  plugins: [
-    react({
-      jsxImportSource: '@emotion/react',
-    }),
-  ],
+  }
 });
