@@ -6,7 +6,14 @@ Description
 
 This project is a React.js-based tool designed to provide functionality similar to Canva.com. It utilizes the Vite build tool and manages state with ProseMirror. The tool allows users to create and design content through an intuitive interface.
 
-![](./Screenshot.png)
+
+[![Demo](./Screenshot.png)](https://canva-editor-three.vercel.app)
+
+## Demo
+
+Explore the live demo: [Try it out!](https://canva-editor-three.vercel.app)
+
+Get full source code here: https://kenvinlu.gumroad.com/l/canva-editor
 
 Installation
 ------------
@@ -128,10 +135,9 @@ Usage
 Here's an example usage of the CanvaEditor component within a React component:
 
 ```javascript
-import { CanvaEditor } from 'canva-editor/components/editor';
+import { CanvaEditor, EditorConfig } from 'canva-editor';
 import { data } from './sampleData';
-import {  useState } from 'react';
-import { EditorConfig } from 'canva-editor/components/editor/EditorContext';
+import { useState } from 'react';
 
 const editorConfig: EditorConfig = {
   apis: {
@@ -153,7 +159,7 @@ const editorConfig: EditorConfig = {
     searchText: 'Search texts',
     searchImage: 'Search images',
     searchShape: 'Search shapes',
-    searchFrame: 'Search frames'
+    searchFrame: 'Search frames',
   },
   editorAssetsUrl: 'http://localhost:4000/editor',
   imageKeywordSuggestions: 'animal,sport,love,scene,dog,cat,whale',
@@ -167,9 +173,8 @@ const Test = () => {
   const handleOnChanges = (changes: any) => {
     console.log('On changes');
     console.log(changes);
-    
+
     setSaving(true);
-    // Waiting for 1s (Fake calling API and wait for response)
     setTimeout(() => {
       setSaving(false);
     }, 1e3);
@@ -178,10 +183,8 @@ const Test = () => {
   const handleOnDesignNameChanges = (newName: string) => {
     console.log('On name changes');
     console.log(newName);
-    
-    setSaving(true);
 
-    // Waiting for 1s (Fake calling API and wait for response)
+    setSaving(true);
     setTimeout(() => {
       setSaving(false);
     }, 1e3);
@@ -234,11 +237,6 @@ yarn dev
 ```
 
 This will launch the tool at [http://localhost:5173](http://localhost:5173).
-
-Contributing
-------------
-
-If you'd like to contribute to this project, please follow our [contribution guidelines](CONTRIBUTING.md).
 
 License
 -------

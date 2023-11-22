@@ -9,7 +9,7 @@ import { throttle } from 'lodash';
 import { useEditor } from './useEditor';
 import { isMobile } from 'react-device-detect';
 import { getTransformStyle } from 'canva-editor/layers';
-import { CursorPosition, GestureEvent } from 'canva-editor/types';
+import { CursorPosition } from 'canva-editor/types';
 import { getPosition } from 'canva-editor/utils';
 import { distanceBetweenPoints } from 'canva-editor/utils/2d/distanceBetweenPoints';
 
@@ -402,28 +402,7 @@ export const useZoomPage = (
     };
     updateSize();
   }, [pageSize, setPageTransform]);
-  useEffect(() => {
-    const handleGestureStart = (e: Event) => {
-      e.preventDefault();
-      pageZoomStart();
-      document.addEventListener('gesturechange', handleGestureChange);
-      document.addEventListener('gestureend', handleGestureEnd, { once: true });
-    };
-    const handleGestureChange = throttle((e: Event) => {
-      pageZoomMove((e as GestureEvent).scale);
-      e.preventDefault();
-    }, 16);
-    const handleGestureEnd = (e: Event) => {
-      pageZoomEnd((e as GestureEvent).scale);
-      e.preventDefault();
-      document.removeEventListener('gesturechange', handleGestureChange);
-      document.removeEventListener('gestureend', handleGestureEnd);
-    };
-    document.addEventListener('gesturestart', handleGestureStart);
-    return () => {
-      document.removeEventListener('gesturestart', handleGestureStart);
-    };
-  }, [scale, pageTransform, setPageTransform, actions]);
+  
   return {
     pageTransform,
     onZoomStart: handleZoomStart,

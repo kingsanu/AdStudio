@@ -26,6 +26,7 @@
     "baseUrl": ".",
     "rootDir": ".",
     "paths": {
+      "canva-editor": ["packages/editor/src"],
       "canva-editor/*": ["packages/editor/src/*"]
     }
   },

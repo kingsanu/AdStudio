@@ -484,6 +484,7 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
               left: 0,
               top: 0,
               zIndex: 1,
+              overflow: 'hidden',
               '@media (max-width: 900px)': {
                 width: width * scale,
                 height: height * scale,

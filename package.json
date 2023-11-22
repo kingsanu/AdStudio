@@ -14,7 +14,6 @@
   "main": "src/index.jsx",
   "module": "src/index.jsx",
   "dependencies": {
-    "canva-editor": "*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "styled-components": "^6.0.8",
@@ -38,6 +37,7 @@
     "vite-plugin-dts": "^3.6.3"
   },
   "workspaces": [
-    "packages/*"
+    "api",
+    "packages/editor"
   ]
 }
