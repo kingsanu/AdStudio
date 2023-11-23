@@ -6,6 +6,7 @@ import {
 import { createContext } from 'react';
 
 export type EditorConfig = {
+  logoUrl?: string;
   apis: {
     url: string;
     searchFonts: string;

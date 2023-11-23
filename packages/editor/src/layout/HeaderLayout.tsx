@@ -11,6 +11,7 @@ import HeaderFileMenu from './sidebar/components/HeaderFileMenu';
 import SyncingIcon from 'canva-editor/icons/SyncingIcon';
 
 interface HeaderLayoutProps {
+  logoUrl?: string;
   designName: string;
   saving: boolean;
   onChanges: (str: string) => void;
@@ -18,7 +19,7 @@ interface HeaderLayoutProps {
 const HeaderLayout: ForwardRefRenderFunction<
   HTMLDivElement,
   HeaderLayoutProps
-> = ({ designName, saving, onChanges }, ref) => {
+> = ({ logoUrl, designName, saving, onChanges }, ref) => {
   const [name, setName] = useState(designName);
   const { actions, query } = useEditor();
   return (
@@ -43,7 +44,9 @@ const HeaderLayout: ForwardRefRenderFunction<
         }}
       >
         <div css={{ color: 'white' }}>
-          <CanvaIcon fill='currentColor' />
+          {logoUrl ? <img src={logoUrl} css={{
+            maxHeight: 35
+          }} /> : <CanvaIcon fill='currentColor' />}
         </div>
       </div>
       <div css={{ marginRight: 'auto' }}>

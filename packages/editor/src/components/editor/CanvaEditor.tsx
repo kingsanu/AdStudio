@@ -51,7 +51,7 @@ const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
           maxHeight: viewPortHeight ? `${viewPortHeight}px` : 'auto',
         }}
       >
-        <HeaderLayout designName={data?.name || ''} saving={saving || false} onChanges={onDesignNameChanges} />
+        <HeaderLayout logoUrl={config.logoUrl} designName={data?.name || ''} saving={saving || false} onChanges={onDesignNameChanges} />
         <div
           css={{
             display: 'flex',
