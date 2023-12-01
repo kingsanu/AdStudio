@@ -23,7 +23,7 @@ const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
   config,
   saving,
   onChanges,
-  onDesignNameChanges
+  onDesignNameChanges,
 }) => {
   const { getState, actions, query } = useEditorStore();
   const leftSidebarRef = useRef<HTMLDivElement>(null);
@@ -51,7 +51,12 @@ const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
           maxHeight: viewPortHeight ? `${viewPortHeight}px` : 'auto',
         }}
       >
-        <HeaderLayout logoUrl={config.logoUrl} designName={data?.name || ''} saving={saving || false} onChanges={onDesignNameChanges} />
+        <HeaderLayout
+          logoUrl={config.logoUrl}
+          designName={data?.name || ''}
+          saving={saving || false}
+          onChanges={onDesignNameChanges}
+        />
         <div
           css={{
             display: 'flex',
@@ -83,16 +88,7 @@ const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
             }}
           >
             <AppLayerSettings />
-            <div
-              css={{
-                flexGrow: 1,
-                overflow: 'auto',
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-            >
-              <EditorContent data={data?.editorConfig} onChanges={onChanges} />
-            </div>
+            <EditorContent data={data?.editorConfig} onChanges={onChanges} />
             <div
               css={{
                 height: 40,

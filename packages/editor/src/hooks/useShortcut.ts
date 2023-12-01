@@ -201,21 +201,21 @@ const useShortcut = (frameEle: HTMLElement | null) => {
   );
 
   const zoomStep = 0.02;
+  
   useEffect(() => {
     let animationFrameId: number;
 
     const handleZoomDesktop = (e: WheelEvent) => {
-      if (e.ctrlKey) {
-        const s = Math.exp((-e.deltaY * zoomStep) / 3);
-        const newScale = +Math.min(Math.max(scale * s, 0.1), 5).toFixed(4);
-        cancelAnimationFrame(animationFrameId);
+      if (e.ctrlKey && frameEle) {
+        e.preventDefault();
 
+        // Apply zoom
+        const s = Math.exp((-e.deltaY * zoomStep) / 3);
+        const newScale = +Math.min(Math.max(scale * s, 0.1), 5);
+        cancelAnimationFrame(animationFrameId);
         animationFrameId = requestAnimationFrame(() => {
           actions.setScale(newScale);
         });
-
-        e.preventDefault();
-        e.stopPropagation();
       }
     };
 

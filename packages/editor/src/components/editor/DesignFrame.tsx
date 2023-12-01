@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useRef,
+  useState,
 } from 'react';
 import { EditorContext } from './EditorContext';
 import DesignPage from './DesignPage';
@@ -42,6 +43,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
   const pageRef = useRef<HTMLDivElement[]>([]);
   const contextMenuRef = useRef<HTMLDivElement>(null);
   const { usedFonts } = useUsedFont();
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const {
     config: { editorAssetsUrl },
   } = useContext(EditorContext);
@@ -155,6 +157,59 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
       }
     }
   };
+
+  const [previousScale, setPreviousScale] = useState(scale);
+  useEffect(() => {
+    let offset = {
+      x: frameRef?.current?.scrollLeft || 0,
+      y: frameRef?.current?.scrollTop || 0,
+    };
+    let pageLoc = { x: mousePos.x + offset.x, y: mousePos.y + offset.y };
+    let zoomPoint = {
+      x: pageLoc.x / previousScale,
+      y: pageLoc.y / previousScale,
+    };
+
+    let zoomPointNew = { x: zoomPoint.x * scale, y: zoomPoint.y * scale };
+    let newScroll = {
+      x: zoomPointNew.x - mousePos.x,
+      y: zoomPointNew.y - mousePos.y,
+    };
+
+    if (frameRef?.current) {
+      frameRef.current.scrollTop = newScroll.y;
+      frameRef.current.scrollLeft = newScroll.x;
+    }
+    setPreviousScale(scale);
+  }, [scale]);
+
+  useEffect(() => {
+    const mouseMove = (event: any) => {
+      setMousePos({
+        x: event.pageX,
+        y: event.pageY,
+      });
+    };
+
+    const mouseLeave = () => {
+      setMousePos({
+        x: (frameRef.current?.offsetWidth || 2) / 2,
+        y: (frameRef.current?.offsetHeight || 2) / 2
+      });
+    }
+
+    if (frameRef?.current) {
+      frameRef.current.addEventListener('mousemove', mouseMove);
+      frameRef.current.addEventListener('mouseleave', mouseLeave);
+    }
+
+    return () => {
+      if (frameRef?.current) {
+        frameRef.current.removeEventListener('mousemove', mouseMove);
+        frameRef.current.removeEventListener('mouseleave', mouseLeave);
+      }
+    };
+  }, [frameRef?.current]);
 
   const handleScrollToActivePage = (pageIndex: number) => {
     setTimeout(() => {
