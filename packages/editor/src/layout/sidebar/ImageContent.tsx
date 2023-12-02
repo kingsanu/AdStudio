@@ -1,6 +1,5 @@
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import { isMobile } from 'react-device-detect';
 import { useEditor } from 'canva-editor/hooks';
 import Draggable from 'canva-editor/layers/core/Dragable';
 import { Delta } from 'canva-editor/types';
@@ -8,6 +7,7 @@ import CloseSidebarButton from './CloseButton';
 import ImageSearchBox from './components/ImageSearchBox';
 import HorizontalCarousel from 'canva-editor/components/carousel/HorizontalCarousel';
 import OutlineButton from 'canva-editor/components/button/OutlineButton';
+import useMobileDetect from 'canva-editor/hooks/useMobileDetect';
 
 const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
   const [images, setImages] = useState<{ img: string }[]>([]);
@@ -17,6 +17,7 @@ const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
   const [offset, setOffset] = useState(0);
   const dataRef = useRef(false);
   const [keyword, setKeyword] = useState('');
+  const isMobile = useMobileDetect();
 
   const loadData = useCallback(
     async (offset = 0, kw = '') => {
@@ -91,7 +92,7 @@ const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
         padding: 16,
       }}
     >
-      <CloseSidebarButton onClose={onClose} />
+      {!isMobile && <CloseSidebarButton onClose={onClose} />}
       <div>
         <ImageSearchBox searchString={keyword} onStartSearch={handleSearch} />
         <div css={{ paddingTop: 8 }}>

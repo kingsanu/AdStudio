@@ -1,11 +1,11 @@
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
-import { isMobile } from 'react-device-detect';
 import { Delta } from 'canva-editor/types';
 import { useEditor } from 'canva-editor/hooks';
 import Draggable from 'canva-editor/layers/core/Dragable';
 import CloseSidebarButton from './CloseButton';
 import ShapeSearchBox from './components/ShapeSearchBox';
 import axios from 'axios';
+import useMobileDetect from 'canva-editor/hooks/useMobileDetect';
 
 type Shape = {
   img: string;
@@ -23,6 +23,7 @@ const ShapeContent: FC<{ onClose: () => void }> = ({ onClose }) => {
   const [offset, setOffset] = useState(0);
   const dataRef = useRef(false);
   const [keyword, setKeyword] = useState('');
+  const isMobile = useMobileDetect();
 
   const loadData = useCallback(
     async (offset = 0, kw = '') => {
@@ -114,7 +115,7 @@ const ShapeContent: FC<{ onClose: () => void }> = ({ onClose }) => {
         padding: 16,
       }}
     >
-      <CloseSidebarButton onClose={onClose} />
+      {!isMobile && <CloseSidebarButton onClose={onClose} />}
       <div
         css={{
           marginBottom: 16,

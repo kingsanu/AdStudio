@@ -1,6 +1,5 @@
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import { isMobile } from 'react-device-detect';
 import { useEditor } from 'canva-editor/hooks';
 import { PageSize, SerializedPage } from 'canva-editor/types';
 import CloseSidebarButton from './CloseButton';
@@ -8,6 +7,7 @@ import TemplateSearchBox from './components/TemplateSearchBox';
 import HorizontalCarousel from 'canva-editor/components/carousel/HorizontalCarousel';
 import OutlineButton from 'canva-editor/components/button/OutlineButton';
 import { unpack } from 'canva-editor/utils/minifier';
+import useMobileDetect from 'canva-editor/hooks/useMobileDetect';
 
 interface Template {
   img: string;
@@ -25,6 +25,7 @@ const TemplateContent: FC<{ onClose: () => void }> = ({ onClose }) => {
   const [offset, setOffset] = useState(0);
   const dataRef = useRef(false);
   const [keyword, setKeyword] = useState('');
+  const isMobile = useMobileDetect();
 
   const loadData = useCallback(
     async (offset = 0, kw = '') => {
@@ -104,7 +105,7 @@ const TemplateContent: FC<{ onClose: () => void }> = ({ onClose }) => {
         padding: 16,
       }}
     >
-      <CloseSidebarButton onClose={onClose} />
+      {!isMobile && <CloseSidebarButton onClose={onClose} />}
       <div>
         <TemplateSearchBox
           searchString={keyword}

@@ -444,6 +444,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
                         width: window.innerWidth,
                         height: window.innerHeight,
                         overflow: 'hidden',
+                        display: 'flex'
                       },
                     }}
                   >

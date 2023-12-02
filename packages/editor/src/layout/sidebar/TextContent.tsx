@@ -1,6 +1,5 @@
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import { isMobile } from 'react-device-detect';
 import { useEditor } from 'canva-editor/hooks';
 import { BoxSize, Delta, LayerId, SerializedLayers } from 'canva-editor/types';
 import { getPositionWhenLayerCenter } from 'canva-editor/utils/layer/getPositionWhenLayerCenter';
@@ -10,6 +9,7 @@ import Button from 'canva-editor/components/button/Button';
 import CloseSidebarButton from './CloseButton';
 import styled from '@emotion/styled';
 import TextSearchBox from './components/TextSearchBox';
+import useMobileDetect from 'canva-editor/hooks/useMobileDetect';
 
 const DefaultTextButton = styled(Button)`
   background-color: #313334;
@@ -73,6 +73,7 @@ const TextContent: FC<{ onClose: () => void }> = ({ onClose }) => {
   const [offset, setOffset] = useState(0);
   const dataRef = useRef(false);
   const [keyword, setKeyword] = useState('');
+  const isMobile = useMobileDetect();
 
   const loadData = useCallback(
     async (offset = 0, kw = '') => {
@@ -163,7 +164,7 @@ const TextContent: FC<{ onClose: () => void }> = ({ onClose }) => {
         padding: 16,
       }}
     >
-      <CloseSidebarButton onClose={onClose} />
+      {!isMobile && <CloseSidebarButton onClose={onClose} />}
       <div
         css={{
           marginBottom: 16,

@@ -445,7 +445,7 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
         ref={ref}
         css={{
           position: 'relative',
-          margin: 0,
+          margin: 'auto',
           boxShadow: '0 2px 8px rgba(14,19,24,.07)',
           '@media (max-width: 900px)': {
             boxShadow: 'none',
@@ -484,11 +484,7 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
               left: 0,
               top: 0,
               zIndex: 1,
-              overflow: 'hidden',
-              '@media (max-width: 900px)': {
-                width: width * scale,
-                height: height * scale,
-              },
+              overflow: 'hidden'
             }}
           >
             <PageElement />

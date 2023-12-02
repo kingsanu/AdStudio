@@ -19,7 +19,7 @@ const AppLayerSettings = () => {
                     background: '#fff',
                     display: selectedLayerIds.length > 0 ? 'flex' : 'none',
                     justifyContent: 'center',
-                    zIndex: 20,
+                    zIndex: 1001,
                     height: 72,
                 },
             }}

@@ -31,7 +31,7 @@ const HeaderLayout: ForwardRefRenderFunction<
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        zIndex: 9999,
+        zIndex: 999,
         '@media (max-width: 900px)': {
           padding: 12,
         },

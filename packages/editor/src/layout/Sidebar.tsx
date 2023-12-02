@@ -1,3 +1,4 @@
+import ReactDOM from 'react-dom';
 import SidebarTab from './TabList';
 import TextContent from './sidebar/TextContent';
 import ShapeContent from './sidebar/ShapeContent';
@@ -15,6 +16,9 @@ import UploadIcon from 'canva-editor/icons/UploadIcon';
 import ImageIcon from 'canva-editor/icons/ImageIcon';
 import Notes from 'canva-editor/utils/settings/sidebar/Notes';
 import FrameIcon from 'canva-editor/icons/FrameIcon';
+import useMobileDetect from 'canva-editor/hooks/useMobileDetect';
+import { useRef, useState } from 'react';
+import BottomSheet from 'canva-editor/components/bottom-sheet/BottomSheet';
 
 const tabs = [
   {
@@ -44,19 +48,93 @@ const tabs = [
 ];
 const Sidebar = () => {
   const { actions, state } = useEditor();
+  const isMobile = useMobileDetect();
+
+  const getSidebarComponent = (tabName: string) => {
+    switch (tabName) {
+      case 'Template':
+        return (
+          <TemplateContent
+            onClose={() => {
+              actions.setSidebarTab();
+              actions.setSidebar();
+            }}
+          />
+        );
+      case 'Text':
+        return (
+          <TextContent
+            onClose={() => {
+              actions.setSidebarTab();
+              actions.setSidebar();
+            }}
+          />
+        );
+      case 'Frame':
+        return (
+          <FrameContent
+            onClose={() => {
+              actions.setSidebarTab();
+              actions.setSidebar();
+            }}
+          />
+        );
+      case 'Image':
+        return (
+          <ImageContent
+            onClose={() => {
+              actions.setSidebarTab();
+              actions.setSidebar();
+            }}
+          />
+        );
+      case 'Shape':
+        return (
+          <ShapeContent
+            onClose={() => {
+              actions.setSidebarTab();
+              actions.setSidebar();
+            }}
+          />
+        );
+      case 'Notes':
+        return <Notes />;
+      case 'Upload':
+        return (
+          <UploadContent
+            visibility={true}
+            onClose={() => {
+              actions.setSidebarTab();
+              actions.setSidebar();
+            }}
+          />
+        );
+    }
+  };
+
   return (
     <div
       css={{
         display: 'flex',
-        zIndex: 2,
         position: 'relative',
         backgroundColor: '#ffffff',
         borderRight: '1px solid rgba(217, 219, 228, 0.6)',
       }}
     >
+      {isMobile && (
+        <BottomSheet
+          isOpen={!!state.sideBarTab}
+          onClose={() => {
+            actions.setSidebarTab();
+            actions.setSidebar();
+          }}
+        >
+          {state.sideBarTab && getSidebarComponent(state.sideBarTab)}
+        </BottomSheet>
+      )}
       <div
         css={{
-          display: 'flex',
+          display: 'flex'
         }}
       >
         <SidebarTab
@@ -67,7 +145,7 @@ const Sidebar = () => {
             actions.setSidebarTab(tab);
           }}
         />
-        {state.sideBarTab && (
+        {!isMobile && state.sideBarTab && (
           <div
             css={{
               width: 360,
@@ -81,54 +159,7 @@ const Sidebar = () => {
               },
             }}
           >
-            {state.sideBarTab === 'Template' && (
-              <TemplateContent
-                onClose={() => {
-                  actions.setSidebarTab();
-                  actions.setSidebar();
-                }}
-              />
-            )}
-            {state.sideBarTab === 'Text' && (
-              <TextContent
-                onClose={() => {
-                  actions.setSidebarTab();
-                  actions.setSidebar();
-                }}
-              />
-            )}
-            {state.sideBarTab === 'Frame' && (
-              <FrameContent
-                onClose={() => {
-                  actions.setSidebarTab();
-                  actions.setSidebar();
-                }}
-              />
-            )}
-            {state.sideBarTab === 'Image' && (
-              <ImageContent
-                onClose={() => {
-                  actions.setSidebarTab();
-                  actions.setSidebar();
-                }}
-              />
-            )}
-            {state.sideBarTab === 'Shape' && (
-              <ShapeContent
-                onClose={() => {
-                  actions.setSidebarTab();
-                  actions.setSidebar();
-                }}
-              />
-            )}
-            {state.sideBarTab === 'Notes' && <Notes />}
-            <UploadContent
-              visibility={state.sideBarTab === 'Upload'}
-              onClose={() => {
-                actions.setSidebarTab();
-                actions.setSidebar();
-              }}
-            />
+            {getSidebarComponent(state.sideBarTab)}
           </div>
         )}
       </div>
@@ -138,7 +169,7 @@ const Sidebar = () => {
           overflow: 'hidden',
           height: '100%',
           pointerEvents: 'none',
-          zIndex: 4,
+          zIndex: 9999,
           ...(state.sideBarTab
             ? {
                 position: 'absolute',

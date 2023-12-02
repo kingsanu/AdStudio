@@ -1,8 +1,8 @@
 import { ChangeEvent, FC, useRef, useState } from 'react';
-import { isMobile } from 'react-device-detect';
 import { useEditor } from 'canva-editor/hooks';
 import CloseSidebarButton from './CloseButton';
 import Button from 'canva-editor/components/button/Button';
+import useMobileDetect from 'canva-editor/hooks/useMobileDetect';
 
 interface UploadContentProps {
   visibility: boolean;
@@ -11,6 +11,7 @@ interface UploadContentProps {
 const UploadContent: FC<UploadContentProps> = ({ visibility, onClose }) => {
   const inputFileRef = useRef<HTMLInputElement>(null);
   const { actions } = useEditor();
+  const isMobile = useMobileDetect();
 
   const [images, setImages] = useState<
     { url: string; type: 'svg' | 'image' }[]
@@ -54,7 +55,7 @@ const UploadContent: FC<UploadContentProps> = ({ visibility, onClose }) => {
         display: visibility ? 'flex' : 'none',
       }}
     >
-      <CloseSidebarButton onClose={onClose} />
+      {!isMobile && <CloseSidebarButton onClose={onClose} />}
       <div
         css={{
           margin: 16,

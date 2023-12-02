@@ -3,7 +3,6 @@ import { createEditor } from './core/helper/createEditor';
 import { useEditor } from '../../hooks';
 import { TextEditor } from './interfaces';
 import { selectText } from './core/command/selectText';
-import { isMobile } from 'react-device-detect';
 
 interface EditorContentProps {
     editor: TextEditor;
