@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, FC, ReactNode } from 'react';
 import ArrowRightIcon from 'canva-editor/icons/ArrowRightIcon';
 import './DropdownButton.css';
+import useMobileDetect from 'canva-editor/hooks/useMobileDetect';
 
 export type DropdownMenuItem = {
   label: string;
@@ -13,13 +14,15 @@ export type DropdownMenuItem = {
   hint?: string;
 };
 interface Props {
-  text: string;
+  text: string | ReactNode;
   header?: ReactNode;
   items: DropdownMenuItem[];
 }
 const DropdownButton: FC<Props> = ({ text, header, items }) => {
   const [showMenu, setShowMenu] = useState(false);
+  const [submenuOpen, setSubmenuOpen] = useState(-1);
   const dropdownRef = useRef<any>(null);
+  const isMobile = useMobileDetect();
 
   const handleClickOutside = (event: MouseEvent) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -40,6 +43,16 @@ const DropdownButton: FC<Props> = ({ text, header, items }) => {
   }, []);
 
   const renderMenuItem = (item: DropdownMenuItem, index: number) => {
+    const submenuStyle: React.CSSProperties = isMobile
+        ? {
+            left: isMobile ? 6 : '100%', // Adjust the position based on isMobile
+            top: isMobile ? '100%' : 0,
+          }
+        : {};
+    const toggleSubmenu = () => {
+      if (isMobile) setSubmenuOpen(submenuOpen === -1 ? index : -1);
+    };
+
     if (item.type === 'divider') {
       return <div key={index} className='menu-divider'></div>;
     } else if (item.type === 'groupname') {
@@ -54,11 +67,20 @@ const DropdownButton: FC<Props> = ({ text, header, items }) => {
       item.type === 'submenu' ? 'with-submenu' : ''
     }`;
 
+    const shouldRenderSubmenu = (idx: number) => {
+      if (isMobile) {
+        return submenuOpen === idx;
+      }
+
+      return true;
+    }
+
     return (
       <div key={index} className={menuItemClassName}>
         <button
           disabled={item.disabled}
           onClick={(...args: any[]) => {
+            toggleSubmenu();
             if (item.disabled || !item.action) return;
             item.action(...args);
             setShowMenu(false);
@@ -78,7 +100,7 @@ const DropdownButton: FC<Props> = ({ text, header, items }) => {
           </p>
           {item.hint && <p className='hint'>{item.hint}</p>}
           {item.type === 'submenu' && (
-            <span className='submenu-arrow'>
+            <span className={`submenu-arrow ${submenuOpen === index ? 'open' : ''}`}>
               <ArrowRightIcon />
             </span>
           )}
@@ -88,8 +110,8 @@ const DropdownButton: FC<Props> = ({ text, header, items }) => {
             </span>
           )}
         </button>
-        {item.items && (
-          <div className='submenu'>
+        {shouldRenderSubmenu(index) && item.items && (
+          <div className='submenu' style={submenuStyle}>
             {item.items.map((submenuItem, subIndex) =>
               renderMenuItem(submenuItem, subIndex)
             )}

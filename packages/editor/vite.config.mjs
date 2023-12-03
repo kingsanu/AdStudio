@@ -24,7 +24,7 @@ export default defineConfig((configEnv) => ({
     }),
   ],
   optimizeDeps: {
-    include: ['esm-dep > cjs-dep'],
+    include: ['esm-dep'],
   },
   build: {
     // do not copy the contents of the public folder to the dist folder

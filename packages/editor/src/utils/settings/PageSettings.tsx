@@ -69,7 +69,7 @@ const PageSettings: FC<PageSettingsProps> = ({ onChangePage }) => {
         background: '#fff',
         zIndex: 3,
         '@media (max-width: 900px)': {
-          height: `calc(100% - 73px)`,
+          height: `calc(100% - 65px)`,
         },
       }}
     >

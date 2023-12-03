@@ -22,6 +22,8 @@ import FacebookIcon from 'canva-editor/icons/FacebookIcon';
 import InstagramIcon from 'canva-editor/icons/InstagramIcon';
 import { BoxSize } from 'canva-editor/types';
 import { dataMapping, pack, unpack } from 'canva-editor/utils/minifier';
+import HamburgerIcon from 'canva-editor/icons/HamburgerIcon';
+import useMobileDetect from 'canva-editor/hooks/useMobileDetect';
 
 interface Props {
   designName: string;
@@ -29,6 +31,7 @@ interface Props {
 const HeaderFileMenu: FC<Props> = ({ designName }) => {
   const [openPreview, setOpenPreview] = useState(false);
   const uploadRef = useRef<HTMLInputElement>(null);
+  const isMobile = useMobileDetect();
   const { actions, query, activePage, pageSize, isPageLocked } = useEditor(
     (state) => ({
       activePage: state.activePage,
@@ -290,7 +293,7 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
   return (
     <>
       <DropdownButton
-        text='File'
+        text={isMobile ? <HamburgerIcon /> : 'File'}
         items={menuData}
         header={
           <div css={{ padding: '16px 16px 8px' }}>

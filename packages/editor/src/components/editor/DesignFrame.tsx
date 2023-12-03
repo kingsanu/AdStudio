@@ -102,7 +102,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
     const serializedData: SerializedPage[] = unpack(data);
     actions.setData(serializedData);
     setTimeout(() => {
-      actions.setScale(0.59);
+      actions.setScale(((frameRef?.current?.offsetWidth || 0)-32)/pageSize.width); // Padding 16x2
     }, 16);
   }, [data, actions]);
 
@@ -444,7 +444,6 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
                         width: window.innerWidth,
                         height: window.innerHeight,
                         overflow: 'hidden',
-                        display: 'flex'
                       },
                     }}
                   >

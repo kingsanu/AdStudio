@@ -78,30 +78,31 @@ const SidebarTab: FC<SidebarTabProps> = ({ tabs, active, onChange }) => {
                     </div>
                 )}
                 {tabs.map((tab, idx) => (
-                    <div
+                    <button
                         key={idx}
                         css={{
-                            color: idx === activeIdx ? '#009ef7' : undefined,
-                            borderBottomRightRadius: idx === activeIdx - 1 ? 8 : 0,
-                            borderTopRightRadius: idx === activeIdx + 1 ? 8 : 0,
+                            color: idx === activeIdx ? '#000' : undefined,
+                            borderRadius: 6,
                             position: 'relative',
                             display: 'flex',
                             flexDirection: 'column',
                             justifyContent: 'center',
                             alignItems: 'center',
                             padding: '0 2px',
-                            height: 72,
+                            height: 60,
                             width: 72,
+                            margin: 2,
                             cursor: 'pointer',
                             ':hover': {
-                                color: '#009ef7',
+                                color: '#000',
+                                backgroundColor: '#0000000f'
                             },
                         }}
                         onClick={(e) => onChange(e, tab.name)}
                     >
                         <div css={{ fontSize: 24, height: 28 }}>{tab.icon}</div>
                         <span css={{ fontSize: 10, lineHeight: 1.6, fontWeight: 600 }}>{tab.name}</span>
-                    </div>
+                    </button>
                 ))}
             </div>
         </div>

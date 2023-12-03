@@ -9,6 +9,7 @@ import BackIcon from 'canva-editor/icons/BackIcon';
 import SyncedIcon from 'canva-editor/icons/SyncedIcon';
 import HeaderFileMenu from './sidebar/components/HeaderFileMenu';
 import SyncingIcon from 'canva-editor/icons/SyncingIcon';
+import useMobileDetect from 'canva-editor/hooks/useMobileDetect';
 
 interface HeaderLayoutProps {
   logoUrl?: string;
@@ -22,6 +23,7 @@ const HeaderLayout: ForwardRefRenderFunction<
 > = ({ logoUrl, designName, saving, onChanges }, ref) => {
   const [name, setName] = useState(designName);
   const { actions, query } = useEditor();
+  const isMobile = useMobileDetect();
   return (
     <div
       ref={ref}
@@ -37,20 +39,28 @@ const HeaderLayout: ForwardRefRenderFunction<
         },
       }}
     >
-      <div
-        css={{
-          color: '#3d8eff',
-          fontSize: 36,
-        }}
-      >
-        <div css={{ color: 'white' }}>
-          {logoUrl ? <img src={logoUrl} css={{
-            maxHeight: 35
-          }} /> : <CanvaIcon fill='currentColor' />}
+      {!isMobile && (
+        <div
+          css={{
+            fontSize: 36,
+          }}
+        >
+          <div>
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                css={{
+                  maxHeight: 35,
+                }}
+              />
+            ) : (
+              <CanvaIcon fill='white' />
+            )}
+          </div>
         </div>
-      </div>
+      )}
       <div css={{ marginRight: 'auto' }}>
-        <div css={{ margin: '0 16px' }}>
+        <div css={{ margin: isMobile ? '0 16px 0 0' : '0 16px' }}>
           <HeaderFileMenu designName={name} />
         </div>
       </div>

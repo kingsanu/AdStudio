@@ -50,9 +50,6 @@ const BottomSheet: FC<BottomSheetProps> = ({
     info: { offset: { y: number } }
   ) => {
     sheetY.set(info.offset.y);
-    // if (info.offset.y >= 0) {
-    //   console.log(info.offset.y)
-    // }
   };
 
   const handleDragEnd = () => {
@@ -109,7 +106,7 @@ const BottomSheet: FC<BottomSheetProps> = ({
           borderTopLeftRadius: '10px',
           borderTopRightRadius: '10px',
           paddingTop: 20,
-          paddingBottom: 73,
+          paddingBottom: 65,
           boxSizing: 'border-box',
           overflow: 'auto',
           zIndex: 1000,

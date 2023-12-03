@@ -1,4 +1,3 @@
-import ReactDOM from 'react-dom';
 import SidebarTab from './TabList';
 import TextContent from './sidebar/TextContent';
 import ShapeContent from './sidebar/ShapeContent';
@@ -17,8 +16,25 @@ import ImageIcon from 'canva-editor/icons/ImageIcon';
 import Notes from 'canva-editor/utils/settings/sidebar/Notes';
 import FrameIcon from 'canva-editor/icons/FrameIcon';
 import useMobileDetect from 'canva-editor/hooks/useMobileDetect';
-import { useRef, useState } from 'react';
 import BottomSheet from 'canva-editor/components/bottom-sheet/BottomSheet';
+import PlusIcon from 'canva-editor/icons/PlusIcon';
+import GridViewIcon from 'canva-editor/icons/GridViewIcon';
+import styled from '@emotion/styled';
+
+const FABButton = styled('button')`
+  position: fixed;
+  bottom: 80px;
+  background-color: #fff;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  color: #0d1216;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  vertical-align: middle;
+`;
 
 const tabs = [
   {
@@ -180,6 +196,16 @@ const Sidebar = () => {
         }}
         id={'settings'}
       />
+      {isMobile &&
+        <div>
+          <FABButton css={{left: 10}} onClick={() => actions.addPage()}>
+            <PlusIcon/>
+          </FABButton>
+          <FABButton css={{right: 10}} onClick={() => actions.togglePageSettings()}>
+            <GridViewIcon/>
+          </FABButton>
+        </div>
+      }
     </div>
   );
 };

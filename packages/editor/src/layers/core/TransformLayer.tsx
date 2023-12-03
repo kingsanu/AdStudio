@@ -1,8 +1,8 @@
 import { BoxSize, Delta } from 'canva-editor/types';
 import React, { forwardRef, ForwardRefRenderFunction, PropsWithChildren } from 'react';
-import { getTransformStyle } from '..';
+import { getTransformStyle } from '../index';
 
-interface TransformLayerProps {
+export interface TransformLayerProps {
     boxSize: BoxSize;
     rotate: number;
     position: Delta;
