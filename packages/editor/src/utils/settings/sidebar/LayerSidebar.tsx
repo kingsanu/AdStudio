@@ -11,10 +11,10 @@ import ReverseTransformLayer from './layer/ReverseTransformLayer';
 import { useEditor, useSelectedLayers } from 'canva-editor/hooks';
 import { getPosition } from 'canva-editor/utils';
 import { PageContext } from 'canva-editor/layers/core/PageContext';
-import ArrowLeftIcon from 'canva-editor/icons/ArrowLeftIcon';
 import BackgroundSelectionIcon from 'canva-editor/icons/BackgroundSelectionIcon';
 import { cloneDeep } from 'lodash';
 import SortableListLayer from './layer/SortableListLayer';
+import CloseIcon from 'canva-editor/icons/CloseIcon';
 
 type LayerSidebarProps = SidebarProps;
 const LayerSidebar: ForwardRefRenderFunction<
@@ -116,6 +116,23 @@ const LayerSidebar: ForwardRefRenderFunction<
             >
               Layers
             </p>
+              <div
+                  css={{
+                      fontSize: 20,
+                      flexShrink: 0,
+                      width: 32,
+                      height: 32,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                  }}
+                  onClick={() => {
+                      actions.setSidebar();
+                  }}
+              >
+                  <CloseIcon />
+              </div>
           </div>
 
           <div

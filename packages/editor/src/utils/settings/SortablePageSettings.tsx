@@ -7,6 +7,7 @@ import Page from 'canva-editor/components/editor/Page';
 import EditInlineInput from 'canva-editor/components/EditInlineInput';
 import EditorButton from 'canva-editor/components/EditorButton';
 import PlusIcon from 'canva-editor/icons/PlusIcon';
+import useMobileDetect from 'canva-editor/hooks/useMobileDetect';
 
 type PageSortableType = {
   items?: Array<PageType> | any;
@@ -19,10 +20,8 @@ type PageSortableType = {
   onSetText: (txt: string) => void;
   onChangePage: (index: number) => void;
   onAddNewPage: (index: number) => void;
-  onChange: (change: {
-    fromIndex: number;
-    toIndex: number;
-  }) => void;
+  onDoubleClick: (index: number) => void;
+  onChange: (change: { fromIndex: number; toIndex: number }) => void;
 };
 
 const SortableItem = SortableElement(
@@ -38,6 +37,7 @@ const SortableItem = SortableElement(
     onSetText,
     onChangePage,
     onAddNewPage,
+    onDoubleClick
   }: {
     containerRef: React.MutableRefObject<null>;
     item: PageType;
@@ -50,6 +50,7 @@ const SortableItem = SortableElement(
     onSetText: (txt: string) => void;
     onChangePage: (index: number) => void;
     onAddNewPage: (index: number) => void;
+    onDoubleClick: (index: number) => void;
   }): JSX.Element => {
     return (
       <li css={{ float: 'left', listStyle: 'none' }}>
@@ -62,6 +63,7 @@ const SortableItem = SortableElement(
             className='page-btn'
             isNew={idx === newItemIndex}
             onClick={() => onChangePage(idx)}
+            onDoubleClick={() => onDoubleClick(idx)}
           >
             <div
               css={{
@@ -78,8 +80,10 @@ const SortableItem = SortableElement(
               />
             </div>
             <div>
-              <span css={{whiteSpace: 'nowrap'}}>{idx + 1} &#8226;&nbsp;</span>
-              <div css={{width: '96%'}}>
+              <span css={{ whiteSpace: 'nowrap' }}>
+                {idx + 1} &#8226;&nbsp;
+              </span>
+              <div css={{ width: '96%' }}>
                 <EditInlineInput
                   text={item.name}
                   placeholder='Add page title'
@@ -116,12 +120,16 @@ const SortableList = SortableContainer(
     onSetText,
     onChangePage,
     onAddNewPage,
+    onDoubleClick
   }: PageSortableType) => {
+    const isMobile = useMobileDetect();
     return (
       <div
         css={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(217px, 1fr))',
+          gridTemplateColumns: `repeat(auto-fill, ${
+            isMobile ? 'minmax(120px, .5fr)' : 'minmax(217px, 1fr)'
+          })`,
           gap: 10,
           position: 'relative',
         }}
@@ -141,6 +149,7 @@ const SortableList = SortableContainer(
             onSetText={onSetText}
             onChangePage={onChangePage}
             onAddNewPage={onAddNewPage}
+            onDoubleClick={onDoubleClick}
           />
         ))}
       </div>
@@ -159,6 +168,7 @@ const SortablePageSettings: FC<PageSortableType> = ({
   onSetText,
   onChangePage,
   onAddNewPage,
+  onDoubleClick,
   onChange,
 }) => {
   return (
@@ -173,6 +183,7 @@ const SortablePageSettings: FC<PageSortableType> = ({
       onSetText={onSetText}
       onChangePage={onChangePage}
       onAddNewPage={onAddNewPage}
+      onDoubleClick={onDoubleClick}
       axis='xy'
       pressDelay={120}
       onSortEnd={(change: SortEnd) => {
@@ -181,7 +192,7 @@ const SortablePageSettings: FC<PageSortableType> = ({
             fromIndex: change.oldIndex,
             toIndex: change.newIndex,
           });
-          onChangePage(change.newIndex)
+          onChangePage(change.newIndex);
         }
       }}
     />

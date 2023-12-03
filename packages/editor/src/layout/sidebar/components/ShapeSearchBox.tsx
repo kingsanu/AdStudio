@@ -2,12 +2,14 @@ import { FC, useState } from 'react';
 import { SearchBox } from 'canva-editor/search-autocomplete';
 import axios from 'axios';
 import { useEditor } from 'canva-editor/hooks';
+import useMobileDetect from 'canva-editor/hooks/useMobileDetect';
 
 interface Props {
   onStartSearch: (kw: string) => void;
 }
 const ShapeSearchBox: FC<Props> = ({ onStartSearch }) => {
   const { config } = useEditor();
+  const isMobile = useMobileDetect();
   const [suggestItems, setSuggestItems] = useState([]);
   const handleOnSearch = async (keyword: any) => {
     // onSearch will have as the first callback parameter
@@ -34,7 +36,7 @@ const ShapeSearchBox: FC<Props> = ({ onStartSearch }) => {
       onSelect={handleOnSelect}
       onFocus={handleOnFocus}
       onClear={() => onStartSearch('')}
-      autoFocus
+      autoFocus={!isMobile}
       styling={{ zIndex: 4 }}
     />
   );

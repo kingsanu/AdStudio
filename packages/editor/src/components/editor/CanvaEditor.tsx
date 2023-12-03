@@ -97,6 +97,7 @@ const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
                 display: 'grid',
                 alignItems: 'center',
                 flexShrink: 0,
+                zIndex: 3,
                 '@media (max-width: 900px)': {
                   display: 'none',
                 },

@@ -5,6 +5,7 @@ import TrashIcon from 'canva-editor/icons/TrashIcon';
 import AddNewPageIcon from 'canva-editor/icons/AddNewPageIcon';
 import SortablePageSettings from './SortablePageSettings';
 import { cloneDeep } from 'lodash';
+import CloseIcon from 'canva-editor/icons/CloseIcon';
 
 interface PageSettingsProps {
   onChangePage: (pageIndex: number) => void;
@@ -146,13 +147,30 @@ const PageSettings: FC<PageSettingsProps> = ({ onChangePage }) => {
         >
           <TrashIcon />
         </div>
+        <div
+            css={{
+                fontSize: 20,
+                flexShrink: 0,
+                width: 32,
+                height: 32,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginLeft: 'auto'
+            }}
+            onClick={() => actions.togglePageSettings()}
+        >
+            <CloseIcon />
+        </div>
       </div>
       <div
         ref={ref}
         css={{
           flexGrow: 1,
           overflowY: 'auto',
-          padding: 24,
+          padding: '24px 24px 56px',
+          maxHeight: '100%'
         }}
       >
         <SortablePageSettings
@@ -171,6 +189,7 @@ const PageSettings: FC<PageSettingsProps> = ({ onChangePage }) => {
           onChange={(change) => {
             actions.swapPagePosition(change.fromIndex, change.toIndex);
           }}
+          onDoubleClick={() => actions.togglePageSettings()}
         />
       </div>
     </div>

@@ -118,16 +118,22 @@ const BottomSheet: FC<BottomSheetProps> = ({
           }}
           style={{
             position: 'absolute',
-            top: '10px',
+            top: '5px',
             left: '50%',
             transform: 'translateX(-50%)',
             cursor: 'grab',
-            width: '50px',
-            height: '6px',
-            background: '#ccc',
-            borderRadius: '5px',
+            height: 10,
+            width: 100,
+            textAlign: 'center'
           }}
-        />
+        >
+          <button css={{
+            width: 50,
+            height: 6,
+            background: '#ccc',
+            borderRadius: 5
+          }}></button>
+        </motion.div>
         {children}
       </motion.div>
     </AnimatePresence>

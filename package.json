@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "api": "cd api && yarn dev",
     "build": "tsc && vite build",
     "build-editor": "cd packages/editor & tsc && vite build",
