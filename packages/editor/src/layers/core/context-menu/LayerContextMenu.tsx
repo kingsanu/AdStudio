@@ -209,7 +209,7 @@ const LayerContextMenu: ForwardRefRenderFunction<HTMLDivElement> = (_, ref) => {
                 paddingTop: 8,
                 paddingBottom: 8,
                 borderRadius: 4,
-                zIndex: 30,
+                zIndex: 31,
                 boxShadow: '0 0 0 1px rgba(64,87,109,.07),0 2px 12px rgba(53,71,90,.2)',
                 transform: getTransformStyle({
                     position: {

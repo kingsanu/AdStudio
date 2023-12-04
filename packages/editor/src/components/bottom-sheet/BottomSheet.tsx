@@ -1,4 +1,5 @@
 import React, { FC, useEffect, useRef, useState } from 'react';
+import ReactDOM from 'react-dom';
 import {
   motion,
   useAnimation,
@@ -9,6 +10,10 @@ import {
 
 interface BottomSheetProps {
   isOpen: boolean;
+  containerId?: string;
+  style?: { [pro: string]: string | number };
+  zIndex?: number;
+  dragListener?: boolean;
   onClose: () => void;
   onOpen?: () => void;
   children: React.ReactNode;
@@ -16,6 +21,12 @@ interface BottomSheetProps {
 
 const BottomSheet: FC<BottomSheetProps> = ({
   isOpen,
+  containerId,
+  style = {
+    paddingBottom: 65,
+  },
+  zIndex = 3,
+  dragListener = true,
   onClose,
   onOpen,
   children,
@@ -53,7 +64,8 @@ const BottomSheet: FC<BottomSheetProps> = ({
   };
 
   const handleDragEnd = () => {
-    if (sheetY.get() > sheetHeight * 0.4) { // Hide if dropped position at 40% height
+    if (sheetY.get() > sheetHeight * 0.4) {
+      // Hide if dropped position at 40% height
       onClose();
     } else {
       controls.start({ y: 0 });
@@ -64,7 +76,7 @@ const BottomSheet: FC<BottomSheetProps> = ({
     onClose();
   };
 
-  return (
+  const pageRender = () => (
     <AnimatePresence onExitComplete={() => sheetY.set(0)}>
       {offsetY === 0 && (
         <motion.div
@@ -76,7 +88,7 @@ const BottomSheet: FC<BottomSheetProps> = ({
             width: '100%',
             height: '100%',
             background: 'rgba(0, 0, 0, 0.5)',
-            zIndex: 1000,
+            zIndex: zIndex ? zIndex : 1,
           }}
           onClick={handleBackdropClick}
         />
@@ -86,7 +98,7 @@ const BottomSheet: FC<BottomSheetProps> = ({
         drag='y'
         dragControls={dragControls}
         dragElastic={0.1}
-        dragListener={false}
+        dragListener={dragListener}
         dragConstraints={{ top: 0, bottom: sheetHeight }}
         onDrag={handleDrag}
         onDragEnd={handleDragEnd}
@@ -105,39 +117,61 @@ const BottomSheet: FC<BottomSheetProps> = ({
           boxShadow: '0px -2px 10px rgba(0, 0, 0, 0.1)',
           borderTopLeftRadius: '10px',
           borderTopRightRadius: '10px',
-          paddingTop: 20,
-          paddingBottom: 65,
+          paddingTop: dragListener ? 20 : 0,
           boxSizing: 'border-box',
           overflow: 'auto',
-          zIndex: 1000,
+          zIndex: zIndex ? zIndex + 1 : 2,
+          ...style,
         }}
       >
-        <motion.div
-          onPointerDown={(e) => {
-            dragControls.start(e)
-          }}
-          style={{
-            position: 'absolute',
-            top: '5px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            cursor: 'grab',
-            height: 10,
-            width: 100,
-            textAlign: 'center'
-          }}
-        >
-          <button css={{
-            width: 50,
-            height: 6,
-            background: '#ccc',
-            borderRadius: 5
-          }}></button>
-        </motion.div>
+        {dragListener && (
+          <motion.div
+            onPointerDown={(e) => {
+              dragControls.start(e);
+            }}
+            style={{
+              position: 'absolute',
+              top: '5px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              cursor: 'grab',
+              height: 10,
+              width: 100,
+              textAlign: 'center',
+            }}
+          >
+            <button
+              css={{
+                width: 50,
+                height: 6,
+                background: '#ccc',
+                borderRadius: 5,
+              }}
+            ></button>
+          </motion.div>
+        )}
         {children}
       </motion.div>
     </AnimatePresence>
   );
+
+  if (!containerId) {
+    return pageRender();
+  }
+  const [container, setContainer] = useState(
+    window.document.getElementById(containerId)
+  );
+
+  useEffect(() => {
+    setContainer(window.document.getElementById(containerId));
+  }, []);
+
+  // Container not found
+  if (!container) {
+    return pageRender();
+  }
+
+  return isOpen ? ReactDOM.createPortal(pageRender(), container) : null;
 };
 
 export default BottomSheet;

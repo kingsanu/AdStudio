@@ -29,6 +29,8 @@ import DocumentIcon from 'canva-editor/icons/DocumentIcon';
 import HorizontalCarousel from 'canva-editor/components/carousel/HorizontalCarousel';
 import OutlineButton from 'canva-editor/components/button/OutlineButton';
 import axios from 'axios';
+import useMobileDetect from 'canva-editor/hooks/useMobileDetect';
+import CloseIcon from 'canva-editor/icons/CloseIcon';
 
 const ListItem = styled('div')`
   height: 40px;
@@ -84,6 +86,7 @@ const FontSidebar: ForwardRefRenderFunction<
   FontSidebarProps
 > = ({ selected, onChangeFontFamily, ...props }, ref) => {
   const dataRef = useRef(false);
+  const isMobile = useMobileDetect();
   const scrollRef = useRef<HTMLDivElement>(null);
   const { usedFonts } = useUsedFont();
   const { actions, fontList, config } = useEditor((state, config) => ({
@@ -114,7 +117,9 @@ const FontSidebar: ForwardRefRenderFunction<
       return params;
     };
     return axios
-      .get<FontDataApi[]>(`${config.apis.url}${config.apis.searchFonts}?${buildParams(query)}`)
+      .get<FontDataApi[]>(
+        `${config.apis.url}${config.apis.searchFonts}?${buildParams(query)}`
+      )
       .then((res) => res.data);
   }, []);
 
@@ -184,6 +189,49 @@ const FontSidebar: ForwardRefRenderFunction<
     return listIdx;
   };
 
+  const renderHeader = () =>
+    isMobile && (
+      <div
+        css={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+          height: 48,
+          borderBottom: '1px solid rgba(57,76,96,.15)',
+          padding: '0 20px',
+        }}
+      >
+        <p
+          css={{
+            lineHeight: '48px',
+            fontWeight: 600,
+            color: '#181C32',
+            flexGrow: 1,
+          }}
+        >
+          Fonts
+        </p>
+        <div
+          css={{
+            fontSize: 20,
+            flexShrink: 0,
+            width: 32,
+            height: 32,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          onClick={() => {
+            actions.setSidebar();
+          }}
+        >
+          <CloseIcon />
+        </div>
+      </div>
+    );
+
   return (
     <Sidebar ref={ref} {...props}>
       <FontStyle />
@@ -196,6 +244,7 @@ const FontSidebar: ForwardRefRenderFunction<
           overflowY: 'auto',
         }}
       >
+        {renderHeader()}
         <div css={{ padding: '16px 16px 0' }}>
           <FontSearchBox onSearch={handleSearch} />
           <div css={{ marginTop: 8 }}>

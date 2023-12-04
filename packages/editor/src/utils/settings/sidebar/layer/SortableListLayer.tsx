@@ -51,6 +51,9 @@ const LayerItem = styled('button')`
     border-radius: 8px;
     color: #fff;
     padding: 0 6px;
+    @media (max-width: 900px) {
+      display: none!important;
+    }
   }
   :hover .more-btn {
     display: block;

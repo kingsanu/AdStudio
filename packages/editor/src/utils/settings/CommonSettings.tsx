@@ -10,8 +10,10 @@ import LockIcon from 'canva-editor/icons/LockIcon';
 import LockOpenIcon from 'canva-editor/icons/LockOpenIcon';
 import TransparencyIcon from 'canva-editor/icons/TransparencyIcon';
 import SettingDivider from './components/SettingDivider';
+import useMobileDetect from 'canva-editor/hooks/useMobileDetect';
 
 const CommonSettings = () => {
+  const isMobile = useMobileDetect();
   const transparencyButtonRef = useRef<HTMLDivElement>(null);
   const [openTransparencySetting, setOpenTransparencySetting] = useState(false);
   const { selectedLayers, selectedLayerIds } = useSelectedLayers();
@@ -117,7 +119,7 @@ const CommonSettings = () => {
                 <Popover
                   open={openTransparencySetting}
                   anchorEl={transparencyButtonRef.current}
-                  placement={'bottom-end'}
+                  placement={isMobile ? 'top-end' : 'bottom-end'}
                   onClose={() => setOpenTransparencySetting(false)}
                   offsets={{
                     'bottom-end': { x: 0, y: 8 },

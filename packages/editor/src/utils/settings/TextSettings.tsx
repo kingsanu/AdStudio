@@ -94,6 +94,7 @@ import TextAUnderlineIcon from 'canva-editor/icons/TextAUnderlineIcon';
 import ListBulletsIcon from 'canva-editor/icons/ListBulletsIcon';
 import ListNumbersIcon from 'canva-editor/icons/ListNumbersIcon';
 import LineSpacingIcon from 'canva-editor/icons/LineSpacingIcon';
+import useMobileDetect from 'canva-editor/hooks/useMobileDetect';
 
 interface TextSettingsProps {
   layers: Layer<TextLayerProps>[];
@@ -104,6 +105,7 @@ const fontSizeList = [
   104, 120, 144,
 ];
 const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
+  const isMobile = useMobileDetect();
   const fontSizeRef = useRef<HTMLDivElement>(null);
   const fontSizeInputRef = useRef<HTMLInputElement>(null);
   const spacingRef = useRef<HTMLDivElement>(null);
@@ -1397,7 +1399,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
           <Popover
             open={openFontSizeSelection}
             anchorEl={fontSizeInputRef.current}
-            placement={'bottom'}
+            placement={isMobile ? 'top' : 'bottom'}
             onClose={() => setOpenFontSizeSelection(false)}
           >
             <div css={{ maxHeight: '50vh', overflowY: 'auto' }}>

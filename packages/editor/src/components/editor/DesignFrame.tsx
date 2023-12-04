@@ -102,7 +102,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
     const serializedData: SerializedPage[] = unpack(data);
     actions.setData(serializedData);
     setTimeout(() => {
-      actions.setScale(((frameRef?.current?.offsetWidth || 0)-32)/pageSize.width); // Padding 16x2
+      actions.setScale(((frameRef?.current?.offsetWidth || 0)-(isMobile ? 32 : 112))/pageSize.width); // Padding 16x2
     }, 16);
   }, [data, actions]);
 
@@ -160,6 +160,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
 
   const [previousScale, setPreviousScale] = useState(scale);
   useEffect(() => {
+    if (isMobile) return;
     let offset = {
       x: frameRef?.current?.scrollLeft || 0,
       y: frameRef?.current?.scrollTop || 0,
@@ -444,6 +445,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
                         width: window.innerWidth,
                         height: window.innerHeight,
                         overflow: 'hidden',
+                        marginTop: 5
                       },
                     }}
                   >

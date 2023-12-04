@@ -138,19 +138,22 @@ const Sidebar = () => {
       }}
     >
       {isMobile && (
-        <BottomSheet
-          isOpen={!!state.sideBarTab}
-          onClose={() => {
-            actions.setSidebarTab();
-            actions.setSidebar();
-          }}
-        >
-          {state.sideBarTab && getSidebarComponent(state.sideBarTab)}
-        </BottomSheet>
+        <>
+          <BottomSheet
+            isOpen={!!state.sideBarTab}
+            onClose={() => {
+              actions.setSidebarTab();
+              actions.setSidebar();
+            }}
+          >
+            {state.sideBarTab && getSidebarComponent(state.sideBarTab)}
+          </BottomSheet>
+          <div id='bottom_sheet' />
+        </>
       )}
       <div
         css={{
-          display: 'flex'
+          display: 'flex',
         }}
       >
         <SidebarTab
@@ -185,7 +188,7 @@ const Sidebar = () => {
           overflow: 'hidden',
           height: '100%',
           pointerEvents: 'none',
-          zIndex: 9999,
+          zIndex: isMobile ? 1000 : 30,
           ...(state.sideBarTab
             ? {
                 position: 'absolute',
@@ -196,16 +199,19 @@ const Sidebar = () => {
         }}
         id={'settings'}
       />
-      {isMobile &&
+      {isMobile && (
         <div>
-          <FABButton css={{left: 10}} onClick={() => actions.addPage()}>
-            <PlusIcon/>
+          <FABButton css={{ left: 10 }} onClick={() => actions.addPage()}>
+            <PlusIcon />
           </FABButton>
-          <FABButton css={{right: 10}} onClick={() => actions.togglePageSettings()}>
-            <GridViewIcon/>
+          <FABButton
+            css={{ right: 10 }}
+            onClick={() => actions.togglePageSettings()}
+          >
+            <GridViewIcon />
           </FABButton>
         </div>
-      }
+      )}
     </div>
   );
 };

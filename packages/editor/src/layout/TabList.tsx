@@ -24,7 +24,7 @@ const SidebarTab: FC<SidebarTabProps> = ({ tabs, active, onChange }) => {
                     display: 'flex',
                     justifyContent: 'center',
                     borderTop: '1px solid rgb(146 146 146 / 15%)',
-                    zIndex: 1000
+                    zIndex: 10
                 },
             }}
         >
