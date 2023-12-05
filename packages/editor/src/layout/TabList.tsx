@@ -14,7 +14,7 @@ const SidebarTab: FC<SidebarTabProps> = ({ tabs, active, onChange }) => {
         <div
             css={{
                 color: '#5E6278',
-                borderRight: '1px solid rgba(217, 219, 228, 0.6)',
+                borderRight: active ? '1px solid rgba(217, 219, 228, 0.6)' : 'none',
                 '@media (max-width: 900px)': {
                     position: 'fixed',
                     bottom: 0,

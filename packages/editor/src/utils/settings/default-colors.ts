@@ -4,3 +4,5 @@ export const defaultColors = [
     ['#0097B2', '#0CC0DF', '#5CE1E6', '#38B6FF', '#5271FF', '#004AAD'],
     ['#00BF62', '#7ED957', '#C1FF72', '#FFDE59', '#FFBD59', '#FF914D'],
 ];
+
+export const defaultGradientColors = [];

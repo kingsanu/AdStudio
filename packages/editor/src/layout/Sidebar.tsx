@@ -134,6 +134,7 @@ const Sidebar = () => {
         display: 'flex',
         position: 'relative',
         backgroundColor: '#ffffff',
+        borderLeft: '1px solid rgba(217, 219, 228, 0.6)',
         borderRight: '1px solid rgba(217, 219, 228, 0.6)',
       }}
     >
@@ -193,7 +194,7 @@ const Sidebar = () => {
             ? {
                 position: 'absolute',
                 top: 0,
-                left: 73,
+                left: 77,
               }
             : {}),
         }}

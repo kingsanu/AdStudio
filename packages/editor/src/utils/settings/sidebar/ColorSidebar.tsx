@@ -157,7 +157,7 @@ const ColorSidebar: ForwardRefRenderFunction<
           alignItems: 'center',
           justifyContent: 'center',
           flexShrink: 0,
-          height: 48,
+          height: 50,
           borderBottom: '1px solid rgba(57,76,96,.15)',
           padding: '0 20px',
         }}
@@ -264,6 +264,7 @@ const ColorSidebar: ForwardRefRenderFunction<
                     paddingBottom: '100%',
                     position: 'relative',
                     width: '100%',
+                    marginTop: 13
                   }}
                 >
                   <div
@@ -370,8 +371,10 @@ const ColorSidebar: ForwardRefRenderFunction<
           </div>
         </div>
         <div css={{ borderTop: '1px solid rgba(217, 219, 228, 0.6)' }}>
-          <div css={{ padding: '8px 0', fontWeight: 700 }}>Default Colors</div>
-
+          <div css={{ padding: '8px 0', fontWeight: 700 }}>
+            Default Colors
+          </div>
+          <p css={{color: 'rgba(13,18,22,.7)', fontSize: 11, margin: '6px 0'}}>Solid colors</p>
           <div
             css={{
               display: 'grid',

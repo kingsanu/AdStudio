@@ -103,7 +103,7 @@ const LayerSidebar: ForwardRefRenderFunction<
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
-            height: 48,
+            height: 50,
             borderBottom: '1px solid rgba(57,76,96,.15)',
             padding: '0 20px',
           }}

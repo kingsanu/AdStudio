@@ -1,3 +1,4 @@
+import useMobileDetect from 'canva-editor/hooks/useMobileDetect';
 import { Tooltip as ReactTooltip } from 'canva-editor/tooltip';
 import { generateRandomID } from 'canva-editor/utils/identityGenerator';
 import { ForwardRefRenderFunction, PropsWithChildren, forwardRef } from 'react';
@@ -32,6 +33,7 @@ const EditorButton: ForwardRefRenderFunction<
   ref
 ) => {
   const btnId = 'btn_' + generateRandomID();
+  const isMobile = useMobileDetect();
   return (
     <>
       <button
@@ -63,7 +65,7 @@ const EditorButton: ForwardRefRenderFunction<
       >
         {children}
       </button>
-      {tooltip && <ReactTooltip id={btnId} content={tooltip} />}
+      {!isMobile && tooltip && <ReactTooltip id={btnId} content={tooltip} />}
     </>
   );
 };

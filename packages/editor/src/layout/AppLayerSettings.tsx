@@ -9,7 +9,7 @@ const AppLayerSettings = () => {
                 background: 'white',
                 borderBottom: '1px solid rgba(57,76,96,.15)',
                 height: 50,
-                overflowX: 'auto',
+                overflow: 'auto',
                 flexShrink: 0,
                 '@media (max-width: 900px)': {
                     position: 'fixed',

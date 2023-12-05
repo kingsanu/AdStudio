@@ -102,7 +102,9 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
     const serializedData: SerializedPage[] = unpack(data);
     actions.setData(serializedData);
     setTimeout(() => {
-      actions.setScale(((frameRef?.current?.offsetWidth || 0)-(isMobile ? 32 : 112))/pageSize.width); // Padding 16x2
+      const maxInitScale = .50;
+      const initScale = ((frameRef?.current?.offsetWidth || 0)-(isMobile ? 32 : 112))/pageSize.width; // Padding 16x2
+      actions.setScale(initScale > maxInitScale ? maxInitScale : initScale);
     }, 16);
   }, [data, actions]);
 

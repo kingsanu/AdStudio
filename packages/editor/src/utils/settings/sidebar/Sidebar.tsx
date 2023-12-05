@@ -13,7 +13,6 @@ const Sidebar: ForwardRefRenderFunction<HTMLDivElement, PropsWithChildren<Sideba
         <div
             ref={ref}
             css={{
-                borderRight: '1px solid rgba(57,76,96,.15)',
                 background: '#fff',
                 width: '100%',
                 height: '100%',
