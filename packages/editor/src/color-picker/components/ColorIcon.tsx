@@ -26,7 +26,6 @@ const ColorIcon: ForwardRefRenderFunction<
         paddingBottom: '100%',
         position: 'relative',
         width: '100%',
-        cursor: 'pointer',
       }}
       {...props}
     >

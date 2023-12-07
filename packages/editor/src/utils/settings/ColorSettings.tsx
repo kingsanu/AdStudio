@@ -5,7 +5,6 @@ import { useEditor } from 'canva-editor/hooks';
 import { getGradientBackground } from 'canva-editor/layers';
 import { GradientStyle } from 'canva-editor/types';
 import { ColorParser } from '../../color-picker/utils';
-import SettingDivider from './components/SettingDivider';
 
 interface ColorSettingsProps {
   colors: string[];

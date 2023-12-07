@@ -577,6 +577,7 @@ export const ActionMethods = (state: EditorState) => {
         state.pages.push(page);
         state.activePage = state.activePage + 1;
       }
+      state.selectedLayers[state.activePage] = ['ROOT'];
     },
     movePageUp: (pageIndex: number) => {
       const newPage = cloneDeep(state.pages[pageIndex]);

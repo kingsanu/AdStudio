@@ -9,7 +9,7 @@ import PlusIcon from 'canva-editor/icons/PlusIcon';
 import { isEqual, uniq, uniqWith } from 'lodash';
 import GradientPicker from './GradientPicker';
 import ColorPickerPopover from './ColorPickerPopover';
-import { defaultColors } from '../default-colors';
+import { defaultColors, defaultGradientColors } from '../default-colors';
 import { ColorIcon } from 'canva-editor/color-picker';
 import { useEditor } from 'canva-editor/hooks';
 import { getGradientBackground } from 'canva-editor/layers';
@@ -219,6 +219,7 @@ const ColorSidebar: ForwardRefRenderFunction<
                     paddingBottom: '100%',
                     position: 'relative',
                     width: '100%',
+                    marginTop: 13,
                   }}
                 >
                   <div
@@ -240,7 +241,7 @@ const ColorSidebar: ForwardRefRenderFunction<
                         fontSize: 16,
                         width: 24,
                         height: 24,
-                        background: '#fff',
+                        background: '#ffffff',
                         borderRadius: '50%',
                         display: 'flex',
                         alignItems: 'center',
@@ -264,7 +265,7 @@ const ColorSidebar: ForwardRefRenderFunction<
                     paddingBottom: '100%',
                     position: 'relative',
                     width: '100%',
-                    marginTop: 13
+                    marginTop: 13,
                   }}
                 >
                   <div
@@ -286,7 +287,7 @@ const ColorSidebar: ForwardRefRenderFunction<
                         fontSize: 16,
                         width: 24,
                         height: 24,
-                        background: '#fff',
+                        background: '#ffffff',
                         borderRadius: '50%',
                         display: 'flex',
                         alignItems: 'center',
@@ -371,10 +372,12 @@ const ColorSidebar: ForwardRefRenderFunction<
           </div>
         </div>
         <div css={{ borderTop: '1px solid rgba(217, 219, 228, 0.6)' }}>
-          <div css={{ padding: '8px 0', fontWeight: 700 }}>
-            Default Colors
-          </div>
-          <p css={{color: 'rgba(13,18,22,.7)', fontSize: 11, margin: '6px 0'}}>Solid colors</p>
+          <div css={{ padding: '8px 0', fontWeight: 700 }}>Default Colors</div>
+          <p
+            css={{ color: 'rgba(13,18,22,.7)', fontSize: 11, margin: '6px 0' }}
+          >
+            Solid colors
+          </p>
           <div
             css={{
               display: 'grid',
@@ -387,12 +390,43 @@ const ColorSidebar: ForwardRefRenderFunction<
                 <ColorIcon
                   key={ci}
                   color={c}
-                  selected={selected}
+                  selected={null}
                   onClick={() => handleSelectColor(c)}
                 />
               ))
             )}
           </div>
+          {useGradient && (
+            <>
+              <p
+                css={{
+                  color: 'rgba(13,18,22,.7)',
+                  fontSize: 11,
+                  margin: '20px 0 6px 0',
+                }}
+              >
+                Gradient colors
+              </p>
+              <div
+                css={{
+                  display: 'grid',
+                  gridGap: 12,
+                  gridTemplateColumns: `repeat(${defaultGradientColors[0].length},minmax(0,1fr))`,
+                }}
+              >
+                {defaultGradientColors.map((colorList) =>
+                  colorList.map((c, ci) => (
+                    <ColorIcon
+                      key={ci}
+                      color={getGradientBackground(c.colors, c.style)}
+                      selected={null}
+                      onClick={() => handleSelectGradient(c)}
+                    />
+                  ))
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </Sidebar>

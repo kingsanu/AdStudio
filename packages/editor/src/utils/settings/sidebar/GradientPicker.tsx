@@ -32,7 +32,7 @@ const GradientPicker: FC<PropsWithChildren<GradientPickerProps>> = ({
 }) => {
     const mainRef = useRef<HTMLDivElement>(null);
     const gradientRef = useRef<HTMLDivElement>(null);
-    const colorRef = useRef<HTMLDivElement[]>([]);
+    const colorRef = useRef<HTMLButtonElement[]>([]);
     const [openGradientPicker, setOpenGradientPicker] = useState(false);
     const [editColorPicker, setEditColorPicker] = useState<{ index: number; color: string } | null>(null);
     const [tab, setTab] = useState(gradient ? 'gradient' : 'solid');
@@ -204,7 +204,7 @@ const GradientPicker: FC<PropsWithChildren<GradientPickerProps>> = ({
                                     {tmpGradient?.colors.map((color, i) => (
                                         <div key={i} css={{ position: 'relative' }}>
                                             <ColorIcon
-                                                ref={(el) => (colorRef.current[i] = el as HTMLDivElement)}
+                                                ref={(el) => (colorRef.current[i] = el as HTMLButtonElement)}
                                                 selected={null}
                                                 color={color}
                                                 onClick={() => setEditColorPicker({ index: i, color })}

@@ -1,7 +1,7 @@
 {
   "name": "canva-editor",
   "private": false,
-  "version": "1.0.4",
+  "version": "1.0.5",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,6 +16,10 @@
   },
   "license": "MIT License with No Resale Clause",
   "keywords": [
+    "canva editor",
+    "canvajs",
+    "canva.js",
+    "react canvajs",
     "graphic design tool",
     "online design software",
     "react design app",

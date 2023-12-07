@@ -12,6 +12,7 @@ import { getTransformStyle } from 'canva-editor/layers';
 import { CursorPosition, GestureEvent } from 'canva-editor/types';
 import { getPosition } from 'canva-editor/utils';
 import { distanceBetweenPoints } from 'canva-editor/utils/2d/distanceBetweenPoints';
+import { isSafari } from 'canva-editor/utils/browser';
 
 export const useZoomPage = (
   frameRef: RefObject<HTMLDivElement | null>,
@@ -404,6 +405,7 @@ export const useZoomPage = (
   }, [pageSize, setPageTransform]);
 
   useEffect(() => {
+    if (isSafari) return; // Skipping Safari
     const handleGestureStart = (e: Event) => {
       e.preventDefault();
       pageZoomStart();

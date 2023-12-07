@@ -189,6 +189,7 @@ const Sidebar = () => {
           overflow: 'hidden',
           height: '100%',
           pointerEvents: 'none',
+          borderLeft: '1px solid rgba(217, 219, 228, 0.6)',
           zIndex: isMobile ? 1000 : 30,
           ...(state.sideBarTab
             ? {
