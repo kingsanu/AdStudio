@@ -13,7 +13,7 @@ const FontSearchBox: FC<Props> = ({ onSearch }) => {
       onSearch={onSearch}
       autoFocus
       showNoResults={false}
-      styling={{ zIndex: 4 }}
+      styling={{ zIndex: 2 }}
       placeholder='Search fonts'
     />
   );

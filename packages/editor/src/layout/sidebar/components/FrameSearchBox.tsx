@@ -41,7 +41,7 @@ const FrameSearchBox: FC<Props> = ({ onStartSearch }) => {
       onClear={() => onStartSearch('')}
       onFocus={handleOnFocus}
       autoFocus={!isMobile}
-      styling={{ zIndex: 4 }}
+      styling={{ zIndex: 2 }}
     />
   );
 };

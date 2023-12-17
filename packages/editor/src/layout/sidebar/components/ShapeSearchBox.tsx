@@ -37,7 +37,7 @@ const ShapeSearchBox: FC<Props> = ({ onStartSearch }) => {
       onFocus={handleOnFocus}
       onClear={() => onStartSearch('')}
       autoFocus={!isMobile}
-      styling={{ zIndex: 4 }}
+      styling={{ zIndex: 2 }}
     />
   );
 };
