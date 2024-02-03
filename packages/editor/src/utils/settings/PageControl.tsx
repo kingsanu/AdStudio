@@ -12,12 +12,13 @@ import GithubIcon from 'canva-editor/icons/GithubIcon';
 const PageControl = () => {
   const labelScaleOptionRef = useRef<HTMLDivElement>(null);
   const [openScaleOptions, setOpenScaleOptions] = useState(false);
-  const { actions, activePage, totalPages, scale, isOpenPageSettings } =
+  const { actions, activePage, totalPages, scale, isOpenPageSettings, isOpenNotes } =
     useEditor((state) => ({
       activePage: state.activePage,
       totalPages: state.pages.length,
       scale: state.scale,
       isOpenPageSettings: state.openPageSettings,
+      isOpenNotes: state.sideBarTab === 'Notes'
     }));
 
   const handleChangeScale = (value: number) => {
@@ -35,9 +36,10 @@ const PageControl = () => {
     >
       <div css={{ flexGrow: 1 }}>
         <EditorButton
+          isActive={isOpenNotes}
           onClick={() => {
             actions.setSidebar();
-            actions.setSidebarTab('Notes');
+            actions.setSidebarTab(isOpenNotes ? null : 'Notes');
           }}
         >
           <NotesIcon />

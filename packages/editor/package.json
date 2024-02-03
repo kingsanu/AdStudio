@@ -1,7 +1,7 @@
 {
   "name": "canva-editor",
   "private": false,
-  "version": "1.0.51",
+  "version": "1.0.56",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -72,6 +72,7 @@
     "prosemirror-state": "^1.4.3",
     "react-device-detect": "^2.2.3",
     "react-singleton-hook": "^4.0.1",
+    "svg-path-round-corners": "^0.1.5",
     "w3c-keyname": "^2.2.8"
   },
   "devDependencies": {},

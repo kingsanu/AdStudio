@@ -2774,6 +2774,11 @@ supports-preserve-symlinks-flag@^1.0.0:
   resolved "https://registry.npmjs.org/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz"
   integrity sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==
 
+svg-path-round-corners@^0.1.5:
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/svg-path-round-corners/-/svg-path-round-corners-0.1.5.tgz#40b33efd184ca202b720304d0a7041d5909d10d5"
+  integrity sha512-IOEsGoDyaXJg7KG2W9xfPAOrBEzvqXLstyz3eClAEPxZAfaPsZ4Eo85DKYjL2hr5fmVKWcgiM3vBCEaROBCyFA==
+
 text-table@^0.2.0:
   version "0.2.0"
   resolved "https://registry.npmjs.org/text-table/-/text-table-0.2.0.tgz"

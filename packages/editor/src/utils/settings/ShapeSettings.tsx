@@ -127,7 +127,7 @@ const ShapeSettings: FC<ShapeSettingsProps> = ({ layers }) => {
   };
   const updateBorderColor = (color: string) => {
     const layerIds = layers
-      .filter((layer) => layer.data.props.border?.style !== 'none')
+      .filter((layer) => layer.data.props.border?.weight)
       .map((layer) => layer.id);
     actions.history
       .throttle(2000)
@@ -164,7 +164,7 @@ const ShapeSettings: FC<ShapeSettingsProps> = ({ layers }) => {
             setColorSetting('background');
           }}
         />
-        {border && border.style !== 'none' && (
+        {border && border.weight > 0 && (
           <Fragment>
             <ColorSettings
               colors={[border.color]}
@@ -249,15 +249,14 @@ const ShapeSettings: FC<ShapeSettingsProps> = ({ layers }) => {
               onChange={updateBorderWeight}
             />
 
-            {/* TODO: Coming soon */}
-            {/* {layers.length === 1 &&
+            {layers.length === 1 &&
               (
                 <Slider
                   label={'Corner Rounding'}
                   value={roundedCorners}
                   onChange={updateRoundedCorners}
                 />
-              )} */}
+              )}
           </div>
         </Popover>
       </div>

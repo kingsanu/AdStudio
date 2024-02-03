@@ -368,7 +368,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
           display: 'flex',
           position: 'relative',
           height: '100%',
-          overflow: 'scroll',
+          overflow: 'auto',
           ...cursorCSS(),
           '@media (max-width: 900px)': {
             overflow: 'hidden',

@@ -884,7 +884,6 @@ export const ActionMethods = (state: EditorState) => {
         width = height * shapeRatio;
         scale = height / dl.props.boxSize.height;
       }
-      console.log(dl)
       state.pages[state.activePage].layers[layerId] = {
         id: layerId,
         data: mergeWithoutArray(cloneDeep(dl), {
@@ -1150,7 +1149,6 @@ export const ActionMethods = (state: EditorState) => {
       state.imageEditor = undefined;
     },
     fireDownloadCmd(cmdEnum: -1 | 0 | 1) {
-      console.log(cmdEnum)
       state.downloadCmd = cmdEnum;
     },
     goToGithubPage() {

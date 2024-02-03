@@ -1,21 +1,25 @@
 /// <reference lib="es2018.regexp" />
 
-import { hex2rgb } from "./hex2rgb";
-import { rgb2hsv } from "./rgb2hsv";
-import { HSVAColor, RGBAColor } from "./types";
+import { hex2rgb } from './hex2rgb';
+import { rgb2hsv } from './rgb2hsv';
+import { HSVAColor, RGBAColor } from './types';
 
 export const parseColor = (color: string): HSVAColor => {
-  let rgbColor;
-  if (rgbColorRegex.test(color)) {
-    rgbColor = parseRgba(color);
-  } else if (hexColorRegex.test(color)) {
-    rgbColor = parseHex(color);
-  }
+  try {
+    let rgbColor;
+    if (rgbColorRegex.test(color)) {
+      rgbColor = parseRgba(color);
+    } else if (hexColorRegex.test(color)) {
+      rgbColor = parseHex(color);
+    }
 
-  if (rgbColor) {
-    return rgb2hsv(rgbColor);
+    if (rgbColor) {
+      return rgb2hsv(rgbColor);
+    }
+  } catch (_) {
+    console.warn(`Cannot parse ${color}`);
   }
-  throw new Error(`Cannot parse ${color}`);
+  return { h: 0, s: 0, v: 0, a: 1 };
 };
 
 export const rgbColorRegex =
@@ -27,7 +31,7 @@ export const parseRgba = (color: string) => {
       r: parseInt(result.groups.r, 10),
       g: parseInt(result.groups.g, 10),
       b: parseInt(result.groups.b, 10),
-      a: typeof result.groups.a !== "undefined" ? parseInt(result.groups.a) : 1,
+      a: typeof result.groups.a !== 'undefined' ? parseInt(result.groups.a) : 1,
     } as RGBAColor;
   }
 };

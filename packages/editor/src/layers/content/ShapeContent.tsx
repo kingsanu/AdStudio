@@ -5,6 +5,9 @@ import {
   ShapeBorderStyle,
 } from '../../types';
 import { getGradientBackground } from '..';
+import { roundCorners } from 'canva-editor/utils/svgRounding';
+import { parse } from 'canva-editor/utils/svgRounding/parse';
+import { serialize } from 'canva-editor/utils/svgRounding/serialize';
 
 export interface ShapeContentProps extends LayerComponentProps {
   clipPath: string;
@@ -47,8 +50,13 @@ export const ShapeContent: FC<ShapeContentProps> = ({
         return undefined;
     }
   };
-  const svgWidth = boxSize.width / scale / shapeSize.width;
-  const svgHeight = boxSize.height / scale / shapeSize.height;
+  const deductBorder = border?.weight ? border?.weight / 2 : 0;
+  const boxSizeWidth = (boxSize.width / scale) - deductBorder;
+  const boxSizeHeight = (boxSize.height / scale) - deductBorder;
+  const svgWidth = boxSizeWidth / shapeSize.width;
+  const svgHeight = boxSizeHeight / shapeSize.height;
+  const path = roundedCorners > 0 ? serialize(roundCorners(parse(clipPath), roundedCorners)) : clipPath;
+
   return (
     <div
       css={{
@@ -60,7 +68,7 @@ export const ShapeContent: FC<ShapeContentProps> = ({
     >
       <div
         css={{
-          clipPath: `path("${clipPath}")`,
+          clipPath: `path("${path}")`,
           width: shapeSize.width + 'px',
           height: shapeSize.height + 'px',
           background: gradientBackground
@@ -73,10 +81,9 @@ export const ShapeContent: FC<ShapeContentProps> = ({
           transformOrigin: '0 0',
         }}
       />
-
       {border && (
         <svg
-          viewBox={`0 0 ${boxSize.width / scale} ${boxSize.height / scale}`}
+          viewBox={`${0 - deductBorder} ${0 - deductBorder} ${boxSize.width / scale + (border?.weight ?? 0)} ${boxSize.height / scale  + (border?.weight ?? 0)}`}
           css={{
             position: 'absolute',
             inset: 0,
@@ -84,15 +91,8 @@ export const ShapeContent: FC<ShapeContentProps> = ({
             transformOrigin: '0 0',
           }}
         >
-          {roundedCorners > 0 && (
-            <defs>
-              <clipPath id='roundedCorners'>
-                <path d={clipPath} />
-              </clipPath>
-            </defs>
-          )}
           <path
-            d={clipPath}
+            d={path}
             strokeLinecap={'butt'}
             fill={'none'}
             stroke={border.color}

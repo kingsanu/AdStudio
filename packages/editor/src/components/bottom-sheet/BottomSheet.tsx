@@ -111,7 +111,7 @@ const BottomSheet: FC<BottomSheetProps> = ({
           bottom: 0,
           left: 0,
           width: '100%',
-          height: '95%',
+          height: '92%',
           minHeight: '50%',
           background: '#fff',
           boxShadow: '0px -2px 10px rgba(0, 0, 0, 0.1)',

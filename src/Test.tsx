@@ -34,9 +34,7 @@ const Test = () => {
   const [saving, setSaving] = useState(false);
   const name = '';
   const handleOnChanges = (changes: any) => {
-    console.log('On changes');
-    console.log(changes);
-    
+    console.log('On changes: ', changes);
     setSaving(true);
     setTimeout(() => {
       setSaving(false);
@@ -44,9 +42,8 @@ const Test = () => {
   };
 
   const handleOnDesignNameChanges = (newName: string) => {
-    console.log('On name changes');
-    console.log(newName);
-    
+    console.log('On name changes: ' + newName);
+    setSaving(true);
     setSaving(true);
     setTimeout(() => {
       setSaving(false);

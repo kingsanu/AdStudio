@@ -10,6 +10,22 @@ import SyncedIcon from 'canva-editor/icons/SyncedIcon';
 import HeaderFileMenu from './sidebar/components/HeaderFileMenu';
 import SyncingIcon from 'canva-editor/icons/SyncingIcon';
 import useMobileDetect from 'canva-editor/hooks/useMobileDetect';
+import styled from '@emotion/styled';
+import ExportIcon from 'canva-editor/icons/ExportIcon';
+
+const Button = styled('button')`
+  display: flex;
+  align-items: center;
+  color: #fff;
+  line-height: 1;
+  background: rgb(255 255 255 / 7%);
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  &:hover {
+    background: rgb(255 255 255 / 15%);
+  }
+`;
 
 interface HeaderLayoutProps {
   logoUrl?: string;
@@ -33,7 +49,7 @@ const HeaderLayout: ForwardRefRenderFunction<
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        zIndex: 3,
+        zIndex: 31,
         '@media (max-width: 900px)': {
           padding: 12,
         },
@@ -77,7 +93,7 @@ const HeaderLayout: ForwardRefRenderFunction<
             }}
             onSetText={(newText) => {
               setName(newText);
-              onChanges(newText);
+              if (name !== newText) onChanges(newText);
             }}
             handleStyle={(isFocus) => {
               return {
@@ -134,6 +150,25 @@ const HeaderLayout: ForwardRefRenderFunction<
             <NextIcon />
           </EditorButton>
         </div>
+        {!isMobile && (
+          <>
+            <div
+              css={{
+                margin: '0 16px',
+              }}
+            >
+              <SettingDivider background='hsla(0,0%,100%,.15)' />
+            </div>
+            <Button onClick={() => {
+              actions.fireDownloadCmd(0);
+            }}>
+              <div css={{ fontSize: 20 }}>
+                <ExportIcon />
+              </div>{' '}
+              <span css={{ marginRight: 4, marginLeft: 4 }}>Export</span>
+            </Button>
+          </>
+        )}
       </div>
     </div>
   );
