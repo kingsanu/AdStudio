@@ -28,31 +28,31 @@
 
 /** Types variant **/
 .dark {
-  background: var(--rt-color-dark);
-  color: var(--rt-color-white);
+  background: #222;
+  color: #fff;
 }
 
 .light {
-  background-color: var(--rt-color-white);
-  color: var(--rt-color-dark);
+  background-color: #fff;
+  color: #222;
 }
 
 .success {
-  background-color: var(--rt-color-success);
-  color: var(--rt-color-white);
+  background-color: #8dc572;
+  color: #fff;
 }
 
 .warning {
-  background-color: var(--rt-color-warning);
-  color: var(--rt-color-white);
+  background-color: #f0ad4e;
+  color: #fff;
 }
 
 .error {
-  background-color: var(--rt-color-error);
-  color: var(--rt-color-white);
+  background-color: #be6464;
+  color: #fff;
 }
 
 .info {
-  background-color: var(--rt-color-info);
-  color: var(--rt-color-white);
+  background-color: #337ab7;
+  color: #fff;
 }

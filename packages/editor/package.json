@@ -1,7 +1,7 @@
 {
   "name": "canva-editor",
   "private": false,
-  "version": "1.0.56",
+  "version": "1.0.57",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -44,9 +44,9 @@
       "import": "./dist/canva-editor.es.js",
       "require": "./dist/canva-editor.umd.js"
     },
-    "./index.css": {
-      "import": "./dist/index.css",
-      "require": "./dist/index.css"
+    "./index.module.css": {
+      "import": "./dist/index.module.css",
+      "require": "./dist/index.module.css"
     }
   },
   "files": [
@@ -57,7 +57,6 @@
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@floating-ui/dom": "^1.5.3",
-    "@types/lodash": "^4.14.199",
     "axios": "^1.5.1",
     "classnames": "^2.3.2",
     "framer-motion": "^10.16.9",
@@ -72,14 +71,18 @@
     "prosemirror-state": "^1.4.3",
     "react-device-detect": "^2.2.3",
     "react-singleton-hook": "^4.0.1",
+    "styled-components": "^6.1.8",
     "svg-path-round-corners": "^0.1.5",
     "w3c-keyname": "^2.2.8"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/lodash": "^4.14.202",
+    "@types/react": "^18.2.63",
+    "@types/react-dom": "^18.2.20"
+  },
   "peerDependencies": {
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "styled-components": "^6.0.8"
+    "react-dom": "^18.2.0"
   },
   "bugs": {
     "url": "https://github.com/kenvinlu/canva-editor/issues"

@@ -43,11 +43,11 @@ export default defineConfig((configEnv) => ({
           react: 'React',
           'react-dom': 'ReactDOM',
           'styled-components': 'styled',
-        },
+        }
       },
     },
     commonjsOptions: {
       exclude: ['canva-editor'],
-    },
+    }
   }
 }));

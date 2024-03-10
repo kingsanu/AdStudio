@@ -3,6 +3,7 @@ import { serializeLayers } from '../../layer/layers';
 import { LayerId, SerializedLayerTree } from 'canva-editor/types';
 
 export const copy = async (state: EditorState, { pageIndex, layerIds }: { pageIndex: number; layerIds: LayerId[] }) => {
+    if (typeof window === 'undefined') return;
     const data: SerializedLayerTree[] = [];
     layerIds.map((layerId) => {
         data.push({

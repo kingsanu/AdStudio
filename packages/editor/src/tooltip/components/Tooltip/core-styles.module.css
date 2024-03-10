@@ -25,13 +25,13 @@
 }
 
 .show {
-  opacity: var(--rt-opacity);
-  transition: opacity var(--rt-transition-show-delay) ease-out;
+  opacity: 0.9;
+  transition: opacity 0.15s ease-out;
 }
 
 .closing {
   opacity: 0;
-  transition: opacity var(--rt-transition-closing-delay) ease-in;
+  transition: opacity 0.15s ease-in;
 }
 
 /** end - core styles **/

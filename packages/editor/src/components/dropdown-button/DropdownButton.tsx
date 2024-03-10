@@ -94,6 +94,7 @@ const DropdownButton: FC<Props> = ({ text, header, items }) => {
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
               fontSize: 13,
+              margin: 0
             }}
           >
             {item.label}

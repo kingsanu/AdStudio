@@ -17,7 +17,7 @@ export default function sortableElement(
   WrappedComponent,
   config = {withRef: false},
 ) {
-  return class WithSortableElement extends React.Component<{item: ItemType}> {
+  return class WithSortableElement extends React.Component<{item: ItemType}|any> {
     static displayName = provideDisplayName(
       'sortableElement',
       WrappedComponent,
