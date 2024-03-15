@@ -69,7 +69,8 @@ export interface EditorState {
         rotate?: number;
         cursor?: CursorPosition;
     };
-    downloadCmd: -1 | 0 | 1;
+    downloadPNGCmd: -1 | 0 | 1;
+    downloadPDFCmd: -1 | 0 | 1;
     saving: boolean;
     githubLink: string;
 }

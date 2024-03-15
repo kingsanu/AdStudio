@@ -160,7 +160,7 @@ const HeaderLayout: ForwardRefRenderFunction<
               <SettingDivider background='hsla(0,0%,100%,.15)' />
             </div>
             <Button onClick={() => {
-              actions.fireDownloadCmd(0);
+              actions.fireDownloadPNGCmd(0);
             }}>
               <div css={{ fontSize: 20 }}>
                 <ExportIcon />

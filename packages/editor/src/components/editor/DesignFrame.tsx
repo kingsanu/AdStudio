@@ -31,6 +31,8 @@ import PageSettings from 'canva-editor/utils/settings/PageSettings';
 import { dataMapping, pack, unpack } from 'canva-editor/utils/minifier';
 import useDebouncedEffect from 'canva-editor/hooks/useDebouncedEffect';
 import { toPng } from 'html-to-image';
+import htmlToPdfmake from 'html-to-pdfmake';
+import pdfMake from 'pdfmake/build/pdfmake';
 
 interface DesignFrameProps {
   data: any;
@@ -64,7 +66,8 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
     imageEditor,
     pageSize,
     openPageSettings,
-    downloadCmd,
+    downloadPNGCmd,
+    downloadPDFCmd,
   } = useEditor((state) => {
     const hoveredPage = parseInt(Object.keys(state.hoveredLayer)[0]);
     const hoverLayerId = state.hoveredLayer[hoveredPage];
@@ -84,7 +87,8 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
       imageEditor: state.imageEditor,
       pageSize: state.pageSize,
       openPageSettings: state.openPageSettings,
-      downloadCmd: state.downloadCmd,
+      downloadPNGCmd: state.downloadPNGCmd,
+      downloadPDFCmd: state.downloadPDFCmd,
     };
   });
   const {
@@ -101,26 +105,38 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
   useEffect(() => {
     const serializedData: SerializedPage[] = unpack(data);
     actions.setData(serializedData);
+
     setTimeout(() => {
-      const maxInitScale = .50;
-      const initScale = ((frameRef?.current?.offsetWidth || 0)-(isMobile ? 32 : 112))/pageSize.width; // Padding 16x2
+      const maxInitScale = 0.5;
+      const initScale =
+        ((frameRef?.current?.offsetWidth || 0) - (isMobile ? 32 : 112)) /
+        pageSize.width; // Padding 16x2
       actions.setScale(initScale > maxInitScale ? maxInitScale : initScale);
     }, 16);
   }, [data, actions]);
 
   useEffect(() => {
-    if (downloadCmd === -1) return;
+    if (downloadPNGCmd === -1) return;
     // Download active page
-    if (downloadCmd === 1) {
-      handleDownload(activePage);
+    if (downloadPNGCmd === 1) {
+      handleDownloadPNG(activePage);
       return;
     }
     // Download all pages
-    if (downloadCmd === 0) {
-      pages.forEach((_, idx) => handleDownload(idx));
+    if (downloadPNGCmd === 0) {
+      pages.forEach((_, idx) => handleDownloadPNG(idx));
       return;
     }
-  }, [downloadCmd]);
+  }, [downloadPNGCmd]);
+
+  useEffect(() => {
+    if (downloadPNGCmd === -1) return;
+    // Download all pages
+    if (downloadPDFCmd === 0) {
+      handleDownloadPDF();
+      return;
+    }
+  }, [downloadPDFCmd]);
 
   useDebouncedEffect(
     () => {
@@ -197,9 +213,9 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
     const mouseLeave = () => {
       setMousePos({
         x: (frameRef.current?.offsetWidth || 2) / 2,
-        y: (frameRef.current?.offsetHeight || 2) / 2
+        y: (frameRef.current?.offsetHeight || 2) / 2,
       });
-    }
+    };
 
     if (frameRef?.current) {
       frameRef.current.addEventListener('mousemove', mouseMove);
@@ -222,7 +238,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
       });
     }, 16);
   };
-  const handleDownload = async (pageIndex: number) => {
+  const handleDownloadPNG = async (pageIndex: number) => {
     const pageContentEl =
       pageRef.current[pageIndex]?.querySelector('.page-content');
     if (pageContentEl) {
@@ -236,6 +252,25 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
         window.alert('Cannot download: ' + (e as Error).message);
       }
     }
+  };
+  const handleDownloadPDF = async () => {
+    const pageProcesses: Promise<string>[] = [];
+    pages.forEach((_, idx) => {
+      const pageContentEl =
+        pageRef.current[idx]?.querySelector('.page-content');
+      pageProcesses.push(toPng(pageContentEl as HTMLElement));
+    });
+    const dataUrls = await Promise.all(pageProcesses);
+    let html = '';
+    dataUrls.forEach((dataUrl) => {
+      html += `<img src="${dataUrl}" />`;
+    });
+    var docDefinition = {
+      content: [htmlToPdfmake(html)],
+      pageSize: { width: pageSize.width, height: pageSize.height },
+      pageMargins: 0,
+    };
+    pdfMake.createPdf(docDefinition).download('test.pdf');
   };
   const { tmpSelected, onSelectStart } = useSelectLayer({
     frameRef: frameRef,
@@ -447,7 +482,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
                         width: window.innerWidth,
                         height: window.innerHeight,
                         overflow: 'hidden',
-                        marginTop: 5
+                        marginTop: 5,
                       },
                     }}
                   >

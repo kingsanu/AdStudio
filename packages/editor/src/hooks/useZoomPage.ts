@@ -405,7 +405,7 @@ export const useZoomPage = (
   }, [pageSize, setPageTransform]);
 
   useEffect(() => {
-    if (isSafari) return; // Skipping Safari
+    // if (isSafari) return; // Skipping Safari
     const handleGestureStart = (e: Event) => {
       e.preventDefault();
       pageZoomStart();

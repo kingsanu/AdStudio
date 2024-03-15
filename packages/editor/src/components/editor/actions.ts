@@ -1148,8 +1148,11 @@ export const ActionMethods = (state: EditorState) => {
 
       state.imageEditor = undefined;
     },
-    fireDownloadCmd(cmdEnum: -1 | 0 | 1) {
-      state.downloadCmd = cmdEnum;
+    fireDownloadPNGCmd(cmdEnum: -1 | 0 | 1) {
+      state.downloadPNGCmd = cmdEnum;
+    },
+    fireDownloadPDFCmd(cmdEnum: -1 | 0) {
+      state.downloadPDFCmd = cmdEnum;
     },
     goToGithubPage() {
       window?.open(state.githubLink, '_blank')?.focus();

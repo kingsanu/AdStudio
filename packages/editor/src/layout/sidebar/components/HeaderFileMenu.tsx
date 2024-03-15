@@ -139,17 +139,24 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
       icon: <ExportIcon />,
       items: [
         {
-          label: `Export page (${activePage + 1})`,
+          label: `Page ${activePage + 1} as PNG`,
           type: 'normal',
           action: () => {
-            actions.fireDownloadCmd(1);
+            actions.fireDownloadPNGCmd(1);
           },
         },
         {
-          label: 'All pages',
+          label: 'All pages as PNG',
           type: 'normal',
           action: () => {
-            actions.fireDownloadCmd(0);
+            actions.fireDownloadPNGCmd(0);
+          },
+        },
+        {
+          label: `All pages as PDF`,
+          type: 'normal',
+          action: () => {
+            actions.fireDownloadPDFCmd(0);
           },
         },
       ],
