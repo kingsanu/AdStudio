@@ -33,6 +33,7 @@ import useDebouncedEffect from 'canva-editor/hooks/useDebouncedEffect';
 import { toPng } from 'html-to-image';
 import htmlToPdfmake from 'html-to-pdfmake';
 import pdfMake from 'pdfmake/build/pdfmake';
+import { slugify } from 'canva-editor/utils/slugify';
 
 interface DesignFrameProps {
   data: any;
@@ -51,6 +52,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
   } = useContext(EditorContext);
   useShortcut(frameRef.current);
   const {
+    name,
     actions,
     query,
     scale,
@@ -72,6 +74,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
     const hoveredPage = parseInt(Object.keys(state.hoveredLayer)[0]);
     const hoverLayerId = state.hoveredLayer[hoveredPage];
     return {
+      name: state.name,
       scale: state.scale,
       pages: state.pages,
       hoveredPage,
@@ -120,11 +123,13 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
     // Download active page
     if (downloadPNGCmd === 1) {
       handleDownloadPNG(activePage);
+      actions.fireDownloadPNGCmd(-1); // Reset
       return;
     }
     // Download all pages
     if (downloadPNGCmd === 0) {
       pages.forEach((_, idx) => handleDownloadPNG(idx));
+      actions.fireDownloadPNGCmd(-1); // Reset
       return;
     }
   }, [downloadPNGCmd]);
@@ -263,14 +268,22 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
     const dataUrls = await Promise.all(pageProcesses);
     let html = '';
     dataUrls.forEach((dataUrl) => {
-      html += `<img src="${dataUrl}" />`;
+      html += `<img src="${dataUrl}"/>`;
+    });
+    const content: any = htmlToPdfmake(html);
+    content.map((c: any) => {
+      c.width = pageSize.width;
+      c.height = pageSize.height;
+      return c;
     });
     var docDefinition = {
-      content: [htmlToPdfmake(html)],
+      content,
       pageSize: { width: pageSize.width, height: pageSize.height },
       pageMargins: 0,
     };
-    pdfMake.createPdf(docDefinition).download('test.pdf');
+    const fileName = name ? slugify(name) : 'untitled-design';
+    pdfMake.createPdf(docDefinition).download(fileName + '.pdf');
+    actions.fireDownloadPDFCmd(-1); // Reset
   };
   const { tmpSelected, onSelectStart } = useSelectLayer({
     frameRef: frameRef,

@@ -121,6 +121,9 @@ export const ActionMethods = (state: EditorState) => {
         }
       });
     },
+    setName: (name: string) => {
+      state.name = name;
+    },
     changePageSize: (size: PageSize) => {
       const changeW = size.width - state.pageSize.width;
       const changeH = size.height - state.pageSize.height;

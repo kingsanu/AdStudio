@@ -93,7 +93,10 @@ const HeaderLayout: ForwardRefRenderFunction<
             }}
             onSetText={(newText) => {
               setName(newText);
-              if (name !== newText) onChanges(newText);
+              if (name !== newText) {
+                onChanges(newText);
+                actions.setName(newText);
+              }
             }}
             handleStyle={(isFocus) => {
               return {

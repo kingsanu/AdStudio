@@ -20,6 +20,7 @@ import BottomSheet from 'canva-editor/components/bottom-sheet/BottomSheet';
 import PlusIcon from 'canva-editor/icons/PlusIcon';
 import GridViewIcon from 'canva-editor/icons/GridViewIcon';
 import styled from '@emotion/styled';
+import { FC } from 'react';
 
 const FABButton = styled('button')`
   position: fixed;
@@ -62,7 +63,7 @@ const tabs = [
     icon: <UploadIcon />,
   },
 ];
-const Sidebar = () => {
+const Sidebar: FC<{ version: string }> = ({ version }) => {
   const { actions, state } = useEditor();
   const isMobile = useMobileDetect();
 
@@ -165,22 +166,37 @@ const Sidebar = () => {
             actions.setSidebarTab(tab);
           }}
         />
-        {!isMobile && state.sideBarTab && (
-          <div
-            css={{
-              width: 360,
-              '@media (max-width: 900px)': {
-                width: '100%',
-                position: 'fixed',
+        {!isMobile && (
+          <>
+            <div
+              css={{
+                position: 'absolute',
                 bottom: 0,
-                left: 0,
-                top: 0,
-                background: '#fff',
-              },
-            }}
-          >
-            {getSidebarComponent(state.sideBarTab)}
-          </div>
+                width: '100%',
+                padding: '9px 2px',
+                textAlign: 'center',
+              }}
+            >
+              v{version}
+            </div>
+            {state.sideBarTab && (
+              <div
+                css={{
+                  width: 360,
+                  '@media (max-width: 900px)': {
+                    width: '100%',
+                    position: 'fixed',
+                    bottom: 0,
+                    left: 0,
+                    top: 0,
+                    background: '#fff',
+                  },
+                }}
+              >
+                {getSidebarComponent(state.sideBarTab)}
+              </div>
+            )}
+          </>
         )}
       </div>
       <div

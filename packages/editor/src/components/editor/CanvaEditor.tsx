@@ -25,6 +25,7 @@ const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
   onChanges,
   onDesignNameChanges,
 }) => {
+  const version = '1.0.60';
   const { getState, actions, query } = useEditorStore();
   const leftSidebarRef = useRef<HTMLDivElement>(null);
   const [viewPortHeight, setViewPortHeight] = useState<number>();
@@ -76,7 +77,7 @@ const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
               background: 'white',
             }}
           >
-            <Sidebar />
+            <Sidebar version={version} />
           </div>
           <div
             css={{
@@ -88,7 +89,10 @@ const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
             }}
           >
             <AppLayerSettings />
-            <EditorContent data={data?.editorConfig} onChanges={onChanges} />
+            <EditorContent
+              data={data?.editorConfig}
+              onChanges={onChanges}
+            />
             <div
               css={{
                 height: 40,
