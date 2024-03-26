@@ -171,10 +171,8 @@ const Sidebar: FC<{ version: string }> = ({ version }) => {
             <div
               css={{
                 position: 'absolute',
-                bottom: 0,
-                width: '100%',
-                padding: '9px 2px',
-                textAlign: 'center',
+                bottom: 10,
+                left: 10
               }}
             >
               v{version}

@@ -30,10 +30,9 @@ import { isMobile } from 'react-device-detect';
 import PageSettings from 'canva-editor/utils/settings/PageSettings';
 import { dataMapping, pack, unpack } from 'canva-editor/utils/minifier';
 import useDebouncedEffect from 'canva-editor/hooks/useDebouncedEffect';
-import { toPng } from 'html-to-image';
-import htmlToPdfmake from 'html-to-pdfmake';
-import pdfMake from 'pdfmake/build/pdfmake';
+import { domToPng } from 'modern-screenshot'
 import { slugify } from 'canva-editor/utils/slugify';
+import { jsPDF } from "jspdf";
 
 interface DesignFrameProps {
   data: any;
@@ -248,7 +247,10 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
       pageRef.current[pageIndex]?.querySelector('.page-content');
     if (pageContentEl) {
       try {
-        const dataUrl = await toPng(pageContentEl as HTMLElement);
+        const dataUrl = await domToPng(pageContentEl as HTMLElement, {
+          width: pageSize.width,
+          height: pageSize.height
+        });
         const link = document.createElement('a');
         link.download = `design-id-page-${pageIndex + 1}.png`;
         link.href = dataUrl;
@@ -263,26 +265,29 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
     pages.forEach((_, idx) => {
       const pageContentEl =
         pageRef.current[idx]?.querySelector('.page-content');
-      pageProcesses.push(toPng(pageContentEl as HTMLElement));
+      pageProcesses.push(domToPng(pageContentEl as HTMLElement, {
+        width: pageSize.width,
+        height: pageSize.height
+      }));
     });
     const dataUrls = await Promise.all(pageProcesses);
-    let html = '';
-    dataUrls.forEach((dataUrl) => {
-      html += `<img src="${dataUrl}"/>`;
+    const doc = new jsPDF({
+      unit: "px",
     });
-    const content: any = htmlToPdfmake(html);
-    content.map((c: any) => {
-      c.width = pageSize.width;
-      c.height = pageSize.height;
-      return c;
+
+    dataUrls.forEach((dataUrl, idx) => {
+      doc.internal.pageSize.width =  pageSize.width;
+      doc.internal.pageSize.height = pageSize.height;
+      doc.addImage(dataUrl, 'PNG', 0, 0, pageSize.width, pageSize.height, 'p'+idx, 'SLOW');
+      if (idx !== dataUrls.length - 1) {
+        doc.addPage();
+        doc.internal.pageSize.width =  pageSize.width;
+        doc.internal.pageSize.height = pageSize.height;
+      }
     });
-    var docDefinition = {
-      content,
-      pageSize: { width: pageSize.width, height: pageSize.height },
-      pageMargins: 0,
-    };
     const fileName = name ? slugify(name) : 'untitled-design';
-    pdfMake.createPdf(docDefinition).download(fileName + '.pdf');
+    doc.save(fileName + '.pdf');
+
     actions.fireDownloadPDFCmd(-1); // Reset
   };
   const { tmpSelected, onSelectStart } = useSelectLayer({
