@@ -51,6 +51,7 @@ const TextLayer: LayerComponent<TextLayerProps> = ({
             onDoubleClick={handleStartUpdate}
         >
             <TextContent
+                id={id}
                 text={text}
                 scale={scale}
                 fonts={fonts}
