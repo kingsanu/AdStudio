@@ -17,10 +17,10 @@ const PreviewModal: FC<PreviewModalProps> = ({ onClose }) => {
         background: 'rgba(13,18,22,.95)',
       }}
     >
-      <Preview />
+      <Preview onClose={() => onClose()} />
       <div
         css={{
-          background: 'rgba(255,255,255,0.3)',
+          background: 'transparent',
           width: 60,
           height: 60,
           display: 'flex',
@@ -33,6 +33,10 @@ const PreviewModal: FC<PreviewModalProps> = ({ onClose }) => {
           fontSize: 36,
           color: '#fff',
           cursor: 'pointer',
+          ':hover': {
+            background: 'rgba(255,255,255,0.3)',
+            transition: 'background-color 200ms linear',
+          },
         }}
         onClick={onClose}
       >
