@@ -91,6 +91,7 @@ export interface EditorState {
   downloadPDFCmd: -1 | 0 | 1;
   saving: boolean;
   githubLink: string;
+  gumroadLink: string;
 }
 
 export type CoreEditorActions = ReturnType<typeof ActionMethods>;

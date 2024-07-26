@@ -1159,6 +1159,9 @@ export const ActionMethods = (state: EditorState) => {
     },
     goToGithubPage() {
       window?.open(state.githubLink, '_blank')?.focus();
+    },
+    goToGumroadPage() {
+      window?.open(state.gumroadLink, '_blank')?.focus();
     }
   };
 };

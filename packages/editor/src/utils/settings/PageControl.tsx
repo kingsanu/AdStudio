@@ -8,6 +8,7 @@ import CheckIcon from 'canva-editor/icons/CheckIcon';
 import EditorButton from 'canva-editor/components/EditorButton';
 import NotesIcon from 'canva-editor/icons/NotesIcon';
 import GithubIcon from 'canva-editor/icons/GithubIcon';
+import GumroadIcon from 'canva-editor/icons/GumroadIcon';
 
 const PageControl = () => {
   const labelScaleOptionRef = useRef<HTMLDivElement>(null);
@@ -138,6 +139,14 @@ const PageControl = () => {
           }}
         >
           <GithubIcon />
+        </EditorButton>
+        <EditorButton
+          tooltip='Get full source code'
+          onClick={() => {
+            actions.goToGumroadPage();
+          }}
+        >
+          <GumroadIcon />
         </EditorButton>
       </div>
     </div>

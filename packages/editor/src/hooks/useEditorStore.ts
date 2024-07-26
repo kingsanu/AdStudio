@@ -235,8 +235,10 @@ export const useEditorStore = () => {
     selectData: {
       status: false,
     },
-    downloadCmd: -1,
-    githubLink: 'https://github.com/kenvinlu/canva-editor/'
+    fireDownloadPNGCmd: -1,
+    downloadPNGCmd: -1,
+    githubLink: 'https://github.com/kenvinlu/canva-editor/',
+    gumroadLink: 'https://kenvinlu.gumroad.com/l/canva-editor'
   });
 
   const actions = useMemo<EditorActions>(() => {
