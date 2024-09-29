@@ -141,7 +141,7 @@ const PageControl = () => {
           <GithubIcon />
         </EditorButton>
         <EditorButton
-          tooltip='Get full source code'
+          tooltip='Get full source code - Discount code CA2024'
           onClick={() => {
             actions.goToGumroadPage();
           }}
