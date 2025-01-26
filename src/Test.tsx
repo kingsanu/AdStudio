@@ -1,4 +1,6 @@
+// import { CanvaEditor, EditorConfig } from 'canva-editor';
 import { CanvaEditor, EditorConfig } from 'canva-editor/components/editor';
+// import { data } from './devData';
 import { data } from './sampleData';
 import {  useState } from 'react';
 

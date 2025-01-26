@@ -11,11 +11,9 @@ This project is a React.js-based tool designed to provide functionality similar 
 
 ## Demo
 
-Explore the live demo: [Try it out!](https://canva-editor-three.vercel.app)
+Explore the live demo: [Try it out!](https://www.canvaclone.com)
 
 Get full source code here: https://kenvinlu.gumroad.com/l/canva-editor
-
-Support: [Discord](https://discord.gg/mZECg3zksx)
 
 Installation
 ------------

@@ -44,7 +44,7 @@ const HeaderLayout: ForwardRefRenderFunction<
     <div
       ref={ref}
       css={{
-        background: 'linear-gradient(90deg,#00c4cc,#7d2ae8)',
+        background: '#893a3a',
         padding: '12px 24px',
         display: 'flex',
         justifyContent: 'space-between',
@@ -61,18 +61,12 @@ const HeaderLayout: ForwardRefRenderFunction<
             fontSize: 36,
           }}
         >
-          <div>
-            {logoUrl ? (
-              <img
-                src={logoUrl}
-                css={{
-                  maxHeight: 35,
-                }}
-              />
-            ) : (
-              <CanvaIcon fill='white' />
-            )}
-          </div>
+            <img
+              src={logoUrl || '/logo.svg'}
+              css={{
+                height: 40,
+              }}
+            />
         </div>
       )}
       <div css={{ marginRight: 'auto' }}>

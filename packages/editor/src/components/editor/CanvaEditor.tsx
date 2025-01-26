@@ -25,7 +25,7 @@ const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
   onChanges,
   onDesignNameChanges,
 }) => {
-  const version = '1.0.64';
+  const version = '1.0.69';
   const { getState, actions, query } = useEditorStore();
   const leftSidebarRef = useRef<HTMLDivElement>(null);
   const [viewPortHeight, setViewPortHeight] = useState<number>();
