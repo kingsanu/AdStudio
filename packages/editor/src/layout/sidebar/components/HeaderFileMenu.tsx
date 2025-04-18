@@ -1,47 +1,69 @@
-import { ChangeEvent, FC, useMemo, useRef, useState } from 'react';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { ChangeEvent, FC, useMemo, useRef, useState, useEffect } from "react";
 import DropdownButton, {
   DropdownMenuItem,
-} from 'canva-editor/components/dropdown-button/DropdownButton';
-import { useEditor } from 'canva-editor/hooks';
-import { downloadObjectAsJson } from 'canva-editor/utils/download';
-import QuickBoxDialog from 'canva-editor/components/dialog/QuickBoxDialog';
-import UploadIcon from 'canva-editor/icons/UploadIcon';
-import DownloadIcon from 'canva-editor/icons/DownloadIcon';
-import AddNewPageIcon from 'canva-editor/icons/AddNewPageIcon';
-import ResizeIcon from 'canva-editor/icons/ResizeIcon';
-import LockIcon from 'canva-editor/icons/LockIcon';
-import LockOpenIcon from 'canva-editor/icons/LockOpenIcon';
-import SyncedIcon from 'canva-editor/icons/SyncedIcon';
-import HelpIcon from 'canva-editor/icons/HelpIcon';
-import ConfigurationIcon from 'canva-editor/icons/ConfigurationIcon';
-import ExportIcon from 'canva-editor/icons/ExportIcon';
-import EditorButton from 'canva-editor/components/EditorButton';
-import PlayArrowIcon from 'canva-editor/icons/PlayArrowIcon';
-import PreviewModal from './PreviewModal';
-import FacebookIcon from 'canva-editor/icons/FacebookIcon';
-import InstagramIcon from 'canva-editor/icons/InstagramIcon';
-import { BoxSize } from 'canva-editor/types';
-import { dataMapping, pack, unpack } from 'canva-editor/utils/minifier';
-import HamburgerIcon from 'canva-editor/icons/HamburgerIcon';
-import useMobileDetect from 'canva-editor/hooks/useMobileDetect';
+} from "canva-editor/components/dropdown-button/DropdownButton";
+import { useEditor } from "canva-editor/hooks";
+import { downloadObjectAsJson } from "canva-editor/utils/download";
+import QuickBoxDialog from "canva-editor/components/dialog/QuickBoxDialog";
+import UploadIcon from "canva-editor/icons/UploadIcon";
+import DownloadIcon from "canva-editor/icons/DownloadIcon";
+import AddNewPageIcon from "canva-editor/icons/AddNewPageIcon";
+import ResizeIcon from "canva-editor/icons/ResizeIcon";
+import LockIcon from "canva-editor/icons/LockIcon";
+import LockOpenIcon from "canva-editor/icons/LockOpenIcon";
+import SyncedIcon from "canva-editor/icons/SyncedIcon";
+// import HelpIcon from "canva-editor/icons/HelpIcon";
+import ConfigurationIcon from "canva-editor/icons/ConfigurationIcon";
+import ExportIcon from "canva-editor/icons/ExportIcon";
+import EditorButton from "canva-editor/components/EditorButton";
+import PlayArrowIcon from "canva-editor/icons/PlayArrowIcon";
+import PreviewModal from "./PreviewModal";
+import FacebookIcon from "canva-editor/icons/FacebookIcon";
+import InstagramIcon from "canva-editor/icons/InstagramIcon";
+import { BoxSize } from "canva-editor/types";
+import { dataMapping, pack, unpack } from "canva-editor/utils/minifier";
+import HamburgerIcon from "canva-editor/icons/HamburgerIcon";
+import useMobileDetect from "canva-editor/hooks/useMobileDetect";
+import SaveTemplateDialog from "canva-editor/components/editor/SaveTemplateDialog";
+import SyncingIcon from "canva-editor/icons/SyncingIcon";
+import { useSyncService } from "../../../hooks/useSyncService";
+import { WifiOff, AlertCircle } from "lucide-react";
 
 interface Props {
   designName: string;
 }
 const HeaderFileMenu: FC<Props> = ({ designName }) => {
   const [openPreview, setOpenPreview] = useState(false);
+  // const [isSavingTemplate, setIsSavingTemplate] = useState(false);
+  const [openSaveTemplateDialog, setOpenSaveTemplateDialog] = useState(false);
+  // Keep a local copy of the design name to ensure it's up to date
+  const [currentDesignName, setCurrentDesignName] = useState(designName);
   const uploadRef = useRef<HTMLInputElement>(null);
   const isMobile = useMobileDetect();
-  const { actions, query, activePage, pageSize, isPageLocked } = useEditor(
-    (state) => ({
+  const pageContentRef = useRef<HTMLElement | null>(null);
+
+  // Update current design name when prop changes
+  useEffect(() => {
+    setCurrentDesignName(designName);
+  }, [designName]);
+
+  // Use the sync service
+  const { lastSavedAt, isSyncing, hasError, isOffline, isUserTyping, saveNow } =
+    useSyncService({
+      getDesignData: () => query.serialize(),
+      getDesignName: () => currentDesignName,
+      getPageContentElement: () => pageContentRef.current,
+    });
+  const { actions, query, state, activePage, pageSize, isPageLocked } =
+    useEditor((state) => ({
       activePage: state.activePage,
       sidebar: state.sidebar,
       pageSize: state.pageSize,
       isPageLocked:
         state.pages[state.activePage] &&
         state.pages[state.activePage].layers.ROOT.data.locked,
-    })
-  );
+    }));
 
   // Resize
   const [openResizeSetting, setOpenResizeSetting] = useState(false);
@@ -55,13 +77,13 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
   const heightRef = useRef<HTMLInputElement>(null);
   const menuData: DropdownMenuItem[] = [
     {
-      label: 'Create new design',
-      type: 'submenu',
+      label: "Create new design",
+      type: "submenu",
       icon: <AddNewPageIcon />,
       items: [
         {
-          label: 'Custom size',
-          type: 'normal',
+          label: "Custom size",
+          type: "normal",
           icon: <ResizeIcon />,
           action: () => {
             setSize({
@@ -73,14 +95,14 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
           },
         },
         {
-          label: 'Suggested',
-          type: 'groupname',
+          label: "Suggested",
+          type: "groupname",
         },
         {
-          label: 'Facebook Post (Landscape)',
-          type: 'normal',
+          label: "Facebook Post (Landscape)",
+          type: "normal",
           icon: <FacebookIcon />,
-          hint: '940 × 788 px',
+          hint: "940 × 788 px",
           action: () => {
             handleCloseResizeBox();
             createNew({
@@ -90,10 +112,10 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
           },
         },
         {
-          label: 'Facebook Cover',
-          type: 'normal',
+          label: "Facebook Cover",
+          type: "normal",
           icon: <FacebookIcon />,
-          hint: '1640 × 924 px',
+          hint: "1640 × 924 px",
           action: () => {
             handleCloseResizeBox();
             createNew({
@@ -103,10 +125,10 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
           },
         },
         {
-          label: 'Instagram Post (Square)',
-          type: 'normal',
+          label: "Instagram Post (Square)",
+          type: "normal",
           icon: <InstagramIcon />,
-          hint: '1080 × 1080 px',
+          hint: "1080 × 1080 px",
           action: () => {
             handleCloseResizeBox();
             createNew({
@@ -117,44 +139,66 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
         },
       ],
     },
-    { label: 'Divider', type: 'divider' },
+    { label: "Divider", type: "divider" },
     {
-      label: 'Save',
-      type: 'normal',
-      icon: <SyncedIcon />,
-      shortcut: 'All changes saved',
-      action: () => {},
+      label: "Save",
+      type: "normal",
+      icon: isUserTyping ? (
+        <SyncedIcon />
+      ) : isSyncing ? (
+        <SyncingIcon />
+      ) : hasError ? (
+        <AlertCircle size={18} className="text-red-500" />
+      ) : isOffline ? (
+        <WifiOff size={18} className="text-yellow-500" />
+      ) : (
+        <SyncedIcon />
+      ),
+      shortcut: isUserTyping
+        ? "Changes being made..."
+        : isSyncing
+        ? "Saving..."
+        : hasError
+        ? "Failed to save"
+        : isOffline
+        ? "Offline"
+        : lastSavedAt
+        ? `Last saved ${lastSavedAt.toLocaleTimeString()}`
+        : "All changes saved",
+      action: () => {
+        saveNow({ force: true }); // Force save
+      },
     },
     {
-      label: 'Preview',
-      type: 'normal',
+      label: "Preview",
+      type: "normal",
       icon: <PlayArrowIcon />,
       action: () => {
         setOpenPreview(true);
       },
     },
     {
-      label: 'Export',
-      type: 'submenu',
+      label: "Export",
+      type: "submenu",
       icon: <ExportIcon />,
       items: [
         {
           label: `Page ${activePage + 1} as PNG`,
-          type: 'normal',
+          type: "normal",
           action: () => {
             actions.fireDownloadPNGCmd(1);
           },
         },
         {
-          label: 'All pages as PNG',
-          type: 'normal',
+          label: "All pages as PNG",
+          type: "normal",
           action: () => {
             actions.fireDownloadPNGCmd(0);
           },
         },
         {
           label: `All pages as PDF`,
-          type: 'normal',
+          type: "normal",
           action: () => {
             actions.fireDownloadPDFCmd(0);
           },
@@ -162,15 +206,15 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
       ],
     },
 
-    { label: 'Divider', type: 'divider' },
+    { label: "Divider", type: "divider" },
     {
-      label: 'View settings',
-      type: 'submenu',
+      label: "View settings",
+      type: "submenu",
       icon: <ConfigurationIcon />,
       items: [
         {
           label: `Resize page (${activePage + 1})`,
-          type: 'normal',
+          type: "normal",
           icon: <ResizeIcon />,
           disabled: isPageLocked,
           action: () => {
@@ -181,33 +225,41 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
         },
       ],
     },
-    { label: 'Divider', type: 'divider' },
+    { label: "Divider", type: "divider" },
     {
-      label: 'Import design',
-      type: 'normal',
+      label: "Import design",
+      type: "normal",
       icon: <UploadIcon />,
       action: () => {
         uploadRef.current?.click();
       },
     },
     {
-      label: 'Download design',
-      type: 'normal',
+      label: "Download design",
+      type: "normal",
       icon: <DownloadIcon />,
       action: () => {
-        downloadObjectAsJson('file', pack(query.serialize(), dataMapping)[0]);
+        downloadObjectAsJson("file", pack(query.serialize(), dataMapping)[0]);
       },
     },
-    { label: 'Divider', type: 'divider' },
     {
-      label: 'Help',
-      type: 'normal',
-      icon: <HelpIcon />,
-      shortcut: '⌘H',
+      label: "Save as Template",
+      type: "normal",
+      icon: <SyncedIcon />,
       action: () => {
-        actions.goToGithubPage();
+        setOpenSaveTemplateDialog(true);
       },
     },
+    // { label: "Divider", type: "divider" },
+    // {
+    //   label: "Help",
+    //   type: "normal",
+    //   icon: <HelpIcon />,
+    //   shortcut: "⌘H",
+    //   action: () => {
+    //     actions.goToGithubPage();
+    //   },
+    // },
   ];
 
   const handleImport = (e: ChangeEvent<HTMLInputElement>) => {
@@ -219,7 +271,7 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
         actions.setData(unpack(fileContent));
       };
       reader.readAsText(file);
-      e.target.value = '';
+      e.target.value = "";
     }
   };
 
@@ -228,10 +280,10 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
     [size]
   );
 
-  const handleChangeSize = (value: string, type: 'width' | 'height') => {
+  const handleChangeSize = (value: string, type: "width" | "height") => {
     const ratio = (size?.width || 0) / (size?.height || 0);
     const v = parseInt(value, 10);
-    if (type === 'width') {
+    if (type === "width") {
       if (lockSiteAspect) {
         (heightRef.current as HTMLInputElement).value = String(
           Math.round((v / ratio) * 10) / 10
@@ -239,7 +291,7 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
       }
       setSize({ ...size, width: v || 0 });
     }
-    if (type === 'height') {
+    if (type === "height") {
       if (lockSiteAspect) {
         (widthRef.current as HTMLInputElement).value = String(
           Math.round(v * ratio * 10) / 10
@@ -262,12 +314,12 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
   const createNew = (boxSize: BoxSize) => {
     actions.setData([
       {
-        name: '',
-        notes: '',
+        name: "",
+        notes: "",
         layers: {
           ROOT: {
             type: {
-              resolvedName: 'RootLayer',
+              resolvedName: "RootLayer",
             },
             props: {
               boxSize,
@@ -276,7 +328,7 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
                 y: 0,
               },
               rotate: 0,
-              color: 'rgb(255, 255, 255)',
+              color: "rgb(255, 255, 255)",
               image: null,
             },
             locked: false,
@@ -297,22 +349,27 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
     setOpenResizeSetting(false);
   };
 
+  // Initial setup for page content reference
+  useEffect(() => {
+    pageContentRef.current = document.querySelector(".page-content");
+  }, []);
+
   return (
     <>
       <DropdownButton
-        text={isMobile ? <HamburgerIcon /> : 'File'}
+        text={isMobile ? <HamburgerIcon /> : "File"}
         items={menuData}
         header={
-          <div css={{ padding: '16px 16px 8px' }}>
-            <div css={{ fontSize: 18, fontWeight: 700, color: '#000' }}>
-              {designName || 'Untitled design'}
+          <div css={{ padding: "16px 16px 8px" }}>
+            <div css={{ fontSize: 18, fontWeight: 700, color: "#000" }}>
+              {currentDesignName || "Untitled design"}
             </div>
             <div
               css={{
                 fontSize: 13,
-                color: '#909090',
+                color: "#909090",
                 marginTop: 8,
-                fontFamily: 'Arial',
+                fontFamily: "Arial",
               }}
             >{`${pageSize.width}px x ${pageSize.height}px`}</div>
           </div>
@@ -320,32 +377,32 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
       />
       <input
         ref={uploadRef}
-        type='file'
-        accept='application/json'
+        type="file"
+        accept="application/json"
         onChange={handleImport}
-        css={{ display: 'none' }}
+        css={{ display: "none" }}
       />
       <QuickBoxDialog open={openResizeSetting} onClose={handleCloseResizeBox}>
-        <div css={{ padding: '0 16px 16px', width: 300 }}>
-          <div css={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+        <div css={{ padding: "0 16px 16px", width: 300 }}>
+          <div css={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
             <div>
               <div css={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>
                 Width
               </div>
               <div
                 css={{
-                  border: '1px solid rgba(43,59,74,.3)',
+                  border: "1px solid rgba(43,59,74,.3)",
                   height: 40,
-                  padding: '0 12px',
+                  padding: "0 12px",
                   width: 80,
                   borderRadius: 4,
                 }}
               >
                 <input
                   ref={widthRef}
-                  css={{ width: '100%', minWidth: 8, height: '100%' }}
-                  onChange={(e) => handleChangeSize(e.target.value, 'width')}
-                  value={size?.width || ''}
+                  css={{ width: "100%", minWidth: 8, height: "100%" }}
+                  onChange={(e) => handleChangeSize(e.target.value, "width")}
+                  value={size?.width || ""}
                 />
               </div>
             </div>
@@ -355,57 +412,71 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
               </div>
               <div
                 css={{
-                  border: '1px solid rgba(43,59,74,.3)',
+                  border: "1px solid rgba(43,59,74,.3)",
                   height: 40,
-                  padding: '0 12px',
+                  padding: "0 12px",
                   width: 80,
                   borderRadius: 4,
                 }}
               >
                 <input
                   ref={heightRef}
-                  css={{ width: '100%', minWidth: 8, height: '100%' }}
-                  onChange={(e) => handleChangeSize(e.target.value, 'height')}
-                  value={size?.height || ''}
+                  css={{ width: "100%", minWidth: 8, height: "100%" }}
+                  onChange={(e) => handleChangeSize(e.target.value, "height")}
+                  value={size?.height || ""}
                 />
               </div>
             </div>
             <EditorButton
               disabled={isDisabledResize}
               onClick={() => setLockSizeAspect(!lockSiteAspect)}
-              css={{ fontSize: 20, cursor: 'pointer', margin: '5px 0' }}
+              css={{ fontSize: 20, cursor: "pointer", margin: "5px 0" }}
             >
               {lockSiteAspect ? <LockIcon /> : <LockOpenIcon />}
             </EditorButton>
           </div>
           {isDisabledResize && (
-            <div css={{ color: '#db1436', fontSize: 12, marginTop: 5 }}>
+            <div css={{ color: "#db1436", fontSize: 12, marginTop: 5 }}>
               Dimensions must be at least 40px and no more than 8000px.
             </div>
           )}
           <div css={{ marginTop: 12 }}>
             <button
               css={{
-                background: !isDisabledResize ? '#3a3a4c' : '#8383A2',
-                padding: '8px 14px',
+                background: !isDisabledResize ? "#3a3a4c" : "#8383A2",
+                padding: "8px 14px",
                 lineHeight: 1,
-                color: '#FFF',
+                color: "#FFF",
                 borderRadius: 4,
-                cursor: !isDisabledResize ? 'pointer' : 'not-allowed',
+                cursor: !isDisabledResize ? "pointer" : "not-allowed",
                 fontSize: 16,
-                textAlign: 'center',
+                textAlign: "center",
                 fontWeight: 700,
-                width: '100%',
+                width: "100%",
               }}
               onClick={handleResize}
               disabled={isDisabledResize}
             >
-              {isCreating ? 'Create new design' : 'Resize'}
+              {isCreating ? "Create new design" : "Resize"}
             </button>
           </div>
         </div>
       </QuickBoxDialog>
       {openPreview && <PreviewModal onClose={() => setOpenPreview(false)} />}
+      {openSaveTemplateDialog && (
+        <SaveTemplateDialog
+          open={openSaveTemplateDialog}
+          onClose={() => {
+            setOpenSaveTemplateDialog(false);
+            // Update local design name in case it was changed in the dialog
+            // Get the current name from the editor state
+            if (state && state.name) {
+              setCurrentDesignName(state.name);
+            }
+          }}
+          initialName={currentDesignName}
+        />
+      )}
     </>
   );
 };

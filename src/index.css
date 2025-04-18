@@ -1,7 +1,8 @@
-html,body {
+html,
+body {
   margin: 0;
-  font-family: 'Canva Sans', sans-serif;
-  color: #5E6278;
+  font-family: "Canva Sans", sans-serif;
+  color: #5e6278;
   font-size: 14px;
 }
 
@@ -85,7 +86,7 @@ textarea::placeholder {
 }
 
 button,
-[role='button'] {
+[role="button"] {
   cursor: pointer;
 }
 
@@ -106,7 +107,7 @@ textarea {
   padding: 0;
   line-height: inherit;
   color: inherit;
-  font-family: 'Canva Sans', sans-serif;
+  font-family: "Canva Sans", sans-serif;
 }
 
 pre,
@@ -132,4 +133,12 @@ img,
 video {
   max-width: 100%;
   height: auto;
+}
+.slide-indicator {
+  transition: opacity 0.3s ease;
+}
+
+input[type="text"],
+input[type="tel"] {
+  background-color: white;
 }

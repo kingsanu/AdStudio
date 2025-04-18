@@ -1,8 +1,9 @@
-import { FC, useState } from 'react';
-import { SearchBox } from 'canva-editor/search-autocomplete';
-import axios from 'axios';
-import { useEditor } from 'canva-editor/hooks';
-import useMobileDetect from 'canva-editor/hooks/useMobileDetect';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { FC, useState } from "react";
+import { SearchBox } from "canva-editor/search-autocomplete";
+import axios from "axios";
+import { useEditor } from "canva-editor/hooks";
+import useMobileDetect from "canva-editor/hooks/useMobileDetect";
 
 interface Props {
   searchString: string;
@@ -12,10 +13,12 @@ const ImageSearchBox: FC<Props> = ({ searchString, onStartSearch }) => {
   const { config } = useEditor();
   const isMobile = useMobileDetect();
   const [suggestItems, setSuggestItems] = useState([]);
-  const handleOnSearch = async (keyword: any) => {
+  const handleOnSearch = async (keyword: unknown) => {
     // onSearch will have as the first callback parameter
     // the string searched and for the second the results.
-    const response = await axios.get(`${config.apis.url}${config.apis.imageKeywordSuggestion}?kw=` + keyword);
+    const response = await axios.get(
+      `${config.apis.url}${config.apis.imageKeywordSuggestion}?kw=` + keyword
+    );
     setSuggestItems(response?.data || []);
   };
 
@@ -32,12 +35,12 @@ const ImageSearchBox: FC<Props> = ({ searchString, onStartSearch }) => {
     <SearchBox
       items={suggestItems}
       inputSearchString={searchString}
-      placeholder={config.placeholders?.searchImage || 'Search photos'}
+      placeholder={config.placeholders?.searchImage || "Search photos"}
       onSearch={handleOnSearch}
       onHover={handleOnHover}
       onSelect={handleOnSelect}
       onFocus={handleOnFocus}
-      onClear={() => onStartSearch('')}
+      onClear={() => onStartSearch("")}
       autoFocus={!isMobile}
       styling={{ zIndex: 2 }}
     />

@@ -1,9 +1,5 @@
-import {
-  EditorActions,
-  EditorQuery,
-  EditorState,
-} from 'canva-editor/types';
-import { createContext } from 'react';
+import { EditorActions, EditorQuery, EditorState } from "canva-editor/types";
+import { createContext } from "react";
 
 export type EditorConfig = {
   logoUrl?: string;
@@ -20,6 +16,8 @@ export type EditorConfig = {
     imageKeywordSuggestion: string;
     shapeKeywordSuggestion: string;
     frameKeywordSuggestion: string;
+    getUserImages: string;
+    uploadImage: string;
   };
   placeholders?: {
     searchTemplate?: string;
@@ -27,7 +25,7 @@ export type EditorConfig = {
     searchImage?: string;
     searchShape?: string;
     searchFrame?: string;
-  }
+  };
   editorAssetsUrl: string;
   imageKeywordSuggestions?: string;
   templateKeywordSuggestions?: string;

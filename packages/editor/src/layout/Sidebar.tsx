@@ -1,28 +1,28 @@
-import SidebarTab from './TabList';
-import TextContent from './sidebar/TextContent';
-import ShapeContent from './sidebar/ShapeContent';
-import ImageContent from './sidebar/ImageContent';
-import UploadContent from './sidebar/UploadContent';
-import TemplateContent from './sidebar/TemplateContent';
-import FrameContent from './sidebar/FrameContent';
-import { useEditor } from 'canva-editor/hooks';
+import SidebarTab from "./TabList";
+import TextContent from "./sidebar/TextContent";
+import ShapeContent from "./sidebar/ShapeContent";
+import ImageContent from "./sidebar/ImageContent";
+import UploadContent from "./sidebar/UploadContent";
+import TemplateContent from "./sidebar/TemplateContent";
+import FrameContent from "./sidebar/FrameContent";
+import { useEditor } from "canva-editor/hooks";
 
 // Icons
-import LayoutIcon from 'canva-editor/icons/LayoutIcon';
-import TextIcon from 'canva-editor/icons/TextIcon';
-import ElementsIcon from 'canva-editor/icons/ElementsIcon';
-import UploadIcon from 'canva-editor/icons/UploadIcon';
-import ImageIcon from 'canva-editor/icons/ImageIcon';
-import Notes from 'canva-editor/utils/settings/sidebar/Notes';
-import FrameIcon from 'canva-editor/icons/FrameIcon';
-import useMobileDetect from 'canva-editor/hooks/useMobileDetect';
-import BottomSheet from 'canva-editor/components/bottom-sheet/BottomSheet';
-import PlusIcon from 'canva-editor/icons/PlusIcon';
-import GridViewIcon from 'canva-editor/icons/GridViewIcon';
-import styled from '@emotion/styled';
-import { FC } from 'react';
+import LayoutIcon from "canva-editor/icons/LayoutIcon";
+import TextIcon from "canva-editor/icons/TextIcon";
+import ElementsIcon from "canva-editor/icons/ElementsIcon";
+import UploadIcon from "canva-editor/icons/UploadIcon";
+import ImageIcon from "canva-editor/icons/ImageIcon";
+import Notes from "canva-editor/utils/settings/sidebar/Notes";
+import FrameIcon from "canva-editor/icons/FrameIcon";
+import useMobileDetect from "canva-editor/hooks/useMobileDetect";
+import BottomSheet from "canva-editor/components/bottom-sheet/BottomSheet";
+import PlusIcon from "canva-editor/icons/PlusIcon";
+import GridViewIcon from "canva-editor/icons/GridViewIcon";
+import styled from "@emotion/styled";
+import { FC } from "react";
 
-const FABButton = styled('button')`
+const FABButton = styled("button")`
   position: fixed;
   bottom: 80px;
   background-color: #fff;
@@ -39,37 +39,37 @@ const FABButton = styled('button')`
 
 const tabs = [
   {
-    name: 'Template',
+    name: "Template",
     icon: <LayoutIcon />,
   },
   {
-    name: 'Text',
+    name: "Text",
     icon: <TextIcon />,
   },
   {
-    name: 'Image',
+    name: "Image",
     icon: <ImageIcon />,
   },
   {
-    name: 'Shape',
+    name: "Shape",
     icon: <ElementsIcon />,
   },
   {
-    name: 'Frame',
+    name: "Frame",
     icon: <FrameIcon />,
   },
   {
-    name: 'Upload',
+    name: "Upload",
     icon: <UploadIcon />,
   },
 ];
-const Sidebar: FC<{ version: string }> = ({ version }) => {
+const Sidebar: FC<{ version: string }> = () => {
   const { actions, state } = useEditor();
   const isMobile = useMobileDetect();
 
   const getSidebarComponent = (tabName: string) => {
     switch (tabName) {
-      case 'Template':
+      case "Template":
         return (
           <TemplateContent
             onClose={() => {
@@ -78,7 +78,7 @@ const Sidebar: FC<{ version: string }> = ({ version }) => {
             }}
           />
         );
-      case 'Text':
+      case "Text":
         return (
           <TextContent
             onClose={() => {
@@ -87,7 +87,7 @@ const Sidebar: FC<{ version: string }> = ({ version }) => {
             }}
           />
         );
-      case 'Frame':
+      case "Frame":
         return (
           <FrameContent
             onClose={() => {
@@ -96,7 +96,7 @@ const Sidebar: FC<{ version: string }> = ({ version }) => {
             }}
           />
         );
-      case 'Image':
+      case "Image":
         return (
           <ImageContent
             onClose={() => {
@@ -105,7 +105,7 @@ const Sidebar: FC<{ version: string }> = ({ version }) => {
             }}
           />
         );
-      case 'Shape':
+      case "Shape":
         return (
           <ShapeContent
             onClose={() => {
@@ -114,9 +114,9 @@ const Sidebar: FC<{ version: string }> = ({ version }) => {
             }}
           />
         );
-      case 'Notes':
+      case "Notes":
         return <Notes />;
-      case 'Upload':
+      case "Upload":
         return (
           <UploadContent
             visibility={true}
@@ -132,11 +132,13 @@ const Sidebar: FC<{ version: string }> = ({ version }) => {
   return (
     <div
       css={{
-        display: 'flex',
-        position: 'relative',
-        backgroundColor: '#ffffff',
-        borderLeft: '1px solid rgba(217, 219, 228, 0.6)',
-        borderRight: '1px solid rgba(217, 219, 228, 0.6)',
+        display: "flex",
+        position: "relative",
+        height: "100%",
+        maxHeight: "90vh",
+        backgroundColor: "#ffffff",
+        borderLeft: "1px solid rgba(217, 219, 228, 0.6)",
+        borderRight: "1px solid rgba(217, 219, 228, 0.6)",
       }}
     >
       {isMobile && (
@@ -150,12 +152,12 @@ const Sidebar: FC<{ version: string }> = ({ version }) => {
           >
             {state.sideBarTab && getSidebarComponent(state.sideBarTab)}
           </BottomSheet>
-          <div id='bottom_sheet' />
+          <div id="bottom_sheet" />
         </>
       )}
       <div
         css={{
-          display: 'flex',
+          display: "flex",
         }}
       >
         <SidebarTab
@@ -168,26 +170,17 @@ const Sidebar: FC<{ version: string }> = ({ version }) => {
         />
         {!isMobile && (
           <>
-            <div
-              css={{
-                position: 'absolute',
-                bottom: 10,
-                left: 10
-              }}
-            >
-              v{version}
-            </div>
             {state.sideBarTab && (
               <div
                 css={{
                   width: 360,
-                  '@media (max-width: 900px)': {
-                    width: '100%',
-                    position: 'fixed',
+                  "@media (max-width: 900px)": {
+                    width: "100%",
+                    position: "fixed",
                     bottom: 0,
                     left: 0,
                     top: 0,
-                    background: '#fff',
+                    background: "#fff",
                   },
                 }}
               >
@@ -200,20 +193,20 @@ const Sidebar: FC<{ version: string }> = ({ version }) => {
       <div
         css={{
           width: state.sidebar ? 360 : 0,
-          overflow: 'hidden',
-          height: '100%',
-          pointerEvents: 'none',
-          borderLeft: '1px solid rgba(217, 219, 228, 0.6)',
+          overflow: "hidden",
+          height: "100%",
+          pointerEvents: "none",
+          borderLeft: "1px solid rgba(217, 219, 228, 0.6)",
           zIndex: isMobile ? 1000 : 30,
           ...(state.sideBarTab
             ? {
-                position: 'absolute',
+                position: "absolute",
                 top: 0,
                 left: 77,
               }
             : {}),
         }}
-        id={'settings'}
+        id={"settings"}
       />
       {isMobile && (
         <div>

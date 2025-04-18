@@ -1,4 +1,5 @@
-import { FC, PropsWithChildren, useRef, useState } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { FC, PropsWithChildren, useRef, useState } from "react";
 
 type CoordinatesType = { x: number; y: number } | null;
 type DrapableProps = {
@@ -33,7 +34,9 @@ const Draggable: FC<PropsWithChildren<DrapableProps>> = ({
     const offsetX = e.nativeEvent.offsetX;
     const offsetY = e.nativeEvent.offsetY;
     const offsetW = ref.current?.offsetWidth || 0;
-    const offsetH = ref.current?.offsetHeight ? ref.current?.offsetHeight / 2 : 0;
+    const offsetH = ref.current?.offsetHeight
+      ? ref.current?.offsetHeight / 2
+      : 0;
 
     setPosition({ x: e.clientX - offsetX, y: e.clientY - offsetY - offsetH });
     setSize({ w: offsetW, h: offsetH });
@@ -41,7 +44,7 @@ const Draggable: FC<PropsWithChildren<DrapableProps>> = ({
     function isInDropArea(e: MouseEvent) {
       const dropArea: any = getElementByClassNearestTheCursorPosition(
         e,
-        'page-content'
+        "page-content"
       );
       if (!dropArea) return false;
 
@@ -80,12 +83,12 @@ const Draggable: FC<PropsWithChildren<DrapableProps>> = ({
           ? { x: e.clientX - offsetW, y: e.clientY - offsetH }
           : null
       );
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
     };
 
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
   };
 
   function getElementByClassNearestTheCursorPosition(
@@ -139,22 +142,22 @@ const Draggable: FC<PropsWithChildren<DrapableProps>> = ({
           <div
             css={{
               width: size.w,
-              height: size.h
+              height: size.h,
             }}
           >
-            {''}
+            {""}
           </div>
         )}
         <div
           ref={dragRef}
           style={{
             ...(isDragging && {
-              position: 'absolute',
+              position: "absolute",
               left: position.x,
               top: position.y,
               width: size.w,
               height: size.h,
-              zIndex: 1
+              zIndex: 1,
             }),
           }}
         >

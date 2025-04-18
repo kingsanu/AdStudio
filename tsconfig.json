@@ -27,10 +27,21 @@
     "rootDir": ".",
     "paths": {
       "canva-editor": ["packages/editor/src"],
-      "canva-editor/*": ["packages/editor/src/*"]
+      "canva-editor/*": ["packages/editor/src/*"],
+      "@/*": ["src/*"]
     }
   },
-  "include": ["**/*.d.ts", "**/*.ts", "**/*.tsx", "vite.config.mjs", "packages/editor/vite.config.mjs"],
+  "include": [
+    "**/*.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "vite.config.mjs",
+    "packages/editor/vite.config.mjs",
+    "packages/editor/src/layout/sidebar/TemplateContent.jsx",
+    "packages/editor/src/components/editor/SaveTemplate.jsx",
+    "packages/editor/src/components/editor/TemplateGallery.jsx"
+  ],
+
   "exclude": ["**/node_modules", "**/dist"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
