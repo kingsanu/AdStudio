@@ -12,7 +12,19 @@ const uploadedImageRoutes = require("./routes/uploadedImages");
 const imageProcessingRoutes = require("./routes/imageProcessing");
 
 const app = express();
-app.use(cors());
+
+// Configure CORS to allow connections from adstudio.foodyqueen.com
+app.use(
+  cors({
+    origin: [
+      "http://adstudio.foodyqueen.com",
+      "https://adstudio.foodyqueen.com",
+      "http://localhost:3000",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 const fs = require("fs");
 // const path = require("path");
