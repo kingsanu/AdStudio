@@ -12,7 +12,11 @@ const uploadedImageRoutes = require("./routes/uploadedImages");
 const imageProcessingRoutes = require("./routes/imageProcessing");
 
 const app = express();
+// Increase JSON body size limit
+app.use(express.json({ limit: "100mb" }));
 
+// Also increase URL-encoded body size limit if you're using it
+app.use(express.urlencoded({ limit: "100mb", extended: true }));
 // Configure CORS to allow connections from adstudio.foodyqueen.com
 app.use(
   cors({
