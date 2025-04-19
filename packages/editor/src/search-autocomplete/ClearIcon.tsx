@@ -30,7 +30,7 @@ export const ClearIcon = ({
 
   return (
     <EditorButton onClick={handleClearSearchString} css={{
-      margin: useTheme().clearIconMargin
+//      margin: useTheme().clearIconMargin
     }}>
       <StyledClearIcon className='clear-icon'>
         <svg
