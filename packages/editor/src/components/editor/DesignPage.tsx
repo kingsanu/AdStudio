@@ -535,14 +535,6 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
                 rotate={hoveredLayer.data.props.rotate}
               />
             )}
-          {/* Debug toolbar rendering conditions */}
-          {console.log("Toolbar rendering conditions:", {
-            imageEditor: !!imageEditor,
-            pageIndex,
-            activePage,
-            selectedLayerIds,
-            controlBox: !!controlBox,
-          })}
 
           {!imageEditor &&
             pageIndex === activePage &&
