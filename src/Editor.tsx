@@ -72,6 +72,21 @@ const Editor = () => {
       const template = await templateService.getTemplateById(templateId);
 
       if (template) {
+        // Check if this is another user's template
+        const currentUserId = localStorage.getItem("auth_token") || "";
+        const isOtherUsersTemplate = template.userId !== currentUserId;
+
+        if (isOtherUsersTemplate) {
+          // Clear template ID from localStorage to ensure we create a new copy
+          localStorage.removeItem("template_id");
+          console.log(
+            "Using another user's template - will create a copy when saving"
+          );
+          toast.info(
+            "You are using a template created by another user. When you save, a copy will be created in your account."
+          );
+        }
+
         // If the template has a templateUrl, fetch the template data
         if (template.templateUrl) {
           try {
@@ -90,7 +105,13 @@ const Editor = () => {
             // Simply use the template data directly as is
             // This is the same format as the sample data
             setTemplateData(templateResponse.data);
-            setName(template.title || "Untitled Design");
+
+            // If it's another user's template, add "Copy of" to the name
+            if (isOtherUsersTemplate) {
+              setName(`Copy of ${template.title}` || "Untitled Design");
+            } else {
+              setName(template.title || "Untitled Design");
+            }
           } catch (error) {
             console.error("Error loading template JSON:", error);
             toast.error("Failed to load template data");
@@ -99,7 +120,11 @@ const Editor = () => {
           }
         } else {
           // If no templateUrl, use the template as is
-          setName(template.title || "Untitled Design");
+          if (isOtherUsersTemplate) {
+            setName(`Copy of ${template.title}` || "Untitled Design");
+          } else {
+            setName(template.title || "Untitled Design");
+          }
           toast.success(`Template "${template.title}" loaded`);
         }
       } else {

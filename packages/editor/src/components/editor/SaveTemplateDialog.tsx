@@ -141,6 +141,37 @@ const SaveTemplateDialog: FC<Props> = ({ open, onClose, initialName = "" }) => {
       // Get user's ID as unique identifier (outletId from auth)
       const userId = user?.userId || Cookies.get("auth_token") || "anonymous";
 
+      // Check if we're editing an existing template
+      const existingTemplateId = localStorage.getItem("template_id");
+
+      // If we have an existing template ID, check if it belongs to the current user
+      if (existingTemplateId) {
+        try {
+          const templateResponse = await axios.get(
+            `${UPLOAD_TEMPLATE_ENDPOINT.replace(
+              "/upload-template",
+              "/templates"
+            )}/${existingTemplateId}`
+          );
+
+          // If template exists but belongs to another user, clear the ID to create a new copy
+          if (
+            templateResponse.data &&
+            templateResponse.data.userId !== userId
+          ) {
+            console.log("Template belongs to another user - creating a copy");
+            localStorage.removeItem("template_id");
+          }
+        } catch (error) {
+          console.warn(
+            "Could not verify template ownership, will create new",
+            error
+          );
+          localStorage.removeItem("template_id");
+        }
+      }
+
+      // Create a new template
       await axios.post(UPLOAD_TEMPLATE_ENDPOINT, {
         packedData,
         previewImage,

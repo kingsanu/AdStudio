@@ -265,12 +265,36 @@ export const syncChangesToServer = async (
     // Ensure the template name is consistent to help with filename consistency
     const templateName = pendingChanges.designName || "Untitled design";
 
+    // Initialize with default values
+    let isPublic = false;
+    let templateDesc = "";
+
+    // If we're updating an existing template, try to fetch its current public status
+    if (templateId) {
+      try {
+        const templateResponse = await axios.get(
+          `${UPLOAD_TEMPLATE_ENDPOINT.replace(
+            "/upload-template",
+            "/templates"
+          )}/${templateId}`
+        );
+        if (templateResponse.data) {
+          // Preserve the existing public status and description
+          isPublic = templateResponse.data.isPublic;
+          templateDesc = templateResponse.data.description || "";
+          console.log(`Preserving template status: isPublic=${isPublic}`);
+        }
+      } catch (error) {
+        console.warn("Could not fetch template details, using defaults", error);
+      }
+    }
+
     const apiData = {
       packedData: pendingChanges.packedData,
       previewImage: pendingChanges.previewImage,
       templateName: templateName,
-      templateDesc: "", // Could be added as a parameter later
-      isPublic: false,
+      templateDesc: templateDesc,
+      isPublic: isPublic,
       userId,
     };
 

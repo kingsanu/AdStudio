@@ -4,44 +4,44 @@ import React, {
   Fragment,
   useEffect,
   useRef,
-} from 'react';
-import PageElement from 'canva-editor/layers/core/PageElement';
-import { useEditor, useSelectedLayers } from '../../hooks';
-import { useLinkedRef } from '../../hooks/useLinkedRef';
+} from "react";
+import PageElement from "canva-editor/layers/core/PageElement";
+import { useEditor, useSelectedLayers } from "../../hooks";
+import { useLinkedRef } from "../../hooks/useLinkedRef";
 import {
   BoxData,
   LayerComponentProps,
   LayerDataRef,
   LayerId,
-} from 'canva-editor/types';
-import { useDisabledFeatures } from '../../hooks/useDisabledFeatures';
-import { getTransformStyle } from 'canva-editor/layers';
-import { visualCorners } from 'canva-editor/utils/2d/visualCorners';
-import { isPointInsideBox } from 'canva-editor/utils/2d/isPointInsideBox';
-import { getPosition } from 'canva-editor/utils';
-import { ResizeCallbackData, useResizeLayer } from '../../hooks/useResizeLayer';
-import { isImageLayer } from 'canva-editor/utils/layer/layers';
-import { getImageSize } from '../../hooks/useResize';
-import { ImageLayerProps } from 'canva-editor/layers/ImageLayer';
-import { getControlBoxSizeFromLayers } from 'canva-editor/utils/layer/getControlBoxSizeFromLayers';
-import { RotateCallbackData, useRotateLayer } from '../../hooks/useRotateLayer';
-import PageProvider from 'canva-editor/layers/core/PageContext';
-import ControlBox from 'canva-editor/layers/control/ControlBox';
-import Toolbar from 'canva-editor/layers/control/Toolbar';
-import Guideline from 'canva-editor/layers/control/Guideline';
-import LayerBorderBox from 'canva-editor/layers/core/LayerBorderBox';
-import ImageEditor from '../image-editor/ImageEditor';
-import TextEditor from '../text-editor/TextEditor';
+} from "canva-editor/types";
+import { useDisabledFeatures } from "../../hooks/useDisabledFeatures";
+import { getTransformStyle } from "canva-editor/layers";
+import { visualCorners } from "canva-editor/utils/2d/visualCorners";
+import { isPointInsideBox } from "canva-editor/utils/2d/isPointInsideBox";
+import { getPosition } from "canva-editor/utils";
+import { ResizeCallbackData, useResizeLayer } from "../../hooks/useResizeLayer";
+import { isImageLayer } from "canva-editor/utils/layer/layers";
+import { getImageSize } from "../../hooks/useResize";
+import { ImageLayerProps } from "canva-editor/layers/ImageLayer";
+import { getControlBoxSizeFromLayers } from "canva-editor/utils/layer/getControlBoxSizeFromLayers";
+import { RotateCallbackData, useRotateLayer } from "../../hooks/useRotateLayer";
+import PageProvider from "canva-editor/layers/core/PageContext";
+import ControlBox from "canva-editor/layers/control/ControlBox";
+import Toolbar from "canva-editor/layers/control/Toolbar";
+import Guideline from "canva-editor/layers/control/Guideline";
+import LayerBorderBox from "canva-editor/layers/core/LayerBorderBox";
+import ImageEditor from "../image-editor/ImageEditor";
+import TextEditor from "../text-editor/TextEditor";
 
 // Icons
-import LockIcon from 'canva-editor/icons/LockIcon';
-import LockOpenIcon from 'canva-editor/icons/LockOpenIcon';
-import DuplicateIcon from 'canva-editor/icons/DuplicateIcon';
-import TrashIcon from 'canva-editor/icons/TrashIcon';
-import ArrowUpIcon from 'canva-editor/icons/ArrowUpIcon';
-import ArrowDownIcon from 'canva-editor/icons/ArrowDownIcon';
-import AddNewPageIcon from 'canva-editor/icons/AddNewPageIcon';
-import EditInlineInput from '../EditInlineInput';
+import LockIcon from "canva-editor/icons/LockIcon";
+import LockOpenIcon from "canva-editor/icons/LockOpenIcon";
+import DuplicateIcon from "canva-editor/icons/DuplicateIcon";
+import TrashIcon from "canva-editor/icons/TrashIcon";
+import ArrowUpIcon from "canva-editor/icons/ArrowUpIcon";
+import ArrowDownIcon from "canva-editor/icons/ArrowDownIcon";
+import AddNewPageIcon from "canva-editor/icons/AddNewPageIcon";
+import EditInlineInput from "../EditInlineInput";
 
 export interface PageProps {
   pageIndex: number;
@@ -237,7 +237,7 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
   });
   useEffect(() => {
     const layerRecords = selectedLayers
-      .filter((layer) => layer.id !== 'ROOT')
+      .filter((layer) => layer.id !== "ROOT")
       .reduce((acc, layer) => {
         acc[layer.id] = layer.data.props;
         return acc;
@@ -269,25 +269,25 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
     <PageProvider pageIndex={pageIndex}>
       <div
         css={{
-          fontWeight: 'bold',
+          fontWeight: "bold",
           marginTop: 24,
           height: 28,
-          display: 'flex',
-          alignItems: 'center',
+          display: "flex",
+          alignItems: "center",
           marginBottom: 4,
           width: width * scale,
-          whiteSpace: 'nowrap',
-          '@media (max-width: 900px)': {
-            display: 'none',
+          whiteSpace: "nowrap",
+          "@media (max-width: 900px)": {
+            display: "none",
           },
         }}
       >
         <div css={{ flexGrow: 1 }}>
-          <div css={{ display: 'flex' }}>
+          <div css={{ display: "flex" }}>
             <div>Page {pageIndex + 1} -</div>&nbsp;
             <EditInlineInput
               text={pageName}
-              placeholder='Add page title'
+              placeholder="Add page title"
               onSetText={(newText) => {
                 actions.setPageName(pageIndex, newText);
               }}
@@ -296,10 +296,10 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
         </div>
         <div
           css={{
-            display: 'flex',
-            alignItems: 'center',
+            display: "flex",
+            alignItems: "center",
             fontSize: 20,
-            color: '#0d1216',
+            color: "#0d1216",
             height: 28,
             opacity: 0.7,
           }}
@@ -309,15 +309,15 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
               marginLeft: 8,
               width: 28,
               height: 28,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               borderRadius: 4,
-              cursor: pageIndex === 0 ? 'not-allowed' : 'pointer',
-              color: pageIndex === 0 ? 'rgba(36,49,61,.4)' : '#0d1216',
-              ':hover': {
+              cursor: pageIndex === 0 ? "not-allowed" : "pointer",
+              color: pageIndex === 0 ? "rgba(36,49,61,.4)" : "#0d1216",
+              ":hover": {
                 background:
-                  pageIndex === 0 ? undefined : 'rgba(64, 87, 109, 0.07)',
+                  pageIndex === 0 ? undefined : "rgba(64, 87, 109, 0.07)",
               },
             }}
             onClick={() => {
@@ -333,18 +333,18 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
               marginLeft: 8,
               width: 28,
               height: 28,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               borderRadius: 4,
-              cursor: pageIndex === totalPages - 1 ? 'not-allowed' : 'pointer',
+              cursor: pageIndex === totalPages - 1 ? "not-allowed" : "pointer",
               color:
-                pageIndex === totalPages - 1 ? 'rgba(36,49,61,.4)' : '#0d1216',
-              ':hover': {
+                pageIndex === totalPages - 1 ? "rgba(36,49,61,.4)" : "#0d1216",
+              ":hover": {
                 background:
                   pageIndex === totalPages - 1
                     ? undefined
-                    : 'rgba(64, 87, 109, 0.07)',
+                    : "rgba(64, 87, 109, 0.07)",
               },
             }}
             onClick={() => {
@@ -360,13 +360,13 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
               marginLeft: 8,
               width: 28,
               height: 28,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               borderRadius: 4,
-              cursor: 'pointer',
-              ':hover': {
-                background: 'rgba(64, 87, 109, 0.07)',
+              cursor: "pointer",
+              ":hover": {
+                background: "rgba(64, 87, 109, 0.07)",
               },
             }}
             onClick={() => {
@@ -383,13 +383,13 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
               marginLeft: 8,
               width: 28,
               height: 28,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               borderRadius: 4,
-              cursor: 'pointer',
-              ':hover': {
-                background: 'rgba(64, 87, 109, 0.07)',
+              cursor: "pointer",
+              ":hover": {
+                background: "rgba(64, 87, 109, 0.07)",
               },
             }}
             onClick={() => actions.duplicatePage(pageIndex)}
@@ -401,18 +401,18 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
               marginLeft: 8,
               width: 28,
               height: 28,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               borderRadius: 4,
-              cursor: isLocked || totalPages <= 1 ? 'not-allowed' : 'pointer',
+              cursor: isLocked || totalPages <= 1 ? "not-allowed" : "pointer",
               color:
-                isLocked || totalPages <= 1 ? 'rgba(36,49,61,.4)' : '#0d1216',
-              ':hover': {
+                isLocked || totalPages <= 1 ? "rgba(36,49,61,.4)" : "#0d1216",
+              ":hover": {
                 background:
                   isLocked || totalPages <= 1
                     ? undefined
-                    : 'rgba(64, 87, 109, 0.07)',
+                    : "rgba(64, 87, 109, 0.07)",
               },
             }}
             onClick={() =>
@@ -426,13 +426,13 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
               marginLeft: 8,
               width: 28,
               height: 28,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               borderRadius: 4,
-              cursor: 'pointer',
-              ':hover': {
-                background: 'rgba(64, 87, 109, 0.07)',
+              cursor: "pointer",
+              ":hover": {
+                background: "rgba(64, 87, 109, 0.07)",
               },
             }}
             onClick={() => actions.addPage(pageIndex)}
@@ -444,11 +444,11 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
       <div
         ref={ref}
         css={{
-          position: 'relative',
-          margin: 'auto',
-          boxShadow: '0 2px 8px rgba(14,19,24,.07)',
-          '@media (max-width: 900px)': {
-            boxShadow: 'none',
+          position: "relative",
+          margin: "auto",
+          boxShadow: "0 2px 8px rgba(14,19,24,.07)",
+          "@media (max-width: 900px)": {
+            boxShadow: "none",
           },
         }}
         style={{
@@ -463,9 +463,9 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
         <div
           ref={pageRef}
           css={{
-            background: 'white',
-            overflow: 'hidden',
-            transformOrigin: '0 0',
+            background: "white",
+            overflow: "hidden",
+            transformOrigin: "0 0",
           }}
           style={{
             width: width,
@@ -476,15 +476,15 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
         >
           <div
             ref={displayRef}
-            className='page-content'
+            className="page-content"
             css={{
               width,
               height,
-              position: 'relative',
+              position: "relative",
               left: 0,
               top: 0,
               zIndex: 1,
-              overflow: 'hidden'
+              overflow: "hidden",
             }}
           >
             <PageElement />
@@ -493,10 +493,11 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
 
         <div
           css={{
-            position: 'absolute',
+            position: "absolute",
             inset: 0,
-            pointerEvents: 'none',
+            pointerEvents: "none",
             zIndex: 2,
+            overflow: "visible", // Allow content to overflow
           }}
         >
           {!imageEditor &&
@@ -507,7 +508,7 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
                 boxSize={controlBox.boxSize}
                 position={controlBox.position}
                 rotate={controlBox.rotate}
-                type={'dashed'}
+                type={"dashed"}
               />
             )}
           {!imageEditor &&
@@ -534,6 +535,15 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
                 rotate={hoveredLayer.data.props.rotate}
               />
             )}
+          {/* Debug toolbar rendering conditions */}
+          {console.log("Toolbar rendering conditions:", {
+            imageEditor: !!imageEditor,
+            pageIndex,
+            activePage,
+            selectedLayerIds,
+            controlBox: !!controlBox,
+          })}
+
           {!imageEditor &&
             pageIndex === activePage &&
             selectedLayerIds.length > 0 && (
@@ -551,7 +561,21 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
                     onResizeStart={startResizing}
                   />
                 )}
-                <Toolbar />
+                {/* Force toolbar to render with high z-index */}
+                <div
+                  style={{
+                    position: "absolute",
+                    zIndex: 1000,
+                    pointerEvents: "auto",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: 0, // Height 0 to not take up space
+                    overflow: "visible", // Allow content to overflow
+                  }}
+                >
+                  <Toolbar />
+                </div>
               </Fragment>
             )}
           {pageIndex === activePage && <Guideline />}

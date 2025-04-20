@@ -2,7 +2,6 @@ import { useSelectedLayers, useEditor } from "canva-editor/hooks";
 import { boundingRect } from "canva-editor/utils/2d/boundingRect";
 import { isGroupLayer, isImageLayer } from "canva-editor/utils/layer/layers";
 import React, { Fragment, useContext, useMemo, useRef, useState } from "react";
-import { Tooltip } from "canva-editor/tooltip";
 import { duplicate } from "canva-editor/utils/menu/actions/duplicate";
 import { PageContext } from "../core/PageContext";
 import DuplicateIcon from "canva-editor/icons/DuplicateIcon";
@@ -13,6 +12,8 @@ import RemoveBackgroundIcon from "canva-editor/icons/RemoveBackgroundIcon";
 import axios from "axios";
 import { REMOVE_BACKGROUND_ENDPOINT } from "canva-editor/utils/constants/api";
 import { toast } from "sonner";
+// Import Shadcn tooltip component
+import { Tooltip } from "@/components/ui/tooltip";
 
 const Toolbar: React.FC = () => {
   const { pageIndex } = useContext(PageContext);
@@ -51,12 +52,16 @@ const Toolbar: React.FC = () => {
         height: pageSize.height,
       };
     }
-    return boundingRect(
+    // Calculate the bounding rectangle for the control box
+    const rect = boundingRect(
       controlBox.boxSize,
       controlBox.position,
       controlBox.rotate
     );
-  }, [controlBox]);
+
+    console.log("Calculated boundingBoxRect:", rect);
+    return rect;
+  }, [controlBox, pageSize.width, pageSize.height]);
   const handleDuplicate = () => {
     duplicate(state, { pageIndex, layerIds: selectedLayerIds, actions });
   };
@@ -90,15 +95,11 @@ const Toolbar: React.FC = () => {
 
     try {
       setIsProcessing(true);
-      toast.loading("Removing background...", {
-        description: "Please wait while we process your image.",
-      });
 
       const imageUrl = selectedLayer.data.props.image.url;
       const layerId = selectedLayerIds[0];
 
       // Show a more detailed loading toast
-      toast.dismiss();
       toast.loading("Processing image...", {
         description:
           "Removing background using AI. This may take a few seconds.",
@@ -116,8 +117,6 @@ const Toolbar: React.FC = () => {
         // Create a new image element to get dimensions
         const img = new Image();
         img.onload = () => {
-          // Replace the existing image with the processed one
-          // We keep the same position, size and rotation, just update the image URL
           actions.history.merge().setProp(pageIndex, layerId, {
             image: {
               ...selectedLayer.data.props.image,
@@ -152,24 +151,51 @@ const Toolbar: React.FC = () => {
       setIsProcessing(false);
     }
   };
+  // Don't render toolbar during drag/resize/rotate operations
   if (
     isDragging ||
     isResizing ||
     isRotating ||
-    (selectedLayerIds.includes("ROOT") && !isLocked && !isPageLocked) ||
-    !controlBox
+    !controlBox ||
+    selectedLayerIds.length === 0
   ) {
     return null;
   }
+
+  // Debug information
+  console.log("Toolbar rendering with:", {
+    selectedLayerIds,
+    selectedLayersCount: selectedLayers.length,
+    controlBox: !!controlBox,
+    controlBoxDetails: controlBox,
+    isDragging,
+    isResizing,
+    isRotating,
+    pageIndex,
+  });
   const containerGroupLayer = !!selectedLayers.find((l) => isGroupLayer(l));
+  // Calculate toolbar position
+  // Use boundingBoxRect if available, otherwise use fallback position
+  const toolbarLeft =
+    boundingBoxRect.x !== undefined
+      ? (boundingBoxRect.x + boundingBoxRect.width / 2) * scale
+      : (pageSize.width * scale) / 2; // Center of page as fallback
+
+  const toolbarTop =
+    boundingBoxRect.y !== undefined ? boundingBoxRect.y * scale - 60 : 20; // Top of page as fallback
+
+  console.log("Toolbar position:", { left: toolbarLeft, top: toolbarTop });
+
   return (
     <div
       ref={toolbarRef}
       css={{
         position: "absolute",
-        left: (boundingBoxRect.x + boundingBoxRect.width / 2) * scale,
-        top: boundingBoxRect.y * scale - 60,
+        left: toolbarLeft,
+        top: toolbarTop,
         transform: "translateX(-50%)",
+        zIndex: 1000, // Very high z-index to ensure it's above everything
+        pointerEvents: "auto", // Make sure toolbar can receive mouse events
       }}
     >
       <div
@@ -180,8 +206,6 @@ const Toolbar: React.FC = () => {
           display: "inline-flex",
           alignItems: "center",
           background: "#fff",
-          boxShadow:
-            "0 0 0 1px rgba(64,87,109,.07),0 2px 12px rgba(53,71,90,.2)",
           overflow: "hidden",
           pointerEvents: "auto",
           color: "#0d1216",
@@ -197,7 +221,8 @@ const Toolbar: React.FC = () => {
             whiteSpace: "nowrap",
           }}
         >
-          {!isPageLocked && !isLocked && !selectedLayerIds.includes("ROOT") && (
+          {/* Always show toolbar buttons when layers are selected */}
+          {!isPageLocked && !isLocked && (
             <Fragment>
               {selectedLayerIds.length > 1 && (
                 <div
@@ -239,7 +264,7 @@ const Toolbar: React.FC = () => {
                   Ungroup
                 </div>
               )}
-              <Tooltip content="Duplicate" place="bottom" delayShow={300}>
+              <Tooltip content="Duplicate" delayDuration={300}>
                 <div
                   css={{
                     width: 32,
@@ -259,7 +284,7 @@ const Toolbar: React.FC = () => {
                 </div>
               </Tooltip>
 
-              <Tooltip content="Delete" place="bottom" delayShow={300}>
+              <Tooltip content="Delete" delayDuration={300}>
                 <div
                   css={{
                     width: 32,
@@ -283,11 +308,7 @@ const Toolbar: React.FC = () => {
 
               {selectedLayerIds.length === 1 &&
                 isImageLayer(selectedLayers[0]) && (
-                  <Tooltip
-                    content="Remove Background"
-                    place="bottom"
-                    delayShow={300}
-                  >
+                  <Tooltip content="Remove Background" delayDuration={300}>
                     <div
                       css={{
                         width: 32,
@@ -313,7 +334,7 @@ const Toolbar: React.FC = () => {
                   </Tooltip>
                 )}
 
-              <Tooltip content="More Options" place="bottom" delayShow={300}>
+              <Tooltip content="More Options" delayDuration={300}>
                 <div
                   css={{
                     width: 32,
@@ -335,7 +356,7 @@ const Toolbar: React.FC = () => {
             </Fragment>
           )}
           {(isLocked || isPageLocked) && (
-            <Tooltip content="Unlock" place="bottom" delayShow={300}>
+            <Tooltip content="Unlock" delayDuration={300}>
               <div
                 css={{
                   width: 32,

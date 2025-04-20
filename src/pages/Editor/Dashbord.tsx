@@ -580,8 +580,6 @@ export default function Dashboard() {
 
         {/* Main Content */}
         <main className="flex-1 overflow-auto p-6">
-          {/* No profile section as requested */}
-
           {/* Create New Section */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}

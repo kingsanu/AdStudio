@@ -18,7 +18,7 @@ interface ToolButtonProps {
 const ToolButton: FC<ToolButtonProps> = ({ icon, label, active, onClick }) => {
   return (
     <TooltipProvider>
-      <Tooltip content={label}>
+      <Tooltip>
         <TooltipTrigger asChild>
           <button
             className={cn(
