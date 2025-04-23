@@ -1,9 +1,9 @@
-import { FontData } from 'canva-editor/types';
-import { chain, filter, find, omit } from 'lodash';
+import { FontData } from "canva-editor/types";
+import { chain, find } from "lodash";
 
 function groupFontsByFamily(fonts: FontData[]): FontData[] {
   return chain(fonts)
-    .groupBy('family')
+    .groupBy("family")
     .map((group) => {
       // Case the font has only one style
       if (group.length === 1) {
@@ -12,18 +12,20 @@ function groupFontsByFamily(fonts: FontData[]): FontData[] {
           styles: group,
         };
       }
-      const regularItem: any = find(group, (item) =>
-        item.name.toLowerCase().includes('regular')
-      );
+      const regularItem = find(group, (item) =>
+        item.name.toLowerCase().includes("regular")
+      ) as FontData | undefined;
 
       if (regularItem) {
-        const { name, ...rest } = regularItem;
-        const { styles, ...familyObj } = omit(regularItem, ['name']);
+        const { name } = regularItem;
+        // Extract family from regularItem without overriding it
+        const familyName = regularItem.family;
 
         return {
-          family: familyObj,
+          family: familyName,
           name,
-          ...rest,
+          style: regularItem.style,
+          url: regularItem.url,
           styles: group,
         };
       } else {
@@ -36,17 +38,24 @@ function groupFontsByFamily(fonts: FontData[]): FontData[] {
     .value();
 }
 
-function handleFontStyle(style: string) {
-  if (style === 'regular') return '';
+function handleFontStyle(style: string | undefined) {
+  console.log("handleFontStyle", style);
+  // Handle undefined or null style
+  if (!style) {
+    console.warn("Font style is undefined or null");
+    return "";
+  }
+
+  if (style === "regular") return "";
 
   const fontStrong = parseInt(style);
-  if (style.includes('italic')) {
+  if (style.includes("italic")) {
     // bold + italic
-    const fontStyle = 'font-style: italic;\n';
+    const fontStyle = "font-style: italic;\n";
     return fontStrong ? `font-weight: ${fontStrong};\n${fontStyle}` : fontStyle;
   }
 
-  if (!fontStrong) return '';
+  if (!fontStrong) return "";
 
   return `font-weight: ${fontStrong};\n`;
 }
@@ -54,38 +63,44 @@ function handleFontStyle(style: string) {
 function getFontStrongName(weight: number) {
   switch (weight) {
     case 100:
-      return 'Thin';
+      return "Thin";
     case 200:
-      return 'Extra Light';
+      return "Extra Light";
     case 300:
-      return 'Light';
+      return "Light";
     case 400:
-      return 'Normal';
+      return "Normal";
     case 500:
-      return 'Medium';
+      return "Medium";
     case 600:
-      return 'Semi Bold';
+      return "Semi Bold";
     case 700:
-      return 'Bold';
+      return "Bold";
     case 800:
-      return 'Extra Bold';
+      return "Extra Bold";
     case 900:
-      return 'Black';
+      return "Black";
     default:
-      return 'Unknown';
+      return "Unknown";
   }
 }
 
-function handleFontStyleName(style: string) {
-  if (style === 'regular') return 'Regular';
-
-  const fontStrong = parseInt(style);
-  if (style.includes('italic')) {
-    // bold + italic
-    return fontStrong ? `${getFontStrongName(fontStrong)} + Italic` : 'Italic';
+function handleFontStyleName(style: string | undefined) {
+  // Handle undefined or null style
+  if (!style) {
+    console.warn("Font style name is undefined or null");
+    return "Regular";
   }
 
-  if (!fontStrong) return 'Regular';
+  if (style === "regular") return "Regular";
+
+  const fontStrong = parseInt(style);
+  if (style.includes("italic")) {
+    // bold + italic
+    return fontStrong ? `${getFontStrongName(fontStrong)} + Italic` : "Italic";
+  }
+
+  if (!fontStrong) return "Regular";
 
   return getFontStrongName(fontStrong);
 }

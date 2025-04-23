@@ -5,6 +5,7 @@ import PhoneAuth from "./pages/auth/PhoneAuth";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Dashbord from "./pages/Editor/Dashbord";
 import Editor from "./Editor";
+import TextTemplateEditor from "./TextTemplateEditor";
 import { Toaster } from "./components/ui/sonner";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
@@ -27,6 +28,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Editor />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/new-text"
+            element={
+              <ProtectedRoute>
+                <TextTemplateEditor />
               </ProtectedRoute>
             }
           />

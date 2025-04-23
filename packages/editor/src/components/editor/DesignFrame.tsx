@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   FC,
   Fragment,
@@ -6,32 +8,32 @@ import {
   useEffect,
   useRef,
   useState,
-} from 'react';
-import { EditorContext } from './EditorContext';
-import DesignPage from './DesignPage';
-import { SerializedPage } from 'canva-editor/types';
-import { useTrackingShiftKey } from '../../hooks/useTrackingShiftKey';
-import { useUsedFont } from '../../hooks/useUsedFont';
-import useShortcut from '../../hooks/useShortcut';
-import { useEditor, useSelectedLayers } from '../../hooks';
-import { useZoomPage } from '../../hooks/useZoomPage';
-import useClickOutside from '../../hooks/useClickOutside';
-import { isElementInViewport } from 'canva-editor/utils/dom/isElementInViewport';
-import { useSelectLayer } from '../../hooks/useSelectLayer';
-import { useDragLayer } from '../../hooks/useDragLayer';
-import { getPosition, isMouseEvent, isTouchEvent } from 'canva-editor/utils';
-import { GlobalStyle, getTransformStyle } from 'canva-editor/layers';
-import { visualCorners } from 'canva-editor/utils/2d/visualCorners';
-import { isPointInsideBox } from 'canva-editor/utils/2d/isPointInsideBox';
-import { rectangleInsideAnother } from 'canva-editor/utils/2d/rectangleInsideAnother';
-import LayerContextMenu from 'canva-editor/layers/core/context-menu/LayerContextMenu';
-import SelectionBox from 'canva-editor/layers/core/SelectionBox';
-import { isMobile } from 'react-device-detect';
-import PageSettings from 'canva-editor/utils/settings/PageSettings';
-import { dataMapping, pack, unpack } from 'canva-editor/utils/minifier';
-import useDebouncedEffect from 'canva-editor/hooks/useDebouncedEffect';
-import { domToPng } from 'modern-screenshot'
-import { slugify } from 'canva-editor/utils/slugify';
+} from "react";
+import { EditorContext } from "./EditorContext";
+import DesignPage from "./DesignPage";
+import { SerializedPage } from "canva-editor/types";
+import { useTrackingShiftKey } from "../../hooks/useTrackingShiftKey";
+import { useUsedFont } from "../../hooks/useUsedFont";
+import useShortcut from "../../hooks/useShortcut";
+import { useEditor, useSelectedLayers } from "../../hooks";
+import { useZoomPage } from "../../hooks/useZoomPage";
+import useClickOutside from "../../hooks/useClickOutside";
+import { isElementInViewport } from "canva-editor/utils/dom/isElementInViewport";
+import { useSelectLayer } from "../../hooks/useSelectLayer";
+import { useDragLayer } from "../../hooks/useDragLayer";
+import { getPosition, isMouseEvent, isTouchEvent } from "canva-editor/utils";
+import { GlobalStyle, getTransformStyle } from "canva-editor/layers";
+import { visualCorners } from "canva-editor/utils/2d/visualCorners";
+import { isPointInsideBox } from "canva-editor/utils/2d/isPointInsideBox";
+import { rectangleInsideAnother } from "canva-editor/utils/2d/rectangleInsideAnother";
+import LayerContextMenu from "canva-editor/layers/core/context-menu/LayerContextMenu";
+import SelectionBox from "canva-editor/layers/core/SelectionBox";
+import { isMobile } from "react-device-detect";
+import PageSettings from "canva-editor/utils/settings/PageSettings";
+import { dataMapping, pack, unpack } from "canva-editor/utils/minifier";
+import useDebouncedEffect from "canva-editor/hooks/useDebouncedEffect";
+import { domToPng } from "modern-screenshot";
+import { slugify } from "canva-editor/utils/slugify";
 import { jsPDF } from "jspdf";
 
 interface DesignFrameProps {
@@ -155,7 +157,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
     () => {
       actions.hideContextMenu();
     },
-    'mousedown',
+    "mousedown",
     { capture: true }
   );
 
@@ -172,7 +174,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
       ) {
         pageRef.current.some((page, pageIndex) => {
           if (isElementInViewport(viewport, page)) {
-            actions.selectLayers(pageIndex, 'ROOT');
+            actions.selectLayers(pageIndex, "ROOT");
             return true;
           }
         });
@@ -183,18 +185,18 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
   const [previousScale, setPreviousScale] = useState(scale);
   useEffect(() => {
     if (isMobile) return;
-    let offset = {
+    const offset = {
       x: frameRef?.current?.scrollLeft || 0,
       y: frameRef?.current?.scrollTop || 0,
     };
-    let pageLoc = { x: mousePos.x + offset.x, y: mousePos.y + offset.y };
-    let zoomPoint = {
+    const pageLoc = { x: mousePos.x + offset.x, y: mousePos.y + offset.y };
+    const zoomPoint = {
       x: pageLoc.x / previousScale,
       y: pageLoc.y / previousScale,
     };
 
-    let zoomPointNew = { x: zoomPoint.x * scale, y: zoomPoint.y * scale };
-    let newScroll = {
+    const zoomPointNew = { x: zoomPoint.x * scale, y: zoomPoint.y * scale };
+    const newScroll = {
       x: zoomPointNew.x - mousePos.x,
       y: zoomPointNew.y - mousePos.y,
     };
@@ -222,14 +224,14 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
     };
 
     if (frameRef?.current) {
-      frameRef.current.addEventListener('mousemove', mouseMove);
-      frameRef.current.addEventListener('mouseleave', mouseLeave);
+      frameRef.current.addEventListener("mousemove", mouseMove);
+      frameRef.current.addEventListener("mouseleave", mouseLeave);
     }
 
     return () => {
       if (frameRef?.current) {
-        frameRef.current.removeEventListener('mousemove', mouseMove);
-        frameRef.current.removeEventListener('mouseleave', mouseLeave);
+        frameRef.current.removeEventListener("mousemove", mouseMove);
+        frameRef.current.removeEventListener("mouseleave", mouseLeave);
       }
     };
   }, [frameRef?.current]);
@@ -237,26 +239,26 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
   const handleScrollToActivePage = (pageIndex: number) => {
     setTimeout(() => {
       pageRef.current[pageIndex].scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
+        behavior: "smooth",
+        block: "center",
       });
     }, 16);
   };
   const handleDownloadPNG = async (pageIndex: number) => {
     const pageContentEl =
-      pageRef.current[pageIndex]?.querySelector('.page-content');
+      pageRef.current[pageIndex]?.querySelector(".page-content");
     if (pageContentEl) {
       try {
         const dataUrl = await domToPng(pageContentEl as HTMLElement, {
           width: pageSize.width,
-          height: pageSize.height
+          height: pageSize.height,
         });
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.download = `design-id-page-${pageIndex + 1}.png`;
         link.href = dataUrl;
         link.click();
       } catch (e) {
-        window.alert('Cannot download: ' + (e as Error).message);
+        window.alert("Cannot download: " + (e as Error).message);
       }
     }
   };
@@ -264,11 +266,13 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
     const pageProcesses: Promise<string>[] = [];
     pages.forEach((_, idx) => {
       const pageContentEl =
-        pageRef.current[idx]?.querySelector('.page-content');
-      pageProcesses.push(domToPng(pageContentEl as HTMLElement, {
-        width: pageSize.width,
-        height: pageSize.height
-      }));
+        pageRef.current[idx]?.querySelector(".page-content");
+      pageProcesses.push(
+        domToPng(pageContentEl as HTMLElement, {
+          width: pageSize.width,
+          height: pageSize.height,
+        })
+      );
     });
     const dataUrls = await Promise.all(pageProcesses);
     const doc = new jsPDF({
@@ -276,17 +280,26 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
     });
 
     dataUrls.forEach((dataUrl, idx) => {
-      doc.internal.pageSize.width =  pageSize.width;
+      doc.internal.pageSize.width = pageSize.width;
       doc.internal.pageSize.height = pageSize.height;
-      doc.addImage(dataUrl, 'PNG', 0, 0, pageSize.width, pageSize.height, 'p'+idx, 'SLOW');
+      doc.addImage(
+        dataUrl,
+        "PNG",
+        0,
+        0,
+        pageSize.width,
+        pageSize.height,
+        "p" + idx,
+        "SLOW"
+      );
       if (idx !== dataUrls.length - 1) {
         doc.addPage();
-        doc.internal.pageSize.width =  pageSize.width;
+        doc.internal.pageSize.width = pageSize.width;
         doc.internal.pageSize.height = pageSize.height;
       }
     });
-    const fileName = name ? slugify(name) : 'untitled-design';
-    doc.save(fileName + '.pdf');
+    const fileName = name ? slugify(name) : "untitled-design";
+    doc.save(fileName + ".pdf");
 
     actions.fireDownloadPDFCmd(-1); // Reset
   };
@@ -347,7 +360,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
       }
       if (
         hoveredLayer &&
-        hoveredLayer.id !== 'ROOT' &&
+        hoveredLayer.id !== "ROOT" &&
         !selectedLayerIds.includes(hoveredLayer.id)
       ) {
         if (
@@ -358,13 +371,13 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
           actions.selectLayers(
             hoveredPage,
             hoveredLayer.id,
-            shiftKeyRef.current ? 'add' : 'replace'
+            shiftKeyRef.current ? "add" : "replace"
           );
         }
       }
       if (
         (hoveredLayer &&
-          hoveredLayer.id !== 'ROOT' &&
+          hoveredLayer.id !== "ROOT" &&
           !hoveredLayer.data.locked) ||
         isInsideControlBox
       ) {
@@ -400,14 +413,14 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
         bottom: 0,
       };
       const rotate =
-        (resizeData.rotate || 0) + rd[resizeData.direction || 'bottom'] + 90;
+        (resizeData.rotate || 0) + rd[resizeData.direction || "bottom"] + 90;
       const file = Math.round((rotate % 180) / 10);
       return {
         cursor: `url('${editorAssetsUrl}/cursors/resize/${file}.png') 12 12, auto`,
       };
     } else if (dragData.status) {
       return {
-        cursor: 'move',
+        cursor: "move",
       };
     }
     return {};
@@ -418,14 +431,14 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
       <div
         ref={frameRef}
         css={{
-          display: 'flex',
-          position: 'relative',
-          height: '100%',
-          overflow: 'auto',
+          display: "flex",
+          position: "relative",
+          height: "100%",
+          overflow: "auto",
           ...cursorCSS(),
-          '@media (max-width: 900px)': {
-            overflow: 'hidden',
-            height: 'calc(100% - 72px)',
+          "@media (max-width: 900px)": {
+            overflow: "hidden",
+            height: "calc(100% - 72px)",
           },
         }}
         tabIndex={0}
@@ -438,33 +451,33 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
       >
         <div
           css={{
-            position: 'absolute',
-            display: 'flex',
-            minWidth: '100%',
-            minHeight: '100%',
+            position: "absolute",
+            display: "flex",
+            minWidth: "100%",
+            minHeight: "100%",
           }}
           onMouseDown={(e) => handMouseDown(e.nativeEvent)}
           onTouchStart={(e) => handMouseDown(e.nativeEvent)}
         >
           <div
             css={{
-              position: 'relative',
-              display: 'flex',
+              position: "relative",
+              display: "flex",
               flexGrow: 1,
-              touchAction: 'pinch-zoom',
+              touchAction: "pinch-zoom",
             }}
           >
             <div
               ref={pageContainerRef}
               css={{
-                display: 'flex',
-                position: 'relative',
-                flexDirection: 'row',
-                justifyContent: 'center',
-                margin: 'auto',
-                '@media (max-width: 900px)': {
-                  transition: 'transform 250ms linear 0s',
-                  margin: 'initial',
+                display: "flex",
+                position: "relative",
+                flexDirection: "row",
+                justifyContent: "center",
+                margin: "auto",
+                "@media (max-width: 900px)": {
+                  transition: "transform 250ms linear 0s",
+                  margin: "initial",
                 },
               }}
               style={{
@@ -476,8 +489,8 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
               <div
                 css={{
                   marginLeft: 56,
-                  '@media (max-width: 900px)': {
-                    display: 'flex',
+                  "@media (max-width: 900px)": {
+                    display: "flex",
                     marginLeft: 0,
                   },
                 }}
@@ -490,16 +503,16 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
                   onMovePageEnd();
                 }}
               >
-                <GlobalStyle fonts={usedFonts} mode={'editor'} />
+                <GlobalStyle fonts={usedFonts} mode={"editor"} />
                 {pages.map((page, index) => (
                   <div
                     key={index}
                     css={{
-                      '@media (max-width: 900px)': {
-                        padding: '0 16px',
+                      "@media (max-width: 900px)": {
+                        padding: "0 16px",
                         width: window.innerWidth,
                         height: window.innerHeight,
-                        overflow: 'hidden',
+                        overflow: "hidden",
                         marginTop: 5,
                       },
                     }}
@@ -524,20 +537,20 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
                 ))}
                 <button
                   css={{
-                    alignItems: 'center',
-                    justifyItems: 'center',
+                    alignItems: "center",
+                    justifyItems: "center",
                     marginTop: 20,
                     marginBottom: 20,
-                    background: 'rgba(64,87,109,.07)',
-                    color: '#0d1216',
+                    background: "rgba(64,87,109,.07)",
+                    color: "#0d1216",
                     width: pageSize.width * scale,
                     height: 40,
-                    textAlign: 'center',
-                    padding: '0 2px',
+                    textAlign: "center",
+                    padding: "0 2px",
                     fontWeight: 600,
                     borderRadius: 3,
-                    '@media (max-width: 900px)': {
-                      display: 'none',
+                    "@media (max-width: 900px)": {
+                      display: "none",
                     },
                   }}
                   onClick={() => {
@@ -551,8 +564,8 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
               <div
                 css={{
                   width: 56,
-                  pointerEvents: 'none',
-                  '@media (max-width: 900px)': {
+                  pointerEvents: "none",
+                  "@media (max-width: 900px)": {
                     width: 0,
                   },
                 }}
@@ -571,20 +584,20 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
       {resizeData.status && (
         <div
           css={{
-            position: 'fixed',
+            position: "fixed",
             top: `${(resizeData.cursor?.clientY || 0) + 36}px`,
             left: `${(resizeData.cursor?.clientX || 0) + 60}px`,
-            whiteSpace: 'nowrap',
-            background: '#3a3a4c',
-            padding: '3px 8px',
+            whiteSpace: "nowrap",
+            background: "#3a3a4c",
+            padding: "3px 8px",
             borderRadius: 4,
-            textAlign: 'center',
-            color: 'white',
+            textAlign: "center",
+            color: "white",
             fontSize: 12,
             fontWeight: 700,
           }}
         >
-          w: {Math.round(resizeData.boxSize?.width || 0)} h:{' '}
+          w: {Math.round(resizeData.boxSize?.width || 0)} h:{" "}
           {Math.round(resizeData.boxSize?.height || 0)}
         </div>
       )}
@@ -593,7 +606,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
           onChangePage={(pageIndex) => {
             actions.setActivePage(pageIndex);
             pageRef.current[pageIndex].scrollIntoView({
-              block: 'center',
+              block: "center",
             });
           }}
         />

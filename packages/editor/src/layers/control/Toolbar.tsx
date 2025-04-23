@@ -59,7 +59,6 @@ const Toolbar: React.FC = () => {
       controlBox.rotate
     );
 
-    console.log("Calculated boundingBoxRect:", rect);
     return rect;
   }, [controlBox, pageSize.width, pageSize.height]);
   const handleDuplicate = () => {
@@ -162,17 +161,6 @@ const Toolbar: React.FC = () => {
     return null;
   }
 
-  // Debug information
-  console.log("Toolbar rendering with:", {
-    selectedLayerIds,
-    selectedLayersCount: selectedLayers.length,
-    controlBox: !!controlBox,
-    controlBoxDetails: controlBox,
-    isDragging,
-    isResizing,
-    isRotating,
-    pageIndex,
-  });
   const containerGroupLayer = !!selectedLayers.find((l) => isGroupLayer(l));
   // Calculate toolbar position
   // Use boundingBoxRect if available, otherwise use fallback position
@@ -183,8 +171,6 @@ const Toolbar: React.FC = () => {
 
   const toolbarTop =
     boundingBoxRect.y !== undefined ? boundingBoxRect.y * scale - 60 : 20; // Top of page as fallback
-
-  console.log("Toolbar position:", { left: toolbarLeft, top: toolbarTop });
 
   return (
     <div

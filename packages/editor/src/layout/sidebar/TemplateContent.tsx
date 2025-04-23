@@ -126,6 +126,7 @@ const TemplateContent: FC<{ onClose: () => void }> = ({ onClose }) => {
         });
       } else {
         const serializedData: SerializedPage = unpack(data);
+        console.log(serializedData);
         actions.changePageSize(
           serializedData.layers.ROOT.props.boxSize as PageSize
         );

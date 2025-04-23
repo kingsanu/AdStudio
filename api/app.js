@@ -8,6 +8,7 @@ const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");
 const templateRoutes = require("./routes/templates");
+const textTemplateRoutes = require("./routes/textTemplates");
 const uploadedImageRoutes = require("./routes/uploadedImages");
 const imageProcessingRoutes = require("./routes/imageProcessing");
 
@@ -24,6 +25,7 @@ app.use(
       "http://adstudio.foodyqueen.com",
       "https://adstudio.foodyqueen.com",
       "http://localhost:3000",
+      "http://localhost:5173",
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   })
@@ -38,6 +40,7 @@ connectDB();
 
 // Use routes
 app.use("/api", templateRoutes);
+app.use("/api", textTemplateRoutes);
 app.use("/api", uploadedImageRoutes);
 app.use("/api", imageProcessingRoutes);
 

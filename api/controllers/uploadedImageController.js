@@ -10,6 +10,9 @@ const UploadedImage = require("./../models/uploadedImage");
 // Cloud storage API endpoint
 const CLOUD_STORAGE_API = "https://business.foodyqueen.com/admin/UploadMedia";
 
+// Define folder name for uploaded images in cloud storage
+const STORAGE_FOLDER = "editor";
+
 const uploadedImageController = {
   // Upload image to cloud storage and save metadata
   uploadImage: async (req, res) => {
@@ -31,8 +34,12 @@ const uploadedImageController = {
       const imagePath = path.join(tempDir, filename);
       fs.writeFileSync(imagePath, imageBuffer);
 
+      // Create local and cloud filenames
+      const localFilename = filename;
+      const cloudFilename = `${STORAGE_FOLDER}/${filename}`;
+
       formData.append("stream", fs.createReadStream(imagePath));
-      formData.append("filename", filename);
+      formData.append("filename", cloudFilename);
       formData.append("senitize", "false");
 
       // Upload to cloud storage
@@ -100,7 +107,7 @@ const uploadedImageController = {
   deleteImage: async (req, res) => {
     try {
       const image = await UploadedImage.findById(req.params.id);
-      
+
       if (!image) {
         return res.status(404).json({ message: "Image not found" });
       }

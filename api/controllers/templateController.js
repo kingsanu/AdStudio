@@ -11,6 +11,9 @@ const UploadedImage = require("./../models/uploadedImage");
 // Cloud storage API endpoint
 const CLOUD_STORAGE_API = "https://business.foodyqueen.com/admin/UploadMedia";
 
+// Define folder name for templates in cloud storage
+const STORAGE_FOLDER = "editor";
+
 const templateController = {
   // Upload image to cloud storage
   uploadImage: async (req, res) => {
@@ -27,13 +30,16 @@ const templateController = {
       const formData = new FormData();
       const imageBuffer = Buffer.from(base64, "base64");
 
+      // Add folder prefix to filename
+      const folderFilename = `${STORAGE_FOLDER}/${filename}`;
+
       // Create a temporary file
       const tempDir = os.tmpdir();
       const imagePath = path.join(tempDir, filename);
       fs.writeFileSync(imagePath, imageBuffer);
 
       formData.append("stream", fs.createReadStream(imagePath));
-      formData.append("filename", filename);
+      formData.append("filename", folderFilename);
       formData.append("senitize", "false");
 
       // Upload to cloud storage
@@ -110,11 +116,16 @@ const templateController = {
       const sanitizedUserId = userId.replace(/[^a-zA-Z0-9_-]/g, "");
 
       // Use consistent naming pattern to match the update function
-      const templateFilename = `template_${sanitizedUserId}_${sanitizedName}.json`;
-      const thumbnailFilename = `thumbnail_${sanitizedUserId}_${sanitizedName}.png`;
+      // Create filenames for local storage and cloud storage
+      const localTemplateFilename = `template_${sanitizedUserId}_${sanitizedName}.json`;
+      const localThumbnailFilename = `thumbnail_${sanitizedUserId}_${sanitizedName}.png`;
+
+      // Add folder prefix for cloud storage
+      const cloudTemplateFilename = `${STORAGE_FOLDER}/${localTemplateFilename}`;
+      const cloudThumbnailFilename = `${STORAGE_FOLDER}/${localThumbnailFilename}`;
 
       console.log(
-        `Using filenames: ${templateFilename} and ${thumbnailFilename}`
+        `Using filenames: ${cloudTemplateFilename} and ${cloudThumbnailFilename}`
       );
 
       // Save files temporarily to disk
@@ -125,7 +136,7 @@ const templateController = {
         typeof packedData === "string"
           ? packedData
           : JSON.stringify(packedData);
-      const templatePath = path.join(tempDir, templateFilename);
+      const templatePath = path.join(tempDir, localTemplateFilename);
       fs.writeFileSync(templatePath, templateData);
 
       // Save thumbnail file
@@ -134,19 +145,19 @@ const templateController = {
         ""
       );
       const thumbnailBuffer = Buffer.from(thumbnailBase64, "base64");
-      const thumbnailPath = path.join(tempDir, thumbnailFilename);
+      const thumbnailPath = path.join(tempDir, localThumbnailFilename);
       fs.writeFileSync(thumbnailPath, thumbnailBuffer);
 
       // Create form data for template upload
       const templateFormData = new FormData();
       templateFormData.append("stream", fs.createReadStream(templatePath));
-      templateFormData.append("filename", templateFilename);
+      templateFormData.append("filename", cloudTemplateFilename);
       templateFormData.append("senitize", "false");
 
       // Create form data for thumbnail upload
       const thumbnailFormData = new FormData();
       thumbnailFormData.append("stream", fs.createReadStream(thumbnailPath));
-      thumbnailFormData.append("filename", thumbnailFilename);
+      thumbnailFormData.append("filename", cloudThumbnailFilename);
       thumbnailFormData.append("senitize", "false");
 
       // Upload files
@@ -308,15 +319,25 @@ const templateController = {
         .replace(/[^a-zA-Z0-9_-]/g, "");
       const sanitizedUserId = userId.replace(/[^a-zA-Z0-9_-]/g, "");
 
-      const templateFilename =
+      // If we have existing filenames, use them as is (they might already have the folder)
+      // Otherwise, create new filenames
+      const cloudTemplateFilename =
         existingTemplateFilename ||
-        `template_${sanitizedUserId}_${sanitizedName}.json`;
-      const thumbnailFilename =
+        `${STORAGE_FOLDER}/template_${sanitizedUserId}_${sanitizedName}.json`;
+      const cloudThumbnailFilename =
         existingThumbnailFilename ||
-        `thumbnail_${sanitizedUserId}_${sanitizedName}.png`;
+        `${STORAGE_FOLDER}/thumbnail_${sanitizedUserId}_${sanitizedName}.png`;
+
+      // Extract local filenames (without folder prefix)
+      const localTemplateFilename = existingTemplateFilename
+        ? existingTemplateFilename.split("/").pop()
+        : `template_${sanitizedUserId}_${sanitizedName}.json`;
+      const localThumbnailFilename = existingThumbnailFilename
+        ? existingThumbnailFilename.split("/").pop()
+        : `thumbnail_${sanitizedUserId}_${sanitizedName}.png`;
 
       console.log(
-        `Using filenames: ${templateFilename} and ${thumbnailFilename}`
+        `Using filenames: ${cloudTemplateFilename} and ${cloudThumbnailFilename}`
       );
       console.log(
         `Reusing existing files: ${!!existingTemplateFilename} and ${!!existingThumbnailFilename}`
@@ -330,7 +351,7 @@ const templateController = {
         typeof packedData === "string"
           ? packedData
           : JSON.stringify(packedData);
-      const templatePath = path.join(tempDir, templateFilename);
+      const templatePath = path.join(tempDir, localTemplateFilename);
       fs.writeFileSync(templatePath, templateData);
 
       // Save thumbnail file
@@ -339,19 +360,19 @@ const templateController = {
         ""
       );
       const thumbnailBuffer = Buffer.from(thumbnailBase64, "base64");
-      const thumbnailPath = path.join(tempDir, thumbnailFilename);
+      const thumbnailPath = path.join(tempDir, localThumbnailFilename);
       fs.writeFileSync(thumbnailPath, thumbnailBuffer);
 
       // Create form data for template upload
       const templateFormData = new FormData();
       templateFormData.append("stream", fs.createReadStream(templatePath));
-      templateFormData.append("filename", templateFilename);
+      templateFormData.append("filename", cloudTemplateFilename);
       templateFormData.append("senitize", "false");
 
       // Create form data for thumbnail upload
       const thumbnailFormData = new FormData();
       thumbnailFormData.append("stream", fs.createReadStream(thumbnailPath));
-      thumbnailFormData.append("filename", thumbnailFilename);
+      thumbnailFormData.append("filename", cloudThumbnailFilename);
       thumbnailFormData.append("senitize", "false");
 
       // Upload files

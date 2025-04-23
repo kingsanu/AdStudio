@@ -159,8 +159,6 @@ const CommonSettings = () => {
       setIsProcessing(false);
     }
   };
-  console.log(selectedLayerIds.length);
-  console.log(selectedLayerIds.length);
 
   return (
     <Fragment>

@@ -24,11 +24,17 @@ export type FontDataApi = {
 };
 
 export type FontData = {
+  // Standard properties
   name: string;
   family: string;
   style: string;
   url: string;
   styles?: FontData[];
+
+  // Minified format properties (optional)
+  x?: string; // family
+  bl?: string; // style
+  bm?: any[]; // styles
 };
 
 export type HorizontalGuideline = {

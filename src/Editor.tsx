@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CanvaEditor } from "canva-editor/components/editor";
 import { data } from "./sampleData";
@@ -17,8 +18,7 @@ const Editor = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const handleOnChanges = (changes: any) => {
-    console.log("On changes: ", changes);
+  const handleOnChanges = (_changes: any) => {
     setSaving(true);
     setTimeout(() => {
       setSaving(false);
@@ -26,7 +26,6 @@ const Editor = () => {
   };
 
   const handleOnDesignNameChanges = (newName: string) => {
-    console.log("On name changes: " + newName);
     setName(newName);
     setSaving(true);
     setTimeout(() => {
@@ -79,12 +78,6 @@ const Editor = () => {
         if (isOtherUsersTemplate) {
           // Clear template ID from localStorage to ensure we create a new copy
           localStorage.removeItem("template_id");
-          console.log(
-            "Using another user's template - will create a copy when saving"
-          );
-          toast.info(
-            "You are using a template created by another user. When you save, a copy will be created in your account."
-          );
         }
 
         // If the template has a templateUrl, fetch the template data

@@ -1,8 +1,8 @@
-import { FunctionComponent, ReactElement } from 'react';
-import { BoxSize, DeepPartial, Delta } from './common';
-import { EditorActions, EditorState } from './editor';
-import { TextEditor } from 'canva-editor/components/text-editor/interfaces';
-import { ImageContentProps } from 'canva-editor/layers';
+import { FunctionComponent, ReactElement } from "react";
+import { BoxSize, DeepPartial, Delta } from "./common";
+import { EditorActions, EditorState } from "./editor";
+import { TextEditor } from "canva-editor/components/text-editor/interfaces";
+import { ImageContentProps } from "canva-editor/layers";
 
 export type LayerId = string;
 
@@ -13,24 +13,24 @@ export type LayerComponentProps = {
   scale?: number;
   transparency?: number;
   text?: string;
-  image?: ImageContentProps['image'] | null;
+  image?: ImageContentProps["image"] | null;
 };
 
 export type GradientStyle =
-  | 'leftToRight'
-  | 'topToBottom'
-  | 'topLeftToBottomRight'
-  | 'circleCenter'
-  | 'circleTopLeft';
+  | "leftToRight"
+  | "topToBottom"
+  | "topLeftToBottomRight"
+  | "circleCenter"
+  | "circleTopLeft";
 export type LayerType =
-  | 'Image'
-  | 'Text'
-  | 'Shape'
-  | 'Root'
-  | 'Group'
-  | 'Frame'
-  | 'Svg'
-  | 'Video';
+  | "Image"
+  | "Text"
+  | "Shape"
+  | "Root"
+  | "Group"
+  | "Frame"
+  | "Svg"
+  | "Video";
 
 export type SerializedLayerTree = {
   rootId: LayerId;
@@ -59,6 +59,7 @@ export type BoxData = {
 };
 
 export type EffectSettings = {
+  position: any;
   offset?: number;
   direction?: number;
   blur?: number;
@@ -69,35 +70,35 @@ export type EffectSettings = {
 };
 
 export type ShapeType =
-  | 'circle'
-  | 'rectangle'
-  | 'triangle'
-  | 'triangleUpsideDown'
-  | 'parallelogram'
-  | 'parallelogramUpsideDown'
-  | 'trapezoid'
-  | 'trapezoidUpsideDown'
-  | 'cross'
-  | 'arrowRight'
-  | 'arrowLeft'
-  | 'arrowTop'
-  | 'arrowBottom'
-  | 'rhombus'
-  | 'chevron'
-  | 'arrowPentagon'
-  | 'pentagon'
-  | 'hexagonVertical'
-  | 'hexagonHorizontal'
-  | 'octagon'
-  | 'chatBubbleSquare'
-  | 'chatBubbleRound';
+  | "circle"
+  | "rectangle"
+  | "triangle"
+  | "triangleUpsideDown"
+  | "parallelogram"
+  | "parallelogramUpsideDown"
+  | "trapezoid"
+  | "trapezoidUpsideDown"
+  | "cross"
+  | "arrowRight"
+  | "arrowLeft"
+  | "arrowTop"
+  | "arrowBottom"
+  | "rhombus"
+  | "chevron"
+  | "arrowPentagon"
+  | "pentagon"
+  | "hexagonVertical"
+  | "hexagonHorizontal"
+  | "octagon"
+  | "chatBubbleSquare"
+  | "chatBubbleRound";
 
 export type ShapeBorderStyle =
-  | 'solid'
-  | 'longDashes'
-  | 'shortDashes'
-  | 'dots'
-  | 'none';
+  | "solid"
+  | "longDashes"
+  | "shortDashes"
+  | "dots"
+  | "none";
 
 export type ContextMenuItem = {
   value: string;
@@ -130,7 +131,7 @@ export type LayerActions = {
     position: Delta;
     rotate: number;
     boxSize: BoxSize;
-    image?: ImageContentProps['image'] | null;
+    image?: ImageContentProps["image"] | null;
   }) => void;
 };
 

@@ -1,7 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { FC } from "react";
-import { DesignFrame } from "../../components/editor";
-const defaultData = [
+export const emptyTextTemplate = [
   {
     name: "",
     notes: "",
@@ -26,17 +23,7 @@ const defaultData = [
         locked: false,
         child: [],
         parent: null,
-      },
+      }
     },
   },
 ];
-
-interface Props {
-  data?: any;
-  onChanges?: (changes: any) => void;
-}
-const EditorContent: FC<Props> = ({ data = defaultData, ...props }) => {
-  return <DesignFrame data={data} {...props} />;
-};
-
-export default EditorContent;
