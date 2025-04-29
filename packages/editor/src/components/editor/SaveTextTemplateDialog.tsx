@@ -27,6 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { LoaderCircle, Save, AlertCircle, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import { useEditor } from "canva-editor/hooks";
 // Don't use useEditor hook here as it's not available in the context
 
 interface Props {
@@ -34,7 +35,6 @@ interface Props {
   onClose: () => void;
   initialName?: string;
   onNameChange?: (name: string) => void;
-  editorData: any; // Add editorData prop back
 }
 
 const SaveTextTemplateDialog: FC<Props> = ({
@@ -42,7 +42,6 @@ const SaveTextTemplateDialog: FC<Props> = ({
   onClose,
   initialName = "",
   onNameChange,
-  editorData,
 }) => {
   const [templateName, setTemplateName] = useState(initialName);
   const [templateDesc, setTemplateDesc] = useState("");
@@ -52,6 +51,7 @@ const SaveTextTemplateDialog: FC<Props> = ({
   const [saveProgress, setSaveProgress] = useState(0);
   const [previewImage, setPreviewImage] = useState<string>("");
   const [isPublic, setIsPublic] = useState(false);
+  const { query, actions } = useEditor();
 
   const { user } = useAuth();
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -148,9 +148,11 @@ const SaveTextTemplateDialog: FC<Props> = ({
       }, 50);
 
       // console.log("FULL EDITOR DATA:", editorData);
+      const templateData = query.serialize();
+      console.log("SERIALIZED TEMPLATE DATA:", templateData);
 
       // Pack the data for sending to the server
-      const packedData = pack(editorData, dataMapping)[0];
+      const packedData = pack(templateData, dataMapping)[0];
 
       // Get user's ID as unique identifier (outletId from auth)
       const userId = user?.userId || Cookies.get("auth_token") || "anonymous";

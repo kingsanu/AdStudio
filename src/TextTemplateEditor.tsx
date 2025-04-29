@@ -6,27 +6,29 @@ import { textTemplateService } from "./services/textTemplateService";
 import { toast } from "sonner";
 import axios from "axios";
 import { GET_TEMPLATE_ENDPOINT } from "canva-editor/utils/constants/api";
-import SaveTextTemplateDialog from "./components/SaveTextTemplateDialog";
-import { Save } from "lucide-react";
+// No need to import SaveTextTemplateDialog or Save icon as they're handled by CanvaEditor
 import { emptyTextTemplate } from "./emptyTextTemplate";
+import { data } from "./sampleData";
+import { useEditor } from "canva-editor/hooks";
+import { EditorContext } from "canva-editor/components/editor/EditorContext";
+import { useEditorStore } from "canva-editor/hooks/useEditorStore";
 
+// Main component that provides the EditorContext
 const TextTemplateEditor = () => {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [templateData, setTemplateData] = useState<any>(emptyTextTemplate);
+  const [templateData, setTemplateData] = useState<any>(data);
   const [name, setName] = useState("New Text Template");
   const [editorError, setEditorError] = useState(false);
-  const [showSaveDialog, setShowSaveDialog] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const [textData, setTextData] = useState<any>(emptyTextTemplate);
+
+  // Create the editor store
+  const editorStore = useEditorStore();
 
   const handleOnChanges = (changes: any) => {
     console.log("On changes: ", changes);
-    // Update templateData with the latest editor state
-    if (changes) {
-      setTextData(changes);
-    }
+
     setSaving(true);
     setTimeout(() => {
       setSaving(false);
@@ -89,21 +91,6 @@ const TextTemplateEditor = () => {
     window.addEventListener("error", handleError);
     return () => {
       window.removeEventListener("error", handleError);
-    };
-  }, []);
-
-  // Add keyboard shortcut for saving (Ctrl+S)
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === "s") {
-        event.preventDefault(); // Prevent browser save dialog
-        setShowSaveDialog(true);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 
@@ -254,72 +241,58 @@ const TextTemplateEditor = () => {
 
   // Note: Custom header buttons are not supported in the current CanvaEditor component
 
+  // Define the editor configuration
+  const editorConfig = {
+    apis: {
+      url: "https://adstudioserver.foodyqueen.com/api",
+      searchFonts: "/fonts",
+      searchTemplates: "/templates",
+      searchTexts: "/texts",
+      searchImages: "/images",
+      searchShapes: "/shapes",
+      searchFrames: "/frames",
+      templateKeywordSuggestion: "/template-suggestion",
+      textKeywordSuggestion: "/text-suggestion",
+      imageKeywordSuggestion: "/image-suggestion",
+      shapeKeywordSuggestion: "/shape-suggestion",
+      frameKeywordSuggestion: "/frame-suggestion",
+      getUserImages: "/user-images",
+      uploadImage: "/upload-image",
+    },
+    placeholders: {
+      searchTemplate: "Search templates",
+      searchText: "Search texts",
+      searchImage: "Search images",
+      searchShape: "Search shapes",
+      searchFrame: "Search frames",
+    },
+    editorAssetsUrl: "https://adstudioserver.foodyqueen.com/editor",
+    imageKeywordSuggestions: "animal,sport,love,scene,dog,cat,whale",
+    templateKeywordSuggestions:
+      "mother,sale,discount,fashion,model,deal,motivation,quote",
+  };
+
+  // Create the editor context value
+  const editorContextValue = {
+    ...editorStore,
+    config: editorConfig,
+  };
+
   return (
-    <>
-      <div className="relative">
-        {/* Floating save button for better visibility */}
-        <button
-          onClick={() => setShowSaveDialog(true)}
-          className="fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
-          title="Save Text Template (Ctrl+S)"
-        >
-          <Save className="h-5 w-5" />
-          <span className="font-medium">Save Template</span>
-        </button>
-
-        <CanvaEditor
-          data={{
-            name,
-            editorConfig: templateData,
-          }}
-          config={{
-            apis: {
-              url: "https://adstudioserver.foodyqueen.com/api",
-              searchFonts: "/fonts",
-              searchTemplates: "/templates",
-              searchTexts: "/texts",
-              searchImages: "/images",
-              searchShapes: "/shapes",
-              searchFrames: "/frames",
-              templateKeywordSuggestion: "/template-suggestion",
-              textKeywordSuggestion: "/text-suggestion",
-              imageKeywordSuggestion: "/image-suggestion",
-              shapeKeywordSuggestion: "/shape-suggestion",
-              frameKeywordSuggestion: "/frame-suggestion",
-              getUserImages: "/user-images",
-              uploadImage: "/upload-image",
-            },
-            placeholders: {
-              searchTemplate: "Search templates",
-              searchText: "Search texts",
-              searchImage: "Search images",
-              searchShape: "Search shapes",
-              searchFrame: "Search frames",
-            },
-            editorAssetsUrl: "https://adstudioserver.foodyqueen.com/editor",
-            imageKeywordSuggestions: "animal,sport,love,scene,dog,cat,whale",
-            templateKeywordSuggestions:
-              "mother,sale,discount,fashion,model,deal,motivation,quote",
-          }}
-          saving={saving}
-          onChanges={handleOnChanges}
-          onDesignNameChanges={handleOnDesignNameChanges}
-          key={location.search} // Force re-render when template changes
-          // headerButtons prop is not supported in the current CanvaEditor component
-        />
-      </div>
-
-      {/* Save Text Template Dialog */}
-      {showSaveDialog && (
-        <SaveTextTemplateDialog
-          open={showSaveDialog}
-          onClose={() => setShowSaveDialog(false)}
-          initialName={name}
-          onNameChange={(newName) => setName(newName)}
-          editorData={textData}
-        />
-      )}
-    </>
+    <div className="relative">
+      <CanvaEditor
+        data={{
+          name,
+          editorConfig: templateData,
+        }}
+        config={editorConfig}
+        saving={saving}
+        onChanges={handleOnChanges}
+        isTextTemplate={true} // This tells CanvaEditor to use SaveTextTemplateDialog
+        onDesignNameChanges={handleOnDesignNameChanges}
+        key={location.search} // Force re-render when template changes
+      />
+    </div>
   );
 };
 

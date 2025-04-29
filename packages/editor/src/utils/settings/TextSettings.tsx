@@ -6,48 +6,48 @@ import React, {
   useMemo,
   useRef,
   useState,
-} from 'react';
-import { Tooltip as ReactTooltip } from 'canva-editor/tooltip';
-import FontSidebar from './sidebar/FontSidebar';
-import TextEffectSidebar from './sidebar/TextEffectSidebar';
-import ColorSidebar from './sidebar/ColorSidebar';
-import { filter, isEqual, throttle, uniq, uniqBy } from 'lodash';
-import Popover from 'canva-editor/components/popover/Popover';
-import Slider from 'canva-editor/components/slider/Slider';
+} from "react";
+import { Tooltip as ReactTooltip } from "canva-editor/tooltip";
+import FontSidebar from "./sidebar/FontSidebar";
+import TextEffectSidebar from "./sidebar/TextEffectSidebar";
+import ColorSidebar from "./sidebar/ColorSidebar";
+import { filter, isEqual, throttle, uniq, uniqBy } from "lodash";
+import Popover from "canva-editor/components/popover/Popover";
+import Slider from "canva-editor/components/slider/Slider";
 import {
   unsetBoldOfBlock,
   toggleBold,
   setBold,
   unsetBold,
-} from 'canva-editor/components/text-editor/core/command/bold';
+} from "canva-editor/components/text-editor/core/command/bold";
 import {
   unsetItalicOfBlock,
   toggleItalic,
   setItalic,
   unsetItalic,
-} from 'canva-editor/components/text-editor/core/command/italic';
-import { selectAll } from 'canva-editor/components/text-editor/core/command/selectAll';
-import { selectNode } from 'canva-editor/components/text-editor/core/command/selectNode';
-import { selectText } from 'canva-editor/components/text-editor/core/command/selectText';
-import { setBulletList } from 'canva-editor/components/text-editor/core/command/setBulletList';
-import { setFontFamily } from 'canva-editor/components/text-editor/core/command/setFontFamily';
-import { setFontSize } from 'canva-editor/components/text-editor/core/command/setFontSize';
-import { setLetterSpacing } from 'canva-editor/components/text-editor/core/command/setLetterSpacing';
-import { setLineHeight } from 'canva-editor/components/text-editor/core/command/setLineHeight';
-import { setOrderedList } from 'canva-editor/components/text-editor/core/command/setOrderedList';
-import { setTextAlign } from 'canva-editor/components/text-editor/core/command/setTextAlign';
-import { setTextTransform } from 'canva-editor/components/text-editor/core/command/setTextTransform';
+} from "canva-editor/components/text-editor/core/command/italic";
+import { selectAll } from "canva-editor/components/text-editor/core/command/selectAll";
+import { selectNode } from "canva-editor/components/text-editor/core/command/selectNode";
+import { selectText } from "canva-editor/components/text-editor/core/command/selectText";
+import { setBulletList } from "canva-editor/components/text-editor/core/command/setBulletList";
+import { setFontFamily } from "canva-editor/components/text-editor/core/command/setFontFamily";
+import { setFontSize } from "canva-editor/components/text-editor/core/command/setFontSize";
+import { setLetterSpacing } from "canva-editor/components/text-editor/core/command/setLetterSpacing";
+import { setLineHeight } from "canva-editor/components/text-editor/core/command/setLineHeight";
+import { setOrderedList } from "canva-editor/components/text-editor/core/command/setOrderedList";
+import { setTextAlign } from "canva-editor/components/text-editor/core/command/setTextAlign";
+import { setTextTransform } from "canva-editor/components/text-editor/core/command/setTextTransform";
 import {
   setColorForBlock,
   setColor,
-} from 'canva-editor/components/text-editor/core/command/textColor';
+} from "canva-editor/components/text-editor/core/command/textColor";
 import {
   toggleUnderline,
   setUnderline,
   unsetUnderline,
-} from 'canva-editor/components/text-editor/core/command/underline';
-import { isActive } from 'canva-editor/components/text-editor/core/helper/isActive';
-import { isEmptyContent } from 'canva-editor/components/text-editor/core/helper/isEmptyContent';
+} from "canva-editor/components/text-editor/core/command/underline";
+import { isActive } from "canva-editor/components/text-editor/core/helper/isActive";
+import { isEmptyContent } from "canva-editor/components/text-editor/core/helper/isEmptyContent";
 import {
   getAllAttrs,
   getFontFamily,
@@ -58,43 +58,43 @@ import {
   getAllMarks,
   getAttrs,
   getMarkAttrs,
-} from 'canva-editor/components/text-editor/mark';
-import { useSelectedLayers, useEditor } from 'canva-editor/hooks';
-import { useUsedFont } from 'canva-editor/hooks/useUsedFont';
-import { getTransformStyle } from 'canva-editor/layers';
-import { TextLayerProps } from 'canva-editor/layers/TextLayer';
+} from "canva-editor/components/text-editor/mark";
+import { useSelectedLayers, useEditor } from "canva-editor/hooks";
+import { useUsedFont } from "canva-editor/hooks/useUsedFont";
+import { getTransformStyle } from "canva-editor/layers";
+import { TextLayerProps } from "canva-editor/layers/TextLayer";
 import {
   Layer,
   LayerId,
   FontData,
   FontStyle,
   LayerComponentProps,
-} from 'canva-editor/types';
-import { getPositionChangesBetweenTwoCorners } from '../2d/getPositionChangesBetweenTwoCorners';
-import { visualCorners } from '../2d/visualCorners';
-import { getVirtualDomHeight } from '../dom/getVirtualDomHeight';
-import { getControlBoxSizeFromLayers } from '../layer/getControlBoxSizeFromLayers';
-import { ColorParser } from '../../color-picker/utils';
-import SettingButton from './SettingButton';
+} from "canva-editor/types";
+import { getPositionChangesBetweenTwoCorners } from "../2d/getPositionChangesBetweenTwoCorners";
+import { visualCorners } from "../2d/visualCorners";
+import { getVirtualDomHeight } from "../dom/getVirtualDomHeight";
+import { getControlBoxSizeFromLayers } from "../layer/getControlBoxSizeFromLayers";
+import { ColorParser } from "../../color-picker/utils";
+import SettingButton from "./SettingButton";
 
 // Icons
-import CheckIcon from 'canva-editor/icons/CheckIcon';
-import PlusIcon from 'canva-editor/icons/PlusIcon';
-import ArrowDownIcon from 'canva-editor/icons/ArrowDownIcon';
-import MinusIcon from 'canva-editor/icons/MinusIcon';
-import FormatBoldIcon from 'canva-editor/icons/FormatBoldIcon';
-import FormatItalicIcon from 'canva-editor/icons/FormatItalicIcon';
-import FormatUnderlineIcon from 'canva-editor/icons/FormatUnderlineIcon';
-import FormatUppercaseIcon from 'canva-editor/icons/FormatUppercaseIcon';
-import TextAlignLeftIcon from 'canva-editor/icons/TextAlignLeftIcon';
-import TextAlignCenterIcon from 'canva-editor/icons/TextAlignCenterIcon';
-import TextAlignRightIcon from 'canva-editor/icons/TextAlignRightIcon';
-import TextAlignJustifyIcon from 'canva-editor/icons/TextAlignJustifyIcon';
-import TextAUnderlineIcon from 'canva-editor/icons/TextAUnderlineIcon';
-import ListBulletsIcon from 'canva-editor/icons/ListBulletsIcon';
-import ListNumbersIcon from 'canva-editor/icons/ListNumbersIcon';
-import LineSpacingIcon from 'canva-editor/icons/LineSpacingIcon';
-import useMobileDetect from 'canva-editor/hooks/useMobileDetect';
+import CheckIcon from "canva-editor/icons/CheckIcon";
+import PlusIcon from "canva-editor/icons/PlusIcon";
+import ArrowDownIcon from "canva-editor/icons/ArrowDownIcon";
+import MinusIcon from "canva-editor/icons/MinusIcon";
+import FormatBoldIcon from "canva-editor/icons/FormatBoldIcon";
+import FormatItalicIcon from "canva-editor/icons/FormatItalicIcon";
+import FormatUnderlineIcon from "canva-editor/icons/FormatUnderlineIcon";
+import FormatUppercaseIcon from "canva-editor/icons/FormatUppercaseIcon";
+import TextAlignLeftIcon from "canva-editor/icons/TextAlignLeftIcon";
+import TextAlignCenterIcon from "canva-editor/icons/TextAlignCenterIcon";
+import TextAlignRightIcon from "canva-editor/icons/TextAlignRightIcon";
+import TextAlignJustifyIcon from "canva-editor/icons/TextAlignJustifyIcon";
+import TextAUnderlineIcon from "canva-editor/icons/TextAUnderlineIcon";
+import ListBulletsIcon from "canva-editor/icons/ListBulletsIcon";
+import ListNumbersIcon from "canva-editor/icons/ListNumbersIcon";
+import LineSpacingIcon from "canva-editor/icons/LineSpacingIcon";
+import useMobileDetect from "canva-editor/hooks/useMobileDetect";
 
 interface TextSettingsProps {
   layers: Layer<TextLayerProps>[];
@@ -168,34 +168,34 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
       settings.color[layer.id] = layer.data.props.colors;
       const editor = layer.data.editor;
       if (editor) {
-        if (!isActive(editor.state, 'bold')) {
+        if (!isActive(editor.state, "bold")) {
           settings.isBold = false;
         }
-        if (!isActive(editor.state, 'italic')) {
+        if (!isActive(editor.state, "italic")) {
           settings.isItalic = false;
         }
-        if (!isActive(editor.state, 'underline')) {
+        if (!isActive(editor.state, "underline")) {
           settings.isUnderline = false;
         }
-        if (!isActive(editor.state, null, { indent: 1, listType: '' })) {
+        if (!isActive(editor.state, null, { indent: 1, listType: "" })) {
           settings.isBulletList = false;
         }
-        if (!isActive(editor.state, null, { indent: 1, listType: 'ordered' })) {
+        if (!isActive(editor.state, null, { indent: 1, listType: "ordered" })) {
           settings.isOrderedList = false;
         }
-        if (!isActive(editor.state, null, { textTransform: 'uppercase' })) {
+        if (!isActive(editor.state, null, { textTransform: "uppercase" })) {
           settings.isUppercase = false;
         }
-        if (!isActive(editor.state, null, { textAlign: 'left' })) {
+        if (!isActive(editor.state, null, { textAlign: "left" })) {
           settings.isAlignLeft = false;
         }
-        if (!isActive(editor.state, null, { textAlign: 'right' })) {
+        if (!isActive(editor.state, null, { textAlign: "right" })) {
           settings.isAlignRight = false;
         }
-        if (!isActive(editor.state, null, { textAlign: 'center' })) {
+        if (!isActive(editor.state, null, { textAlign: "center" })) {
           settings.isAlignCenter = false;
         }
-        if (!isActive(editor.state, null, { textAlign: 'justify' })) {
+        if (!isActive(editor.state, null, { textAlign: "justify" })) {
           settings.isAlignJustify = false;
         }
       }
@@ -218,7 +218,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
     uniqBy(
       getFontFamily(editorAttrs).map((font) => {
         const usedFont = usedFontObj[font] || fontObj[font];
-        if (!usedFont) console.log('Font not found: ' + font);
+        if (!usedFont) console.log("Font not found: " + font);
         return {
           family: usedFont.family,
           name: usedFont.name,
@@ -230,7 +230,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
           ),
         };
       }),
-      'name'
+      "name"
     );
 
   useEffect(() => {
@@ -281,34 +281,34 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
           attrs,
           getAllMarks(editor.state.doc)
         );
-        if (!isActive(editor.state, 'bold')) {
+        if (!isActive(editor.state, "bold")) {
           settings.isBold = false;
         }
-        if (!isActive(editor.state, 'italic')) {
+        if (!isActive(editor.state, "italic")) {
           settings.isItalic = false;
         }
-        if (!isActive(editor.state, 'underline')) {
+        if (!isActive(editor.state, "underline")) {
           settings.isUnderline = false;
         }
-        if (!isActive(editor.state, null, { indent: 1, listType: '' })) {
+        if (!isActive(editor.state, null, { indent: 1, listType: "" })) {
           settings.isBulletList = false;
         }
-        if (!isActive(editor.state, null, { indent: 1, listType: 'ordered' })) {
+        if (!isActive(editor.state, null, { indent: 1, listType: "ordered" })) {
           settings.isOrderedList = false;
         }
-        if (!isActive(editor.state, null, { textTransform: 'uppercase' })) {
+        if (!isActive(editor.state, null, { textTransform: "uppercase" })) {
           settings.isUppercase = false;
         }
-        if (!isActive(editor.state, null, { textAlign: 'left' })) {
+        if (!isActive(editor.state, null, { textAlign: "left" })) {
           settings.isAlignLeft = false;
         }
-        if (!isActive(editor.state, null, { textAlign: 'right' })) {
+        if (!isActive(editor.state, null, { textAlign: "right" })) {
           settings.isAlignRight = false;
         }
-        if (!isActive(editor.state, null, { textAlign: 'center' })) {
+        if (!isActive(editor.state, null, { textAlign: "center" })) {
           settings.isAlignCenter = false;
         }
-        if (!isActive(editor.state, null, { textAlign: 'justify' })) {
+        if (!isActive(editor.state, null, { textAlign: "justify" })) {
           settings.isAlignJustify = false;
         }
         setSettings(settings);
@@ -322,7 +322,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
           if (settings.fontFamily[layer.id]) {
             const props = layer.data.props;
             acc.fontFamily.push(...settings.fontFamily[layer.id]);
-            acc.fontFamily = uniqBy(acc.fontFamily, 'name');
+            acc.fontFamily = uniqBy(acc.fontFamily, "name");
             if (settings.fontSize[layer.id]) {
               acc.fontSize = uniq(
                 acc.fontSize.concat(
@@ -361,9 +361,9 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
   useEffect(() => {
     if (fontSizeInputRef.current) {
       if (fontSize.length === 1) {
-        fontSizeInputRef.current.value = fontSize[0] + '';
+        fontSizeInputRef.current.value = fontSize[0] + "";
       } else {
-        fontSizeInputRef.current.value = '--';
+        fontSizeInputRef.current.value = "--";
       }
     }
   }, [fontSize]);
@@ -381,7 +381,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
   }, [usedFonts]);
 
   const updateLayerProps = useCallback(
-    (type: 'content' | 'selection') => {
+    (type: "content" | "selection") => {
       // function is called twice because it updates editor
       const settings: {
         fontFamily: Record<LayerId, FontData[]>;
@@ -454,7 +454,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
           const { changeX, changeY } = getPositionChangesBetweenTwoCorners(
             oldCorners,
             newCorners,
-            'bottomRight'
+            "bottomRight"
           );
 
           if (editor.state.selection.empty) {
@@ -482,7 +482,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
                 settings.fontFamily[editingLayer.id].push(...fontFamily);
                 settings.fontFamily[editingLayer.id] = uniqBy(
                   settings.fontFamily[editingLayer.id],
-                  'name'
+                  "name"
                 );
                 settings.fontSize[editingLayer.id] = uniq(
                   settings.fontSize[editingLayer.id].concat(getFontSize(attrs))
@@ -511,40 +511,40 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
               }
             }
           );
-          if (!isActive(editor.state, 'bold')) {
+          if (!isActive(editor.state, "bold")) {
             settings.isBold = false;
           }
-          if (!isActive(editor.state, 'italic')) {
+          if (!isActive(editor.state, "italic")) {
             settings.isItalic = false;
           }
-          if (!isActive(editor.state, 'underline')) {
+          if (!isActive(editor.state, "underline")) {
             settings.isUnderline = false;
           }
-          if (!isActive(editor.state, null, { indent: 1, listType: '' })) {
+          if (!isActive(editor.state, null, { indent: 1, listType: "" })) {
             settings.isBulletList = false;
           }
           if (
-            !isActive(editor.state, null, { indent: 1, listType: 'ordered' })
+            !isActive(editor.state, null, { indent: 1, listType: "ordered" })
           ) {
             settings.isOrderedList = false;
           }
-          if (!isActive(editor.state, null, { textTransform: 'uppercase' })) {
+          if (!isActive(editor.state, null, { textTransform: "uppercase" })) {
             settings.isUppercase = false;
           }
-          if (!isActive(editor.state, null, { textAlign: 'left' })) {
+          if (!isActive(editor.state, null, { textAlign: "left" })) {
             settings.isAlignLeft = false;
           }
-          if (!isActive(editor.state, null, { textAlign: 'right' })) {
+          if (!isActive(editor.state, null, { textAlign: "right" })) {
             settings.isAlignRight = false;
           }
-          if (!isActive(editor.state, null, { textAlign: 'center' })) {
+          if (!isActive(editor.state, null, { textAlign: "center" })) {
             settings.isAlignCenter = false;
           }
-          if (!isActive(editor.state, null, { textAlign: 'justify' })) {
+          if (!isActive(editor.state, null, { textAlign: "justify" })) {
             settings.isAlignJustify = false;
           }
           setSettings(settings);
-          if (type === 'content') {
+          if (type === "content") {
             const attrs = getAllAttrs(editor.state.doc);
             actions.history
               .merge()
@@ -590,46 +590,46 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
               attrs,
               getAllMarks(editor.state.doc)
             );
-            if (!isActive(editor.state, 'bold')) {
+            if (!isActive(editor.state, "bold")) {
               settings.isBold = false;
             }
-            if (!isActive(editor.state, 'italic')) {
+            if (!isActive(editor.state, "italic")) {
               settings.isItalic = false;
             }
-            if (!isActive(editor.state, 'underline')) {
+            if (!isActive(editor.state, "underline")) {
               settings.isUnderline = false;
             }
-            if (!isActive(editor.state, null, { indent: 1, listType: '' })) {
+            if (!isActive(editor.state, null, { indent: 1, listType: "" })) {
               settings.isBulletList = false;
             }
             if (
-              !isActive(editor.state, null, { indent: 1, listType: 'ordered' })
+              !isActive(editor.state, null, { indent: 1, listType: "ordered" })
             ) {
               settings.isOrderedList = false;
             }
-            if (!isActive(editor.state, null, { textTransform: 'uppercase' })) {
+            if (!isActive(editor.state, null, { textTransform: "uppercase" })) {
               settings.isUppercase = false;
             }
-            if (!isActive(editor.state, null, { textAlign: 'left' })) {
+            if (!isActive(editor.state, null, { textAlign: "left" })) {
               settings.isAlignLeft = false;
             }
-            if (!isActive(editor.state, null, { textAlign: 'right' })) {
+            if (!isActive(editor.state, null, { textAlign: "right" })) {
               settings.isAlignRight = false;
             }
-            if (!isActive(editor.state, null, { textAlign: 'center' })) {
+            if (!isActive(editor.state, null, { textAlign: "center" })) {
               settings.isAlignCenter = false;
             }
-            if (!isActive(editor.state, null, { textAlign: 'justify' })) {
+            if (!isActive(editor.state, null, { textAlign: "justify" })) {
               settings.isAlignJustify = false;
             }
-            if (type === 'content') {
+            if (type === "content") {
               const scale = isEqual(
                 props.fontSizes,
                 settings.fontSize[layer.id]
               )
                 ? props.scale
                 : 1;
-              const div = document.createElement('div');
+              const div = document.createElement("div");
               div.append(editor.dom);
               const { clientHeight } = getVirtualDomHeight(
                 div,
@@ -659,7 +659,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
               const { changeX, changeY } = getPositionChangesBetweenTwoCorners(
                 oldCorners,
                 newCorners,
-                'bottomRight'
+                "bottomRight"
               );
               actions.history
                 .merge()
@@ -717,60 +717,89 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
   );
 
   const selectionUpdate = useCallback(() => {
-    updateLayerProps('selection');
+    updateLayerProps("selection");
   }, [updateLayerProps]);
   const contentUpdate = useCallback(() => {
-    updateLayerProps('content');
+    updateLayerProps("content");
   }, [updateLayerProps]);
 
   useEffect(() => {
-    textEditor?.editor?.events.on('selectionUpdate', selectionUpdate);
-    textEditor?.editor?.events.on('update', contentUpdate);
+    textEditor?.editor?.events.on("selectionUpdate", selectionUpdate);
+    textEditor?.editor?.events.on("update", contentUpdate);
     return () => {
-      textEditor?.editor?.events.off('selectionUpdate', selectionUpdate);
-      textEditor?.editor?.events.off('update', contentUpdate);
+      textEditor?.editor?.events.off("selectionUpdate", selectionUpdate);
+      textEditor?.editor?.events.off("update", contentUpdate);
     };
   }, [textEditor?.editor, updateLayerProps]);
   useEffect(() => {
     layers.forEach((layer) => {
-      layer.data.editor?.events.on('update', contentUpdate);
+      layer.data.editor?.events.on("update", contentUpdate);
     });
     return () => {
       layers.forEach((layer) => {
-        layer.data.editor?.events.off('update', contentUpdate);
+        layer.data.editor?.events.off("update", contentUpdate);
       });
     };
   }, [JSON.stringify(layers.map((l) => l.id)), updateLayerProps]);
   const fontStyles = useCallback((fontList: FontData[]) => {
     const fontStyles: string[] = [];
+
+    // Ensure we have valid input
+    if (!fontList || !Array.isArray(fontList) || fontList.length === 0) {
+      // Return default styles if no valid fonts
+      return ["Bold", "Italic"];
+    }
+
     fontList.forEach((font) => {
-      if (!font.name.includes('Italic')) {
-        fontStyles.push('Italic');
+      // Skip invalid fonts
+      if (!font || !font.name) return;
+
+      // Add Italic style if the font name doesn't already include "Italic"
+      if (!font.name.includes("Italic")) {
+        fontStyles.push("Italic");
       }
 
-      if (font.name.includes('Bold')) {
-        const weight = parseInt(font.style);
-        if (weight < 600) {
-          fontStyles.push('Bold');
+      // Handle Bold style more safely
+      if (font.name.includes("Bold")) {
+        // Only try to parse if style is a numeric string
+        if (font.style && /^\d+$/.test(font.style)) {
+          try {
+            const weight = parseInt(font.style);
+            if (weight < 600) {
+              fontStyles.push("Bold");
+            }
+          } catch (e) {
+            // If parsing fails, default to adding Bold
+            fontStyles.push("Bold");
+          }
         }
       } else {
-        fontStyles.push('Bold');
+        // If the name doesn't include "Bold", add it as an available style
+        fontStyles.push("Bold");
       }
     });
-    return fontStyles;
+
+    // Remove duplicates
+    return [...new Set(fontStyles)];
   }, []);
 
   const applyFont = (font: FontData) => {
+    // Remove unnecessary console.log
     actions.history.new();
     if (editingLayer) {
       const editor = textEditor?.editor;
       if (editor) {
         setFontFamily(font.name)(editor.state, editor.dispatch);
-        const styles = fontStyles([font]);
-        if (!styles.includes('Bold')) {
+        // Make sure font is valid before processing styles
+        const validFont = {
+          ...font,
+          style: font.style || "regular", // Ensure style has a default value
+        };
+        const styles = fontStyles([validFont]);
+        if (!styles.includes("Bold")) {
           unsetBoldOfBlock(editor.state, editor.dispatch);
         }
-        if (!styles.includes('Italic')) {
+        if (!styles.includes("Italic")) {
           unsetItalicOfBlock(editor.state, editor.dispatch);
         }
         editor.focus();
@@ -783,11 +812,16 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
             hiddenEditor.dispatch
           );
           setFontFamily(font.name)(hiddenEditor.state, hiddenEditor.dispatch);
-          const styles = fontStyles([font]);
-          if (!styles.includes('Bold')) {
+          // Make sure font is valid before processing styles
+          const validFont = {
+            ...font,
+            style: font.style || "regular", // Ensure style has a default value
+          };
+          const styles = fontStyles([validFont]);
+          if (!styles.includes("Bold")) {
             unsetBoldOfBlock(hiddenEditor.state, hiddenEditor.dispatch);
           }
-          if (!styles.includes('Italic')) {
+          if (!styles.includes("Italic")) {
             unsetItalicOfBlock(hiddenEditor.state, hiddenEditor.dispatch);
           }
         }
@@ -798,11 +832,16 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         if (editor) {
           selectAll(editor.state, editor.dispatch);
           setFontFamily(font.name)(editor.state, editor.dispatch);
-          const styles = fontStyles([font]);
-          if (!styles.includes('Bold')) {
+          // Make sure font is valid before processing styles
+          const validFont = {
+            ...font,
+            style: font.style || "regular", // Ensure style has a default value
+          };
+          const styles = fontStyles([validFont]);
+          if (!styles.includes("Bold")) {
             unsetBoldOfBlock(editor.state, editor.dispatch);
           }
-          if (!styles.includes('Italic')) {
+          if (!styles.includes("Italic")) {
             unsetItalicOfBlock(editor.state, editor.dispatch);
           }
         }
@@ -941,18 +980,18 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
     if (color.length === 1 && new ColorParser(color[0]).white() === 100) {
       return {
         backgroundImage:
-          'linear-gradient(to right, rgb(255, 0, 0) 0%, rgb(255, 255, 0) 17%, rgb(0, 255, 0) 33%, rgb(0, 255, 255) 50%, rgb(0, 0, 255) 67%, rgb(255, 0, 255) 83%, rgb(255, 0, 0) 100%)',
+          "linear-gradient(to right, rgb(255, 0, 0) 0%, rgb(255, 255, 0) 17%, rgb(0, 255, 0) 33%, rgb(0, 255, 255) 50%, rgb(0, 0, 255) 67%, rgb(255, 0, 255) 83%, rgb(255, 0, 0) 100%)",
       };
     }
     const size = 100 / color.length;
     return {
       backgroundImage: color
         .map((c) => `linear-gradient(to right, ${c}, ${c})`)
-        .join(', '),
+        .join(", "),
       backgroundSize: color
         .map((_, index) => `${size * (index + 1)}%`)
-        .join(', '),
-      boxShadow: 'inset 0 0 0 1px rgba(57,76,96,.15)',
+        .join(", "),
+      boxShadow: "inset 0 0 0 1px rgba(57,76,96,.15)",
     };
   }, [color]);
 
@@ -992,13 +1031,13 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
     }
   }, 16);
 
-  const toggleStyle = (type: 'BOLD' | 'ITALIC' | 'UNDERLINE' | 'UPPERCASE') => {
+  const toggleStyle = (type: "BOLD" | "ITALIC" | "UNDERLINE" | "UPPERCASE") => {
     actions.history.new();
     if (editingLayer) {
       const editor = textEditor?.editor;
       if (editor) {
         switch (type) {
-          case 'BOLD': {
+          case "BOLD": {
             const fonts = editingLayer.data.props.fonts.reduce((acc, f) => {
               acc[f.name] = f;
               return acc;
@@ -1012,7 +1051,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
                 const attrs = getAllAttrs(node);
                 const fontFamily = getFontFamily(attrs);
                 const check = fontFamily.every(
-                  (f) => fonts[f] && fonts[f].name.includes('Bold')
+                  (f) => fonts[f] && fonts[f].name.includes("Bold")
                 );
                 if (!check) {
                   supported = false;
@@ -1034,7 +1073,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
             }
             break;
           }
-          case 'ITALIC': {
+          case "ITALIC": {
             toggleItalic(editor.state, editor.dispatch);
             editor.focus();
             if (editingLayer.data.editor) {
@@ -1048,7 +1087,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
             }
             break;
           }
-          case 'UNDERLINE': {
+          case "UNDERLINE": {
             toggleUnderline(editor.state, editor.dispatch);
             editor.focus();
             if (editingLayer.data.editor) {
@@ -1062,11 +1101,11 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
             }
             break;
           }
-          case 'UPPERCASE': {
+          case "UPPERCASE": {
             const cmd = setTextTransform(
-              isActive(editor.state, null, { textTransform: 'uppercase' })
+              isActive(editor.state, null, { textTransform: "uppercase" })
                 ? undefined
-                : 'uppercase'
+                : "uppercase"
             );
             cmd(editor.state, editor.dispatch);
             editor.focus();
@@ -1089,27 +1128,27 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         if (editor) {
           selectAll(editor.state, editor.dispatch);
           switch (type) {
-            case 'BOLD': {
+            case "BOLD": {
               !isBold
                 ? setBold(editor.state, editor.dispatch)
                 : unsetBold(editor.state, editor.dispatch);
               break;
             }
-            case 'ITALIC': {
+            case "ITALIC": {
               !isItalic
                 ? setItalic(editor.state, editor.dispatch)
                 : unsetItalic(editor.state, editor.dispatch);
               break;
             }
-            case 'UNDERLINE': {
+            case "UNDERLINE": {
               !isUnderline
                 ? setUnderline(editor.state, editor.dispatch)
                 : unsetUnderline(editor.state, editor.dispatch);
               break;
             }
-            case 'UPPERCASE': {
+            case "UPPERCASE": {
               !isUppercase
-                ? setTextTransform('uppercase')(editor.state, editor.dispatch)
+                ? setTextTransform("uppercase")(editor.state, editor.dispatch)
                 : setTextTransform()(editor.state, editor.dispatch);
               break;
             }
@@ -1120,7 +1159,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
   };
 
   const updateTextAlign = (
-    textAlign: 'left' | 'right' | 'center' | 'justify'
+    textAlign: "left" | "right" | "center" | "justify"
   ) => {
     actions.history.new();
     const editor = textEditor?.editor;
@@ -1205,7 +1244,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
       if (editor) {
         const isValid = isActive(editor.state, null, {
           indent: 1,
-          listType: '',
+          listType: "",
         });
         setBulletList(!isValid ? 1 : 0)(editor.state, editor.dispatch);
         editor.focus();
@@ -1227,7 +1266,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         const editor = layer.data.editor;
         if (editor) {
           selectAll(editor.state, editor.dispatch);
-          return isActive(editor.state, null, { indent: 1, listType: '' });
+          return isActive(editor.state, null, { indent: 1, listType: "" });
         }
       });
       layers.forEach((layer) => {
@@ -1246,7 +1285,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
       if (editor) {
         const isValid = isActive(editor.state, null, {
           indent: 1,
-          listType: 'ordered',
+          listType: "ordered",
         });
         setOrderedList(!isValid ? 1 : 0)(editor.state, editor.dispatch);
         editor.focus();
@@ -1270,7 +1309,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
           selectAll(editor.state, editor.dispatch);
           return isActive(editor.state, null, {
             indent: 1,
-            listType: 'ordered',
+            listType: "ordered",
           });
         }
       });
@@ -1287,7 +1326,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
   const handleFontSizeInputUpdate = (e: React.KeyboardEvent) => {
     const input = fontSizeInputRef.current as HTMLInputElement;
     const inputValue = input.value;
-    if (e.key.toLowerCase() === 'enter') {
+    if (e.key.toLowerCase() === "enter") {
       fontSizeInputRef.current &&
         handleChangeFontSize(+parseFloat(inputValue).toFixed(1));
       input.blur();
@@ -1299,7 +1338,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
   const handleFontSizeInputBlur = () => {
     const input = fontSizeInputRef.current as HTMLInputElement;
     const inputValue = input.value;
-    if (inputValue !== '--' && inputValue !== fontSize[0] + '') {
+    if (inputValue !== "--" && inputValue !== fontSize[0] + "") {
       fontSizeInputRef.current &&
         handleChangeFontSize(+parseFloat(inputValue).toFixed(1));
     }
@@ -1310,38 +1349,38 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
       <div>
         <div
           css={{
-            border: '1px solid rgba(43,59,74,.3)',
+            border: "1px solid rgba(43,59,74,.3)",
             height: 32,
-            padding: '0 2px',
+            padding: "0 2px",
             borderRadius: 4,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            cursor: 'pointer',
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            cursor: "pointer",
             background:
-              sidebar === 'FONT_FAMILY' ? 'rgba(57,76,96,.15)' : '#fff',
+              sidebar === "FONT_FAMILY" ? "rgba(57,76,96,.15)" : "#fff",
           }}
           onClick={() => {
-            actions.setSidebar('FONT_FAMILY');
+            actions.setSidebar("FONT_FAMILY");
           }}
         >
           <div
             css={{
               padding: 4,
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
               fontSize: 14,
             }}
           >
-            {fontFamily.length === 1 ? fontFamily[0].family : 'Multiple fonts'}
+            {fontFamily.length === 1 ? fontFamily[0].family : "Multiple fonts"}
           </div>
           <div
             css={{
               width: 24,
               height: 24,
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
               fontSize: 16,
             }}
           >
@@ -1352,22 +1391,22 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
       <div>
         <div
           css={{
-            border: '1px solid rgba(43,59,74,.3)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+            border: "1px solid rgba(43,59,74,.3)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
             borderRadius: 4,
           }}
         >
           <SettingButton
             css={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               borderRadius: 0,
             }}
             onClick={decreaseFontSize}
-            tooltip='Decrease font size'
+            tooltip="Decrease font size"
           >
             <MinusIcon />
           </SettingButton>
@@ -1376,20 +1415,20 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
             css={{
               width: 42,
               height: 32,
-              borderLeft: '1px solid rgba(43,59,74,.3)',
-              borderRight: '1px solid rgba(43,59,74,.3)',
+              borderLeft: "1px solid rgba(43,59,74,.3)",
+              borderRight: "1px solid rgba(43,59,74,.3)",
             }}
             onClick={() => setOpenFontSizeSelection(true)}
           >
             <input
-              data-tooltip-id='btn-change-fontsize'
+              data-tooltip-id="btn-change-fontsize"
               ref={fontSizeInputRef}
               css={{
                 width: 38,
-                height: '100%',
+                height: "100%",
                 outline: 0,
                 border: 0,
-                textAlign: 'center',
+                textAlign: "center",
               }}
               onBlur={handleFontSizeInputBlur}
               onKeyDown={handleFontSizeInputUpdate}
@@ -1399,10 +1438,10 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
           <Popover
             open={openFontSizeSelection}
             anchorEl={fontSizeInputRef.current}
-            placement={isMobile ? 'top' : 'bottom'}
+            placement={isMobile ? "top" : "bottom"}
             onClose={() => setOpenFontSizeSelection(false)}
           >
-            <div css={{ maxHeight: '50vh', overflowY: 'auto' }}>
+            <div css={{ maxHeight: "50vh", overflowY: "auto" }}>
               {fontSizeList.map((i) => {
                 return (
                   <div
@@ -1410,12 +1449,12 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
                     css={{
                       height: 40,
                       minWidth: 120,
-                      padding: '0 8px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      cursor: 'pointer',
-                      ':hover': {
-                        backgroundColor: 'rgba(64,87,109,.07)',
+                      padding: "0 8px",
+                      display: "flex",
+                      alignItems: "center",
+                      cursor: "pointer",
+                      ":hover": {
+                        backgroundColor: "rgba(64,87,109,.07)",
                       },
                     }}
                     onClick={() => handleChangeFontSize(i)}
@@ -1433,61 +1472,61 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
           </Popover>
           <SettingButton
             css={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
               borderRadius: 0,
             }}
             onClick={increaseFontSize}
-            tooltip='Increase font size'
+            tooltip="Increase font size"
           >
             <PlusIcon />
           </SettingButton>
           <ReactTooltip
-            id='btn-change-fontsize'
-            content='Font size'
-            place={openFontSizeSelection ? 'left' : 'bottom'}
+            id="btn-change-fontsize"
+            content="Font size"
+            place={openFontSizeSelection ? "left" : "bottom"}
           />
         </div>
       </div>
       <SettingButton
         css={{
-          position: 'relative',
-          display: 'flex',
-          justifyContent: 'center',
+          position: "relative",
+          display: "flex",
+          justifyContent: "center",
           fontSize: 24,
         }}
         onClick={() => {
-          actions.setSidebar('CHOOSING_COLOR');
+          actions.setSidebar("CHOOSING_COLOR");
         }}
-        tooltip='Text color'
+        tooltip="Text color"
       >
         <TextAUnderlineIcon />
         <div
           css={{
             bottom: 1,
-            left: '5%',
-            width: '90%',
-            position: 'absolute',
+            left: "5%",
+            width: "90%",
+            position: "absolute",
           }}
         >
           <div
             css={{
-              paddingBottom: '16%',
+              paddingBottom: "16%",
               height: 0,
-              position: 'relative',
-              margin: 'auto',
-              width: '80%',
+              position: "relative",
+              margin: "auto",
+              width: "80%",
             }}
           >
             <span
               css={{
                 borderRadius: 4,
-                overflow: 'hidden',
-                position: 'absolute',
+                overflow: "hidden",
+                position: "absolute",
                 inset: 0,
-                backgroundRepeat: 'no-repeat',
+                backgroundRepeat: "no-repeat",
                 ...backgroundIconDivider,
               }}
             />
@@ -1496,83 +1535,83 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
       </SettingButton>
       <SettingButton
         css={{ fontSize: 24 }}
-        disabled={!fontStyles(fontFamily).includes('Bold')}
+        disabled={!fontStyles(fontFamily).includes("Bold")}
         isActive={isBold}
-        onClick={() => toggleStyle('BOLD')}
-        tooltip='Bold'
+        onClick={() => toggleStyle("BOLD")}
+        tooltip="Bold"
       >
         <FormatBoldIcon />
       </SettingButton>
       <SettingButton
         css={{ fontSize: 24 }}
-        disabled={!fontStyles(fontFamily).includes('Italic')}
+        disabled={!fontStyles(fontFamily).includes("Italic")}
         isActive={isItalic}
-        onClick={() => toggleStyle('ITALIC')}
-        tooltip='Italics'
+        onClick={() => toggleStyle("ITALIC")}
+        tooltip="Italics"
       >
         <FormatItalicIcon />
       </SettingButton>
       <SettingButton
         css={{ fontSize: 24 }}
         isActive={isUnderline}
-        onClick={() => toggleStyle('UNDERLINE')}
-        tooltip='Underline'
+        onClick={() => toggleStyle("UNDERLINE")}
+        tooltip="Underline"
       >
         <FormatUnderlineIcon />
       </SettingButton>
       <SettingButton
         css={{ fontSize: 24 }}
         isActive={isUppercase}
-        onClick={() => toggleStyle('UPPERCASE')}
-        tooltip='Uppercase'
+        onClick={() => toggleStyle("UPPERCASE")}
+        tooltip="Uppercase"
       >
         <FormatUppercaseIcon />
       </SettingButton>
       <div
-        css={{ height: 24, width: `1px`, background: 'rgba(57,76,96,.15)' }}
+        css={{ height: 24, width: `1px`, background: "rgba(57,76,96,.15)" }}
       />
 
       <SettingButton
         css={{ fontSize: 24 }}
         isActive={isAlignLeft}
-        onClick={() => updateTextAlign('left')}
-        tooltip='Left'
+        onClick={() => updateTextAlign("left")}
+        tooltip="Left"
       >
         <TextAlignLeftIcon />
       </SettingButton>
       <SettingButton
         css={{ fontSize: 24 }}
         isActive={isAlignCenter}
-        onClick={() => updateTextAlign('center')}
-        tooltip='Center'
+        onClick={() => updateTextAlign("center")}
+        tooltip="Center"
       >
         <TextAlignCenterIcon />
       </SettingButton>
       <SettingButton
         css={{ fontSize: 24 }}
         isActive={isAlignRight}
-        onClick={() => updateTextAlign('right')}
-        tooltip='Right'
+        onClick={() => updateTextAlign("right")}
+        tooltip="Right"
       >
         <TextAlignRightIcon />
       </SettingButton>
       <SettingButton
         css={{ fontSize: 24 }}
         isActive={isAlignJustify}
-        onClick={() => updateTextAlign('justify')}
-        tooltip='Justify'
+        onClick={() => updateTextAlign("justify")}
+        tooltip="Justify"
       >
         <TextAlignJustifyIcon />
       </SettingButton>
 
       <div
-        css={{ height: 24, width: `1px`, background: 'rgba(57,76,96,.15)' }}
+        css={{ height: 24, width: `1px`, background: "rgba(57,76,96,.15)" }}
       />
       <SettingButton
         css={{ fontSize: 24 }}
         isActive={isBulletList}
         onClick={toggleBulletList}
-        tooltip='List'
+        tooltip="List"
       >
         <ListBulletsIcon />
       </SettingButton>
@@ -1580,7 +1619,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         css={{ fontSize: 24 }}
         isActive={isOrderedList}
         onClick={toggleOrderedList}
-        tooltip='List'
+        tooltip="List"
       >
         <ListNumbersIcon />
       </SettingButton>
@@ -1589,29 +1628,29 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         ref={spacingRef}
         css={{ fontSize: 24 }}
         onClick={() => setOpenSpacingSetting(true)}
-        tooltip='Spacing'
+        tooltip="Spacing"
       >
         <LineSpacingIcon />
       </SettingButton>
       <Popover
         open={openSpacingSetting}
         anchorEl={spacingRef.current}
-        placement={'bottom-end'}
+        placement={"bottom-end"}
         onClose={() => setOpenSpacingSetting(false)}
         offsets={{
-          'bottom-end': { x: 0, y: 8 },
+          "bottom-end": { x: 0, y: 8 },
         }}
       >
-        <div css={{ padding: 16, minWidth: 220, display: 'grid', rowGap: 8 }}>
+        <div css={{ padding: 16, minWidth: 220, display: "grid", rowGap: 8 }}>
           <Slider
-            label={'Letter spacing'}
+            label={"Letter spacing"}
             min={-200}
             max={800}
             value={letterSpacing[0] * 1000 || 0}
             onChange={(v) => handleChangeLetterSpacing(v / 1000)}
           />
           <Slider
-            label={'Line spacing'}
+            label={"Line spacing"}
             step={0.01}
             min={0.5}
             max={2.5}
@@ -1621,21 +1660,21 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         </div>
       </Popover>
       <div
-        css={{ height: 24, width: `1px`, background: 'rgba(57,76,96,.15)' }}
+        css={{ height: 24, width: `1px`, background: "rgba(57,76,96,.15)" }}
       />
 
       <SettingButton
         css={{ minWidth: 70 }}
         onClick={() => {
-          actions.setSidebar('TEXT_EFFECT');
+          actions.setSidebar("TEXT_EFFECT");
         }}
       >
         Effects
       </SettingButton>
       <div
-        css={{ height: 24, width: `1px`, background: 'rgba(57,76,96,.15)' }}
+        css={{ height: 24, width: `1px`, background: "rgba(57,76,96,.15)" }}
       />
-      {sidebar === 'FONT_FAMILY' && (
+      {sidebar === "FONT_FAMILY" && (
         <FontSidebar
           open={true}
           selected={fontFamily}
@@ -1643,7 +1682,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         />
       )}
 
-      {sidebar === 'CHOOSING_COLOR' && (
+      {sidebar === "CHOOSING_COLOR" && (
         <ColorSidebar
           open={true}
           selected={color[0]}
@@ -1651,7 +1690,7 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         />
       )}
 
-      {sidebar === 'TEXT_EFFECT' && <TextEffectSidebar open={true} />}
+      {sidebar === "TEXT_EFFECT" && <TextEffectSidebar open={true} />}
     </Fragment>
   );
 };

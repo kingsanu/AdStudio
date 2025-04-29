@@ -47,7 +47,7 @@ export const TextContent: FC<TextContentProps> = ({
   // Only try to get text effect styles if we have a valid effect
   if (effect) {
     try {
-      console.log("Effect object:", effect);
+      // console.log("Effect object:", effect);
 
       // Handle both standard format and minified format
       const effectName = effect.name;
@@ -61,10 +61,10 @@ export const TextContent: FC<TextContentProps> = ({
       ) {
         // Cast to unknown first to avoid TypeScript error
         const minifiedSettings = effect.bq as unknown as ExtendedEffectSettings;
-        console.log(
-          "Found minified effect settings in bq property:",
-          minifiedSettings
-        );
+        // console.log(
+        //   "Found minified effect settings in bq property:",
+        //   minifiedSettings
+        // );
 
         // Map minified properties to standard properties
         if (minifiedSettings.br !== undefined)
@@ -84,12 +84,12 @@ export const TextContent: FC<TextContentProps> = ({
         effectName !== "none" &&
         Object.keys(effectSettings).length > 0
       ) {
-        console.log(
-          "Applying effect:",
-          effectName,
-          "with settings:",
-          effectSettings
-        );
+        // console.log(
+        //   "Applying effect:",
+        //   effectName,
+        //   "with settings:",
+        //   effectSettings
+        // );
         const textColor = colors && colors.length > 0 ? colors[0] : undefined;
         const fontSize =
           fontSizes && fontSizes.length > 0 ? fontSizes[0] : undefined;
@@ -104,7 +104,7 @@ export const TextContent: FC<TextContentProps> = ({
         if (effectStyles && typeof effectStyles === "object") {
           styles = effectStyles as Record<string, string | number>;
         }
-        console.log("Generated effect styles:", styles);
+        // console.log("Generated effect styles:", styles);
       } else {
         console.warn("Invalid effect configuration:", effect);
       }
@@ -124,9 +124,9 @@ export const TextContent: FC<TextContentProps> = ({
   let fontStyles: Record<string, string> = {};
   if (fonts && fonts.length > 0) {
     try {
-      console.log("Fonts available:", fonts);
+      // console.log("Fonts available:", fonts);
       const font = fonts[0] as ExtendedFontData;
-      console.log("Using font:", font);
+      // console.log("Using font:", font);
 
       // Handle both standard format and minified format
       const fontFamily = font.family || font.name || font.x;
@@ -137,9 +137,9 @@ export const TextContent: FC<TextContentProps> = ({
       }
 
       if (fontStyle) {
-        console.log("Font style:", fontStyle);
+        // console.log("Font style:", fontStyle);
         const fontStyleCSS = handleFontStyle(fontStyle);
-        console.log("Generated font style CSS:", fontStyleCSS);
+        // console.log("Generated font style CSS:", fontStyleCSS);
         if (fontStyleCSS && typeof fontStyleCSS === "string") {
           // Parse the CSS string into an object
           const cssProperties = fontStyleCSS
@@ -157,7 +157,7 @@ export const TextContent: FC<TextContentProps> = ({
             ...fontStyles,
             ...cssProperties,
           };
-          console.log("Applied font styles:", fontStyles);
+          // console.log("Applied font styles:", fontStyles);
         }
       } else {
         console.warn("Font object has no style property:", font);

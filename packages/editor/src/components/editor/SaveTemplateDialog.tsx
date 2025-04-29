@@ -136,7 +136,34 @@ const SaveTemplateDialog: FC<Props> = ({ open, onClose, initialName = "" }) => {
       }, 50);
 
       const designData = query.serialize();
-      const packedData = pack(designData, dataMapping)[0];
+
+      // Pack the data and get both the packed data and the updated mapping
+      const [packedResult, updatedMapping] = pack(designData, dataMapping);
+      const packedData = Array.isArray(packedResult)
+        ? packedResult[0]
+        : packedResult;
+
+      // Log the complete mapping
+      console.log("=== COMPLETE MAPPING ===");
+
+      // Get all keys from dataMapping
+      const originalKeys = new Set(Object.keys(dataMapping));
+
+      // Separate original and dynamic mappings
+      const originalMappings: Record<string, string> = {};
+      const dynamicMappings: Record<string, string> = {};
+
+      Object.entries(updatedMapping).forEach(([key, value]) => {
+        if (originalKeys.has(key)) {
+          originalMappings[key] = value as string;
+        } else {
+          dynamicMappings[key] = value as string;
+        }
+      });
+
+      console.log("Original mappings:", originalMappings);
+      console.log("Dynamically generated mappings:", dynamicMappings);
+      console.log("=== END MAPPING ===");
 
       // Get user's ID as unique identifier (outletId from auth)
       const userId = user?.userId || Cookies.get("auth_token") || "anonymous";

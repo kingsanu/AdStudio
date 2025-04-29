@@ -1,3 +1,5 @@
+/* eslint-disable no-prototype-builtins */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { isEditorID } from "./identityGenerator";
 
 export const dataMapping: any = {
@@ -47,29 +49,29 @@ export const dataMapping: any = {
   // New mappings for text templates
   // These are the reverse mappings for the new format
   // Original property name: minified name
-  aq: "name",
-  as: "layers",
-  ar: "locked",
-  au: "type",
-  av: "resolvedName",
-  aw: "props",
-  ax: "boxSize",
-  ay: "width",
-  az: "height",
-  ba: "position",
-  bg: "x",
-  bh: "y",
-  bb: "rotate",
-  bc: "color",
-  bd: "image",
-  be: "child",
-  bf: "parent",
-  bi: "scale",
-  bj: "text",
-  bk: "fonts",
-  bn: "colors",
-  bo: "fontSizes",
-  bp: "effect",
+  // aq: "name",
+  // as: "layers",
+  // ar: "locked",
+  // au: "type",
+  // av: "resolvedName",
+  // aw: "props",
+  // ax: "boxSize",
+  // ay: "width",
+  // az: "height",
+  // ba: "position",
+  // bg: "x",
+  // bh: "y",
+  // bb: "rotate",
+  // bc: "color",
+  // bd: "image",
+  // be: "child",
+  // bf: "parent",
+  // bi: "scale",
+  // bj: "text",
+  // bk: "fonts",
+  // bn: "colors",
+  // bo: "fontSizes",
+  // bp: "effect",
 };
 
 function getAlphabetCharByOrder(order: number) {
@@ -108,11 +110,13 @@ const pack = (obj: any, mapping: any = {}, charCode = 1): any => {
   for (const key in obj) {
     if (obj.hasOwnProperty(key)) {
       if (!mapping[key]) {
+        console.log(key);
         if (!isEditorID(key)) {
           mapping[key] = getAlphabetCharByOrder(charCode);
           charCode++;
         }
       } else {
+        //ll
       }
       const [packedValue, updatedMapping] = pack(obj[key], mapping, charCode);
       packedObj[mapping[key] || key] = packedValue;

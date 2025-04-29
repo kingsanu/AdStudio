@@ -1,11 +1,11 @@
 export const data = [
   {
-    name: '',
-    notes: '',
+    name: "",
+    notes: "",
     layers: {
       ROOT: {
         type: {
-          resolvedName: 'RootLayer',
+          resolvedName: "RootLayer",
         },
         props: {
           boxSize: {
@@ -17,13 +17,13 @@ export const data = [
             y: 0,
           },
           rotate: 0,
-          color: 'rgb(255, 255, 255)',
+          color: "rgb(255, 255, 255)",
           image: null,
         },
         locked: false,
         child: [],
         parent: null,
-      }
+      },
     },
   },
 ];

@@ -1,4 +1,4 @@
-import { Direction } from './resize';
+import { Direction } from "./resize";
 import {
   BoxData,
   BoxSize,
@@ -7,12 +7,12 @@ import {
   FontData,
   LayerId,
   PageSize,
-} from 'canva-editor/types';
-import { HorizontalGuideline, VerticalGuideline } from './common';
-import { Page } from './page';
-import { TextEditor } from 'canva-editor/components/text-editor/interfaces';
-import { QueryMethods } from 'canva-editor/components/editor/query';
-import { ActionMethods } from 'canva-editor/components/editor/actions';
+} from "canva-editor/types";
+import { HorizontalGuideline, VerticalGuideline } from "./common";
+import { Page } from "./page";
+import { TextEditor } from "canva-editor/components/text-editor/interfaces";
+import { QueryMethods } from "canva-editor/components/editor/query";
+import { ActionMethods } from "canva-editor/components/editor/actions";
 
 export type DataConfig = {
   name: string;
@@ -33,10 +33,10 @@ export type ImageEditorData = {
   } | null;
 };
 export type SidebarType =
-  | 'TEXT_EFFECT'
-  | 'FONT_FAMILY'
-  | 'LAYER_MANAGEMENT'
-  | 'CHOOSING_COLOR';
+  | "TEXT_EFFECT"
+  | "FONT_FAMILY"
+  | "LAYER_MANAGEMENT"
+  | "CHOOSING_COLOR";
 
 export interface EditorState {
   name: string;

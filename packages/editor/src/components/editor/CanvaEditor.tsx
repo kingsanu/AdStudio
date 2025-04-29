@@ -18,6 +18,8 @@ import {
   setupDesignChangeListeners,
   cleanupDesignChangeListeners,
 } from "../../utils/designChangeEvent";
+import SaveTextTemplateDialog from "canva-editor/components/editor/SaveTextTemplateDialog";
+import { Save } from "lucide-react";
 
 export type EditorProps = {
   data?: {
@@ -28,18 +30,20 @@ export type EditorProps = {
   config: EditorConfig;
   onChanges: (changes: unknown) => void;
   onDesignNameChanges?: (name: string) => void;
+  isTextTemplate?: boolean;
 };
 
 const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
   data,
   config,
   onChanges,
+  isTextTemplate = false,
 }) => {
   const version = "1.0.69";
   const { getState, actions, query } = useEditorStore();
   const [viewPortHeight, setViewPortHeight] = useState<number>();
   const [showPreview, setShowPreview] = useState(false);
-
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
   // Initialize sync service and design change listeners
   useEffect(() => {
     // Initialize the sync service
@@ -100,6 +104,24 @@ const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
           background: "white",
         }}
       >
+        {isTextTemplate && showSaveDialog && (
+          <SaveTextTemplateDialog
+            open={showSaveDialog}
+            onClose={() => setShowSaveDialog(false)}
+            initialName={data?.name}
+          />
+        )}
+        {isTextTemplate && (
+          <button
+            onClick={() => setShowSaveDialog(true)}
+            className="fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+            title="Save Text Template (Ctrl+S)"
+          >
+            <Save className="h-5 w-5" />
+            <span className="font-medium">Save Template</span>
+          </button>
+        )}
+
         {/* Top Header Bar */}
         <div
           css={{

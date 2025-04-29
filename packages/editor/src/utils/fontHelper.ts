@@ -39,7 +39,7 @@ function groupFontsByFamily(fonts: FontData[]): FontData[] {
 }
 
 function handleFontStyle(style: string | undefined) {
-  console.log("handleFontStyle", style);
+  // console.log("handleFontStyle", style);
   // Handle undefined or null style
   if (!style) {
     console.warn("Font style is undefined or null");

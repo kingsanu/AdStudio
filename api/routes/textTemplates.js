@@ -32,10 +32,10 @@ router.get("/get-text-template/:filename", async (req, res) => {
     if (!filename) {
       return res.status(400).json({ message: "Filename is required" });
     }
-
+    console.log(filename);
     // Check if the filename already has the editor/ prefix
     const hasEditorPrefix = filename.startsWith("editor/");
-
+    console.log(hasEditorPrefix);
     // Try to fetch the template with the editor/ prefix first if it doesn't have it
     try {
       const prefixedFilename = hasEditorPrefix
@@ -47,7 +47,8 @@ router.get("/get-text-template/:filename", async (req, res) => {
       const response = await axios.get(
         `${GET_TEMPLATE_ENDPOINT}/${prefixedFilename}`
       );
-      console.log(response.data[0].as);
+      console.log(response);
+      console.log("data");
       return res.json(response.data);
     } catch (prefixError) {
       // If that fails and the filename had the prefix, we're out of options
