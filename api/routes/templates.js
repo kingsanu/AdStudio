@@ -66,10 +66,12 @@ router.get("/proxy-template/:filename", async (req, res) => {
       const prefixedFilename = hasEditorPrefix
         ? filename
         : `editor/${filename}`;
+      const url = `${CLOUD_STORAGE.BASE_URL}/${prefixedFilename}`;
+      console.log(url);
       console.log(
         `Trying to fetch template with prefixed filename: ${prefixedFilename}`
       );
-      await handleResponse(`${CLOUD_STORAGE.BASE_URL}/${prefixedFilename}`);
+      await handleResponse(url);
     } catch (prefixError) {
       // If that fails and the filename had the prefix, we're out of options
       if (hasEditorPrefix) {

@@ -6,28 +6,21 @@ import { textTemplateService } from "./services/textTemplateService";
 import { toast } from "sonner";
 import axios from "axios";
 import { GET_TEMPLATE_ENDPOINT } from "canva-editor/utils/constants/api";
-// No need to import SaveTextTemplateDialog or Save icon as they're handled by CanvaEditor
 import { emptyTextTemplate } from "./emptyTextTemplate";
-import { data } from "./sampleData";
-import { useEditor } from "canva-editor/hooks";
-import { EditorContext } from "canva-editor/components/editor/EditorContext";
-import { useEditorStore } from "canva-editor/hooks/useEditorStore";
+import { emptyData } from "./sampleData";
 
 // Main component that provides the EditorContext
 const TextTemplateEditor = () => {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [templateData, setTemplateData] = useState<any>(data);
+  const [templateData, setTemplateData] = useState<any>(emptyData);
   const [name, setName] = useState("New Text Template");
   const [editorError, setEditorError] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Create the editor store
-  const editorStore = useEditorStore();
-
   const handleOnChanges = (changes: any) => {
-    console.log("On changes: ", changes);
+    // console.log("On changes: ", changes);
 
     setSaving(true);
     setTimeout(() => {
@@ -53,23 +46,12 @@ const TextTemplateEditor = () => {
       searchParams.get("template") || searchParams.get("templateId");
 
     if (templateId) {
-      console.log(`Loading template with ID: ${templateId}`);
       loadTemplate(templateId);
 
       // Store the template ID in localStorage for future updates
       localStorage.setItem("text_template_id", templateId);
     } else {
-      // Clear any existing template ID from localStorage
       localStorage.removeItem("text_template_id");
-
-      // Show a welcome toast with save shortcut info when creating a new template
-      setTimeout(() => {
-        toast.info("Welcome to Text Template Editor", {
-          description:
-            "Press Ctrl+S (or Cmd+S on Mac) to save your template anytime.",
-          duration: 5000,
-        });
-      }, 1500); // Delay to ensure it appears after the editor loads
     }
   }, [location.search]);
 
@@ -239,12 +221,10 @@ const TextTemplateEditor = () => {
     );
   }
 
-  // Note: Custom header buttons are not supported in the current CanvaEditor component
-
   // Define the editor configuration
   const editorConfig = {
     apis: {
-      url: "https://adstudioserver.foodyqueen.com/api",
+      url: "http://localhost:4000/api",
       searchFonts: "/fonts",
       searchTemplates: "/templates",
       searchTexts: "/texts",
@@ -266,16 +246,10 @@ const TextTemplateEditor = () => {
       searchShape: "Search shapes",
       searchFrame: "Search frames",
     },
-    editorAssetsUrl: "https://adstudioserver.foodyqueen.com/editor",
+    editorAssetsUrl: "http://localhost:4000/editor",
     imageKeywordSuggestions: "animal,sport,love,scene,dog,cat,whale",
     templateKeywordSuggestions:
       "mother,sale,discount,fashion,model,deal,motivation,quote",
-  };
-
-  // Create the editor context value
-  const editorContextValue = {
-    ...editorStore,
-    config: editorConfig,
   };
 
   return (

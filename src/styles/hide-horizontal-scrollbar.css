@@ -1,0 +1,56 @@
+/* Global styles to hide horizontal scrollbars */
+
+/* Hide horizontal scrollbars for all elements */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+/* Hide horizontal scrollbars for WebKit browsers */
+*::-webkit-scrollbar:horizontal {
+  height: 0;
+  display: none;
+}
+
+/* Allow vertical scrollbars */
+*::-webkit-scrollbar:vertical {
+  width: 8px;
+  display: block;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+/* Specific fix for elements with horizontal overflow */
+.overflow-x-auto,
+[style*="overflow-x:auto"],
+[style*="overflow-x: auto"],
+[css*="overflowX: auto"],
+[css*="overflow-x: auto"] {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.overflow-x-auto::-webkit-scrollbar,
+[style*="overflow-x:auto"]::-webkit-scrollbar,
+[style*="overflow-x: auto"]::-webkit-scrollbar,
+[css*="overflowX: auto"]::-webkit-scrollbar,
+[css*="overflow-x: auto"]::-webkit-scrollbar {
+  height: 0;
+  display: none;
+}
+
+/* Fix for horizontal scrolling in the main editor area */
+.editor-container,
+.canvas-area,
+.main-content,
+.flex-grow,
+.flex-1 {
+  overflow-x: hidden !important;
+}

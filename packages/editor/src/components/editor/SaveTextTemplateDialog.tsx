@@ -51,7 +51,7 @@ const SaveTextTemplateDialog: FC<Props> = ({
   const [saveProgress, setSaveProgress] = useState(0);
   const [previewImage, setPreviewImage] = useState<string>("");
   const [isPublic, setIsPublic] = useState(false);
-  const { query, actions } = useEditor();
+  const { query } = useEditor();
 
   const { user } = useAuth();
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -151,8 +151,9 @@ const SaveTextTemplateDialog: FC<Props> = ({
       const templateData = query.serialize();
       console.log("SERIALIZED TEMPLATE DATA:", templateData);
 
-      // Pack the data for sending to the server
-      const packedData = pack(templateData, dataMapping)[0];
+      // Pack the data for sending to the server - keep all pages
+      const [packedResult] = pack(templateData, dataMapping);
+      const packedData = packedResult;
 
       // Get user's ID as unique identifier (outletId from auth)
       const userId = user?.userId || Cookies.get("auth_token") || "anonymous";

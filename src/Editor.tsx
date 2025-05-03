@@ -33,13 +33,22 @@ const Editor = () => {
     }, 1000);
   };
 
-  // Parse URL parameters to get template ID
+  // Parse URL parameters to get template ID or custom dimensions
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const templateId = searchParams.get("template");
+    const width = searchParams.get("width");
+    const height = searchParams.get("height");
+    const bgColor = searchParams.get("bgColor");
 
     if (templateId) {
       loadTemplate(templateId);
+    } else if (width && height) {
+      createEmptyTemplate(
+        parseInt(width),
+        parseInt(height),
+        bgColor || "rgb(255, 255, 255)"
+      );
     }
   }, [location.search]);
 
@@ -63,6 +72,62 @@ const Editor = () => {
       window.removeEventListener("error", handleError);
     };
   }, []);
+
+  // Function to create an empty template with custom dimensions
+  const createEmptyTemplate = (
+    width: number,
+    height: number,
+    backgroundColor: string = "rgb(255, 255, 255)"
+  ) => {
+    try {
+      setLoading(true);
+
+      // Create an empty template with the specified dimensions using the minified format
+      const emptyTemplate = [
+        {
+          a: "", // name
+          b: "", // notes
+          c: {
+            // layers
+            d: {
+              // ROOT layer
+              e: {
+                f: "RootLayer", // type.resolvedName
+              },
+              g: {
+                h: {
+                  i: width, // boxSize.width
+                  j: height, // boxSize.height
+                },
+                k: {
+                  l: 0, // position.x
+                  m: 0, // position.y
+                },
+                n: 0, // rotate
+                o: backgroundColor, // color
+                p: null, // image
+                q: null, // additional props
+              },
+              r: false, // locked
+              t: null, // parent
+              s: [], // child
+            },
+          },
+        },
+      ];
+
+      setTemplateData(emptyTemplate);
+      setName("Untitled Design");
+      toast.success("Custom size design created");
+    } catch (error) {
+      console.error("Error creating empty template:", error);
+      toast.error("Failed to create custom size design");
+      // Fallback to sample data
+      setTemplateData(data);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Function to load a template by ID
   const loadTemplate = async (templateId: string) => {
@@ -94,7 +159,7 @@ const Editor = () => {
             const templateResponse = await axios.get(
               `${GET_TEMPLATE_ENDPOINT}/${filename}`
             );
-
+            console.log(templateResponse.data);
             // Simply use the template data directly as is
             // This is the same format as the sample data
             setTemplateData(templateResponse.data);
@@ -203,7 +268,7 @@ const Editor = () => {
         }}
         config={{
           apis: {
-            url: "https://adstudioserver.foodyqueen.com/api",
+            url: "http://localhost:4000/api",
             searchFonts: "/fonts",
             searchTemplates: "/templates",
             searchTexts: "/texts",
@@ -225,7 +290,7 @@ const Editor = () => {
             searchShape: "Search shapes",
             searchFrame: "Search frames",
           },
-          editorAssetsUrl: "https://adstudioserver.foodyqueen.com/editor",
+          editorAssetsUrl: "http://localhost:4000/editor",
           imageKeywordSuggestions: "animal,sport,love,scene,dog,cat,whale",
           templateKeywordSuggestions:
             "mother,sale,discount,fashion,model,deal,motivation,quote",

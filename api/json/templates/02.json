@@ -19,8 +19,8 @@
           "rotate": 0,
           "color": "rgb(255, 255, 255)",
           "image": {
-            "url": "https://adstudioserver.foodyqueen.com/images/photos/nature/001.jpg",
-            "thumb": "https://adstudioserver.foodyqueen.com/images/photos/nature/001.jpg",
+            "url": "http://localhost:4000/images/photos/nature/001.jpg",
+            "thumb": "http://localhost:4000/images/photos/nature/001.jpg",
             "boxSize": {
               "width": 1348.9461358313818,
               "height": 900

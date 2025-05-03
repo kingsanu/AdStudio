@@ -11,7 +11,8 @@ const path = require("node:path");
 require("dotenv").config();
 
 // FastAPI service endpoint for background removal
-const REMOVE_BG_API = process.env.REMOVE_BG_API || "http://localhost:8000/rbg";
+const REMOVE_BG_API =
+  process.env.REMOVE_BG_API || "http://bgremove.foodyqueen.com/rbg";
 
 // Log the API endpoint being used
 console.log(`Using background removal API: ${REMOVE_BG_API}`);
@@ -48,7 +49,7 @@ const imageProcessingController = {
             const response = await axios.get(imageUrl, {
               responseType: "arraybuffer",
               // Add timeout to prevent hanging requests
-              timeout: 10000,
+              timeout: 60000,
             });
             imageBuffer = Buffer.from(response.data);
           }

@@ -4,11 +4,9 @@
 }
 
 .dropdown-button {
-  color: #fff;
-  height: 40px;
-  padding: 0 16px;
+  color: #000;
+  padding: 0 4px;
   border: 2px solid transparent;
-  border-radius: 4px;
   box-sizing: border-box;
   font-size: 14px;
   transition: background-color 0.1s linear, border-color 0.1s linear,

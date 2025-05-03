@@ -71,7 +71,7 @@ export type EditorConfig = {
 
 const editorConfig: EditorConfig = {
   apis: {
-    url: 'https://adstudioserver.foodyqueen.com/api',
+    url: 'http://localhost:4000/api',
     searchFonts: '/fonts',
     searchTemplates: '/templates',
     searchTexts: '/texts',
@@ -93,7 +93,7 @@ const editorConfig: EditorConfig = {
     searchShape: 'Search shapes',
     searchFrame: 'Search frames'
   },
-  editorAssetsUrl: 'https://adstudioserver.foodyqueen.com/editor',
+  editorAssetsUrl: 'http://localhost:4000/editor',
   imageKeywordSuggestions: 'animal,sport,love,scene,dog,cat,whale',
   templateKeywordSuggestions:
     'mother,sale,discount,fashion,model,deal,motivation,quote',
@@ -141,7 +141,7 @@ import { useState } from "react";
 const editorConfig: EditorConfig = {
   logoUrl: "./your-logo.png",
   apis: {
-    url: "https://adstudioserver.foodyqueen.com/api",
+    url: "http://localhost:4000/api",
     searchFonts: "/fonts",
     searchTemplates: "/templates",
     searchTexts: "/texts",
@@ -163,7 +163,7 @@ const editorConfig: EditorConfig = {
     searchShape: "Search shapes",
     searchFrame: "Search frames",
   },
-  editorAssetsUrl: "https://adstudioserver.foodyqueen.com/editor",
+  editorAssetsUrl: "http://localhost:4000/editor",
   imageKeywordSuggestions: "animal,sport,love,scene,dog,cat,whale",
   templateKeywordSuggestions:
     "mother,sale,discount,fashion,model,deal,motivation,quote",

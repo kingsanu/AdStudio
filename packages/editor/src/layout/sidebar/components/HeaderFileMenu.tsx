@@ -28,7 +28,7 @@ import useMobileDetect from "canva-editor/hooks/useMobileDetect";
 import SaveTemplateDialog from "canva-editor/components/editor/SaveTemplateDialog";
 import SyncingIcon from "canva-editor/icons/SyncingIcon";
 import { useSyncService } from "../../../hooks/useSyncService";
-import { WifiOff, AlertCircle } from "lucide-react";
+import { WifiOff, AlertCircle, MoreHorizontal } from "lucide-react";
 
 interface Props {
   designName: string;
@@ -357,7 +357,7 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
   return (
     <>
       <DropdownButton
-        text={isMobile ? <HamburgerIcon /> : "File"}
+        text={isMobile ? <HamburgerIcon /> : <MoreHorizontal />}
         items={menuData}
         header={
           <div css={{ padding: "16px 16px 8px" }}>

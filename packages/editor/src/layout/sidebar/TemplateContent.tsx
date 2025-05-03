@@ -116,6 +116,7 @@ const TemplateContent: FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const addPages = async (data: Array<SerializedPage> | SerializedPage) => {
     try {
+      console.log(data);
       if (Array.isArray(data)) {
         data.forEach((page, idx) => {
           const serializedData: SerializedPage = unpack(page);
@@ -205,16 +206,16 @@ const TemplateContent: FC<{ onClose: () => void }> = ({ onClose }) => {
               css={{ cursor: "pointer", position: "relative" }}
               onClick={async () => {
                 const file = item.templateUrl.split("/");
-                console.log(file[4]);
+                console.log(file[file.length - 1]);
                 const templateData = await axios.get(
-                  `${GET_TEMPLATE_ENDPOINT}/${file[4]}`
+                  `${GET_TEMPLATE_ENDPOINT}/${file[file.length - 1]}`
                 );
                 console.log(templateData);
-                addPages(templateData.data[0]);
+                addPages(templateData.data);
               }}
             >
               <img
-                // src={`https://adstudioserver.foodyqueen.com${item.thumbnailUrl}`}
+                // src={`http://localhost:4000${item.thumbnailUrl}`}
                 src={`${item.thumbnailUrl}`}
                 loading="lazy"
                 alt={item.title}

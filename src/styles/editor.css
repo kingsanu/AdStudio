@@ -1,0 +1,36 @@
+/* Hide horizontal scrollbars */
+.horizontal-scroll::-webkit-scrollbar {
+  height: 0;
+  display: none;
+}
+
+.horizontal-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Hide all horizontal scrollbars in the editor */
+.editor-container *::-webkit-scrollbar:horizontal {
+  height: 0;
+  display: none;
+}
+
+.editor-container * {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Allow vertical scrolling */
+.editor-container *::-webkit-scrollbar:vertical {
+  width: 8px;
+  display: block;
+}
+
+.editor-container *::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.editor-container *::-webkit-scrollbar-track {
+  background-color: transparent;
+}

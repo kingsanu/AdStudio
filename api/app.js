@@ -11,6 +11,8 @@ const templateRoutes = require("./routes/templates");
 const textTemplateRoutes = require("./routes/textTemplates");
 const uploadedImageRoutes = require("./routes/uploadedImages");
 const imageProcessingRoutes = require("./routes/imageProcessing");
+const videoProcessingRoutes = require("./routes/videoProcessing");
+const whatsappSettingsRoutes = require("./routes/whatsappSettings");
 
 const app = express();
 // Increase JSON body size limit
@@ -43,6 +45,8 @@ app.use("/api", templateRoutes);
 app.use("/api", textTemplateRoutes);
 app.use("/api", uploadedImageRoutes);
 app.use("/api", imageProcessingRoutes);
+app.use("/api", videoProcessingRoutes);
+app.use("/api", whatsappSettingsRoutes);
 
 // Get port from environment variables or use 4000 as default
 const PORT = process.env.PORT || 4000;

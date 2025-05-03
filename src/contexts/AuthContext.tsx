@@ -48,8 +48,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const fetchUserDetails = async (userId: string, forceRefresh = false) => {
     try {
       // Check if we have cached user data and it's not too old (less than 24 hours old)
-      const cachedUserData = localStorage.getItem("user_data");
-      const cachedTimestamp = localStorage.getItem("user_data_timestamp");
+      const cachedUserData = localStorage.getItem("s_data");
+      const cachedTimestamp = localStorage.getItem("s_data_timestamp");
       const now = Date.now();
       const ONE_DAY = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
@@ -85,8 +85,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (userDetails) {
         setUser(userDetails);
         // Update local storage with the latest user data and timestamp
-        localStorage.setItem("user_data", JSON.stringify(userDetails));
-        localStorage.setItem("user_data_timestamp", now.toString());
+        localStorage.setItem("s_data", JSON.stringify(userDetails));
+        localStorage.setItem("s_data_timestamp", now.toString());
       }
     } catch (error) {
       console.error("Error fetching user details:", error);
@@ -125,14 +125,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           console.log("Found outlet ID in cookie:", outletId);
 
           // First try to get user data from localStorage for immediate display
-          const userData = localStorage.getItem("user_data");
+          const userData = localStorage.getItem("s_data");
           if (userData) {
             const parsedUser = JSON.parse(userData);
             setUser(parsedUser);
             console.log("Loaded user data from localStorage");
 
             // Check if we need to refresh the data (older than 24 hours)
-            const cachedTimestamp = localStorage.getItem("user_data_timestamp");
+            const cachedTimestamp = localStorage.getItem("s_data_timestamp");
             const now = Date.now();
             const ONE_DAY = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
@@ -156,8 +156,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       } catch (error) {
         console.error("Authentication error:", error);
         Cookies.remove("auth_token");
-        localStorage.removeItem("user_data");
-        localStorage.removeItem("user_data_timestamp");
+        localStorage.removeItem("s_data");
+        localStorage.removeItem("s_data_timestamp");
         setIsLoading(false);
       } finally {
         setIsLoading(false);
@@ -172,8 +172,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     Cookies.set("auth_token", outletId, { expires: 30 }); // 7 days
 
     // Store basic user data in localStorage with timestamp
-    localStorage.setItem("user_data", JSON.stringify(userData));
-    localStorage.setItem("user_data_timestamp", Date.now().toString());
+    localStorage.setItem("s_data", JSON.stringify(userData));
+    localStorage.setItem("s_data_timestamp", Date.now().toString());
     setUser(userData);
 
     // Fetch complete user details after login using the outlet ID
@@ -186,8 +186,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const logout = () => {
     Cookies.remove("auth_token");
-    localStorage.removeItem("user_data");
-    localStorage.removeItem("user_data_timestamp");
+    localStorage.removeItem("s_data");
+    localStorage.removeItem("s_data_timestamp");
     localStorage.removeItem("subscription_data");
     localStorage.removeItem("subscription_timestamp");
     setUser(null);
@@ -219,15 +219,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }));
 
         // Update the cached user data
-        const cachedUserData = localStorage.getItem("user_data");
+        const cachedUserData = localStorage.getItem("s_data");
         if (cachedUserData) {
           const parsedUser = JSON.parse(cachedUserData);
           const updatedUserData = {
             ...parsedUser,
             ...updatedDetails,
           };
-          localStorage.setItem("user_data", JSON.stringify(updatedUserData));
-          localStorage.setItem("user_data_timestamp", Date.now().toString());
+          localStorage.setItem("s_data", JSON.stringify(updatedUserData));
+          localStorage.setItem("s_data_timestamp", Date.now().toString());
         }
 
         toast.success("Profile updated successfully");

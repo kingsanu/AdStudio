@@ -13,6 +13,7 @@ import { Page } from "./page";
 import { TextEditor } from "canva-editor/components/text-editor/interfaces";
 import { QueryMethods } from "canva-editor/components/editor/query";
 import { ActionMethods } from "canva-editor/components/editor/actions";
+import { AnimationState } from "../animations/types";
 
 export type DataConfig = {
   name: string;
@@ -87,6 +88,8 @@ export interface EditorState {
     rotate?: number;
     cursor?: CursorPosition;
   };
+  animations?: AnimationState;
+  isPreviewMode: boolean;
   downloadPNGCmd: -1 | 0 | 1;
   downloadPDFCmd: -1 | 0 | 1;
   saving: boolean;

@@ -6,6 +6,7 @@ export interface UserDetails {
   name: string;
   email?: string;
   phoneNumber?: string;
+  whatsappUsername?: string; // Added WhatsApp username
   logo?: string;
   businessName?: string;
   businessType?: string;
@@ -50,6 +51,8 @@ export const userService = {
           userId: response.data.ID || userId,
           name: response.data.Name || "User",
           phoneNumber: response.data.RestPhone || "",
+          whatsappUsername:
+            response.data.WhatsappUsername || response.data.RestPhone || "", // Use WhatsApp username if available, otherwise use phone number
           email: "", // Not provided in the response
           logo: "", // Not provided in the response
           businessName: response.data.Name || "",
@@ -76,6 +79,7 @@ export const userService = {
           userId: userId,
           name: "User",
           phoneNumber: "",
+          whatsappUsername: "",
         };
       }
     } catch (error) {
@@ -85,6 +89,7 @@ export const userService = {
         userId: userId,
         name: "User",
         phoneNumber: "",
+        whatsappUsername: "",
       };
     }
   },
@@ -163,7 +168,7 @@ export const userService = {
         // Try to get the user data first to determine the plan
         try {
           // Check if we have cached user data with RestId
-          const cachedUserData = localStorage.getItem("user_data");
+          const cachedUserData = localStorage.getItem("s_data");
           let restId = 0;
 
           if (cachedUserData) {
@@ -242,7 +247,7 @@ export const userService = {
       // Try to get the user data first to determine the plan
       try {
         // Check if we have cached user data with RestId
-        const cachedUserData = localStorage.getItem("user_data");
+        const cachedUserData = localStorage.getItem("s_data");
         let restId = 0;
 
         if (cachedUserData) {

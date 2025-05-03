@@ -139,9 +139,8 @@ const SaveTemplateDialog: FC<Props> = ({ open, onClose, initialName = "" }) => {
 
       // Pack the data and get both the packed data and the updated mapping
       const [packedResult, updatedMapping] = pack(designData, dataMapping);
-      const packedData = Array.isArray(packedResult)
-        ? packedResult[0]
-        : packedResult;
+      // Don't extract just the first element if it's an array - we need all pages
+      const packedData = packedResult;
 
       // Log the complete mapping
       console.log("=== COMPLETE MAPPING ===");

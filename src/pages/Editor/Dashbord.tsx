@@ -2,41 +2,34 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
+import "@/styles/hide-scrollbar.css";
 import {
   Search,
   Plus,
   Star,
-  Grid,
-  Layout,
-  ImageIcon,
-  Text,
-  ChevronDown,
   Bell,
-  Sparkles,
-  Layers,
-  Palette,
-  TrendingUp,
-  Clock,
-  Filter,
-  MoreHorizontal,
+  FileText,
+  Phone,
+  Video,
+  MessageSquare,
+  Tag,
+  Award,
+  ThumbsUp,
+  Cake,
+  Gift,
+  Calendar,
+  Utensils,
+  ChevronRight,
+  ChevronLeft,
+  Edit,
   Download,
-  Share2,
-  Trash2,
+  Layout,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { templateService, Template } from "@/services/templateService";
 import {
@@ -45,23 +38,31 @@ import {
   SidebarLink,
 } from "@/components/ui/sidebar";
 import { IconArrowLeft, IconBrandTabler } from "@tabler/icons-react";
+import CustomSizeDialog from "@/components/CustomSizeDialog";
 
 export default function Dashboard() {
   const { user, logout, userLoading, refreshUserDetails } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [notificationCount] = useState(3); // Sample notification count
+  const [showCustomSizeDialog, setShowCustomSizeDialog] = useState(false);
   const [publicTemplates, setPublicTemplates] = useState<Template[]>([]);
   const [userTemplates, setUserTemplates] = useState<Template[]>([]);
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(true);
-  const [notificationCount] = useState(3); // Sample notification count
-
-  // Infinite scroll states
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const lastTemplateElementRef = useRef<HTMLDivElement | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [isLoadingUserTemplates, setIsLoadingUserTemplates] = useState(true);
+  const [loadingMoreTemplates, setLoadingMoreTemplates] = useState(false);
+  const [loadingMoreUserTemplates, setLoadingMoreUserTemplates] =
+    useState(false);
+  const [hasMoreTemplates, setHasMoreTemplates] = useState(true);
+  const [hasMoreUserTemplates, setHasMoreUserTemplates] = useState(true);
+  const [publicTemplatePage, setPublicTemplatePage] = useState(1);
+  const [userTemplatePage, setUserTemplatePage] = useState(1);
+  const templatesScrollRef = useRef<HTMLDivElement>(null);
+  const lastPublicTemplateRef = useRef<HTMLDivElement>(null);
+  const lastUserTemplateRef = useRef<HTMLDivElement>(null);
+  const publicTemplatesObserver = useRef<IntersectionObserver | null>(null);
+  const userTemplatesObserver = useRef<IntersectionObserver | null>(null);
 
   // Track if we've already attempted to load user details
   const userDetailsAttempted = useRef(false);
@@ -79,7 +80,8 @@ export default function Dashboard() {
   // Function to handle creating a new design
   const handleCreateNew = () => {
     toast.success("Creating new design");
-    navigate("/editor");
+    // Use default dimensions for a blank design (1080x1080)
+    navigate("/editor?width=1080&height=1080&bgColor=rgb(255,%20255,%20255)");
   };
 
   // Function to handle using a template
@@ -87,135 +89,185 @@ export default function Dashboard() {
     navigate(`/editor?template=${templateId}`);
   };
 
-  // Function to handle adding a template to favorites
-  const handleAddToFavorites = (
-    templateId: string,
-    event: React.MouseEvent
-  ) => {
-    event.stopPropagation(); // Prevent triggering the card click
+  // Function to open the classic editor (for testing)
+  const handleOpenClassicEditor = () => {
+    navigate("/classic-editor");
+  };
 
-    if (!user?.userId) {
-      toast.error("Please log in to add templates to favorites");
-      return;
-    }
-
-    const success = templateService.addToFavorites(templateId, user.userId);
-    if (success) {
-      toast.success("Added to favorites");
+  // Fetch public templates
+  const fetchPublicTemplates = useCallback(async (page = 1, append = false) => {
+    if (page === 1) {
+      setIsLoadingTemplates(true);
     } else {
-      toast.error("Failed to add to favorites");
+      setLoadingMoreTemplates(true);
     }
-  };
-
-  // Function to check if a template is in favorites
-  const isTemplateFavorite = (templateId: string) => {
-    if (!user?.userId) return false;
-    return templateService.isFavorite(templateId, user.userId);
-  };
-  const [activeTab, setActiveTab] = useState("recent");
-
-  // Function to fetch templates with pagination
-  const fetchPublicTemplates = useCallback(
-    async (pageNum: number, append: boolean = false) => {
-      if (pageNum === 1) {
-        setIsLoadingTemplates(true);
-      } else {
-        setLoadingMore(true);
-      }
-
-      try {
-        // Add pagination parameters
-        const templates = await templateService.getTemplates({
-          isPublic: true,
-          page: pageNum,
-          limit: 6, // Number of templates per page
-          keyword: searchQuery, // Add search query if present
-        });
-
-        if (templates.length === 0) {
-          setHasMore(false);
-        } else {
-          if (append) {
-            setPublicTemplates((prev) => [...prev, ...templates]);
-          } else {
-            setPublicTemplates(templates);
-          }
-          setPage(pageNum);
-        }
-      } catch (error) {
-        console.error("Error fetching public templates:", error);
-        toast.error("Failed to load templates");
-      } finally {
-        setIsLoadingTemplates(false);
-        setLoadingMore(false);
-      }
-    },
-    [searchQuery]
-  );
-
-  const fetchUserTemplates = useCallback(async () => {
-    if (!user?.userId) return;
 
     try {
       const templates = await templateService.getTemplates({
-        userId: user.userId,
-        onlyMine: true,
+        isPublic: true,
+        page,
+        limit: 8,
       });
-      setUserTemplates(templates);
-    } catch (error) {
-      console.error("Error fetching user templates:", error);
-      toast.error("Failed to load your templates");
-    }
-  }, [user]);
 
-  // Initial load of templates
+      if (templates.length === 0) {
+        setHasMoreTemplates(false);
+      } else {
+        if (append) {
+          setPublicTemplates((prev) => [...prev, ...templates]);
+        } else {
+          setPublicTemplates(templates);
+        }
+        setPublicTemplatePage(page);
+      }
+    } catch (error) {
+      console.error("Error fetching public templates:", error);
+      toast.error("Failed to load templates");
+    } finally {
+      setIsLoadingTemplates(false);
+      setLoadingMoreTemplates(false);
+    }
+  }, []);
+
+  // Fetch user templates
+  const fetchUserTemplates = useCallback(
+    async (page = 1, append = false) => {
+      if (!user?.userId) return;
+
+      if (page === 1) {
+        setIsLoadingUserTemplates(true);
+      } else {
+        setLoadingMoreUserTemplates(true);
+      }
+
+      try {
+        const templates = await templateService.getTemplates({
+          userId: user.userId,
+          onlyMine: true,
+          page,
+          limit: 4,
+        });
+
+        if (templates.length === 0) {
+          setHasMoreUserTemplates(false);
+        } else {
+          if (append) {
+            setUserTemplates((prev) => [...prev, ...templates]);
+          } else {
+            setUserTemplates(templates);
+          }
+          setUserTemplatePage(page);
+        }
+      } catch (error) {
+        console.error("Error fetching user templates:", error);
+        toast.error("Failed to load your templates");
+      } finally {
+        setIsLoadingUserTemplates(false);
+        setLoadingMoreUserTemplates(false);
+      }
+    },
+    [user?.userId]
+  );
+
+  // Load templates when component mounts
   useEffect(() => {
-    // Reset pagination when search query changes
-    setPage(1);
-    setHasMore(true);
-    setPublicTemplates([]);
     fetchPublicTemplates(1, false);
-  }, [fetchPublicTemplates, searchQuery]);
+  }, [fetchPublicTemplates]);
 
   // Load user templates when user changes
   useEffect(() => {
-    fetchUserTemplates();
-  }, [fetchUserTemplates]);
+    if (user?.userId) {
+      fetchUserTemplates(1, false);
+    }
+  }, [fetchUserTemplates, user?.userId]);
 
-  // Setup intersection observer for infinite scrolling
+  // Setup intersection observer for public templates infinite scrolling
   useEffect(() => {
-    // Disconnect previous observer if it exists
-    if (observerRef.current) {
-      observerRef.current.disconnect();
+    if (publicTemplatesObserver.current) {
+      publicTemplatesObserver.current.disconnect();
     }
 
-    // Create new observer
-    observerRef.current = new IntersectionObserver(
+    publicTemplatesObserver.current = new IntersectionObserver(
       (entries) => {
         const [entry] = entries;
-        if (entry.isIntersecting && hasMore && !loadingMore) {
-          // Load more templates when last template comes into view
-          fetchPublicTemplates(page + 1, true);
+        if (entry.isIntersecting && hasMoreTemplates && !loadingMoreTemplates) {
+          fetchPublicTemplates(publicTemplatePage + 1, true);
         }
       },
-      {
-        root: null,
-        rootMargin: "0px",
-        threshold: 0.1,
-      }
+      { threshold: 0.5 }
     );
 
-    // Observe the last template element
-    if (lastTemplateElementRef.current) {
-      observerRef.current.observe(lastTemplateElementRef.current);
+    if (lastPublicTemplateRef.current) {
+      publicTemplatesObserver.current.observe(lastPublicTemplateRef.current);
     }
 
     return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
+      if (publicTemplatesObserver.current) {
+        publicTemplatesObserver.current.disconnect();
       }
     };
-  }, [fetchPublicTemplates, hasMore, loadingMore, page]);
+  }, [
+    fetchPublicTemplates,
+    hasMoreTemplates,
+    loadingMoreTemplates,
+    publicTemplatePage,
+  ]);
+
+  // Setup intersection observer for user templates infinite scrolling
+  useEffect(() => {
+    if (userTemplatesObserver.current) {
+      userTemplatesObserver.current.disconnect();
+    }
+
+    userTemplatesObserver.current = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (
+          entry.isIntersecting &&
+          hasMoreUserTemplates &&
+          !loadingMoreUserTemplates
+        ) {
+          fetchUserTemplates(userTemplatePage + 1, true);
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    if (lastUserTemplateRef.current) {
+      userTemplatesObserver.current.observe(lastUserTemplateRef.current);
+    }
+
+    return () => {
+      if (userTemplatesObserver.current) {
+        userTemplatesObserver.current.disconnect();
+      }
+    };
+  }, [
+    fetchUserTemplates,
+    hasMoreUserTemplates,
+    loadingMoreUserTemplates,
+    userTemplatePage,
+  ]);
+
+  // Scroll templates horizontally with mouse wheel
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      if (templatesScrollRef.current) {
+        e.preventDefault();
+        templatesScrollRef.current.scrollLeft += e.deltaY;
+      }
+    };
+
+    const currentRef = templatesScrollRef.current;
+    if (currentRef) {
+      currentRef.addEventListener("wheel", handleWheel, { passive: false });
+    }
+
+    return () => {
+      if (currentRef) {
+        currentRef.removeEventListener("wheel", handleWheel);
+      }
+    };
+  }, []);
 
   // Sidebar links
   const sidebarLinks = [
@@ -243,103 +295,106 @@ export default function Dashboard() {
     },
   ];
 
-  // Template categories can be defined here if needed
-  /* const templateCategories = [
+  // Design templates
+  const designTemplates = [
     {
       id: 1,
-      title: "Social Media",
-      count: "120+ templates",
-      thumbnail: "/placeholder.svg?height=150&width=200",
-      color: "from-[#0070f3] to-[#00a2ff]",
+      title: "Blank Design",
+      icon: <FileText className="h-6 w-6" />,
+      color: "bg-white dark:bg-neutral-800",
+      textColor: "text-blue-600 dark:text-blue-400",
+      dimensions: { width: 1080, height: 1080 },
+      backgroundColor: "rgb(255, 255, 255)",
     },
     {
       id: 2,
-      title: "Presentations",
-      count: "85+ templates",
-      thumbnail: "/placeholder.svg?height=150&width=200",
-      color: "from-[#7928ca] to-[#ff0080]",
+      title: "AI Calling",
+      icon: <Phone className="h-6 w-6" />,
+      color: "bg-purple-50 dark:bg-purple-900/20",
+      textColor: "text-purple-600 dark:text-purple-400",
+      dimensions: { width: 1080, height: 1920 },
+      backgroundColor: "rgb(245, 243, 255)",
     },
     {
       id: 3,
-      title: "Print Products",
-      count: "65+ templates",
-      thumbnail: "/placeholder.svg?height=150&width=200",
-      color: "from-[#ff4d4d] to-[#f9cb28]",
+      title: "Self Order Video",
+      icon: <Video className="h-6 w-6" />,
+      color: "bg-green-50 dark:bg-green-900/20",
+      textColor: "text-green-600 dark:text-green-400",
+      dimensions: { width: 1920, height: 1080 },
+      backgroundColor: "rgb(240, 253, 244)",
     },
     {
       id: 4,
-      title: "Videos",
-      count: "40+ templates",
-      thumbnail: "/placeholder.svg?height=150&width=200",
-      color: "from-[#00b37e] to-[#00d4ff]",
+      title: "WhatsApp Campaign",
+      icon: <MessageSquare className="h-6 w-6" />,
+      color: "bg-emerald-50 dark:bg-emerald-900/20",
+      textColor: "text-emerald-600 dark:text-emerald-400",
+      dimensions: { width: 800, height: 800 },
+      backgroundColor: "rgb(236, 253, 245)",
     },
     {
       id: 5,
-      title: "Websites",
-      count: "30+ templates",
-      thumbnail: "/placeholder.svg?height=150&width=200",
-      color: "from-[#ff0080] to-[#7928ca]",
-    },
-  ]; */
-
-  const tools = [
-    {
-      id: 1,
-      title: "Layouts",
-      description: "Pre-designed layouts",
-      icon: <Layout className="h-5 w-5" />,
-      color: "#0070f3",
-    },
-    {
-      id: 2,
-      title: "Images",
-      description: "Stock photos & uploads",
-      icon: <ImageIcon className="h-5 w-5" />,
-      color: "#0070f3",
-    },
-    {
-      id: 3,
-      title: "Text",
-      description: "Typography & fonts",
-      icon: <Text className="h-5 w-5" />,
-      color: "#0070f3",
-    },
-    {
-      id: 4,
-      title: "Elements",
-      description: "Shapes & icons",
-      icon: <Grid className="h-5 w-5" />,
-      color: "#0070f3",
-    },
-    {
-      id: 5,
-      title: "AI Tools",
-      description: "Smart design assistance",
-      icon: <Sparkles className="h-5 w-5" />,
-      color: "#0070f3",
-      isNew: true,
+      title: "Coupon Code Design",
+      icon: <Tag className="h-6 w-6" />,
+      color: "bg-yellow-50 dark:bg-yellow-900/20",
+      textColor: "text-yellow-600 dark:text-yellow-400",
+      dimensions: { width: 1200, height: 628 },
+      backgroundColor: "rgb(254, 252, 232)",
     },
     {
       id: 6,
-      title: "Colors",
-      description: "Palettes & gradients",
-      icon: <Palette className="h-5 w-5" />,
-      color: "#0070f3",
+      title: "Royalty Program",
+      icon: <Award className="h-6 w-6" />,
+      color: "bg-red-50 dark:bg-red-900/20",
+      textColor: "text-red-600 dark:text-red-400",
+      dimensions: { width: 1080, height: 1080 },
+      backgroundColor: "rgb(254, 242, 242)",
     },
     {
       id: 7,
-      title: "Layers",
-      description: "Manage design layers",
-      icon: <Layers className="h-5 w-5" />,
-      color: "#0070f3",
+      title: "Google Feedback",
+      icon: <ThumbsUp className="h-6 w-6" />,
+      color: "bg-orange-50 dark:bg-orange-900/20",
+      textColor: "text-orange-600 dark:text-orange-400",
+      dimensions: { width: 1200, height: 628 },
+      backgroundColor: "rgb(255, 247, 237)",
     },
     {
       id: 8,
-      title: "Analytics",
-      description: "Design performance",
-      icon: <TrendingUp className="h-5 w-5" />,
-      color: "#0070f3",
-      isNew: true,
+      title: "Birthday Wishes",
+      icon: <Cake className="h-6 w-6" />,
+      color: "bg-pink-50 dark:bg-pink-900/20",
+      textColor: "text-pink-600 dark:text-pink-400",
+      dimensions: { width: 1080, height: 1080 },
+      backgroundColor: "rgb(253, 242, 248)",
+    },
+    {
+      id: 9,
+      title: "Anniversary Wishes",
+      icon: <Gift className="h-6 w-6" />,
+      color: "bg-indigo-50 dark:bg-indigo-900/20",
+      textColor: "text-indigo-600 dark:text-indigo-400",
+      dimensions: { width: 1080, height: 1080 },
+      backgroundColor: "rgb(238, 242, 255)",
+    },
+    {
+      id: 10,
+      title: "New Event",
+      icon: <Calendar className="h-6 w-6" />,
+      color: "bg-cyan-50 dark:bg-cyan-900/20",
+      textColor: "text-cyan-600 dark:text-cyan-400",
+      dimensions: { width: 1200, height: 628 },
+      backgroundColor: "rgb(236, 254, 255)",
+    },
+    {
+      id: 11,
+      title: "New Food Launch",
+      icon: <Utensils className="h-6 w-6" />,
+      color: "bg-amber-50 dark:bg-amber-900/20",
+      textColor: "text-amber-600 dark:text-amber-400",
+      dimensions: { width: 1080, height: 1080 },
+      backgroundColor: "rgb(255, 251, 235)",
     },
   ];
 
@@ -416,171 +471,63 @@ export default function Dashboard() {
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="sticky top-0 z-10 flex items-center justify-between border-b border-neutral-200 bg-white/80 px-6 py-4 backdrop-blur-md dark:border-neutral-800 dark:bg-neutral-900/80"
+          className="sticky top-0 z-10 flex items-center justify-between border-b border-neutral-200 bg-white/80 px-6 py-3 backdrop-blur-md dark:border-neutral-800 dark:bg-neutral-900/80"
         >
-          <div className="flex items-center gap-4 md:w-1/3">
-            <div className="relative w-full">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center">
+              <div className="h-8 w-8 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-[#0070f3] dark:bg-[#0070f3] flex items-center justify-center mr-2">
+                <span className="text-white font-bold">A</span>
+              </div>
+              <span className="font-bold">Ads Studio</span>
+            </div>
+            <div className="relative ml-6 w-64">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
               <Input
-                placeholder="Search..."
-                className="w-full pl-10 transition-all focus-visible:ring-[#0070f3]"
+                placeholder="Search all templates"
+                className="w-full pl-10 transition-all focus-visible:ring-blue-500 rounded-full bg-gray-100 dark:bg-gray-800 border-0"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="relative text-neutral-700 dark:text-neutral-300"
-                >
-                  <Bell className="h-5 w-5" />
-                  {notificationCount > 0 && (
-                    <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#0070f3] text-[10px] text-white">
-                      {notificationCount}
-                    </span>
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80 p-0">
-                <div className="flex items-center justify-between p-3 border-b">
-                  <h3 className="font-medium">Notifications</h3>
-                  <Button variant="ghost" size="sm" className="text-xs h-7">
-                    Mark all as read
-                  </Button>
-                </div>
-                <div className="max-h-[400px] overflow-y-auto">
-                  {[1, 2, 3].map((item) => (
-                    <div
-                      key={item}
-                      className="p-3 border-b hover:bg-neutral-50 dark:hover:bg-neutral-800 cursor-pointer"
-                    >
-                      <div className="flex gap-3">
-                        <Avatar className="h-9 w-9">
-                          <AvatarImage src="https://github.com/shadcn.png" />
-                          <AvatarFallback>U</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <p className="text-sm">
-                            <span className="font-medium">User Name</span> liked
-                            your design
-                          </p>
-                          <p className="text-xs text-neutral-500 mt-1">
-                            2 hours ago
-                          </p>
-                        </div>
-                        <div className="h-2 w-2 rounded-full bg-[#0070f3] self-start mt-2"></div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="p-2 border-t text-center">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full text-[#0070f3]"
-                    onClick={() => navigate("/notifications")}
-                  >
-                    View all notifications
-                  </Button>
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-blue-500 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+            >
+              Try Premium
+            </Button>
 
-            {/* Settings button removed as requested */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative text-neutral-700 dark:text-neutral-300"
+            >
+              <Bell className="h-5 w-5" />
+              {notificationCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
+                  {notificationCount}
+                </span>
+              )}
+            </Button>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="flex items-center gap-2 rounded-full"
-                >
-                  {userLoading ? (
-                    <div className="h-8 w-8 rounded-full border-2 border-[#0070f3] flex items-center justify-center">
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-solid border-[#0070f3] border-r-transparent"></div>
-                    </div>
-                  ) : user ? (
-                    <Avatar className="h-8 w-8 border-2 border-[#0070f3]">
-                      <AvatarImage
-                        src={user?.logo || "https://github.com/shadcn.png"}
-                        alt={user?.name || "User"}
-                        loading="lazy"
-                      />
-                      <AvatarFallback className="bg-[#0070f3] text-white">
-                        {user?.name
-                          ? user.name.substring(0, 2).toUpperCase()
-                          : "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                  ) : (
-                    <div className="h-8 w-8 rounded-full border-2 border-[#0070f3] flex items-center justify-center bg-[#0070f3] text-white">
-                      <span>U</span>
-                    </div>
-                  )}
-                  {user && (
-                    <span className="hidden md:inline">
-                      {userLoading ? "Loading..." : user?.name || "User"}
-                    </span>
-                  )}
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                {user ? (
-                  <>
-                    <div className="flex items-center gap-2 p-2">
-                      {userLoading ? (
-                        <div className="h-8 w-8 rounded-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center">
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-solid border-[#0070f3] border-r-transparent"></div>
-                        </div>
-                      ) : (
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage
-                            src={user?.logo || "https://github.com/shadcn.png"}
-                            alt={user?.name || "User"}
-                            loading="lazy"
-                          />
-                          <AvatarFallback>
-                            {user?.name
-                              ? user.name.substring(0, 2).toUpperCase()
-                              : "U"}
-                          </AvatarFallback>
-                        </Avatar>
-                      )}
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium">
-                          {userLoading ? "Loading..." : user?.name || "User"}
-                        </span>
-                        {(user?.businessName ||
-                          user?.city ||
-                          user?.address ||
-                          user?.phoneNumber) && (
-                          <span className="text-xs text-neutral-500">
-                            {user?.businessName ||
-                              user?.city ||
-                              user?.address ||
-                              user?.phoneNumber}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <DropdownMenuSeparator />
-                  </>
-                ) : null}
-                <DropdownMenuItem onClick={logout} className="text-red-500">
-                  <span>Logout</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Avatar className="h-8 w-8 border border-gray-200 dark:border-gray-700">
+              <AvatarImage
+                src={user?.logo || "https://github.com/shadcn.png"}
+                alt={user?.name || "User"}
+                loading="lazy"
+              />
+              <AvatarFallback className="bg-blue-500 text-white">
+                {user?.name ? user.name.substring(0, 2).toUpperCase() : "U"}
+              </AvatarFallback>
+            </Avatar>
           </div>
         </motion.header>
 
         {/* Main Content */}
         <main className="flex-1 overflow-auto p-6">
-          {/* Create New Section */}
+          {/* Create a new project section */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -589,62 +536,165 @@ export default function Dashboard() {
           >
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-2xl font-semibold">Create a design</h2>
+                <h2 className="text-2xl font-semibold">Create a new project</h2>
                 <p className="text-neutral-500 mt-1">
-                  Choose from our templates or start from scratch
+                  Create confidently, share fearlessly
+                  <span
+                    className="ml-2 text-xs text-blue-500 cursor-pointer hover:underline"
+                    onClick={handleOpenClassicEditor}
+                  >
+                    (Classic Editor)
+                  </span>
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="border-gray-300 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800 hidden md:flex"
+                  onClick={() => {
+                    if (templatesScrollRef.current) {
+                      templatesScrollRef.current.scrollLeft -= 300;
+                    }
+                  }}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="border-gray-300 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800 hidden md:flex"
+                  onClick={() => {
+                    if (templatesScrollRef.current) {
+                      templatesScrollRef.current.scrollLeft += 300;
+                    }
+                  }}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            <div
+              ref={templatesScrollRef}
+              className="flex overflow-x-auto pb-4 gap-4 hide-scrollbar"
+              style={{ scrollBehavior: "smooth" }}
+            >
+              {/* Custom size card */}
+              <Card
+                className="overflow-hidden border border-dashed border-gray-300 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300 cursor-pointer group flex-shrink-0 w-[180px]"
+                onClick={() => setShowCustomSizeDialog(true)}
+              >
+                <CardContent className="p-4 flex flex-col items-center justify-center h-[180px] text-center">
+                  <div className="mb-3 p-3 rounded-full bg-gray-100 dark:bg-gray-800">
+                    <Plus className="h-6 w-6 text-gray-500 dark:text-gray-400" />
+                  </div>
+                  <h3 className="text-sm font-medium">Custom size</h3>
+                </CardContent>
+              </Card>
+
+              {/* Design templates */}
+              {designTemplates.map((template) => (
+                <Card
+                  key={template.id}
+                  className="overflow-hidden border border-gray-200 dark:border-gray-800 hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300 cursor-pointer group flex-shrink-0 w-[180px]"
+                  onClick={() => {
+                    if (template.dimensions) {
+                      // If template has specific dimensions, use them
+                      navigate(
+                        `/editor?width=${template.dimensions.width}&height=${
+                          template.dimensions.height
+                        }&bgColor=${encodeURIComponent(
+                          template.backgroundColor || "rgb(255, 255, 255)"
+                        )}`
+                      );
+                    } else {
+                      // Otherwise use default dimensions
+                      handleCreateNew();
+                    }
+                    toast.success(`Creating ${template.title.toLowerCase()}`);
+                  }}
+                >
+                  <CardContent className="p-4 flex flex-col items-center justify-center h-[180px] text-center">
+                    <div className={`mb-3 p-3 rounded-full ${template.color}`}>
+                      <div className={template.textColor}>{template.icon}</div>
+                    </div>
+                    <h3 className="text-sm font-medium">{template.title}</h3>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Custom Size Dialog */}
+            <CustomSizeDialog
+              open={showCustomSizeDialog}
+              onClose={() => setShowCustomSizeDialog(false)}
+            />
+          </motion.section>
+
+          {/* Prebuilt Templates Section */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="mb-10"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-semibold">Prebuilt Templates</h2>
+                <p className="text-neutral-500 mt-1">
+                  Ready-to-use templates for your marketing needs
                 </p>
               </div>
               <Button
-                className="bg-[#0070f3] hover:bg-[#0060d3] text-white shadow-md hover:shadow-lg transition-all"
-                onClick={handleCreateNew}
+                variant="outline"
+                className="border-gray-300 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
+                onClick={() => navigate("/templates")}
               >
-                <Plus className="mr-2 h-4 w-4" /> Create new
+                <span className="mr-2">View all</span> →
               </Button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              {isLoadingTemplates && !loadingMore ? (
-                // Initial loading skeleton
-                Array(5)
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {isLoadingTemplates ? (
+                // Loading skeleton
+                Array(4)
                   .fill(0)
                   .map((_, index) => (
                     <Card
                       key={`skeleton-${index}`}
-                      className="overflow-hidden shadow-md border-0"
+                      className="overflow-hidden shadow-md border-0 h-full"
                     >
-                      <CardContent className="p-0">
-                        <div className="h-[140px] bg-neutral-200 dark:bg-neutral-800 animate-pulse"></div>
-                        <div className="p-4">
-                          <div className="h-5 w-3/4 bg-neutral-200 dark:bg-neutral-800 animate-pulse rounded mb-2"></div>
-                          <div className="h-3 w-1/2 bg-neutral-200 dark:bg-neutral-800 animate-pulse rounded"></div>
+                      <CardContent className="p-0 h-full flex flex-col">
+                        <div className="h-[180px] bg-neutral-200 dark:bg-neutral-800 animate-pulse"></div>
+                        <div className="p-4 flex-1">
+                          <div className="h-5 w-3/4 bg-neutral-200 dark:bg-neutral-800 animate-pulse rounded mb-3"></div>
+                          <div className="h-4 w-1/3 bg-neutral-200 dark:bg-neutral-800 animate-pulse rounded mb-3"></div>
                         </div>
                       </CardContent>
                     </Card>
                   ))
-              ) : // Render actual templates
-              publicTemplates.length > 0 ? (
+              ) : publicTemplates.length > 0 ? (
                 publicTemplates.map((template, index) => (
                   <motion.div
                     key={template._id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.05 + 0.2 }}
-                    // Add ref to the last template element for infinite scrolling
+                    transition={{ duration: 0.3, delay: index * 0.05 + 0.1 }}
+                    whileHover={{ y: -5 }}
+                    className="h-full"
                     ref={
                       index === publicTemplates.length - 1
-                        ? lastTemplateElementRef
+                        ? lastPublicTemplateRef
                         : null
                     }
                   >
                     <Card
-                      className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group border-0 shadow-md"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleUseTemplate(template._id);
-                      }}
+                      className="overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer group border-0 h-full"
+                      onClick={() => handleUseTemplate(template._id)}
                     >
-                      <CardContent className="p-0">
+                      <CardContent className="p-0 h-full flex flex-col">
                         <div className="relative">
-                          {/* Template overlay - can be customized per template */}
                           <div className="absolute inset-0 bg-gradient-to-br from-neutral-200 to-neutral-300 dark:from-neutral-700 dark:to-neutral-800 opacity-10 group-hover:opacity-20 transition-opacity"></div>
                           <img
                             src={
@@ -653,48 +703,24 @@ export default function Dashboard() {
                               ) || "/placeholder.svg"
                             }
                             alt={template.title}
-                            className="w-full h-[140px] object-cover"
+                            className="w-full h-[180px] object-cover"
                             loading="lazy"
                           />
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center">
                             <motion.div
                               initial={{ scale: 0.8, opacity: 0 }}
                               whileHover={{ scale: 1, opacity: 1 }}
-                              className="bg-white text-[#0070f3] font-medium px-4 py-2 rounded-md shadow-lg cursor-pointer"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleUseTemplate(template._id);
-                              }}
+                              className="bg-white text-blue-600 font-medium px-4 py-2 rounded-md shadow-lg cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                             >
                               Use template
                             </motion.div>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className={`absolute top-2 right-2 ${
-                              isTemplateFavorite(template._id)
-                                ? "text-yellow-400"
-                                : "text-white/70"
-                            } bg-black/20 hover:bg-black/30`}
-                            onClick={(e) =>
-                              handleAddToFavorites(template._id, e)
-                            }
-                          >
-                            <Star
-                              className={`h-5 w-5 ${
-                                isTemplateFavorite(template._id)
-                                  ? "fill-yellow-400"
-                                  : ""
-                              }`}
-                            />
-                          </Button>
                         </div>
                         <div className="p-4 bg-gradient-to-br from-white to-neutral-50 dark:from-neutral-900 dark:to-neutral-800">
-                          <h3 className="font-medium text-lg">
+                          <h3 className="font-medium text-lg truncate">
                             {template.title}
                           </h3>
-                          <p className="text-xs text-neutral-500 mt-1">
+                          <p className="text-xs text-neutral-500 mt-1 line-clamp-2">
                             {template.description || "Template"}
                           </p>
                         </div>
@@ -703,7 +729,6 @@ export default function Dashboard() {
                   </motion.div>
                 ))
               ) : (
-                // No templates found
                 <div className="col-span-full text-center py-10">
                   <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-neutral-100 dark:bg-neutral-800 mb-4">
                     <Layout className="h-10 w-10 text-neutral-500" />
@@ -716,7 +741,7 @@ export default function Dashboard() {
                     create your own.
                   </p>
                   <Button
-                    className="bg-[#0070f3] hover:bg-[#0060d3]"
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
                     onClick={handleCreateNew}
                   >
                     <Plus className="mr-2 h-4 w-4" /> Create new
@@ -725,12 +750,24 @@ export default function Dashboard() {
               )}
 
               {/* Loading more indicator */}
-              {loadingMore && (
+              {loadingMoreTemplates && (
                 <div className="col-span-full flex justify-center py-4">
                   <div className="flex items-center space-x-2">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-solid border-[#0070f3] border-r-transparent"></div>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-solid border-blue-600 border-r-transparent"></div>
                     <span className="text-sm text-neutral-500">
                       Loading more templates...
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Loading more indicator */}
+              {loadingMoreUserTemplates && (
+                <div className="col-span-full flex justify-center py-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-solid border-blue-600 border-r-transparent"></div>
+                    <span className="text-sm text-neutral-500">
+                      Loading more designs...
                     </span>
                   </div>
                 </div>
@@ -738,483 +775,151 @@ export default function Dashboard() {
             </div>
           </motion.section>
 
-          {/* Recent Projects */}
+          {/* Recent projects section */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
             className="mb-10"
           >
-            <Tabs defaultValue="recent" onValueChange={setActiveTab}>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-                <div>
-                  <h2 className="text-2xl font-semibold">Your designs</h2>
-                  <p className="text-neutral-500 mt-1">
-                    Access and manage your design projects
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-semibold">Your Recent Designs</h2>
+                <p className="text-neutral-500 mt-1">
+                  Continue working on your recent projects
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                className="border-gray-300 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
+                onClick={() => navigate("/my-designs")}
+              >
+                <span className="mr-2">View all</span> →
+              </Button>
+            </div>
+
+            {isLoadingUserTemplates ? (
+              // Loading skeleton
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {Array(4)
+                  .fill(0)
+                  .map((_, index) => (
+                    <Card
+                      key={`user-skeleton-${index}`}
+                      className="overflow-hidden shadow-md border-0 h-full"
+                    >
+                      <CardContent className="p-0 h-full flex flex-col">
+                        <div className="h-[180px] bg-neutral-200 dark:bg-neutral-800 animate-pulse"></div>
+                        <div className="p-4 flex-1">
+                          <div className="h-5 w-3/4 bg-neutral-200 dark:bg-neutral-800 animate-pulse rounded mb-3"></div>
+                          <div className="h-4 w-1/3 bg-neutral-200 dark:bg-neutral-800 animate-pulse rounded mb-3"></div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+              </div>
+            ) : userTemplates.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {userTemplates.map((template, index) => (
+                  <motion.div
+                    key={`user-${template._id}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 + 0.1 }}
+                    whileHover={{ y: -5 }}
+                    className="h-full"
+                    ref={
+                      index === userTemplates.length - 1
+                        ? lastUserTemplateRef
+                        : null
+                    }
+                  >
+                    <Card className="overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer group border-0 h-full">
+                      <CardContent className="p-0 h-full flex flex-col">
+                        <div className="relative">
+                          <div className="absolute inset-0 bg-gradient-to-br from-neutral-200 to-neutral-300 dark:from-neutral-700 dark:to-neutral-800 opacity-10 group-hover:opacity-20 transition-opacity"></div>
+                          <img
+                            src={
+                              templateService.fixImageUrl(
+                                template.thumbnailUrl
+                              ) || "/placeholder.svg"
+                            }
+                            alt={template.title}
+                            className="w-full h-[180px] object-cover"
+                            loading="lazy"
+                          />
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center">
+                            <motion.div
+                              className="flex gap-2"
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              whileHover={{ opacity: 1, scale: 1 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                className="shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/editor?template=${template._id}`);
+                                }}
+                              >
+                                <Edit className="mr-2 h-4 w-4" /> Edit
+                              </Button>
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                className="shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  // Handle download or other actions
+                                  toast.success("Downloading design...");
+                                }}
+                              >
+                                <Download className="mr-2 h-4 w-4" /> Download
+                              </Button>
+                            </motion.div>
+                          </div>
+                        </div>
+                        <div className="p-4 bg-gradient-to-br from-white to-neutral-50 dark:from-neutral-900 dark:to-neutral-800">
+                          <h3 className="font-medium text-lg truncate">
+                            {template.title}
+                          </h3>
+                          <div className="flex items-center justify-between mt-2">
+                            <p className="text-xs text-neutral-500">
+                              {new Date(
+                                template.createdAt
+                              ).toLocaleDateString()}
+                            </p>
+                            <Star
+                              className="h-4 w-4 text-neutral-400 cursor-pointer hover:text-yellow-400"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toast.success("Added to favorites");
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex items-center justify-center p-10 border border-dashed border-gray-300 dark:border-gray-700 rounded-lg">
+                <div className="text-center">
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">
+                    You currently have no designs.
                   </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="h-9">
-                    <Filter className="mr-2 h-4 w-4" /> Filter
+                  <Button
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    onClick={handleCreateNew}
+                  >
+                    <Plus className="mr-2 h-4 w-4" /> Create your first design
                   </Button>
-                  <TabsList className="bg-neutral-100 dark:bg-neutral-800 p-1">
-                    <TabsTrigger
-                      value="recent"
-                      className={`text-sm ${
-                        activeTab === "recent"
-                          ? "bg-white dark:bg-neutral-700 text-[#0070f3]"
-                          : ""
-                      }`}
-                    >
-                      Recent
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="starred"
-                      className={`text-sm ${
-                        activeTab === "starred"
-                          ? "bg-white dark:bg-neutral-700 text-[#0070f3]"
-                          : ""
-                      }`}
-                    >
-                      Starred
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="all"
-                      className={`text-sm ${
-                        activeTab === "all"
-                          ? "bg-white dark:bg-neutral-700 text-[#0070f3]"
-                          : ""
-                      }`}
-                    >
-                      All designs
-                    </TabsTrigger>
-                  </TabsList>
                 </div>
               </div>
-
-              <AnimatePresence mode="wait">
-                <TabsContent value="recent" className="mt-0">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {isLoadingTemplates &&
-                      // Loading skeleton
-                      Array(4)
-                        .fill(0)
-                        .map((_, index) => (
-                          <Card
-                            key={`skeleton-${index}`}
-                            className="overflow-hidden shadow-md border-0 h-full"
-                          >
-                            <CardContent className="p-0 h-full flex flex-col">
-                              <div className="h-[180px] bg-neutral-200 dark:bg-neutral-800 animate-pulse"></div>
-                              <div className="p-4 flex-1">
-                                <div className="h-5 w-3/4 bg-neutral-200 dark:bg-neutral-800 animate-pulse rounded mb-3"></div>
-                                <div className="h-4 w-1/3 bg-neutral-200 dark:bg-neutral-800 animate-pulse rounded mb-3"></div>
-                                <div className="h-3 w-1/2 bg-neutral-200 dark:bg-neutral-800 animate-pulse rounded mt-auto"></div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-
-                    {!isLoadingTemplates &&
-                      userTemplates.length > 0 &&
-                      userTemplates.map((template, index) => (
-                        <motion.div
-                          key={template._id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{
-                            duration: 0.3,
-                            delay: index * 0.05 + 0.1,
-                          }}
-                          whileHover={{ y: -5 }}
-                          className="h-full"
-                        >
-                          <Card className="overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer group border-0 h-full">
-                            <CardContent className="p-0 h-full flex flex-col">
-                              <div className="relative">
-                                {/* Template overlay - can be customized per template */}
-                                <div className="absolute inset-0 bg-gradient-to-br from-neutral-200 to-neutral-300 dark:from-neutral-700 dark:to-neutral-800 opacity-10 group-hover:opacity-20 transition-opacity"></div>
-                                <img
-                                  src={
-                                    templateService.fixImageUrl(
-                                      template.thumbnailUrl
-                                    ) || "/placeholder.svg"
-                                  }
-                                  alt={template.title}
-                                  className="w-full h-[180px] object-cover"
-                                  loading="lazy"
-                                />
-                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center">
-                                  <motion.div
-                                    initial={{ opacity: 0 }}
-                                    whileHover={{ opacity: 1 }}
-                                    className="flex gap-2"
-                                  >
-                                    <Button
-                                      variant="secondary"
-                                      size="sm"
-                                      className="shadow-lg"
-                                      onClick={() =>
-                                        navigate(
-                                          `/editor?template=${template._id}`
-                                        )
-                                      }
-                                    >
-                                      Edit
-                                    </Button>
-                                    <DropdownMenu>
-                                      <DropdownMenuTrigger asChild>
-                                        <Button
-                                          variant="secondary"
-                                          size="icon"
-                                          className="shadow-lg"
-                                        >
-                                          <MoreHorizontal className="h-4 w-4" />
-                                        </Button>
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent align="end">
-                                        <DropdownMenuItem>
-                                          <Download className="mr-2 h-4 w-4" />
-                                          <span>Download</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem>
-                                          <Share2 className="mr-2 h-4 w-4" />
-                                          <span>Share</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem className="text-red-500">
-                                          <Trash2 className="mr-2 h-4 w-4" />
-                                          <span>Delete</span>
-                                        </DropdownMenuItem>
-                                      </DropdownMenuContent>
-                                    </DropdownMenu>
-                                  </motion.div>
-                                </div>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className={`absolute top-2 right-2 ${
-                                    isTemplateFavorite(template._id)
-                                      ? "text-yellow-400"
-                                      : "text-white/0 group-hover:text-white/90"
-                                  } bg-black/20 hover:bg-black/30`}
-                                  onClick={(e) =>
-                                    handleAddToFavorites(template._id, e)
-                                  }
-                                >
-                                  <Star
-                                    className={`h-5 w-5 ${
-                                      isTemplateFavorite(template._id)
-                                        ? "fill-yellow-400"
-                                        : ""
-                                    }`}
-                                  />
-                                </Button>
-                              </div>
-                              <div className="p-4 flex-1 flex flex-col">
-                                <h3 className="font-medium text-lg truncate">
-                                  {template.title}
-                                </h3>
-                                <div className="flex items-center justify-between mt-2 mb-1">
-                                  <Badge
-                                    variant="outline"
-                                    className="bg-neutral-100 dark:bg-neutral-800 text-xs font-normal"
-                                  >
-                                    {template.isPublic ? "Public" : "Private"}
-                                  </Badge>
-                                </div>
-                                <div className="flex items-center mt-auto text-xs text-neutral-500">
-                                  <Clock className="mr-1 h-3 w-3" />
-                                  {new Date(
-                                    template.createdAt
-                                  ).toLocaleDateString()}
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </motion.div>
-                      ))}
-
-                    {!isLoadingTemplates && userTemplates.length === 0 && (
-                      <div className="col-span-full text-center py-10">
-                        <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-neutral-100 dark:bg-neutral-800 mb-4">
-                          <Layout className="h-10 w-10 text-neutral-500" />
-                        </div>
-                        <h3 className="text-lg font-medium mb-2">
-                          No designs yet
-                        </h3>
-                        <p className="text-neutral-500 max-w-md mx-auto mb-6">
-                          You haven't created any designs yet. Start by creating
-                          a new design or using a template.
-                        </p>
-                        <Button
-                          className="bg-[#0070f3] hover:bg-[#0060d3]"
-                          onClick={handleCreateNew}
-                        >
-                          <Plus className="mr-2 h-4 w-4" /> Create new
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </TabsContent>
-              </AnimatePresence>
-
-              <AnimatePresence mode="wait">
-                <TabsContent value="starred" className="mt-0">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                    className="flex flex-col items-center justify-center py-16"
-                  >
-                    <div className="bg-neutral-100 dark:bg-neutral-800 p-6 rounded-full mb-4">
-                      <Star className="h-12 w-12 text-[#0070f3]" />
-                    </div>
-                    <h3 className="text-xl font-medium mb-2">
-                      No starred designs yet
-                    </h3>
-                    <p className="text-neutral-500 text-center max-w-md mb-6">
-                      Star your favorite designs to access them quickly from
-                      this tab.
-                    </p>
-                    <Button
-                      variant="outline"
-                      className="border-[#0070f3] text-[#0070f3]"
-                    >
-                      Browse your designs
-                    </Button>
-                  </motion.div>
-                </TabsContent>
-              </AnimatePresence>
-
-              <AnimatePresence mode="wait">
-                <TabsContent value="all" className="mt-0">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                      {isLoadingTemplates &&
-                        // Loading skeleton
-                        Array(4)
-                          .fill(0)
-                          .map((_, index) => (
-                            <Card
-                              key={`skeleton-all-${index}`}
-                              className="overflow-hidden shadow-md border-0 h-full"
-                            >
-                              <CardContent className="p-0 h-full flex flex-col">
-                                <div className="h-[180px] bg-neutral-200 dark:bg-neutral-800 animate-pulse"></div>
-                                <div className="p-4 flex-1">
-                                  <div className="h-5 w-3/4 bg-neutral-200 dark:bg-neutral-800 animate-pulse rounded mb-3"></div>
-                                  <div className="h-4 w-1/3 bg-neutral-200 dark:bg-neutral-800 animate-pulse rounded mb-3"></div>
-                                  <div className="h-3 w-1/2 bg-neutral-200 dark:bg-neutral-800 animate-pulse rounded mt-auto"></div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ))}
-
-                      {!isLoadingTemplates &&
-                        userTemplates.length > 0 &&
-                        userTemplates.map((template, index) => (
-                          <motion.div
-                            key={`all-${template._id}-${index}`}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{
-                              duration: 0.3,
-                              delay: index * 0.03 + 0.1,
-                            }}
-                            whileHover={{ y: -5 }}
-                            className="h-full"
-                          >
-                            <Card className="overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer group border-0 h-full">
-                              <CardContent className="p-0 h-full flex flex-col">
-                                <div className="relative">
-                                  {/* Template overlay - can be customized per template */}
-                                  <div className="absolute inset-0 bg-gradient-to-br from-neutral-200 to-neutral-300 dark:from-neutral-700 dark:to-neutral-800 opacity-10 group-hover:opacity-20 transition-opacity"></div>
-                                  <img
-                                    src={
-                                      templateService.fixImageUrl(
-                                        template.thumbnailUrl
-                                      ) || "/placeholder.svg"
-                                    }
-                                    alt={template.title}
-                                    className="w-full h-[180px] object-cover"
-                                    loading="lazy"
-                                  />
-                                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center">
-                                    <motion.div
-                                      initial={{ opacity: 0 }}
-                                      whileHover={{ opacity: 1 }}
-                                      className="flex gap-2"
-                                    >
-                                      <Button
-                                        variant="secondary"
-                                        size="sm"
-                                        className="shadow-lg"
-                                        onClick={() =>
-                                          navigate(
-                                            `/editor?template=${template._id}`
-                                          )
-                                        }
-                                      >
-                                        Edit
-                                      </Button>
-                                      <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                          <Button
-                                            variant="secondary"
-                                            size="icon"
-                                            className="shadow-lg"
-                                          >
-                                            <MoreHorizontal className="h-4 w-4" />
-                                          </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                          <DropdownMenuItem>
-                                            <Download className="mr-2 h-4 w-4" />
-                                            <span>Download</span>
-                                          </DropdownMenuItem>
-                                          <DropdownMenuItem>
-                                            <Share2 className="mr-2 h-4 w-4" />
-                                            <span>Share</span>
-                                          </DropdownMenuItem>
-                                          <DropdownMenuSeparator />
-                                          <DropdownMenuItem className="text-red-500">
-                                            <Trash2 className="mr-2 h-4 w-4" />
-                                            <span>Delete</span>
-                                          </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                      </DropdownMenu>
-                                    </motion.div>
-                                  </div>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="absolute top-2 right-2 text-white/0 group-hover:text-white/90 transition-colors"
-                                  >
-                                    <Star className="h-5 w-5" />
-                                  </Button>
-                                </div>
-                                <div className="p-4 flex-1 flex flex-col">
-                                  <h3 className="font-medium text-lg truncate">
-                                    {template.title}
-                                  </h3>
-                                  <div className="flex items-center justify-between mt-2 mb-1">
-                                    <Badge
-                                      variant="outline"
-                                      className="bg-neutral-100 dark:bg-neutral-800 text-xs font-normal"
-                                    >
-                                      {template.isPublic ? "Public" : "Private"}
-                                    </Badge>
-                                  </div>
-                                  <div className="flex items-center mt-auto text-xs text-neutral-500">
-                                    <Clock className="mr-1 h-3 w-3" />
-                                    {new Date(
-                                      template.createdAt
-                                    ).toLocaleDateString()}
-                                  </div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          </motion.div>
-                        ))}
-
-                      {!isLoadingTemplates && userTemplates.length === 0 && (
-                        <div className="col-span-full text-center py-10">
-                          <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-neutral-100 dark:bg-neutral-800 mb-4">
-                            <Layout className="h-10 w-10 text-neutral-500" />
-                          </div>
-                          <h3 className="text-lg font-medium mb-2">
-                            No designs found
-                          </h3>
-                          <p className="text-neutral-500 max-w-md mx-auto mb-6">
-                            You don't have any designs yet. Start by creating a
-                            new design or using a template.
-                          </p>
-                          <Button
-                            className="bg-[#0070f3] hover:bg-[#0060d3]"
-                            onClick={handleCreateNew}
-                          >
-                            <Plus className="mr-2 h-4 w-4" /> Create new
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
-                </TabsContent>
-              </AnimatePresence>
-            </Tabs>
-          </motion.section>
-
-          {/* Tools Section */}
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-          >
-            <div className="mb-6">
-              <h2 className="text-2xl font-semibold">Design tools</h2>
-              <p className="text-neutral-500 mt-1">
-                Powerful tools to enhance your designs
-              </p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {tools.map((tool, index) => (
-                <motion.div
-                  key={tool.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 + 0.2 }}
-                  whileHover={{ y: -5 }}
-                >
-                  <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer border border-neutral-200 dark:border-neutral-800 group overflow-hidden">
-                    <CardContent className="flex items-center gap-4 p-5 relative">
-                      <motion.div
-                        className="flex h-12 w-12 items-center justify-center rounded-full bg-[#0070f3]/10 text-[#0070f3] group-hover:bg-[#0070f3] group-hover:text-white transition-colors"
-                        whileHover={{ scale: 1.1 }}
-                        transition={{
-                          type: "spring",
-                          stiffness: 400,
-                          damping: 10,
-                        }}
-                      >
-                        {tool.icon}
-                      </motion.div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-medium">{tool.title}</h3>
-                          {tool.isNew && (
-                            <Badge className="bg-[#0070f3] text-[10px] px-1.5 py-0">
-                              NEW
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="text-xs text-neutral-500">
-                          {tool.description}
-                        </p>
-                      </div>
-                      <motion.div
-                        className="absolute -right-10 group-hover:right-4 opacity-0 group-hover:opacity-100 transition-all duration-300"
-                        whileHover={{ scale: 1.1 }}
-                      >
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-[#0070f3]"
-                        >
-                          <ChevronDown className="h-5 w-5" />
-                        </Button>
-                      </motion.div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
+            )}
           </motion.section>
         </main>
       </div>

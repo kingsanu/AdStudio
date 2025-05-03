@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useReducer, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import {
   CoreEditorActions,
   CoreEditorQuery,
@@ -8,13 +8,13 @@ import {
   HistoryActions,
   Layer,
   LayerComponentProps,
-} from 'canva-editor/types';
-import { enablePatches, produce, produceWithPatches } from 'immer';
-import { History, HISTORY_ACTIONS } from 'canva-editor/utils/history';
-import { isTextLayer } from 'canva-editor/utils/layer/layers';
-import { setContent } from 'canva-editor/components/text-editor/core/helper/setContent';
-import { ActionMethods } from 'canva-editor/components/editor/actions';
-import { QueryMethods } from 'canva-editor/components/editor/query';
+} from "canva-editor/types";
+import { enablePatches, produce, produceWithPatches } from "immer";
+import { History, HISTORY_ACTIONS } from "canva-editor/utils/history";
+import { isTextLayer } from "canva-editor/utils/layer/layers";
+import { setContent } from "canva-editor/components/text-editor/core/helper/setContent";
+import { ActionMethods } from "canva-editor/components/editor/actions";
+import { QueryMethods } from "canva-editor/components/editor/query";
 
 type Action = {
   type: string;
@@ -25,50 +25,50 @@ type Action = {
 };
 enablePatches();
 const ignoreHistoryForActions: string[] = [
-  'hoverLayer',
-  'selectLayers',
-  'setControlBox',
-  'setScale',
-  'setEditing',
-  'selectAllLayers',
-  'resetSelectLayer',
-  'hoverLayer',
-  'setTextEditor',
-  'setData',
-  'showContextMenu',
-  'hideContextMenu',
-  'setResizeData',
-  'setRotateData',
-  'setDragData',
-  'setSelectData',
-  'setSidebar',
-  'imageEditor',
-  'fireDownloadCmd',
-  'goToGithubPage',
+  "hoverLayer",
+  "selectLayers",
+  "setControlBox",
+  "setScale",
+  "setEditing",
+  "selectAllLayers",
+  "resetSelectLayer",
+  "hoverLayer",
+  "setTextEditor",
+  "setData",
+  "showContextMenu",
+  "hideContextMenu",
+  "setResizeData",
+  "setRotateData",
+  "setDragData",
+  "setSelectData",
+  "setSidebar",
+  "imageEditor",
+  "fireDownloadCmd",
+  "goToGithubPage",
 ];
 
 const autoHistoryForActions: string[] = [
-  'setProp',
-  'ungroup',
-  'group',
-  'setHidden',
-  'lock',
-  'unlock',
-  'lockPage',
-  'unlockPage',
-  'deletePage',
-  'duplicatePage',
-  'addPage',
-  'movePageUp',
-  'movePageDown',
-  'bringForward',
-  'sendBackward',
-  'bringToFront',
-  'sendToBack',
-  'addLayer',
-  'addImageLayer',
-  'addLayerTree',
-  'deleteLayer',
+  "setProp",
+  "ungroup",
+  "group",
+  "setHidden",
+  "lock",
+  "unlock",
+  "lockPage",
+  "unlockPage",
+  "deletePage",
+  "duplicatePage",
+  "addPage",
+  "movePageUp",
+  "movePageDown",
+  "bringForward",
+  "sendBackward",
+  "bringToFront",
+  "sendToBack",
+  "addLayer",
+  "addImageLayer",
+  "addLayerTree",
+  "deleteLayer",
 ];
 export const useEditorStore = () => {
   const history = useMemo(() => new History(), []);
@@ -206,7 +206,9 @@ export const useEditorStore = () => {
       },
     ];
   }, [history, query]);
-  const [state, dispatch] = useReducer<(state: EditorState, actions: Action) => any>(reducer, {
+  const [state, dispatch] = useReducer<
+    (state: EditorState, actions: Action) => any
+  >(reducer, {
     selectedLayers: {},
     hoveredLayer: {},
     openMenu: null,
@@ -237,8 +239,8 @@ export const useEditorStore = () => {
     },
     fireDownloadPNGCmd: -1,
     downloadPNGCmd: -1,
-    githubLink: 'https://github.com/kenvinlu/canva-editor/',
-    gumroadLink: 'https://kenvinlu.gumroad.com/l/canva-editor'
+    githubLink: "https://github.com/kenvinlu/canva-editor/",
+    gumroadLink: "https://kenvinlu.gumroad.com/l/canva-editor",
   });
 
   const actions = useMemo<EditorActions>(() => {
@@ -324,12 +326,33 @@ export const useEditorStore = () => {
 
   currState.current = state;
 
+  // Add a subscription mechanism
+  const subscribers = useRef<Array<() => void>>([]);
+
+  const subscribe = useCallback((callback: () => void) => {
+    subscribers.current.push(callback);
+    return () => {
+      const index = subscribers.current.indexOf(callback);
+      if (index !== -1) {
+        subscribers.current.splice(index, 1);
+      }
+    };
+  }, []);
+
+  // Notify subscribers when state changes
+  useEffect(() => {
+    subscribers.current.forEach((callback) => callback());
+  }, [state]);
+
   return useMemo(
     () => ({
       getState,
-      actions,
+      actions: {
+        ...actions,
+        subscribe,
+      },
       query,
     }),
-    [actions, getState]
+    [actions, getState, subscribe]
   );
 };
