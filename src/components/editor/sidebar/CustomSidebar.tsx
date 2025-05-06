@@ -18,6 +18,8 @@ import CustomTemplateContent from "./CustomTemplateContent";
 import CustomTextContent from "./CustomTextContent";
 import CustomImageContent from "./CustomImageContent";
 import CustomShapeContent from "./CustomShapeContent";
+import MediaIcon from "canva-editor/icons/VideoIcon";
+import MediaContent from "./MediaContent";
 
 const tabs = [
   {
@@ -43,6 +45,10 @@ const tabs = [
   {
     name: "Upload",
     icon: <UploadIcon />,
+  },
+  {
+    name: "Media",
+    icon: <MediaIcon />,
   },
 ];
 
@@ -95,6 +101,15 @@ const CustomSidebar: FC<CustomSidebarProps> = (_props) => {
       case "Shape":
         return (
           <CustomShapeContent
+            onClose={() => {
+              actions.setSidebarTab();
+              actions.setSidebar();
+            }}
+          />
+        );
+      case "Media":
+        return (
+          <MediaContent
             onClose={() => {
               actions.setSidebarTab();
               actions.setSidebar();

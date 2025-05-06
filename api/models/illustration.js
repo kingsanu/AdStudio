@@ -1,14 +1,19 @@
 /* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-var-requires */
+// File: api/models/illustration.js
 const mongoose = require("mongoose");
 
 const IllustrationSchema = new mongoose.Schema(
   {
-    img: {
+    name: {
       type: String,
       required: true,
     },
-    desc: {
+    url: {
+      type: String,
+      required: true,
+    },
+    category: {
       type: String,
     },
   },

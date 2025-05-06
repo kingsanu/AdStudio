@@ -1,14 +1,17 @@
 /* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-var-requires */
 const mongoose = require("mongoose");
-
-const IconSchema = new mongoose.Schema(
+const iconSchema = new mongoose.Schema(
   {
-    img: {
+    name: {
       type: String,
       required: true,
     },
-    desc: {
+    url: {
+      type: String,
+      required: true,
+    },
+    category: {
       type: String,
     },
   },
@@ -16,5 +19,4 @@ const IconSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-
-module.exports = mongoose.model("Icon", IconSchema);
+module.exports = mongoose.model("Icon", iconSchema);
