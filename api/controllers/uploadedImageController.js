@@ -81,7 +81,9 @@ const uploadedImageController = {
   // Get user's uploaded images
   getUserImages: async (req, res) => {
     try {
-      const { userId } = req.query;
+      const { userId, ps = 30, pi = 0 } = req.query;
+      const pageSize = parseInt(ps);
+      const pageIndex = parseInt(pi);
 
       if (!userId) {
         return res.status(400).json({
@@ -89,11 +91,30 @@ const uploadedImageController = {
         });
       }
 
+      // Get total count for pagination info
+      const totalCount = await UploadedImage.countDocuments({ userId });
+
+      // Apply pagination
       const images = await UploadedImage.find({ userId })
         .sort("-createdAt")
-        .select("url filename createdAt");
+        .select("url filename createdAt")
+        .skip(pageIndex * pageSize)
+        .limit(pageSize);
 
-      res.json(images);
+      console.log(
+        `Found images: ${images.length}, Page: ${pageIndex}, Size: ${pageSize}, Total: ${totalCount}`
+      );
+
+      // Return both the images and pagination info
+      res.json({
+        data: images,
+        pagination: {
+          total: totalCount,
+          page: pageIndex,
+          pageSize: pageSize,
+          hasMore: (pageIndex + 1) * pageSize < totalCount,
+        },
+      });
     } catch (error) {
       console.error("Error fetching user images:", error);
       res.status(500).json({

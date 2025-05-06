@@ -16,6 +16,7 @@ import axios from "axios";
 import Draggable from "canva-editor/layers/core/Dragable";
 import { Delta } from "canva-editor/types";
 import { GET_TEMPLATE_ENDPOINT } from "canva-editor/utils/constants/api";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 import Cookies from "js-cookie";
 import { useAuth } from "@/contexts/AuthContext";
@@ -39,18 +40,19 @@ const UploadContent: FC<UploadContentProps> = ({ visibility, onClose }) => {
   const { user } = useAuth();
   const userId = user?.userId || Cookies.get("auth_token") || "anonymous";
 
-  const [images, setImages] = useState<
-    {
-      url: string;
-      type: "svg" | "image";
-      isUploading?: boolean;
-      _id?: string;
-    }[]
-  >([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [tempUploadingImage, setTempUploadingImage] = useState<{
+    url: string;
+    type: "svg" | "image";
+    isUploading: boolean;
+  } | null>(null);
 
-  const [isLoading, setIsLoading] = useState(false);
+  // Constants for better control
+  const PAGE_SIZE = 20;
+  const SCROLL_THRESHOLD = 200; // px from bottom to trigger loading
+  const scrollRef = useRef<HTMLDivElement>(null);
+
   const addImage = async (url: string, position?: Delta) => {
     console.log("Original URL:", url);
 
@@ -108,18 +110,38 @@ const UploadContent: FC<UploadContentProps> = ({ visibility, onClose }) => {
       }
     };
   };
-  // Fetch user's uploaded images
-  const fetchUserImages = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const response = await axios.get(
-        `${config.apis.url}${config.apis.getUserImages}?userId=${userId}`
+  // Fetch user's uploaded images using React Query
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+  } = useInfiniteQuery({
+    queryKey: ["userImages", userId],
+    enabled: visibility, // Only fetch when the component is visible
+    queryFn: async ({ pageParam = 0 }) => {
+      if (!config.apis) {
+        throw new Error("API configuration is missing");
+      }
+
+      console.log(
+        `[UploadContent] Loading page ${pageParam} for user ${userId}`
       );
 
+      // Build the API URL with query parameters
+      const apiUrl = `${config.apis.url}${config.apis.getUserImages}?userId=${userId}&ps=${PAGE_SIZE}&pi=${pageParam}`;
+
+      const response = await axios.get(apiUrl);
       console.log("Raw user images response:", response.data);
 
+      // Get the images data and pagination info
+      const imagesData = response.data.data || response.data;
+      const paginationInfo = response.data.pagination;
+
       // Convert the uploaded images to the format used by the component
-      const userImages = response.data
+      const userImages = imagesData
         .map((img: UploadedImage) => {
           // Ensure the URL is properly formatted
           let imageUrl;
@@ -134,8 +156,6 @@ const UploadContent: FC<UploadContentProps> = ({ visibility, onClose }) => {
             return null; // Skip this item
           }
 
-          // Transform blob storage URLs to the correct format
-
           return {
             url: imageUrl,
             type: "image",
@@ -149,26 +169,113 @@ const UploadContent: FC<UploadContentProps> = ({ visibility, onClose }) => {
         .filter(Boolean); // Remove any null items
 
       console.log("Fetched user images:", userImages);
-      setImages(userImages);
-    } catch (error) {
-      console.error("Error fetching user images:", error);
-    } finally {
-      setIsLoading(false);
+
+      // Determine if there are more images to load
+      let hasMoreImages = false;
+
+      if (paginationInfo) {
+        // Use pagination info from API if available
+        hasMoreImages = paginationInfo.hasMore;
+      } else {
+        // Fallback to checking if we got a full page
+        hasMoreImages = userImages.length === PAGE_SIZE;
+      }
+
+      return {
+        images: userImages,
+        nextPage: hasMoreImages ? pageParam + 1 : undefined,
+        hasMore: hasMoreImages,
+      };
+    },
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    initialPageParam: 0,
+  });
+
+  // Flatten the pages of images into a single array
+  const images = useCallback(() => {
+    const allImages = data?.pages.flatMap((page) => page.images) || [];
+
+    // Add the temporary uploading image if it exists
+    if (tempUploadingImage) {
+      return [...allImages, tempUploadingImage];
     }
+
+    return allImages;
+  }, [data?.pages, tempUploadingImage])();
+
+  // Check if we need to load more data when the container is too small
+  useEffect(() => {
+    // Skip if already loading, no more content, or no images yet
+    if (isLoading || !hasNextPage || images.length === 0 || !visibility) {
+      return;
+    }
+
+    // Check if content fills the viewport
+    const checkContentHeight = () => {
+      if (!scrollRef.current) return;
+
+      const scrollContainer = scrollRef.current;
+      const isContentShorterThanContainer =
+        scrollContainer.scrollHeight <= scrollContainer.clientHeight;
+
+      // If content doesn't fill viewport and we have more to load, load next page
+      if (isContentShorterThanContainer && hasNextPage && !isFetchingNextPage) {
+        console.log(
+          "[UploadContent] Content doesn't fill viewport, loading more images"
+        );
+        fetchNextPage();
+      }
+    };
+
+    // Check after a short delay to ensure DOM is updated
+    const timer = setTimeout(checkContentHeight, 300);
+    return () => clearTimeout(timer);
   }, [
-    config.apis.url,
-    config.apis.getUserImages,
-    userId,
-    setIsLoading,
-    setImages,
+    images,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    visibility,
   ]);
 
-  // Load user images when the component mounts
-  useEffect(() => {
-    if (visibility) {
-      fetchUserImages();
+  // Check if we need to load more data when scrolling near the bottom
+  const handleScroll = useCallback(() => {
+    if (!scrollRef.current || !hasNextPage || isFetchingNextPage) return;
+
+    const node = scrollRef.current;
+    const scrollPosition = node.scrollTop + node.clientHeight;
+    const scrollThreshold = node.scrollHeight - SCROLL_THRESHOLD;
+
+    // When user scrolls near the bottom, load more images
+    if (scrollPosition >= scrollThreshold) {
+      console.log(
+        "[UploadContent] User scrolled to bottom, loading more images"
+      );
+      fetchNextPage();
     }
-  }, [visibility, userId, fetchUserImages]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+  // Add scroll event listener
+  useEffect(() => {
+    const handleScrollThrottled = () => {
+      // Use requestAnimationFrame to throttle scroll events
+      window.requestAnimationFrame(handleScroll);
+    };
+
+    const currentScrollRef = scrollRef.current;
+    if (currentScrollRef && visibility) {
+      console.log("[UploadContent] Adding scroll event listener");
+      currentScrollRef.addEventListener("scroll", handleScrollThrottled);
+    }
+
+    return () => {
+      if (currentScrollRef) {
+        console.log("[UploadContent] Removing scroll event listener");
+        currentScrollRef.removeEventListener("scroll", handleScrollThrottled);
+      }
+    };
+  }, [handleScroll, visibility]);
 
   const uploadImageToCloud = async (base64Image: string) => {
     try {
@@ -212,31 +319,28 @@ const UploadContent: FC<UploadContentProps> = ({ visibility, onClose }) => {
       reader.onloadend = async () => {
         const imageDataUrl = reader.result as string;
 
-        // Add image to the list with uploading state
-        const newImageIndex = images.length;
-        setImages((prevState) => [
-          ...prevState,
-          { url: imageDataUrl, type: "image", isUploading: true },
-        ]);
+        // Add temporary uploading image
+        setTempUploadingImage({
+          url: imageDataUrl,
+          type: "image",
+          isUploading: true,
+        });
 
         try {
           setIsUploading(true);
           // Upload the image to cloud storage
           await uploadImageToCloud(imageDataUrl);
 
-          // After successful upload, refresh the user's images
-          fetchUserImages();
+          // After successful upload, refresh the user's images by invalidating the query
+          // This will trigger a refetch of the first page
+          await fetchNextPage({ pageParam: 0 });
         } catch (error) {
           // Handle upload error
           console.error("Failed to upload image:", error);
           window.alert("Failed to upload image. Please try again.");
-
-          // Remove the failed image
-          setImages((prevImages) =>
-            prevImages.filter((_, idx) => idx !== newImageIndex)
-          );
         } finally {
           setIsUploading(false);
+          setTempUploadingImage(null);
         }
       };
       reader.readAsDataURL(file);
@@ -279,125 +383,183 @@ const UploadContent: FC<UploadContentProps> = ({ visibility, onClose }) => {
         css={{ display: "none" }}
         onChange={handleUpload}
       />
-      <div css={{ padding: "16px" }}>
-        {isLoading ? (
-          <div css={{ textAlign: "center", padding: "20px" }}>
-            Loading images...
-          </div>
-        ) : images.length === 0 ? (
-          <div css={{ textAlign: "center", padding: "20px", color: "#666" }}>
-            No uploaded images found. Upload some images to see them here.
-          </div>
-        ) : (
-          <div
-            css={{
-              flexGrow: 1,
-              overflowY: "auto",
-              display: "grid",
-              gridTemplateColumns: "repeat(2,minmax(0,1fr))",
-              gridGap: 8,
-            }}
-          >
-            {images.map((item, idx) => (
-              <Draggable
-                key={idx}
-                onDrop={(pos) => {
-                  if (pos) {
-                    // Handle image data fetching and adding with position
-                    (async () => {
-                      const file = item.url.split("/");
-                      console.log(file[4]);
-                      const templateData = await axios.get(
-                        `${GET_TEMPLATE_ENDPOINT}/${file[4]}`
-                      );
-                      console.log(templateData);
-                      addImage(templateData.data.data);
-                    })();
-                  }
-                }}
-                onClick={async () => {
-                  const file = item.url.split("/");
-                  console.log(file[4]);
-                  const templateData = await axios.get(
-                    `${GET_TEMPLATE_ENDPOINT}/${file[4]}`
-                  );
-                  addImage(templateData.data.data);
-                }}
-              >
-                <div
-                  css={{
-                    cursor: "pointer",
-                    position: "relative",
-                    paddingBottom: "100%",
-                    width: "100%",
+      <div
+        css={{
+          padding: "16px",
+          height: "calc(100% - 100px)", // Subtract header height
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <div
+          ref={scrollRef}
+          css={{
+            flexGrow: 1,
+            overflowY: "auto",
+            overflowX: "hidden",
+            WebkitOverflowScrolling: "touch", // Smooth scrolling on iOS
+          }}
+        >
+          {images.length === 0 ? (
+            <div css={{ textAlign: "center", padding: "20px", color: "#666" }}>
+              {isLoading
+                ? "Loading images..."
+                : isError
+                ? "Failed to load images. Please try again."
+                : "No uploaded images found. Upload some images to see them here."}
+            </div>
+          ) : (
+            <div
+              css={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2,minmax(0,1fr))",
+                gridGap: 8,
+                width: "100%",
+              }}
+            >
+              {images.map((item, idx) => (
+                <Draggable
+                  key={`${item._id || idx}`}
+                  onDrop={(pos) => {
+                    if (pos) {
+                      // Handle image data fetching and adding with position
+                      (async () => {
+                        const file = item.url.split("/");
+                        console.log(file[file.length - 1]);
+                        const templateData = await axios.get(
+                          `${GET_TEMPLATE_ENDPOINT}/${file[file.length - 1]}`
+                        );
+                        console.log(templateData);
+                        addImage(templateData.data.data);
+                      })();
+                    }
+                  }}
+                  onClick={async () => {
+                    const file = item.url.split("/");
+                    console.log(file[file.length - 1]);
+                    const templateData = await axios.get(
+                      `${GET_TEMPLATE_ENDPOINT}/${file[file.length - 1]}`
+                    );
+                    addImage(templateData.data.data);
                   }}
                 >
                   <div
                     css={{
-                      position: "absolute",
-                      inset: 0,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
+                      cursor: "pointer",
+                      position: "relative",
+                      paddingBottom: "100%",
+                      width: "100%",
                     }}
                   >
-                    {item.isUploading ? (
-                      <div
-                        css={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          height: "100%",
-                          width: "100%",
-                          backgroundColor: "#f0f0f0",
-                          position: "relative",
-                        }}
-                      >
+                    <div
+                      css={{
+                        position: "absolute",
+                        inset: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {item.isUploading ? (
                         <div
                           css={{
-                            position: "absolute",
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            height: 4,
-                            backgroundColor: "rgba(0,0,0,0.1)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            height: "100%",
+                            width: "100%",
+                            backgroundColor: "#f0f0f0",
+                            position: "relative",
                           }}
                         >
                           <div
                             css={{
-                              height: "100%",
-                              width: `${uploadProgress}%`,
-                              backgroundColor: "#0066ff",
-                              transition: "width 0.3s ease",
+                              position: "absolute",
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              height: 4,
+                              backgroundColor: "rgba(0,0,0,0.1)",
+                            }}
+                          >
+                            <div
+                              css={{
+                                height: "100%",
+                                width: `${uploadProgress}%`,
+                                backgroundColor: "#0066ff",
+                                transition: "width 0.3s ease",
+                              }}
+                            />
+                          </div>
+                          <div css={{ position: "relative", zIndex: 1 }}>
+                            Uploading... {uploadProgress}%
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          {/* Add error handling for image loading */}
+                          <img
+                            src={item.url}
+                            loading="lazy"
+                            alt="Uploaded image"
+                            css={{
+                              maxHeight: "100%",
+                              maxWidth: "100%",
+                              objectFit: "contain",
+                              backgroundColor: "#f8f8f8",
+                              border: "1px solid #eee",
                             }}
                           />
-                        </div>
-                        <div css={{ position: "relative", zIndex: 1 }}>
-                          Uploading... {uploadProgress}%
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        {/* Add error handling for image loading */}
-                        <img
-                          src={item.url}
-                          loading="lazy"
-                          css={{
-                            maxHeight: "100%",
-                            maxWidth: "100%",
-                            objectFit: "contain",
-                            backgroundColor: "#f8f8f8",
-                            border: "1px solid #eee",
-                          }}
-                        />
-                      </>
-                    )}
+                        </>
+                      )}
+                    </div>
                   </div>
+                </Draggable>
+              ))}
+
+              {/* Loading spinner for fetching next page */}
+              {isFetchingNextPage && (
+                <div
+                  css={{
+                    gridColumn: "span 2",
+                    textAlign: "center",
+                    padding: "10px 0",
+                  }}
+                >
+                  <div
+                    css={{
+                      display: "inline-block",
+                      width: "30px",
+                      height: "30px",
+                      border: "3px solid rgba(0, 0, 0, 0.1)",
+                      borderTopColor: "#3498db",
+                      borderRadius: "50%",
+                      animation: "spin 1s ease-in-out infinite",
+                      "@keyframes spin": {
+                        to: { transform: "rotate(360deg)" },
+                      },
+                    }}
+                  />
                 </div>
-              </Draggable>
-            ))}
-          </div>
-        )}
+              )}
+
+              {/* End of images message */}
+              {!isLoading && !hasNextPage && images.length > 0 && (
+                <div
+                  css={{
+                    gridColumn: "span 2",
+                    textAlign: "center",
+                    padding: "10px 0",
+                    fontSize: "12px",
+                    color: "#888",
+                  }}
+                >
+                  End of images
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

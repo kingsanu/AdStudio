@@ -2,7 +2,20 @@
 /* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // Load environment variables
-require("dotenv").config();
+const path = require("path");
+const dotenv = require("dotenv");
+const result = dotenv.config();
+
+if (result.error) {
+  console.error("Error loading .env file:", result.error);
+} else {
+  console.log("Environment variables loaded successfully");
+  console.log(
+    "MONGODB_URI:",
+    process.env.MONGODB_URI ? "Defined" : "Not defined"
+  );
+  console.log("PORT:", process.env.PORT);
+}
 
 const express = require("express");
 const cors = require("cors");
@@ -153,6 +166,7 @@ function paginateArrayWithFilter(array, size = 30, index = 0, keyword = "") {
   const startIndex = index * size;
   const endIndex = startIndex + size;
   let filteredArray = array;
+
   if (keyword && keyword !== "") {
     const lowerCaseKeyword = keyword.toLowerCase();
     filteredArray = array.filter((item) =>
@@ -160,7 +174,17 @@ function paginateArrayWithFilter(array, size = 30, index = 0, keyword = "") {
     );
   }
 
-  return filteredArray.slice(startIndex, endIndex);
+  const paginatedData = filteredArray.slice(startIndex, endIndex);
+
+  return {
+    data: paginatedData,
+    pagination: {
+      total: filteredArray.length,
+      page: index,
+      pageSize: size,
+      hasMore: endIndex < filteredArray.length,
+    },
+  };
 }
 
 function handleFontStyleName(fontName, style) {
@@ -232,9 +256,13 @@ app.get("/api/fonts", async (req, res) => {
       return;
     }
     const { ps, pi, kw } = req.query;
-    res.send(
-      paginateArrayWithFilter(JSON.parse(jsonString).data, +ps, +pi, kw)
+    const result = paginateArrayWithFilter(
+      JSON.parse(jsonString).data,
+      +ps,
+      +pi,
+      kw
     );
+    res.json(result);
   });
 });
 
@@ -281,9 +309,13 @@ app.get("/api/texts", async (req, res) => {
       return;
     }
     const { ps, pi, kw } = req.query;
-    res.send(
-      paginateArrayWithFilter(JSON.parse(jsonString).data, +ps, +pi, kw)
+    const result = paginateArrayWithFilter(
+      JSON.parse(jsonString).data,
+      +ps,
+      +pi,
+      kw
     );
+    res.json(result);
   });
 });
 
@@ -308,14 +340,31 @@ app.get("/api/text-suggestion", async (req, res) => {
 app.get("/api/frames", async (req, res) => {
   fs.readFile("./json/frames.json", "utf8", (err, jsonString) => {
     if (err) {
-      console.error(err);
+      console.error("Error reading frames.json:", err);
       res.send(null);
       return;
     }
-    const { ps, pi, kw } = req.query;
-    res.send(
-      paginateArrayWithFilter(JSON.parse(jsonString).data, +ps, +pi, kw)
-    );
+    try {
+      const jsonData = JSON.parse(jsonString);
+      console.log(
+        "Frames data loaded, count:",
+        jsonData.data ? jsonData.data.length : 0
+      );
+      const { ps = 30, pi = 0, kw = "" } = req.query;
+      const result = paginateArrayWithFilter(jsonData.data, +ps, +pi, kw);
+      res.json(result);
+    } catch (parseErr) {
+      console.error("Error parsing frames.json:", parseErr);
+      res.json({
+        data: [],
+        pagination: {
+          total: 0,
+          page: +pi,
+          pageSize: +ps,
+          hasMore: false,
+        },
+      });
+    }
   });
 });
 
@@ -340,14 +389,31 @@ app.get("/api/frame-suggestion", async (req, res) => {
 app.get("/api/shapes", async (req, res) => {
   fs.readFile("./json/shapes.json", "utf8", (err, jsonString) => {
     if (err) {
-      console.error(err);
+      console.error("Error reading shapes.json:", err);
       res.send(null);
       return;
     }
-    const { ps, pi, kw } = req.query;
-    res.send(
-      paginateArrayWithFilter(JSON.parse(jsonString).data, +ps, +pi, kw)
-    );
+    try {
+      const jsonData = JSON.parse(jsonString);
+      console.log(
+        "Shapes data loaded, count:",
+        jsonData.data ? jsonData.data.length : 0
+      );
+      const { ps = 30, pi = 0, kw = "" } = req.query;
+      const result = paginateArrayWithFilter(jsonData.data, +ps, +pi, kw);
+      res.json(result);
+    } catch (parseErr) {
+      console.error("Error parsing shapes.json:", parseErr);
+      res.json({
+        data: [],
+        pagination: {
+          total: 0,
+          page: +pi,
+          pageSize: +ps,
+          hasMore: false,
+        },
+      });
+    }
   });
 });
 
@@ -372,14 +438,31 @@ app.get("/api/shape-suggestion", async (req, res) => {
 app.get("/api/images", async (req, res) => {
   fs.readFile("./json/images.json", "utf8", (err, jsonString) => {
     if (err) {
-      console.error(err);
+      console.error("Error reading images.json:", err);
       res.send(null);
       return;
     }
-    const { ps, pi, kw } = req.query;
-    res.send(
-      paginateArrayWithFilter(JSON.parse(jsonString).data, +ps, +pi, kw)
-    );
+    try {
+      const jsonData = JSON.parse(jsonString);
+      console.log(
+        "Images data loaded, count:",
+        jsonData.data ? jsonData.data.length : 0
+      );
+      const { ps = 30, pi = 0, kw = "" } = req.query;
+      const result = paginateArrayWithFilter(jsonData.data, +ps, +pi, kw);
+      res.json(result);
+    } catch (parseErr) {
+      console.error("Error parsing images.json:", parseErr);
+      res.json({
+        data: [],
+        pagination: {
+          total: 0,
+          page: +pi,
+          pageSize: +ps,
+          hasMore: false,
+        },
+      });
+    }
   });
 });
 

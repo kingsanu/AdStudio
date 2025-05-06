@@ -1498,6 +1498,8 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
           fontSize: 24,
         }}
         onClick={() => {
+          // Close any open sidebar tab before opening the color picker
+          actions.setSidebarTab(null);
           actions.setSidebar("CHOOSING_COLOR");
         }}
         tooltip="Text color"

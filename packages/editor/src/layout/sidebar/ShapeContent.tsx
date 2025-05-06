@@ -1,11 +1,11 @@
-import { FC, useCallback, useEffect, useRef, useState } from 'react';
-import { Delta } from 'canva-editor/types';
-import { useEditor } from 'canva-editor/hooks';
-import Draggable from 'canva-editor/layers/core/Dragable';
-import CloseSidebarButton from './CloseButton';
-import ShapeSearchBox from './components/ShapeSearchBox';
-import axios from 'axios';
-import useMobileDetect from 'canva-editor/hooks/useMobileDetect';
+import { FC, useCallback, useEffect, useRef, useState } from "react";
+import { Delta } from "canva-editor/types";
+import { useEditor } from "canva-editor/hooks";
+import Draggable from "canva-editor/layers/core/Dragable";
+import CloseSidebarButton from "./CloseButton";
+import ShapeSearchBox from "./components/ShapeSearchBox";
+import axios from "axios";
+import useMobileDetect from "canva-editor/hooks/useMobileDetect";
 
 type Shape = {
   img: string;
@@ -22,23 +22,47 @@ const ShapeContent: FC<{ onClose: () => void }> = ({ onClose }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [offset, setOffset] = useState(0);
   const dataRef = useRef(false);
-  const [keyword, setKeyword] = useState('');
+  const [keyword, setKeyword] = useState("");
   const isMobile = useMobileDetect();
 
+  // Transform API data to match Shape interface
+  const transformShapeData = useCallback((apiData: any[]): Shape[] => {
+    return apiData.map((item) => ({
+      img: item.img,
+      desc: item.desc || "",
+      clipPath: item.clipPath,
+      width: parseInt(item.width),
+      height: parseInt(item.height),
+      background: item.background || "rgb(123, 68, 68)",
+    }));
+  }, []);
+
   const loadData = useCallback(
-    async (offset = 0, kw = '') => {
+    async (offset = 0, kw = "") => {
       dataRef.current = true;
       setIsLoading(true);
-      const res: any = await axios.get<Shape[]>(
-        `${config.apis.url}${config.apis.searchShapes}?ps=40&pi=${offset}&kw=${kw}`
-      );
-      setShapes((shapes) => [...shapes, ...res.data]);
-      setIsLoading(false);
-      if (res.data.length > 0) {
-        dataRef.current = false;
+      try {
+        const res: any = await axios.get<Shape[]>(
+          `${config.apis.url}${config.apis.searchShapes}?ps=40&pi=${offset}&kw=${kw}`
+        );
+
+        // Check if the response has a data property (array of shapes)
+        const shapeData = res.data.data || res.data;
+
+        // Transform the data to match our Shape interface
+        const transformedShapes = transformShapeData(shapeData);
+
+        setShapes((shapes) => [...shapes, ...transformedShapes]);
+        setIsLoading(false);
+        if (transformedShapes.length > 0) {
+          dataRef.current = false;
+        }
+      } catch (error) {
+        console.error("Error loading shapes:", error);
+        setIsLoading(false);
       }
     },
-    [setIsLoading]
+    [setIsLoading, transformShapeData]
   );
 
   useEffect(() => {
@@ -56,9 +80,9 @@ const ShapeContent: FC<{ onClose: () => void }> = ({ onClose }) => {
       }
     };
 
-    scrollRef.current?.addEventListener('scroll', handleLoadMore);
+    scrollRef.current?.addEventListener("scroll", handleLoadMore);
     return () => {
-      scrollRef.current?.removeEventListener('scroll', handleLoadMore);
+      scrollRef.current?.removeEventListener("scroll", handleLoadMore);
     };
   }, [loadData]);
 
@@ -81,7 +105,7 @@ const ShapeContent: FC<{ onClose: () => void }> = ({ onClose }) => {
 
     actions.addShapeLayer({
       type: {
-        resolvedName: 'ShapeLayer',
+        resolvedName: "ShapeLayer",
       },
       props: {
         position,
@@ -95,8 +119,8 @@ const ShapeContent: FC<{ onClose: () => void }> = ({ onClose }) => {
         color: shape.background,
         shapeSize: {
           width: shape.width,
-          height: shape.height
-        }
+          height: shape.height,
+        },
       },
     });
     if (isMobile) {
@@ -107,11 +131,11 @@ const ShapeContent: FC<{ onClose: () => void }> = ({ onClose }) => {
   return (
     <div
       css={{
-        width: '100%',
-        height: '100%',
-        flexDirection: 'column',
-        overflowY: 'auto',
-        display: 'flex',
+        width: "100%",
+        height: "100%",
+        flexDirection: "column",
+        overflowY: "auto",
+        display: "flex",
         padding: 16,
       }}
     >
@@ -123,14 +147,16 @@ const ShapeContent: FC<{ onClose: () => void }> = ({ onClose }) => {
       >
         <ShapeSearchBox onStartSearch={handleSearch} />
       </div>
-      <div css={{ flexDirection: 'column', overflowY: 'auto', display: 'flex' }}>
+      <div
+        css={{ flexDirection: "column", overflowY: "auto", display: "flex" }}
+      >
         <div
           ref={scrollRef}
           css={{
             flexGrow: 1,
-            overflowY: 'auto',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4,minmax(0,1fr))',
+            overflowY: "auto",
+            display: "grid",
+            gridTemplateColumns: "repeat(4,minmax(0,1fr))",
             gridGap: 8,
           }}
         >
@@ -146,25 +172,25 @@ const ShapeContent: FC<{ onClose: () => void }> = ({ onClose }) => {
                 addShape(shape);
               }}
             >
-              <div css={{ cursor: 'pointer', position: 'relative' }}>
-                <div css={{ paddingBottom: '100%' }} />
+              <div css={{ cursor: "pointer", position: "relative" }}>
+                <div css={{ paddingBottom: "100%" }} />
                 <div
                   css={{
-                    position: 'absolute',
+                    position: "absolute",
                     top: 0,
                     left: 0,
-                    height: '100%',
-                    width: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    height: "100%",
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
                   <img
                     src={shape.img}
                     css={{
-                      maxHeight: '100%',
-                      maxWidth: '100%',
+                      maxHeight: "100%",
+                      maxWidth: "100%",
                     }}
                   />
                 </div>

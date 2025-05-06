@@ -104,16 +104,27 @@ export const whatsappService = {
       );
 
       if (response.data) {
+        // Handle both response formats: either status or state property
+        let connectionStatus = WhatsAppConnectionState.DISCONNECTED;
+
+        if (response.data.success && response.data.state === "CONNECTED") {
+          // New response format: { success: true, state: "CONNECTED", message: "session_connected" }
+          connectionStatus = WhatsAppConnectionState.CONNECTED;
+        } else if (response.data.status) {
+          // Old response format with status property
+          connectionStatus = response.data.status;
+        }
+
         // Update local storage with the latest status
         const settings = await this.getSettings(userId);
         if (settings) {
-          settings.connectionStatus = response.data.status;
+          settings.connectionStatus = connectionStatus;
           settings.lastChecked = response.data.lastChecked;
           localStorage.setItem("whatsapp_settings", JSON.stringify(settings));
         }
 
         return {
-          status: response.data.status,
+          status: connectionStatus,
           lastChecked: response.data.lastChecked,
         };
       }
@@ -171,16 +182,18 @@ export const whatsappService = {
   // Start a new WhatsApp session
   async startSession(
     userId: string
-  ): Promise<{ success: boolean; message: string }> {
+  ): Promise<{ success: boolean; message: string; state?: string }> {
     try {
       console.log(`Starting WhatsApp session for user ${userId}`);
       const response = await axios.get(
         `${API_BASE_URL}/api/whatsapp-start/${userId}`
       );
 
+      // Handle both response formats
       return {
         success: response.data && response.data.success,
         message: response.data?.message || "Session started successfully",
+        state: response.data?.state, // Include state from new response format if available
       };
     } catch (error) {
       console.error("Error starting WhatsApp session:", error);

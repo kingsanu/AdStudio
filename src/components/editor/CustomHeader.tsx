@@ -1,4 +1,5 @@
-import { FC, useContext, useState, useEffect } from "react";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { FC, useContext, useState, useEffect, useRef } from "react";
 import {
   EditorContext,
   EditorContext as EditorContextType,
@@ -6,8 +7,10 @@ import {
 import { Undo, Redo, Download, Share, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import CampaignDialog from "./CampaignDialog";
 import HeaderFileMenu from "canva-editor/layout/sidebar/components/HeaderFileMenu";
+import CampaignDialog from "canva-editor/components/editor/CampaignDialog";
+import SyncStatusIndicator from "canva-editor/components/sync/SyncStatusIndicator";
+import { useSyncService } from "canva-editor/hooks/useSyncService";
 
 // Define a type for our custom context that includes the extended properties
 type CustomEditorContext = EditorContextType & {
@@ -36,16 +39,21 @@ type CustomEditorContext = EditorContextType & {
 interface CustomHeaderProps {
   onShare?: () => void;
   onDownload?: () => void;
+  isAdmin?: boolean;
   editorContext?: CustomEditorContext; // Use our custom context type
 }
 
 const CustomHeader: FC<CustomHeaderProps> = ({
-  onShare,
+  // isAdmin,
+  // onShare,
   onDownload,
   editorContext,
 }) => {
   // State for campaign dialog
   const [showCampaignDialog, setShowCampaignDialog] = useState(false);
+
+  // Reference to the page content element for generating previews
+  const pageContentRef = useRef<HTMLElement | null>(null);
 
   // First try to use the provided context, then fall back to useEditor hook
   const contextValue = useContext(EditorContext);
@@ -56,6 +64,15 @@ const CustomHeader: FC<CustomHeaderProps> = ({
   const actions = (editorValue?.actions || {}) as any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const state = (editorValue?.getState ? editorValue.getState() : {}) as any;
+
+  // Set up sync service
+  const { syncStatus, lastSavedAt, isUserTyping, saveNow } = useSyncService({
+    autoSaveInterval: 2000, // 2 seconds
+    getDesignData: () =>
+      editorValue?.query?.serialize ? editorValue.query.serialize() : {},
+    getDesignName: () => titleValue || "Untitled Design",
+    getPageContentElement: () => pageContentRef.current,
+  });
 
   // State for title editing
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -69,6 +86,11 @@ const CustomHeader: FC<CustomHeaderProps> = ({
       setTitleValue(state.name);
     }
   }, [state?.name]);
+
+  // Initialize page content reference
+  useEffect(() => {
+    pageContentRef.current = document.querySelector(".page-content");
+  }, []);
 
   // Handle title change
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,14 +126,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
 
   // Handle share
   const handleShare = () => {
-    if (onShare) {
-      onShare();
-    } else if (actions.openCampaignDialog) {
-      actions.openCampaignDialog();
-    } else {
-      // Open our custom campaign dialog
-      setShowCampaignDialog(true);
-    }
+    setShowCampaignDialog(true);
   };
 
   // Handle undo
@@ -180,6 +195,16 @@ const CustomHeader: FC<CustomHeaderProps> = ({
           {/* File Menu (uses three dots icon internally) */}
           <div className="ml-2">
             <HeaderFileMenu designName={titleValue || "Untitled Design"} />
+          </div>
+
+          {/* Sync Status Indicator */}
+          <div className="ml-2 flex items-center">
+            <SyncStatusIndicator
+              status={syncStatus}
+              lastSavedAt={lastSavedAt}
+              isUserTyping={isUserTyping}
+              onClick={() => saveNow({ force: true })}
+            />
           </div>
         </div>
 

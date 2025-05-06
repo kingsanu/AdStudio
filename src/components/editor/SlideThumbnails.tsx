@@ -1,6 +1,8 @@
 import { FC, useEffect, useState } from "react";
 import { useEditor } from "canva-editor/hooks";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 interface SlideThumbnailProps {
   pageIndex: number;
@@ -8,13 +10,13 @@ interface SlideThumbnailProps {
   onClick: () => void;
 }
 
-const SlideThumbnail: FC<SlideThumbnailProps> = ({ 
-  pageIndex, 
-  isActive, 
-  onClick 
+const SlideThumbnail: FC<SlideThumbnailProps> = ({
+  pageIndex,
+  isActive,
+  onClick,
 }) => {
   return (
-    <div 
+    <div
       className={cn(
         "relative p-2 cursor-pointer transition-all",
         isActive ? "bg-indigo-50" : "hover:bg-neutral-50"
@@ -24,7 +26,7 @@ const SlideThumbnail: FC<SlideThumbnailProps> = ({
       <div className="absolute left-2 top-2 flex items-center justify-center w-6 h-6 bg-white rounded-full shadow-sm text-xs font-medium">
         {pageIndex + 1}
       </div>
-      <div 
+      <div
         className={cn(
           "w-full aspect-[16/9] rounded-md border overflow-hidden",
           isActive ? "border-indigo-500" : "border-neutral-200"
@@ -47,23 +49,23 @@ const SlideThumbnail: FC<SlideThumbnailProps> = ({
 const SlideThumbnails: FC = () => {
   const { actions, state } = useEditor();
   const [activePage, setActivePage] = useState(0);
-  
+
   // Sync with editor state
   useEffect(() => {
     setActivePage(state.activePage);
   }, [state.activePage]);
-  
+
   const handlePageClick = (index: number) => {
     actions.setActivePage(index);
     setActivePage(index);
   };
-  
+
   return (
     <div className="w-64 border-l border-neutral-200 bg-white flex flex-col">
       <div className="p-4 border-b border-neutral-200">
         <h3 className="font-medium text-sm">Slides</h3>
       </div>
-      
+
       <div className="flex-1 overflow-y-auto">
         {state.pages.map((_, index) => (
           <SlideThumbnail
@@ -73,6 +75,18 @@ const SlideThumbnails: FC = () => {
             onClick={() => handlePageClick(index)}
           />
         ))}
+
+        {/* Add Page Button */}
+        <div className="p-2">
+          <Button
+            variant="outline"
+            className="w-full flex items-center justify-center gap-1 border-dashed"
+            onClick={() => actions.addPage()}
+          >
+            <Plus className="h-4 w-4" />
+            <span>Add Page</span>
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -434,6 +434,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
           display: "flex",
           position: "relative",
           height: "100%",
+          paddingBottom: 16,
           overflow: "auto",
           ...cursorCSS(),
           "@media (max-width: 900px)": {
@@ -513,7 +514,7 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
                         width: window.innerWidth,
                         height: window.innerHeight,
                         overflow: "hidden",
-                        marginTop: 5,
+                        marginVertical: 5,
                       },
                     }}
                   >
@@ -535,31 +536,6 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
                     />
                   </div>
                 ))}
-                <button
-                  css={{
-                    alignItems: "center",
-                    justifyItems: "center",
-                    marginTop: 20,
-                    marginBottom: 20,
-                    background: "rgba(64,87,109,.07)",
-                    color: "#0d1216",
-                    width: pageSize.width * scale,
-                    height: 40,
-                    textAlign: "center",
-                    padding: "0 2px",
-                    fontWeight: 600,
-                    borderRadius: 3,
-                    "@media (max-width: 900px)": {
-                      display: "none",
-                    },
-                  }}
-                  onClick={() => {
-                    actions.addPage();
-                    handleScrollToActivePage(activePage + 1);
-                  }}
-                >
-                  + Add Page
-                </button>
               </div>
               <div
                 css={{

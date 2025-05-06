@@ -83,12 +83,20 @@ const CampaignDialog: React.FC<CampaignDialogProps> = ({ open, onClose }) => {
       // Start the session using the backend API
       const result = await whatsappService.startSession(user.userId);
 
+      // Check for success in both old and new response formats
       if (result.success) {
         console.log(
           `WhatsApp session ready: ${
             result.message || "Session started successfully"
           }`
         );
+
+        // Check if we have the new format with state property
+        if (result.state === "CONNECTED") {
+          // New response format indicates already connected
+          setConnectionStatus(WhatsAppConnectionState.CONNECTED);
+        }
+
         setSessionStarted(true);
         // Refresh the QR code immediately after starting the session
         setQrRefreshTimestamp(Date.now());

@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+/* eslint-disable @typescript-eslint/no-var-requires */
 const axios = require("axios");
 const FormData = require("form-data");
 const { Buffer } = require("node:buffer");
@@ -213,7 +215,9 @@ const templateController = {
   // Get all templates
   getAllTemplates: async (req, res) => {
     try {
-      const { userId, isPublic, onlyMine, kw } = req.query;
+      const { userId, isPublic, onlyMine, kw, ps = 10, pi = 0 } = req.query;
+      const pageSize = parseInt(ps);
+      const pageIndex = parseInt(pi);
 
       // Build query based on parameters
       let query = {};
@@ -241,15 +245,33 @@ const templateController = {
         ];
       }
 
+      // Get total count for pagination info
+      const totalCount = await Template.countDocuments(query);
+
+      // Apply pagination
       const templates = await Template.find(query)
         .select(
           "title description templateUrl thumbnailUrl tags createdAt isPublic userId"
         )
-        .sort("-createdAt");
+        .sort("-createdAt")
+        .skip(pageIndex * pageSize)
+        .limit(pageSize);
 
       console.log("Query:", query);
-      console.log("Found templates:", templates.length);
-      res.json(templates);
+      console.log(
+        `Found templates: ${templates.length}, Page: ${pageIndex}, Size: ${pageSize}, Total: ${totalCount}`
+      );
+
+      // Return both the templates and pagination info
+      res.json({
+        data: templates,
+        pagination: {
+          total: totalCount,
+          page: pageIndex,
+          pageSize: pageSize,
+          hasMore: (pageIndex + 1) * pageSize < totalCount,
+        },
+      });
     } catch (error) {
       console.error("Error fetching templates:", error);
       res.status(500).json({

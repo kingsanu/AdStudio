@@ -2,7 +2,7 @@
 import { FC, PropsWithChildren, useEffect, useState, useRef } from "react";
 import { EditorConfig, EditorContext } from "canva-editor/components/editor";
 import { CanvaEditor } from "canva-editor/components/editor";
-import { X } from "lucide-react";
+import { X, Plus } from "lucide-react";
 
 // Import our custom header components
 import {
@@ -296,6 +296,18 @@ const CustomEditor: FC<PropsWithChildren<CustomEditorProps>> = ({
                       onClick={() => actions.setActivePage(index)}
                     />
                   ))}
+
+                  {/* Add Page Button */}
+                  <div className="p-2">
+                    <Button
+                      variant="outline"
+                      className="w-full flex items-center justify-center gap-1 border-dashed"
+                      onClick={() => actions.addPage()}
+                    >
+                      <Plus className="h-4 w-4" />
+                      <span>Add Page</span>
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>

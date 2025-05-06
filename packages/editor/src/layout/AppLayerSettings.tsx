@@ -3,6 +3,7 @@ import { LayerSettings } from "canva-editor/utils/settings";
 
 const AppLayerSettings = () => {
   const { selectedLayerIds } = useSelectedLayers();
+  console.log("selectedLayerIds", selectedLayerIds);
   return (
     <div
       css={{

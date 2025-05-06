@@ -1,37 +1,37 @@
-import { FC, Fragment, ReactElement, useMemo, useRef, useState } from 'react';
-import SettingButton from './SettingButton';
-import ColorSettings from './ColorSettings';
-import Popover from 'canva-editor/components/popover/Popover';
-import Slider from 'canva-editor/components/slider/Slider';
-import { useEditor } from 'canva-editor/hooks';
-import { ShapeLayerProps } from 'canva-editor/layers/ShapeLayer';
-import { Layer, ShapeBorderStyle, GradientStyle } from 'canva-editor/types';
+import { FC, Fragment, ReactElement, useMemo, useRef, useState } from "react";
+import SettingButton from "./SettingButton";
+import ColorSettings from "./ColorSettings";
+import Popover from "canva-editor/components/popover/Popover";
+import Slider from "canva-editor/components/slider/Slider";
+import { useEditor } from "canva-editor/hooks";
+import { ShapeLayerProps } from "canva-editor/layers/ShapeLayer";
+import { Layer, ShapeBorderStyle, GradientStyle } from "canva-editor/types";
 
 // Icons
-import ShapeSettingsIcon from 'canva-editor/icons/ShapeSettingsIcon';
-import LongDashIcon from 'canva-editor/icons/LongDashIcon';
-import TwoDashesIcon from 'canva-editor/icons/TwoDashesIcon';
-import ThreeDashesIcon from 'canva-editor/icons/ThreeDashesIcon';
-import DotsIcon from 'canva-editor/icons/DotsIcon';
-import NotAllowedIcon from 'canva-editor/icons/NotAllowedIcon';
-import SquareBoldIcon from 'canva-editor/icons/SquareBoldIcon';
-import SettingDivider from './components/SettingDivider';
+import ShapeSettingsIcon from "canva-editor/icons/ShapeSettingsIcon";
+import LongDashIcon from "canva-editor/icons/LongDashIcon";
+import TwoDashesIcon from "canva-editor/icons/TwoDashesIcon";
+import ThreeDashesIcon from "canva-editor/icons/ThreeDashesIcon";
+import DotsIcon from "canva-editor/icons/DotsIcon";
+import NotAllowedIcon from "canva-editor/icons/NotAllowedIcon";
+import SquareBoldIcon from "canva-editor/icons/SquareBoldIcon";
+import SettingDivider from "./components/SettingDivider";
 
 interface ShapeSettingsProps {
   layers: Layer<ShapeLayerProps>[];
 }
 const shapeStyles: { type: ShapeBorderStyle; icon: ReactElement }[] = [
   {
-    type: 'none',
+    type: "none",
     icon: <NotAllowedIcon />,
   },
-  { type: 'solid', icon: <LongDashIcon /> },
-  { type: 'longDashes', icon: <TwoDashesIcon /> },
-  { type: 'shortDashes', icon: <ThreeDashesIcon /> },
-  { type: 'dots', icon: <DotsIcon /> },
+  { type: "solid", icon: <LongDashIcon /> },
+  { type: "longDashes", icon: <TwoDashesIcon /> },
+  { type: "shortDashes", icon: <ThreeDashesIcon /> },
+  { type: "dots", icon: <DotsIcon /> },
 ];
 const ShapeSettings: FC<ShapeSettingsProps> = ({ layers }) => {
-  const [colorSetting, setColorSetting] = useState('background');
+  const [colorSetting, setColorSetting] = useState("background");
   const borderRef = useRef<HTMLDivElement>(null);
   const { actions, activePage } = useEditor((state) => ({
     activePage: state.activePage,
@@ -71,9 +71,9 @@ const ShapeSettings: FC<ShapeSettingsProps> = ({ layers }) => {
       return border[0];
     }
     return {
-      style: 'none' as ShapeBorderStyle,
+      style: "none" as ShapeBorderStyle,
       weight: 0,
-      color: 'rgb(0, 0, 0)',
+      color: "rgb(0, 0, 0)",
     };
   }, [layers]);
   const updateBackgroundColor = (color: string) => {
@@ -107,8 +107,8 @@ const ShapeSettings: FC<ShapeSettingsProps> = ({ layers }) => {
         .setProp<ShapeLayerProps>(activePage, layer.id, {
           border: {
             style: style,
-            weight: style === 'none' ? 0 : layer.data.props.border?.weight || 4,
-            color: layer.data.props.border?.color || 'rgb(0, 0, 0)',
+            weight: style === "none" ? 0 : layer.data.props.border?.weight || 4,
+            color: layer.data.props.border?.color || "rgb(0, 0, 0)",
           },
         });
     });
@@ -119,7 +119,7 @@ const ShapeSettings: FC<ShapeSettingsProps> = ({ layers }) => {
       .throttle(2000)
       .setProp<ShapeLayerProps>(activePage, layerIds, {
         border: {
-          style: (weight === 0 ? 'none' : border.style) || 'solid',
+          style: (weight === 0 ? "none" : border.style) || "solid",
           weight,
           color: border.color,
         },
@@ -138,9 +138,9 @@ const ShapeSettings: FC<ShapeSettingsProps> = ({ layers }) => {
       });
   };
   const onUpdateColor = (color: string) => {
-    if (colorSetting === 'background') {
+    if (colorSetting === "background") {
       updateBackgroundColor(color);
-    } else if (colorSetting === 'border') {
+    } else if (colorSetting === "border") {
       updateBorderColor(color);
     }
   };
@@ -148,9 +148,9 @@ const ShapeSettings: FC<ShapeSettingsProps> = ({ layers }) => {
     <Fragment>
       <div
         css={{
-          display: 'grid',
-          alignItems: 'center',
-          gridAutoFlow: 'column',
+          display: "grid",
+          alignItems: "center",
+          gridAutoFlow: "column",
           gridGap: 8,
         }}
       >
@@ -161,7 +161,9 @@ const ShapeSettings: FC<ShapeSettingsProps> = ({ layers }) => {
           onChange={onUpdateColor}
           onChangeGradient={handleChangeGradient}
           onClickCallback={() => {
-            setColorSetting('background');
+            // Close any open sidebar tab before opening the color picker
+            actions.setSidebarTab(null);
+            setColorSetting("background");
           }}
         />
         {border && border.weight > 0 && (
@@ -170,7 +172,9 @@ const ShapeSettings: FC<ShapeSettingsProps> = ({ layers }) => {
               colors={[border.color]}
               onChange={onUpdateColor}
               onClickCallback={() => {
-                setColorSetting('border');
+                // Close any open sidebar tab before opening the color picker
+                actions.setSidebarTab(null);
+                setColorSetting("border");
               }}
             >
               <div
@@ -178,9 +182,9 @@ const ShapeSettings: FC<ShapeSettingsProps> = ({ layers }) => {
                   width: 24,
                   height: 24,
                   borderRadius: 2,
-                  position: 'relative',
+                  position: "relative",
                   fontSize: 24,
-                  overflow: 'hidden',
+                  overflow: "hidden",
                   color: border.color,
                 }}
               >
@@ -200,19 +204,19 @@ const ShapeSettings: FC<ShapeSettingsProps> = ({ layers }) => {
         <Popover
           open={openBorderSetting}
           anchorEl={borderRef.current}
-          placement={'bottom'}
+          placement={"bottom"}
           onClose={() => setOpenBorderSetting(false)}
           offsets={{
-            'bottom-end': { x: 0, y: 8 },
+            "bottom-end": { x: 0, y: 8 },
           }}
         >
-          <div css={{ padding: 16, display: 'grid', gap: 12 }}>
+          <div css={{ padding: 16, display: "grid", gap: 12 }}>
             <div>
               <div
                 css={{
-                  display: 'grid',
-                  gridAutoFlow: 'column',
-                  alignItems: 'center',
+                  display: "grid",
+                  gridAutoFlow: "column",
+                  alignItems: "center",
                   gap: 8,
                 }}
               >
@@ -224,14 +228,14 @@ const ShapeSettings: FC<ShapeSettingsProps> = ({ layers }) => {
                       borderRadius: 4,
                       boxShadow:
                         style.type === border?.style
-                          ? 'inset 0 0 0 2px #3d8eff'
-                          : 'inset 0 0 0 1px rgba(43,59,74,.3)',
+                          ? "inset 0 0 0 2px #3d8eff"
+                          : "inset 0 0 0 1px rgba(43,59,74,.3)",
                       padding: 8,
-                      cursor: 'pointer',
-                      ':hover': {
+                      cursor: "pointer",
+                      ":hover": {
                         boxShadow:
                           style.type !== border?.style
-                            ? 'inset 0 0 0 1px rgba(28,39,48,.5)'
+                            ? "inset 0 0 0 1px rgba(28,39,48,.5)"
                             : undefined,
                       },
                     }}
@@ -244,19 +248,18 @@ const ShapeSettings: FC<ShapeSettingsProps> = ({ layers }) => {
             </div>
 
             <Slider
-              label={'Border Weight'}
+              label={"Border Weight"}
               value={border?.weight || 0}
               onChange={updateBorderWeight}
             />
 
-            {layers.length === 1 &&
-              (
-                <Slider
-                  label={'Corner Rounding'}
-                  value={roundedCorners}
-                  onChange={updateRoundedCorners}
-                />
-              )}
+            {layers.length === 1 && (
+              <Slider
+                label={"Corner Rounding"}
+                value={roundedCorners}
+                onChange={updateRoundedCorners}
+              />
+            )}
           </div>
         </Popover>
       </div>

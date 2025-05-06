@@ -5,7 +5,6 @@ import {
   EditorContext,
 } from "canva-editor/components/editor/EditorContext";
 import { useEditorStore } from "canva-editor/hooks/useEditorStore";
-import Sidebar from "canva-editor/layout/Sidebar";
 import EditorContent from "canva-editor/layout/pages/EditorContent";
 import AppLayerSettings from "canva-editor/layout/AppLayerSettings";
 import Preview from "canva-editor/components/editor/Preview";
@@ -13,6 +12,9 @@ import PageThumbnail from "canva-editor/components/editor/PageThumbnail";
 import CloseIcon from "canva-editor/icons/CloseIcon";
 import { dataMapping, pack } from "canva-editor/utils/minifier";
 import CustomHeader from "./CustomHeader";
+import { CustomSidebar } from "./sidebar";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 export type CustomCanvaEditorProps = {
   data?: {
@@ -35,7 +37,6 @@ const CustomCanvaEditor: FC<PropsWithChildren<CustomCanvaEditorProps>> = ({
   config,
   onChanges,
   onDesignNameChanges,
-  isTextTemplate = false,
   isAdmin = false,
   onShare,
   onSaveAsTemplate,
@@ -87,7 +88,6 @@ const CustomCanvaEditor: FC<PropsWithChildren<CustomCanvaEditorProps>> = ({
         <CustomHeader
           isAdmin={isAdmin}
           onShare={onShare}
-          onSaveAsTemplate={onSaveAsTemplate}
           onDownload={onDownload}
         />
 
@@ -95,7 +95,7 @@ const CustomCanvaEditor: FC<PropsWithChildren<CustomCanvaEditorProps>> = ({
         <div className="flex flex-1 overflow-hidden relative">
           {/* Left Sidebar - Tools */}
           <div className="border-r border-gray-200 flex flex-col items-center py-2 overflow-visible z-20 bg-white h-full relative">
-            <Sidebar version={version} />
+            <CustomSidebar version={version} />
           </div>
 
           {/* Main Canvas Area */}
@@ -119,6 +119,18 @@ const CustomCanvaEditor: FC<PropsWithChildren<CustomCanvaEditorProps>> = ({
                   onClick={() => actions.setActivePage(index)}
                 />
               ))}
+
+              {/* Add Page Button */}
+              <div className="p-2">
+                <Button
+                  variant="outline"
+                  className="w-full flex items-center justify-center gap-1 border-dashed"
+                  onClick={() => actions.addPage()}
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Add Page</span>
+                </Button>
+              </div>
             </div>
           </div>
         </div>

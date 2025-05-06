@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable no-undef */
 const { Schema, default: mongoose } = require("mongoose");
 
 const uploadedImageSchema = new Schema({

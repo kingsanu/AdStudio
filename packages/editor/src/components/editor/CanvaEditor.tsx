@@ -22,7 +22,7 @@ import {
 import SaveTextTemplateDialog from "canva-editor/components/editor/SaveTextTemplateDialog";
 import CampaignDialog from "./CampaignDialog";
 import SimpleVideoPreview from "./SimpleVideoPreview";
-import { Save, AlertCircle, CheckCircle, Wand2 } from "lucide-react";
+import { Save, AlertCircle, CheckCircle, Wand2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { API_BASE_URL } from "canva-editor/utils/constants/api";
 import { AnimationProvider } from "../../animations/AnimationController";
@@ -657,6 +657,35 @@ const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
                       onClick={() => actions.setActivePage(index)}
                     />
                   ))}
+
+                  {/* Add Page Button */}
+                  <div css={{ padding: "8px" }}>
+                    <button
+                      css={{
+                        width: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "8px",
+                        padding: "8px 0",
+                        borderRadius: "4px",
+                        border: "1px dashed #d1d5db",
+                        background: "white",
+                        cursor: "pointer",
+                        color: "#374151",
+                        fontSize: "14px",
+                        fontWeight: 500,
+                        "&:hover": {
+                          background: "#f9fafb",
+                          borderColor: "#9ca3af",
+                        },
+                      }}
+                      onClick={() => actions.addPage()}
+                    >
+                      <Plus size={16} />
+                      <span>Add Page</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

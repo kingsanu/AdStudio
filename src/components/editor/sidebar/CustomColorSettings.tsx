@@ -1,12 +1,12 @@
 import React, { FC, Fragment, PropsWithChildren, useMemo } from "react";
-import SettingButton from "./SettingButton";
-import ColorSidebar from "./sidebar/ColorSidebar";
+import SettingButton from "canva-editor/utils/settings/SettingButton";
+import ColorSidebar from "canva-editor/utils/settings/sidebar/ColorSidebar";
 import { useEditor } from "canva-editor/hooks";
 import { getGradientBackground } from "canva-editor/layers";
 import { GradientStyle } from "canva-editor/types";
-import { ColorParser } from "../../color-picker/utils";
+import { ColorParser } from "canva-editor/color-picker/utils";
 
-interface ColorSettingsProps {
+interface CustomColorSettingsProps {
   colors: string[];
   gradient?: { colors: string[]; style: GradientStyle } | null;
   useGradient?: boolean;
@@ -17,7 +17,8 @@ interface ColorSettingsProps {
     style: GradientStyle;
   }) => void;
 }
-const ColorSettings: FC<PropsWithChildren<ColorSettingsProps>> = ({
+
+const CustomColorSettings: FC<PropsWithChildren<CustomColorSettingsProps>> = ({
   colors,
   gradient,
   useGradient,
@@ -44,14 +45,16 @@ const ColorSettings: FC<PropsWithChildren<ColorSettingsProps>> = ({
     return colors
       .map((color) => `linear-gradient(to right, ${color}, ${color})`)
       .join(", ");
-  }, [colors]);
+  }, [colors, gradient]);
+
   return (
     <Fragment>
       <SettingButton
         onClick={() => {
+          // Close any open sidebar tab before opening the color picker
+          actions.setSidebarTab(null);
           actions.setSidebar("CHOOSING_COLOR");
-          console.log(sidebar);
-          console.log(onClickCallback);
+          console.log("[CustomColorSettings] Opening color picker");
           if (onClickCallback) onClickCallback();
         }}
       >
@@ -103,4 +106,4 @@ const ColorSettings: FC<PropsWithChildren<ColorSettingsProps>> = ({
   );
 };
 
-export default ColorSettings;
+export default CustomColorSettings;

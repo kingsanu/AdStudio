@@ -150,7 +150,17 @@ const textTemplateController = {
   // Get all text templates
   getAllTextTemplates: async (req, res) => {
     try {
-      const { userId, isPublic, onlyMine, kw, includePublic } = req.query;
+      const {
+        userId,
+        isPublic,
+        onlyMine,
+        kw,
+        includePublic,
+        ps = 10,
+        pi = 0,
+      } = req.query;
+      const pageSize = parseInt(ps);
+      const pageIndex = parseInt(pi);
 
       // Build query based on parameters
       let query = { templateType: "text" }; // Always filter by templateType
@@ -213,15 +223,33 @@ const textTemplateController = {
         }
       }
 
+      // Get total count for pagination info
+      const totalCount = await TextTemplate.countDocuments(query);
+
+      // Apply pagination
       const textTemplates = await TextTemplate.find(query)
         .select(
           "title description templateUrl thumbnailUrl tags createdAt isPublic userId"
         )
-        .sort("-createdAt");
+        .sort("-createdAt")
+        .skip(pageIndex * pageSize)
+        .limit(pageSize);
 
       console.log("Query:", query);
-      console.log("Found text templates:", textTemplates.length);
-      res.json(textTemplates);
+      console.log(
+        `Found text templates: ${textTemplates.length}, Page: ${pageIndex}, Size: ${pageSize}, Total: ${totalCount}`
+      );
+
+      // Return both the templates and pagination info
+      res.json({
+        data: textTemplates,
+        pagination: {
+          total: totalCount,
+          page: pageIndex,
+          pageSize: pageSize,
+          hasMore: (pageIndex + 1) * pageSize < totalCount,
+        },
+      });
     } catch (error) {
       console.error("Error fetching text templates:", error);
       res.status(500).json({

@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+/* eslint-disable @typescript-eslint/no-var-requires */
 const WhatsAppSettings = require("../models/whatsappSettings");
 const axios = require("axios");
 
@@ -240,10 +242,18 @@ const whatsappSettingsController = {
         // Update the connection status based on the response
         let connectionStatus = "disconnected";
 
-        if (response.data && response.data.status) {
-          if (response.data.status === "CONNECTED") {
+        // Handle both response formats: either status or state property
+        if (response.data) {
+          if (response.data.success && response.data.state === "CONNECTED") {
+            // New response format: { success: true, state: "CONNECTED", message: "session_connected" }
             connectionStatus = "connected";
-          } else if (response.data.status === "CONNECTING") {
+          } else if (response.data.status === "CONNECTED") {
+            // Old response format with status property
+            connectionStatus = "connected";
+          } else if (
+            response.data.status === "CONNECTING" ||
+            response.data.state === "CONNECTING"
+          ) {
             connectionStatus = "connecting";
           } else {
             connectionStatus = "disconnected";

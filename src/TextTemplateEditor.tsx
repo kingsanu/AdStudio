@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CanvaEditor } from "canva-editor/components/editor";
 import { useState, useEffect } from "react";
@@ -19,7 +20,7 @@ const TextTemplateEditor = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const handleOnChanges = (changes: any) => {
+  const handleOnChanges = (_changes: any) => {
     // console.log("On changes: ", changes);
 
     setSaving(true);
