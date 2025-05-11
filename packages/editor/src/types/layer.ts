@@ -14,6 +14,7 @@ export type LayerComponentProps = {
   transparency?: number;
   text?: string;
   image?: ImageContentProps["image"] | null;
+  name?: string;
 };
 
 export type GradientStyle =

@@ -37,12 +37,11 @@ const CanvaEditorWithCustomHeader: FC<CanvaEditorWithCustomHeaderProps> = ({
   useEffect(() => {
     if (editorContainerRef.current) {
       // Find the original header
-      const originalHeader = editorContainerRef.current.querySelector(
-        ".editor-header"
-      );
+      const originalHeader =
+        editorContainerRef.current.querySelector(".editor-header");
 
       // If found, replace it with our custom header
-      if (originalHeader) {
+      if (originalHeader && originalHeader instanceof HTMLElement) {
         originalHeader.style.display = "none";
       }
     }
@@ -51,25 +50,25 @@ const CanvaEditorWithCustomHeader: FC<CanvaEditorWithCustomHeaderProps> = ({
   return (
     <div className="h-screen overflow-hidden" ref={editorContainerRef}>
       {/* The CanvaEditor component */}
+      {/* Render the custom header separately */}
+      <div className="absolute top-0 left-0 right-0 z-10">
+        <CustomHeader isAdmin={isAdmin} onShare={onShare} />
+      </div>
+
+      {/* The CanvaEditor component */}
       <CanvaEditor
         data={data}
         config={config}
         onChanges={onChanges}
         onDesignNameChanges={onDesignNameChanges}
         isTextTemplate={isTextTemplate}
-        customHeader={
-          <CustomHeader
-            isAdmin={isAdmin}
-            onShare={onShare}
-            onSaveAsTemplate={onSaveAsTemplate}
-          />
-        }
         {...rest}
       />
 
       {/* CSS to hide horizontal scrollbars */}
-      <style dangerouslySetInnerHTML={{
-        __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
           /* Hide horizontal scrollbars */
           .horizontal-scroll::-webkit-scrollbar {
             height: 0;
@@ -79,8 +78,9 @@ const CanvaEditorWithCustomHeader: FC<CanvaEditorWithCustomHeaderProps> = ({
             scrollbar-width: none;
             -ms-overflow-style: none;
           }
-        `
-      }} />
+        `,
+        }}
+      />
     </div>
   );
 };

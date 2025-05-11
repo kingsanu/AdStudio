@@ -5,9 +5,33 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { textTemplateService } from "./services/textTemplateService";
 import { toast } from "sonner";
 import axios from "axios";
-import { GET_TEMPLATE_ENDPOINT } from "./utils/constants/api";
+// Import from canva-editor instead of local path
+import { GET_TEMPLATE_ENDPOINT } from "canva-editor/utils/constants/api";
 import { unpack } from "canva-editor/utils/minifier";
-import { empty } from "./sampleData";
+// Create a local empty template since the import is missing
+const empty = {
+  pages: [
+    {
+      name: "Page 1",
+      notes: "",
+      layers: {
+        ROOT: {
+          type: { resolvedName: "RootLayer" },
+          props: {
+            boxSize: { width: 1640, height: 924 },
+            position: { x: 0, y: 0 },
+            rotate: 0,
+            color: "rgb(255, 255, 255)",
+            image: null,
+          },
+          locked: false,
+          child: [],
+          parent: null,
+        },
+      },
+    },
+  ],
+};
 import { Save } from "lucide-react";
 import SaveTextTemplateDialog from "../packages/editor/src/components/editor/SaveTextTemplateDialog";
 
@@ -382,7 +406,7 @@ const TextTemplateEditor = () => {
           onClose={() => setShowSaveDialog(false)}
           initialName={name}
           onNameChange={(newName) => setName(newName)}
-          editorData={textData}
+          // editorData prop is not needed as the dialog uses useEditor hook
         />
       )}
     </>

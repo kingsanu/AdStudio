@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Player } from "@remotion/player";
 import { SlideshowComposition } from "../../remotion/SlideshowComposition";
 import { Download, X } from "lucide-react";
@@ -155,7 +155,7 @@ const RemotionPreview: React.FC<RemotionPreviewProps> = ({
         <div className="p-6 flex flex-col items-center">
           <div className="w-full aspect-video bg-black rounded-lg overflow-hidden mb-6">
             <Player
-              component={SlideshowComposition}
+              component={SlideshowComposition as any}
               durationInFrames={totalFrames}
               fps={fps}
               compositionWidth={1920}

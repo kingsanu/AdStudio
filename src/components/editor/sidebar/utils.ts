@@ -56,7 +56,7 @@ export const processTemplateData = (
     if (!data) return false;
     console.log("Processing template data:", data);
 
-    let rootId: string;
+    let rootId = "ROOT"; // Initialize with a default value
     let allLayers: SerializedLayers = {};
 
     if (typeof data === "string") {
@@ -149,7 +149,7 @@ export const processTemplateData = (
                 !layerIds.some(
                   (otherId) =>
                     allLayers[otherId]?.child?.includes(id) ||
-                    allLayers[otherId]?.be?.includes(id)
+                    (allLayers[otherId] as any)?.be?.includes(id)
                 )
             ) || layerIds[0];
         }

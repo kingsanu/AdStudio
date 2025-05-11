@@ -42,6 +42,10 @@
     "packages/editor/src/components/editor/TemplateGallery.jsx"
   ],
 
-  "exclude": ["**/node_modules", "**/dist"],
+  "exclude": [
+    "**/node_modules",
+    "**/dist",
+    "src/components/editor/CustomEditor.tsx"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

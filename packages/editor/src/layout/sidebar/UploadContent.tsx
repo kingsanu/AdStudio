@@ -333,7 +333,7 @@ const UploadContent: FC<UploadContentProps> = ({ visibility, onClose }) => {
 
           // After successful upload, refresh the user's images by invalidating the query
           // This will trigger a refetch of the first page
-          await fetchNextPage({ pageParam: 0 });
+          await fetchNextPage();
         } catch (error) {
           // Handle upload error
           console.error("Failed to upload image:", error);

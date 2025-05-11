@@ -460,9 +460,8 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
     isError: boolean,
     isExpanded: boolean,
     sectionKey: keyof typeof expandedSections,
-    isFetchingNext?: boolean,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    hasNextPage?: boolean // Used for API consistency but not needed in the component
+    isFetchingNext?: boolean
+    // Removed hasNextPage parameter as it's not used in the function body
   ) => {
     // If searching, show all items without "View More" button
     const showAll = isExpanded || !!keyword;
@@ -883,8 +882,7 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
               isErrorBackgrounds,
               expandedSections.backgrounds,
               "backgrounds",
-              isFetchingNextBackgrounds,
-              hasNextBackgrounds
+              isFetchingNextBackgrounds
             )}
 
             {renderSection(
@@ -894,8 +892,7 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
               isErrorIllustrations,
               expandedSections.illustrations,
               "illustrations",
-              isFetchingNextIllustrations,
-              hasNextIllustrations
+              isFetchingNextIllustrations
             )}
 
             {renderSection(
@@ -905,8 +902,7 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
               isErrorIcons,
               expandedSections.icons,
               "icons",
-              isFetchingNextIcons,
-              hasNextIcons
+              isFetchingNextIcons
             )}
 
             {renderSection(
@@ -916,8 +912,7 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
               isErrorThreeDImages,
               expandedSections.threeDImages,
               "threeDImages",
-              isFetchingNextThreeDImages,
-              hasNextThreeDImages
+              isFetchingNextThreeDImages
             )}
           </div>
         </>

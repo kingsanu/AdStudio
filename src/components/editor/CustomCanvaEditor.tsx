@@ -36,10 +36,10 @@ const CustomCanvaEditor: FC<PropsWithChildren<CustomCanvaEditorProps>> = ({
   data,
   config,
   onChanges,
-  onDesignNameChanges,
+  onDesignNameChanges: _onDesignNameChanges, // Rename to avoid unused variable warning
   isAdmin = false,
   onShare,
-  onSaveAsTemplate,
+  onSaveAsTemplate: _onSaveAsTemplate, // Rename to avoid unused variable warning
   onDownload,
 }) => {
   const version = "1.0.69";

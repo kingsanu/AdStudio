@@ -1,4 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+/**
+ * NOTE: This file is not currently being used in the application.
+ * It contains TypeScript errors that need to be fixed before it can be used.
+ * The application is using CustomCanvaEditor.tsx or CanvaEditorWithCustomHeader.tsx instead.
+ */
 import { FC, PropsWithChildren, useEffect, useState, useRef } from "react";
 import { EditorConfig, EditorContext } from "canva-editor/components/editor";
 import { CanvaEditor } from "canva-editor/components/editor";

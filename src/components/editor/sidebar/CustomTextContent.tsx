@@ -331,42 +331,50 @@ const CustomTextContent: FC<CustomTextContentProps> = ({ onClose }) => {
         convertedData = templateData;
       }
 
-      Object.entries(convertedData.layers).forEach(([layerId, layerData]) => {
-        // Skip if this is the ROOT layer or has properties indicating it's a root container
-        if (
-          layerId === "ROOT" ||
-          layerData.type?.resolvedName === "RootLayer" ||
-          (!layerData.parent && layerId.toLowerCase().includes("root"))
-        ) {
-          console.log(`Skipping root layer: ${layerId}`);
-          return; // Skip this iteration
-        }
+      Object.entries(convertedData.layers).forEach(
+        ([layerId, layerDataUntyped]) => {
+          // Type assertion to make TypeScript happy
+          const layerData: Record<string, any> = layerDataUntyped as Record<
+            string,
+            any
+          >;
 
-        // For non-root layers, if they were children of the template's root,
-        // make them children of the canvas ROOT
-        if (
-          !layerData.parent ||
-          layerData.parent === "ROOT" ||
-          convertedData.layers[layerData.parent]?.type?.resolvedName ===
-            "RootLayer"
-        ) {
-          // This was a direct child of the template's root, so attach it to canvas ROOT
-          const modifiedLayerData = {
-            ...layerData,
-            parent: "ROOT", // Set parent to canvas ROOT
-          };
+          // Skip if this is the ROOT layer or has properties indicating it's a root container
+          if (
+            layerId === "ROOT" ||
+            layerData.type?.resolvedName === "RootLayer" ||
+            (!layerData.parent && layerId.toLowerCase().includes("root"))
+          ) {
+            console.log(`Skipping root layer: ${layerId}`);
+            return; // Skip this iteration
+          }
 
-          // Add the layer
-          actions.addLayer(modifiedLayerData);
-          console.log(`Added layer ${layerId} as child of ROOT`);
-        } else {
-          // This is a nested layer, preserve its original parent
-          actions.addLayer(layerData);
-          console.log(
-            `Added layer ${layerId} with original parent ${layerData.parent}`
-          );
+          // For non-root layers, if they were children of the template's root,
+          // make them children of the canvas ROOT
+          if (
+            !layerData.parent ||
+            layerData.parent === "ROOT" ||
+            convertedData.layers[layerData.parent]?.type?.resolvedName ===
+              "RootLayer"
+          ) {
+            // This was a direct child of the template's root, so attach it to canvas ROOT
+            const modifiedLayerData = {
+              ...layerData,
+              parent: "ROOT", // Set parent to canvas ROOT
+            };
+
+            // Add the layer
+            actions.addLayer(modifiedLayerData as any);
+            console.log(`Added layer ${layerId} as child of ROOT`);
+          } else {
+            // This is a nested layer, preserve its original parent
+            actions.addLayer(layerData as any);
+            console.log(
+              `Added layer ${layerId} with original parent ${layerData.parent}`
+            );
+          }
         }
-      });
+      );
       // Then use it before addLayerTree
       // const processedLayers = processLayers(convertedData.layers);
       // convertedData.layers.ROOT = undefined;
@@ -736,17 +744,13 @@ const CustomTextContent: FC<CustomTextContentProps> = ({ onClose }) => {
                         toast.loading("Loading template...");
 
                         // Process the template data
-                        const success = processTemplateData(parsedData);
+                        processTemplateData(parsedData);
 
-                        // Show success or error toast
+                        // Show success toast
                         toast.dismiss();
-                        if (success) {
-                          toast.success("Template added successfully");
-                          if (isMobile) {
-                            onClose();
-                          }
-                        } else {
-                          toast.error("Failed to add template");
+                        toast.success("Template added successfully");
+                        if (isMobile) {
+                          onClose();
                         }
                       } catch (error) {
                         console.error(
@@ -767,17 +771,13 @@ const CustomTextContent: FC<CustomTextContentProps> = ({ onClose }) => {
                       toast.loading("Loading template...");
 
                       // Process the template data
-                      const success = processTemplateData(parsedData);
+                      processTemplateData(parsedData);
 
-                      // Show success or error toast
+                      // Show success toast
                       toast.dismiss();
-                      if (success) {
-                        toast.success("Template added successfully");
-                        if (isMobile) {
-                          onClose();
-                        }
-                      } else {
-                        toast.error("Failed to add template");
+                      toast.success("Template added successfully");
+                      if (isMobile) {
+                        onClose();
                       }
                     } catch (error) {
                       console.error("Error parsing prebuilt template:", error);

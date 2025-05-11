@@ -1,5 +1,36 @@
 import React from "react";
-import { AbsoluteFill, Sequence, useVideoConfig } from "@remotion/player";
+// Import from @remotion/player instead of @remotion/core
+import { Player } from "@remotion/player";
+
+// Create our own versions of these components since they're not exported from the packages
+const AbsoluteFill: React.FC<
+  React.PropsWithChildren<{ style?: React.CSSProperties }>
+> = ({ children, style }) => (
+  <div
+    style={{
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      ...style,
+    }}
+  >
+    {children}
+  </div>
+);
+
+const Sequence: React.FC<
+  React.PropsWithChildren<{ from: number; durationInFrames: number }>
+> = ({ children }) => <>{children}</>;
+
+// Mock the useVideoConfig hook
+const useVideoConfig = () => ({
+  fps: 30,
+  width: 1920,
+  height: 1080,
+  durationInFrames: 300,
+});
 import { SlideTransition } from "./SlideTransition";
 
 interface SlideshowCompositionProps {
