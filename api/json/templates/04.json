@@ -19,8 +19,8 @@
           "rotate": 0,
           "color": "rgb(255, 255, 255)",
           "image": {
-            "url": "http://localhost:4000/images/photos/birthdays/007.jpg",
-            "thumb": "http://localhost:4000/images/photos/birthdays/007.jpg",
+            "url": "https://adstudioserver.foodyqueen.com/images/photos/birthdays/007.jpg",
+            "thumb": "https://adstudioserver.foodyqueen.com/images/photos/birthdays/007.jpg",
             "boxSize": {
               "width": 1640,
               "height": 2460
@@ -64,8 +64,8 @@
               "y": -279.09426224092044
             },
             "rotate": 0,
-            "thumb": "http://localhost:4000/images/photos/scenes/003.jpg",
-            "url": "http://localhost:4000/images/photos/scenes/003.jpg"
+            "thumb": "https://adstudioserver.foodyqueen.com/images/photos/scenes/003.jpg",
+            "url": "https://adstudioserver.foodyqueen.com/images/photos/scenes/003.jpg"
           },
           "transparency": 1
         },

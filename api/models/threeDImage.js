@@ -1,20 +1,21 @@
-const mongoose = require('mongoose');
+/* eslint-disable no-undef */
+/* eslint-disable @typescript-eslint/no-var-requires */
+const mongoose = require("mongoose");
 
-const ThreeDImageSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
+const ThreeDImageSchema = new mongoose.Schema(
+  {
+    img: {
+      type: String,
+      required: true,
+    },
+    desc: {
+      type: String,
+      default: "",
+    },
   },
-  url: {
-    type: String,
-    required: true,
-  },
-  category: {
-    type: String,
-    required: true,
-  },
-});
+  {
+    timestamps: true,
+  }
+);
 
-const ThreeDImage = mongoose.model('ThreeDImage', ThreeDImageSchema);
-
-module.exports = ThreeDImage;
+module.exports = mongoose.model("ThreeDImage", ThreeDImageSchema);

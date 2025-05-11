@@ -19,8 +19,8 @@
           "rotate": 0,
           "color": "rgb(217, 217, 217)",
           "image": {
-            "url": "http://localhost:4000/images/photos/sports/002.jpg",
-            "thumb": "http://localhost:4000/images/photos/sports/002.jpg",
+            "url": "https://adstudioserver.foodyqueen.com/images/photos/sports/002.jpg",
+            "thumb": "https://adstudioserver.foodyqueen.com/images/photos/sports/002.jpg",
             "boxSize": {
               "width": 900,
               "height": 1350

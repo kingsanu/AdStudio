@@ -110,7 +110,6 @@ const pack = (obj: any, mapping: any = {}, charCode = 1): any => {
   for (const key in obj) {
     if (obj.hasOwnProperty(key)) {
       if (!mapping[key]) {
-        console.log(key);
         if (!isEditorID(key)) {
           mapping[key] = getAlphabetCharByOrder(charCode);
           charCode++;
@@ -130,42 +129,23 @@ const pack = (obj: any, mapping: any = {}, charCode = 1): any => {
 };
 
 const unpack = (packed: any, depth = 0, path = "root"): any => {
-  const indent = "  ".repeat(depth);
-  console.log(
-    `${indent}[UNPACK] Processing at ${path}, type: ${typeof packed}, value:`,
-    packed
-  );
-
   // Handle null or undefined
   if (packed === null || packed === undefined) {
-    console.log(`${indent}[UNPACK] Returning null/undefined value at ${path}`);
     return packed;
   }
 
   // Handle arrays
   if (Array.isArray(packed)) {
-    console.log(
-      `${indent}[UNPACK] Processing array at ${path} with ${packed.length} items`
-    );
     const unpackedArray: any = [];
     for (let i = 0; i < packed.length; i++) {
-      console.log(`${indent}[UNPACK] Processing array item ${i} at ${path}`);
       unpackedArray.push(unpack(packed[i], depth + 1, `${path}[${i}]`));
     }
-    console.log(
-      `${indent}[UNPACK] Finished array at ${path}, result:`,
-      unpackedArray
-    );
+
     return unpackedArray;
   }
 
   // Handle objects
   if (typeof packed === "object") {
-    console.log(
-      `${indent}[UNPACK] Processing object at ${path} with ${
-        Object.keys(packed).length
-      } keys`
-    );
     const unpackedObj: any = {};
     for (const key in packed) {
       if (packed.hasOwnProperty(key)) {
@@ -178,26 +158,15 @@ const unpack = (packed: any, depth = 0, path = "root"): any => {
         );
         if (originalMappingKey) {
           originalKey = originalMappingKey;
-          console.log(
-            `${indent}[UNPACK] Found key in original mapping: '${key}' -> '${originalKey}'`
-          );
         }
         // Then check if this is a key from the new format (aq -> name)
         else if (dataMapping[key]) {
           originalKey = dataMapping[key];
-          console.log(
-            `${indent}[UNPACK] Found key in new format mapping: '${key}' -> '${originalKey}'`
-          );
         }
-        console.log(
-          `${indent}[UNPACK] Key mapping: '${key}' -> '${originalKey}' at ${path}`
-        );
 
         // Recursively unpack the value
         const value = packed[key];
-        console.log(
-          `${indent}[UNPACK] Processing value for key '${originalKey}' at ${path}.${originalKey}`
-        );
+
         unpackedObj[originalKey] = unpack(
           value,
           depth + 1,
@@ -205,17 +174,10 @@ const unpack = (packed: any, depth = 0, path = "root"): any => {
         );
       }
     }
-    console.log(
-      `${indent}[UNPACK] Finished object at ${path}, result:`,
-      unpackedObj
-    );
+
     return unpackedObj;
   }
 
-  // Handle primitive values (string, number, boolean)
-  console.log(
-    `${indent}[UNPACK] Returning primitive value at ${path}: ${packed}`
-  );
   return packed;
 };
 

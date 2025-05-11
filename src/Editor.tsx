@@ -268,7 +268,7 @@ const Editor = () => {
         }}
         config={{
           apis: {
-            url: "http://localhost:4000/api",
+            url: "https://adstudioserver.foodyqueen.com/api",
             searchFonts: "/fonts",
             searchTemplates: "/templates",
             searchTexts: "/texts",
@@ -290,7 +290,7 @@ const Editor = () => {
             searchShape: "Search shapes",
             searchFrame: "Search frames",
           },
-          editorAssetsUrl: "http://localhost:4000/editor",
+          editorAssetsUrl: "https://adstudioserver.foodyqueen.com/editor",
           imageKeywordSuggestions: "animal,sport,love,scene,dog,cat,whale",
           templateKeywordSuggestions:
             "mother,sale,discount,fashion,model,deal,motivation,quote",

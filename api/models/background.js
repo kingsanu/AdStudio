@@ -1,20 +1,21 @@
-import mongoose from 'mongoose';
+/* eslint-disable no-undef */
+/* eslint-disable @typescript-eslint/no-var-requires */
+const mongoose = require("mongoose");
 
-const backgroundSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
+const backgroundSchema = new mongoose.Schema(
+  {
+    img: {
+      type: String,
+      required: true,
+    },
+    desc: {
+      type: String,
+      default: "",
+    },
   },
-  url: {
-    type: String,
-    required: true,
-  },
-  category: {
-    type: String,
-    required: true,
-  },
-});
+  {
+    timestamps: true,
+  }
+);
 
-const Background = mongoose.model('Background', backgroundSchema);
-
-export default Background;
+module.exports = mongoose.model("Background", backgroundSchema);
