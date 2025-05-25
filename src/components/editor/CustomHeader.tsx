@@ -4,11 +4,12 @@ import {
   EditorContext,
   EditorContext as EditorContextType,
 } from "canva-editor/components/editor/EditorContext";
-import { Undo, Redo, Download, Share, Lightbulb } from "lucide-react";
+import { Undo, Redo, Download, Share, Lightbulb, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import HeaderFileMenu from "canva-editor/layout/sidebar/components/HeaderFileMenu";
 import CampaignDialog from "canva-editor/components/editor/CampaignDialog";
+import PublishKioskDialog from "@/components/editor/PublishKioskDialog";
 import SyncStatusIndicator from "canva-editor/components/sync/SyncStatusIndicator";
 import { useSyncService } from "canva-editor/hooks/useSyncService";
 
@@ -40,6 +41,7 @@ interface CustomHeaderProps {
   onShare?: () => void;
   onDownload?: () => void;
   isAdmin?: boolean;
+  isKiosk?: boolean;
   editorContext?: CustomEditorContext; // Use our custom context type
 }
 
@@ -47,10 +49,12 @@ const CustomHeader: FC<CustomHeaderProps> = ({
   // isAdmin,
   // onShare,
   onDownload,
+  isKiosk = false,
   editorContext,
 }) => {
-  // State for campaign dialog
+  // State for dialogs
   const [showCampaignDialog, setShowCampaignDialog] = useState(false);
+  const [showPublishKioskDialog, setShowPublishKioskDialog] = useState(false);
 
   // Reference to the page content element for generating previews
   const pageContentRef = useRef<HTMLElement | null>(null);
@@ -129,6 +133,11 @@ const CustomHeader: FC<CustomHeaderProps> = ({
     setShowCampaignDialog(true);
   };
 
+  // Handle publish kiosk
+  const handlePublishKiosk = () => {
+    setShowPublishKioskDialog(true);
+  };
+
   // Handle undo
   const handleUndo = () => {
     if (actions.undo) {
@@ -153,6 +162,12 @@ const CustomHeader: FC<CustomHeaderProps> = ({
       <CampaignDialog
         open={showCampaignDialog}
         onClose={() => setShowCampaignDialog(false)}
+      />
+
+      {/* Publish Kiosk Dialog */}
+      <PublishKioskDialog
+        open={showPublishKioskDialog}
+        onClose={() => setShowPublishKioskDialog(false)}
       />
 
       <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-neutral-900">
@@ -252,14 +267,25 @@ const CustomHeader: FC<CustomHeaderProps> = ({
           </Button>
 
           {/* Share Button */}
-          <Button
-            size="sm"
-            className="h-9 bg-blue-600 hover:bg-blue-700"
-            onClick={handleShare}
-          >
-            <Share className="mr-2 h-4 w-4" />
-            Share
-          </Button>
+          {isKiosk ? (
+            <Button
+              size="sm"
+              className="h-9 bg-green-600 hover:bg-green-700"
+              onClick={handlePublishKiosk}
+            >
+              <Monitor className="mr-2 h-4 w-4" />
+              Publish to Kiosk
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              className="h-9 bg-blue-600 hover:bg-blue-700"
+              onClick={handleShare}
+            >
+              <Share className="mr-2 h-4 w-4" />
+              Share
+            </Button>
+          )}
         </div>
       </div>
     </>

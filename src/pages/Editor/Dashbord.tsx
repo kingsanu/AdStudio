@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import "@/styles/hide-scrollbar.css";
+import axios from "axios";
 import {
   Search,
   Plus,
@@ -25,6 +26,7 @@ import {
   Edit,
   Download,
   Layout,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,6 +60,21 @@ export default function Dashboard() {
   const [hasMoreUserTemplates, setHasMoreUserTemplates] = useState(true);
   const [publicTemplatePage, setPublicTemplatePage] = useState(1);
   const [userTemplatePage, setUserTemplatePage] = useState(1);
+
+  // Search dropdown state
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  const [searchResults, setSearchResults] = useState<{
+    designTemplates: any[];
+    publicTemplates: Template[];
+    userTemplates: Template[];
+  }>({
+    designTemplates: [],
+    publicTemplates: [],
+    userTemplates: [],
+  });
+  const [isSearching, setIsSearching] = useState(false);
+  const searchDropdownRef = useRef<HTMLDivElement>(null);
+
   const templatesScrollRef = useRef<HTMLDivElement>(null);
   const lastPublicTemplateRef = useRef<HTMLDivElement>(null);
   const lastUserTemplateRef = useRef<HTMLDivElement>(null);
@@ -66,6 +83,122 @@ export default function Dashboard() {
 
   // Track if we've already attempted to load user details
   const userDetailsAttempted = useRef(false);
+
+  // Design templates - memoized to prevent re-creation on every render
+  const designTemplates = useMemo(
+    () => [
+      {
+        id: 1,
+        title: "Blank Design",
+        icon: <FileText className="h-6 w-6" />,
+        color: "bg-white dark:bg-neutral-800",
+        textColor: "text-blue-600 dark:text-blue-400",
+        dimensions: { width: 1080, height: 1080 },
+        backgroundColor: "rgb(255, 255, 255)",
+      },
+      {
+        id: 12,
+        title: "Kiosk Display",
+        icon: <Layout className="h-6 w-6" />,
+        color: "bg-blue-50 dark:bg-blue-900/20",
+        textColor: "text-blue-600 dark:text-blue-400",
+        dimensions: { width: 900, height: 1200 },
+        backgroundColor: "rgb(239, 246, 255)",
+        isKiosk: true,
+      },
+      {
+        id: 2,
+        title: "AI Calling",
+        icon: <Phone className="h-6 w-6" />,
+        color: "bg-purple-50 dark:bg-purple-900/20",
+        textColor: "text-purple-600 dark:text-purple-400",
+        dimensions: { width: 1080, height: 1920 },
+        backgroundColor: "rgb(245, 243, 255)",
+      },
+      {
+        id: 3,
+        title: "Self Order Video",
+        icon: <Video className="h-6 w-6" />,
+        color: "bg-green-50 dark:bg-green-900/20",
+        textColor: "text-green-600 dark:text-green-400",
+        dimensions: { width: 1920, height: 1080 },
+        backgroundColor: "rgb(240, 253, 244)",
+      },
+      {
+        id: 4,
+        title: "WhatsApp Campaign",
+        icon: <MessageSquare className="h-6 w-6" />,
+        color: "bg-emerald-50 dark:bg-emerald-900/20",
+        textColor: "text-emerald-600 dark:text-emerald-400",
+        dimensions: { width: 800, height: 800 },
+        backgroundColor: "rgb(236, 253, 245)",
+      },
+      {
+        id: 5,
+        title: "Coupon Code Design",
+        icon: <Tag className="h-6 w-6" />,
+        color: "bg-yellow-50 dark:bg-yellow-900/20",
+        textColor: "text-yellow-600 dark:text-yellow-400",
+        dimensions: { width: 1200, height: 628 },
+        backgroundColor: "rgb(254, 252, 232)",
+      },
+      {
+        id: 6,
+        title: "Royalty Program",
+        icon: <Award className="h-6 w-6" />,
+        color: "bg-red-50 dark:bg-red-900/20",
+        textColor: "text-red-600 dark:text-red-400",
+        dimensions: { width: 1080, height: 1080 },
+        backgroundColor: "rgb(254, 242, 242)",
+      },
+      {
+        id: 7,
+        title: "Google Feedback",
+        icon: <ThumbsUp className="h-6 w-6" />,
+        color: "bg-orange-50 dark:bg-orange-900/20",
+        textColor: "text-orange-600 dark:text-orange-400",
+        dimensions: { width: 1200, height: 628 },
+        backgroundColor: "rgb(255, 247, 237)",
+      },
+      {
+        id: 8,
+        title: "Birthday Wishes",
+        icon: <Cake className="h-6 w-6" />,
+        color: "bg-pink-50 dark:bg-pink-900/20",
+        textColor: "text-pink-600 dark:text-pink-400",
+        dimensions: { width: 1080, height: 1080 },
+        backgroundColor: "rgb(253, 242, 248)",
+      },
+      {
+        id: 9,
+        title: "Anniversary Wishes",
+        icon: <Gift className="h-6 w-6" />,
+        color: "bg-indigo-50 dark:bg-indigo-900/20",
+        textColor: "text-indigo-600 dark:text-indigo-400",
+        dimensions: { width: 1080, height: 1080 },
+        backgroundColor: "rgb(238, 242, 255)",
+      },
+      {
+        id: 10,
+        title: "New Event",
+        icon: <Calendar className="h-6 w-6" />,
+        color: "bg-cyan-50 dark:bg-cyan-900/20",
+        textColor: "text-cyan-600 dark:text-cyan-400",
+        dimensions: { width: 1200, height: 628 },
+        backgroundColor: "rgb(236, 254, 255)",
+      },
+      {
+        id: 11,
+        title: "New Food Launch",
+        icon: <Utensils className="h-6 w-6" />,
+        color: "bg-amber-50 dark:bg-amber-900/20",
+        textColor: "text-amber-600 dark:text-amber-400",
+        dimensions: { width: 1080, height: 1080 },
+        backgroundColor: "rgb(255, 251, 235)",
+      },
+    ],
+    []
+  );
 
   // Fetch user details when component mounts - only once
   useEffect(() => {
@@ -94,43 +227,67 @@ export default function Dashboard() {
     navigate("/classic-editor");
   };
 
-  // Fetch public templates
-  const fetchPublicTemplates = useCallback(async (page = 1, append = false) => {
-    if (page === 1) {
-      setIsLoadingTemplates(true);
-    } else {
-      setLoadingMoreTemplates(true);
-    }
-
-    try {
-      const templates = await templateService.getTemplates({
-        isPublic: true,
-        page,
-        limit: 8,
-      });
-
-      if (templates.length === 0) {
-        setHasMoreTemplates(false);
+  // Fetch public templates using the working API endpoint
+  const fetchPublicTemplates = useCallback(
+    async (page = 1, append = false, keyword = "") => {
+      if (page === 1) {
+        setIsLoadingTemplates(true);
       } else {
-        if (append) {
-          setPublicTemplates((prev) => [...prev, ...templates]);
-        } else {
-          setPublicTemplates(templates);
-        }
-        setPublicTemplatePage(page);
+        setLoadingMoreTemplates(true);
       }
-    } catch (error) {
-      console.error("Error fetching public templates:", error);
-      toast.error("Failed to load templates");
-    } finally {
-      setIsLoadingTemplates(false);
-      setLoadingMoreTemplates(false);
-    }
-  }, []);
 
-  // Fetch user templates
+      try {
+        // Use the same API endpoint as CustomTemplateContent.tsx
+        let apiUrl = "https://adstudioserver.foodyqueen.com/api/templates";
+        const params = new URLSearchParams();
+
+        // Convert page to page index (0-based)
+        params.append("ps", "8"); // page size
+        params.append("pi", (page - 1).toString()); // page index (0-based)
+        params.append("isPublic", "true");
+
+        if (keyword) {
+          params.append("kw", keyword);
+        }
+
+        apiUrl += `?${params.toString()}`;
+
+        console.log(`[Dashboard] Fetching public templates from: ${apiUrl}`);
+
+        const response = await axios.get(apiUrl);
+        const templates = response.data.data || response.data || [];
+
+        console.log(`[Dashboard] Public templates response:`, {
+          keyword,
+          page,
+          templatesCount: templates.length,
+          templates: templates.slice(0, 2), // Log first 2 for debugging
+        });
+
+        if (templates.length === 0) {
+          setHasMoreTemplates(false);
+        } else {
+          if (append) {
+            setPublicTemplates((prev) => [...prev, ...templates]);
+          } else {
+            setPublicTemplates(templates);
+          }
+          setPublicTemplatePage(page);
+        }
+      } catch (error) {
+        console.error("Error fetching public templates:", error);
+        toast.error("Failed to load templates");
+      } finally {
+        setIsLoadingTemplates(false);
+        setLoadingMoreTemplates(false);
+      }
+    },
+    []
+  );
+
+  // Fetch user templates using the working API endpoint
   const fetchUserTemplates = useCallback(
-    async (page = 1, append = false) => {
+    async (page = 1, append = false, keyword = "") => {
       if (!user?.userId) return;
 
       if (page === 1) {
@@ -140,11 +297,33 @@ export default function Dashboard() {
       }
 
       try {
-        const templates = await templateService.getTemplates({
-          userId: user.userId,
-          onlyMine: true,
+        // Use the same API endpoint as TemplateContent.tsx
+        let apiUrl = "https://adstudioserver.foodyqueen.com/api/templates";
+        const params = new URLSearchParams();
+
+        // Convert page to page index (0-based)
+        params.append("ps", "4"); // page size
+        params.append("pi", (page - 1).toString()); // page index (0-based)
+        params.append("userId", user.userId);
+        params.append("onlyMine", "true");
+
+        if (keyword) {
+          params.append("kw", keyword);
+        }
+
+        apiUrl += `?${params.toString()}`;
+
+        console.log(`[Dashboard] Fetching user templates from: ${apiUrl}`);
+
+        const response = await axios.get(apiUrl);
+        const templates = response.data.data || response.data || [];
+
+        console.log(`[Dashboard] User templates response:`, {
+          keyword,
           page,
-          limit: 4,
+          userId: user.userId,
+          templatesCount: templates.length,
+          templates: templates.slice(0, 2), // Log first 2 for debugging
         });
 
         if (templates.length === 0) {
@@ -168,6 +347,91 @@ export default function Dashboard() {
     [user?.userId]
   );
 
+  // Fetch search results for dropdown
+  const fetchSearchResults = useCallback(
+    async (keyword: string) => {
+      if (!keyword.trim()) {
+        setSearchResults({
+          designTemplates: [],
+          publicTemplates: [],
+          userTemplates: [],
+        });
+        setShowSearchDropdown(false);
+        setIsSearching(false);
+        return;
+      }
+
+      setIsSearching(true);
+      setShowSearchDropdown(true);
+      console.log(`[Dashboard] Searching for: ${keyword}`);
+
+      try {
+        // Filter design templates
+        const filteredDesignTemplates = designTemplates.filter((template) =>
+          template.title.toLowerCase().includes(keyword.toLowerCase())
+        );
+
+        // Fetch search results for public templates
+        let publicApiUrl =
+          "https://adstudioserver.foodyqueen.com/api/templates";
+        const publicParams = new URLSearchParams();
+        publicParams.append("ps", "6"); // Limit results for dropdown
+        publicParams.append("pi", "0");
+        publicParams.append("isPublic", "true");
+        publicParams.append("kw", keyword);
+        publicApiUrl += `?${publicParams.toString()}`;
+
+        const publicResponse = await axios.get(publicApiUrl);
+        const publicSearchResults =
+          publicResponse.data.data || publicResponse.data || [];
+
+        // Fetch search results for user templates
+        let userSearchResults: Template[] = [];
+        if (user?.userId) {
+          let userApiUrl =
+            "https://adstudioserver.foodyqueen.com/api/templates";
+          const userParams = new URLSearchParams();
+          userParams.append("ps", "4"); // Limit results for dropdown
+          userParams.append("pi", "0");
+          userParams.append("userId", user.userId);
+          userParams.append("onlyMine", "true");
+          userParams.append("kw", keyword);
+          userApiUrl += `?${userParams.toString()}`;
+
+          const userResponse = await axios.get(userApiUrl);
+          userSearchResults = userResponse.data.data || userResponse.data || [];
+        }
+
+        console.log(`[Dashboard] Search results:`, {
+          keyword,
+          designTemplates: filteredDesignTemplates.length,
+          publicTemplates: publicSearchResults.length,
+          userTemplates: userSearchResults.length,
+        });
+
+        setSearchResults({
+          designTemplates: filteredDesignTemplates,
+          publicTemplates: publicSearchResults,
+          userTemplates: userSearchResults,
+        });
+      } catch (error) {
+        console.error("Error fetching search results:", error);
+        toast.error("Failed to search templates");
+      } finally {
+        setIsSearching(false);
+      }
+    },
+    [user?.userId, designTemplates]
+  );
+
+  // Handle search functionality
+  const handleSearch = useCallback(
+    (keyword: string) => {
+      fetchSearchResults(keyword);
+    },
+    [fetchSearchResults]
+  );
+
   // Load templates when component mounts
   useEffect(() => {
     fetchPublicTemplates(1, false);
@@ -179,6 +443,32 @@ export default function Dashboard() {
       fetchUserTemplates(1, false);
     }
   }, [fetchUserTemplates, user?.userId]);
+
+  // Handle search when searchQuery changes
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      handleSearch(searchQuery);
+    }, 300); // Debounce search by 300ms
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, handleSearch]);
+
+  // Handle click outside to close search dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        searchDropdownRef.current &&
+        !searchDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowSearchDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Setup intersection observer for public templates infinite scrolling
   useEffect(() => {
@@ -295,109 +585,6 @@ export default function Dashboard() {
     },
   ];
 
-  // Design templates
-  const designTemplates = [
-    {
-      id: 1,
-      title: "Blank Design",
-      icon: <FileText className="h-6 w-6" />,
-      color: "bg-white dark:bg-neutral-800",
-      textColor: "text-blue-600 dark:text-blue-400",
-      dimensions: { width: 1080, height: 1080 },
-      backgroundColor: "rgb(255, 255, 255)",
-    },
-    {
-      id: 2,
-      title: "AI Calling",
-      icon: <Phone className="h-6 w-6" />,
-      color: "bg-purple-50 dark:bg-purple-900/20",
-      textColor: "text-purple-600 dark:text-purple-400",
-      dimensions: { width: 1080, height: 1920 },
-      backgroundColor: "rgb(245, 243, 255)",
-    },
-    {
-      id: 3,
-      title: "Self Order Video",
-      icon: <Video className="h-6 w-6" />,
-      color: "bg-green-50 dark:bg-green-900/20",
-      textColor: "text-green-600 dark:text-green-400",
-      dimensions: { width: 1920, height: 1080 },
-      backgroundColor: "rgb(240, 253, 244)",
-    },
-    {
-      id: 4,
-      title: "WhatsApp Campaign",
-      icon: <MessageSquare className="h-6 w-6" />,
-      color: "bg-emerald-50 dark:bg-emerald-900/20",
-      textColor: "text-emerald-600 dark:text-emerald-400",
-      dimensions: { width: 800, height: 800 },
-      backgroundColor: "rgb(236, 253, 245)",
-    },
-    {
-      id: 5,
-      title: "Coupon Code Design",
-      icon: <Tag className="h-6 w-6" />,
-      color: "bg-yellow-50 dark:bg-yellow-900/20",
-      textColor: "text-yellow-600 dark:text-yellow-400",
-      dimensions: { width: 1200, height: 628 },
-      backgroundColor: "rgb(254, 252, 232)",
-    },
-    {
-      id: 6,
-      title: "Royalty Program",
-      icon: <Award className="h-6 w-6" />,
-      color: "bg-red-50 dark:bg-red-900/20",
-      textColor: "text-red-600 dark:text-red-400",
-      dimensions: { width: 1080, height: 1080 },
-      backgroundColor: "rgb(254, 242, 242)",
-    },
-    {
-      id: 7,
-      title: "Google Feedback",
-      icon: <ThumbsUp className="h-6 w-6" />,
-      color: "bg-orange-50 dark:bg-orange-900/20",
-      textColor: "text-orange-600 dark:text-orange-400",
-      dimensions: { width: 1200, height: 628 },
-      backgroundColor: "rgb(255, 247, 237)",
-    },
-    {
-      id: 8,
-      title: "Birthday Wishes",
-      icon: <Cake className="h-6 w-6" />,
-      color: "bg-pink-50 dark:bg-pink-900/20",
-      textColor: "text-pink-600 dark:text-pink-400",
-      dimensions: { width: 1080, height: 1080 },
-      backgroundColor: "rgb(253, 242, 248)",
-    },
-    {
-      id: 9,
-      title: "Anniversary Wishes",
-      icon: <Gift className="h-6 w-6" />,
-      color: "bg-indigo-50 dark:bg-indigo-900/20",
-      textColor: "text-indigo-600 dark:text-indigo-400",
-      dimensions: { width: 1080, height: 1080 },
-      backgroundColor: "rgb(238, 242, 255)",
-    },
-    {
-      id: 10,
-      title: "New Event",
-      icon: <Calendar className="h-6 w-6" />,
-      color: "bg-cyan-50 dark:bg-cyan-900/20",
-      textColor: "text-cyan-600 dark:text-cyan-400",
-      dimensions: { width: 1200, height: 628 },
-      backgroundColor: "rgb(236, 254, 255)",
-    },
-    {
-      id: 11,
-      title: "New Food Launch",
-      icon: <Utensils className="h-6 w-6" />,
-      color: "bg-amber-50 dark:bg-amber-900/20",
-      textColor: "text-amber-600 dark:text-amber-400",
-      dimensions: { width: 1080, height: 1080 },
-      backgroundColor: "rgb(255, 251, 235)",
-    },
-  ];
-
   return (
     <div className="flex h-screen w-full flex-1 overflow-hidden bg-white dark:bg-neutral-900">
       {/* Sidebar */}
@@ -480,14 +667,224 @@ export default function Dashboard() {
               </div>
               <span className="font-bold">Ads Studio</span>
             </div>
-            <div className="relative ml-6 w-64">
+            <div className="relative ml-6 w-64" ref={searchDropdownRef}>
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
               <Input
                 placeholder="Search all templates"
-                className="w-full pl-10 transition-all focus-visible:ring-blue-500 rounded-full bg-gray-100 dark:bg-gray-800 border-0"
+                className="w-full pl-10 pr-8 transition-all focus-visible:ring-blue-500 rounded-full bg-gray-100 dark:bg-gray-800 border-0"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") {
+                    setSearchQuery("");
+                    setShowSearchDropdown(false);
+                  }
+                }}
+                onFocus={() => {
+                  if (searchQuery) {
+                    setShowSearchDropdown(true);
+                  }
+                }}
               />
+              {searchQuery && (
+                <button
+                  onClick={() => {
+                    setSearchQuery("");
+                    setShowSearchDropdown(false);
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+
+              {/* Search Dropdown */}
+              <AnimatePresence>
+                {showSearchDropdown && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto"
+                  >
+                    {isSearching ? (
+                      <div className="p-4 text-center">
+                        <div className="inline-flex h-6 w-6 animate-spin rounded-full border-2 border-solid border-blue-600 border-r-transparent"></div>
+                        <p className="mt-2 text-sm text-neutral-500">
+                          Searching...
+                        </p>
+                      </div>
+                    ) : (
+                      <>
+                        {/* Design Templates Section */}
+                        {searchResults.designTemplates.length > 0 && (
+                          <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+                            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+                              Design Templates (
+                              {searchResults.designTemplates.length})
+                            </h3>
+                            <div className="space-y-1">
+                              {searchResults.designTemplates
+                                .slice(0, 3)
+                                .map((template) => (
+                                  <div
+                                    key={`search-design-${template.id}`}
+                                    className="flex items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer"
+                                    onClick={() => {
+                                      if (template.dimensions) {
+                                        const kioskParam = template.isKiosk
+                                          ? "&isKiosk=true"
+                                          : "";
+                                        navigate(
+                                          `/editor?width=${
+                                            template.dimensions.width
+                                          }&height=${
+                                            template.dimensions.height
+                                          }&bgColor=${encodeURIComponent(
+                                            template.backgroundColor ||
+                                              "rgb(255, 255, 255)"
+                                          )}${kioskParam}`
+                                        );
+                                      } else {
+                                        handleCreateNew();
+                                      }
+                                      setSearchQuery("");
+                                      setShowSearchDropdown(false);
+                                      toast.success(
+                                        `Creating ${template.title.toLowerCase()}`
+                                      );
+                                    }}
+                                  >
+                                    <div
+                                      className={`p-2 rounded ${template.color} mr-3`}
+                                    >
+                                      <div className={template.textColor}>
+                                        {template.icon}
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                        {template.title}
+                                      </p>
+                                      <p className="text-xs text-gray-500">
+                                        Design Template
+                                      </p>
+                                    </div>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Public Templates Section */}
+                        {searchResults.publicTemplates.length > 0 && (
+                          <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+                            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+                              Public Templates (
+                              {searchResults.publicTemplates.length})
+                            </h3>
+                            <div className="space-y-1">
+                              {searchResults.publicTemplates
+                                .slice(0, 3)
+                                .map((template) => (
+                                  <div
+                                    key={`search-public-${template._id}`}
+                                    className="flex items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer"
+                                    onClick={() => {
+                                      handleUseTemplate(template._id);
+                                      setSearchQuery("");
+                                      setShowSearchDropdown(false);
+                                    }}
+                                  >
+                                    <img
+                                      src={
+                                        templateService.fixImageUrl(
+                                          template.thumbnailUrl
+                                        ) || "/placeholder.svg"
+                                      }
+                                      alt={template.title}
+                                      className="w-10 h-10 object-cover rounded mr-3"
+                                    />
+                                    <div>
+                                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                        {template.title}
+                                      </p>
+                                      <p className="text-xs text-gray-500">
+                                        Public Template
+                                      </p>
+                                    </div>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* User Templates Section */}
+                        {searchResults.userTemplates.length > 0 && (
+                          <div className="p-3">
+                            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+                              Your Designs ({searchResults.userTemplates.length}
+                              )
+                            </h3>
+                            <div className="space-y-1">
+                              {searchResults.userTemplates
+                                .slice(0, 3)
+                                .map((template) => (
+                                  <div
+                                    key={`search-user-${template._id}`}
+                                    className="flex items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer"
+                                    onClick={() => {
+                                      navigate(
+                                        `/editor?template=${template._id}`
+                                      );
+                                      setSearchQuery("");
+                                      setShowSearchDropdown(false);
+                                    }}
+                                  >
+                                    <img
+                                      src={
+                                        templateService.fixImageUrl(
+                                          template.thumbnailUrl
+                                        ) || "/placeholder.svg"
+                                      }
+                                      alt={template.title}
+                                      className="w-10 h-10 object-cover rounded mr-3"
+                                    />
+                                    <div>
+                                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                        {template.title}
+                                      </p>
+                                      <p className="text-xs text-gray-500">
+                                        Your Design
+                                      </p>
+                                    </div>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* No Results */}
+                        {searchResults.designTemplates.length === 0 &&
+                          searchResults.publicTemplates.length === 0 &&
+                          searchResults.userTemplates.length === 0 &&
+                          searchQuery && (
+                            <div className="p-4 text-center">
+                              <Search className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                              <p className="text-sm text-gray-500">
+                                No results found for "{searchQuery}"
+                              </p>
+                              <p className="text-xs text-gray-400 mt-1">
+                                Try a different search term
+                              </p>
+                            </div>
+                          )}
+                      </>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -539,12 +936,6 @@ export default function Dashboard() {
                 <h2 className="text-2xl font-semibold">Create a new project</h2>
                 <p className="text-neutral-500 mt-1">
                   Create confidently, share fearlessly
-                  <span
-                    className="ml-2 text-xs text-blue-500 cursor-pointer hover:underline"
-                    onClick={handleOpenClassicEditor}
-                  >
-                    (Classic Editor)
-                  </span>
                 </p>
               </div>
               <div className="flex gap-2">
@@ -601,12 +992,15 @@ export default function Dashboard() {
                   onClick={() => {
                     if (template.dimensions) {
                       // If template has specific dimensions, use them
+                      const kioskParam = template.isKiosk
+                        ? "&isKiosk=true"
+                        : "";
                       navigate(
                         `/editor?width=${template.dimensions.width}&height=${
                           template.dimensions.height
                         }&bgColor=${encodeURIComponent(
                           template.backgroundColor || "rgb(255, 255, 255)"
-                        )}`
+                        )}${kioskParam}`
                       );
                     } else {
                       // Otherwise use default dimensions
@@ -734,7 +1128,7 @@ export default function Dashboard() {
                     <Layout className="h-10 w-10 text-neutral-500" />
                   </div>
                   <h3 className="text-lg font-medium mb-2">
-                    No templates found
+                    No templates available
                   </h3>
                   <p className="text-neutral-500 max-w-md mx-auto mb-6">
                     We couldn't find any public templates. Try again later or

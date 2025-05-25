@@ -6,7 +6,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { textTemplateService } from "./services/textTemplateService";
 import { toast } from "sonner";
 import axios from "axios";
-import { GET_TEMPLATE_ENDPOINT } from "canva-editor/utils/constants/api";
+import { GET_TEMPLATE_PATH_ENDPOINT } from "canva-editor/utils/constants/api";
 import { emptyTextTemplate } from "./emptyTextTemplate";
 import { emptyData } from "./sampleData";
 
@@ -98,16 +98,14 @@ const TextTemplateEditor = () => {
         // If the template has a templateUrl, fetch the template data
         if (template.templateUrl) {
           try {
-            // Extract the filename from the templateUrl
-            const file = template.templateUrl.split("/");
-            const filename = file[file.length - 1];
-
             console.log("Template URL:", template.templateUrl);
-            console.log("Extracted filename:", filename);
 
-            // Use the GET_TEMPLATE_ENDPOINT to fetch the template data
+            // Use the complete URL with the proxy endpoint
+            const encodedUrl = encodeURIComponent(template.templateUrl);
+
+            // Use the GET_TEMPLATE_PATH_ENDPOINT to fetch the template data
             const templateResponse = await axios.get(
-              `${GET_TEMPLATE_ENDPOINT}/${filename}`
+              `${GET_TEMPLATE_PATH_ENDPOINT}/${encodedUrl}`
             );
 
             // Simply use the template data directly as is

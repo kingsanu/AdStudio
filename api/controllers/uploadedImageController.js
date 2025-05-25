@@ -11,7 +11,7 @@ const UploadedImage = require("./../models/uploadedImage");
 const CLOUD_STORAGE_API = "https://business.foodyqueen.com/admin/UploadMedia";
 
 // Define folder name for uploaded images in cloud storage
-const STORAGE_FOLDER = "editor";
+const STORAGE_FOLDER = "editor/uploads";
 
 const uploadedImageController = {
   // Upload image to cloud storage and save metadata

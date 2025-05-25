@@ -20,6 +20,8 @@ import CustomImageContent from "./CustomImageContent";
 import CustomShapeContent from "./CustomShapeContent";
 import MediaIcon from "canva-editor/icons/VideoIcon";
 import MediaContent from "./MediaContent";
+import KioskIcon from "../icons/KioskIcon";
+import KioskContent from "./KioskContent";
 
 const tabs = [
   {
@@ -49,6 +51,10 @@ const tabs = [
   {
     name: "Media",
     icon: <MediaIcon />,
+  },
+  {
+    name: "Kiosk",
+    icon: <KioskIcon />,
   },
 ];
 
@@ -110,6 +116,15 @@ const CustomSidebar: FC<CustomSidebarProps> = (_props) => {
       case "Media":
         return (
           <MediaContent
+            onClose={() => {
+              actions.setSidebarTab();
+              actions.setSidebar();
+            }}
+          />
+        );
+      case "Kiosk":
+        return (
+          <KioskContent
             onClose={() => {
               actions.setSidebarTab();
               actions.setSidebar();

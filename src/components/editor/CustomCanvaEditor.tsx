@@ -27,6 +27,7 @@ export type CustomCanvaEditorProps = {
   onDesignNameChanges?: (name: string) => void;
   isTextTemplate?: boolean;
   isAdmin?: boolean;
+  isKiosk?: boolean;
   onShare?: () => void;
   onSaveAsTemplate?: () => void;
   onDownload?: () => void;
@@ -38,6 +39,7 @@ const CustomCanvaEditor: FC<PropsWithChildren<CustomCanvaEditorProps>> = ({
   onChanges,
   onDesignNameChanges: _onDesignNameChanges, // Rename to avoid unused variable warning
   isAdmin = false,
+  isKiosk = false,
   onShare,
   onSaveAsTemplate: _onSaveAsTemplate, // Rename to avoid unused variable warning
   onDownload,
@@ -87,6 +89,7 @@ const CustomCanvaEditor: FC<PropsWithChildren<CustomCanvaEditorProps>> = ({
         {/* Custom Header */}
         <CustomHeader
           isAdmin={isAdmin}
+          isKiosk={isKiosk}
           onShare={onShare}
           onDownload={onDownload}
         />

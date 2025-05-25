@@ -72,7 +72,7 @@ const TemplateContent: FC<{ onClose: () => void }> = ({ onClose }) => {
 
       const res = await axios.get(apiUrl);
       console.log(res.data);
-      setTemplates((templates) => [...templates, ...res.data]);
+      setTemplates((templates) => [...templates, ...res.data.data]);
       setIsLoading(false);
       if (res.data.length > 0) {
         dataRef.current = false;

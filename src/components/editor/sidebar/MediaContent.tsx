@@ -564,21 +564,15 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
                 onDrop={async (pos) => {
                   if (pos) {
                     try {
-                      // Extract the path from the URL
-                      const urlParts = item.img.split("/");
-
-                      // Remove the first three parts (protocol and domain)
-                      const pathParts = urlParts.slice(4);
-
-                      // Join the remaining parts to get the path
-                      const imagePath = pathParts.join("/");
-
                       // Show loading toast
                       toast.loading("Adding media to canvas...");
 
+                      // Use the complete URL with the proxy endpoint
+                      const encodedUrl = encodeURIComponent(item.img);
+
                       // Get the proxied image through the backend
                       const proxyResponse = await axios.get(
-                        `${config.apis.url}/proxy-image/${imagePath}`
+                        `${config.apis.url}/proxy-image/${encodedUrl}`
                       );
                       if (!proxyResponse.data || !proxyResponse.data.url) {
                         throw new Error("Invalid response from proxy server");
@@ -650,21 +644,15 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
                 }}
                 onClick={async () => {
                   try {
-                    // Extract the path from the URL
-                    const urlParts = item.img.split("/");
-
-                    // Remove the first three parts (protocol and domain)
-                    const pathParts = urlParts.slice(4);
-
-                    // Join the remaining parts to get the path
-                    const imagePath = pathParts.join("/");
-
                     // Show loading toast
                     toast.loading("Adding media to canvas...");
 
+                    // Use the complete URL with the proxy endpoint
+                    const encodedUrl = encodeURIComponent(item.img);
+
                     // Get the proxied image through the backend
                     const proxyResponse = await axios.get(
-                      `${config.apis.url}/proxy-image/${imagePath}`
+                      `${config.apis.url}/proxy-image/${encodedUrl}`
                     );
 
                     if (!proxyResponse.data || !proxyResponse.data.url) {
@@ -756,10 +744,9 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
                   }}
                 >
                   <img
-                    src={`${config.apis?.url}/proxy-image/${item.img
-                      .split("/")
-                      .slice(3)
-                      .join("/")}`}
+                    src={`${config.apis?.url}/proxy-image/${encodeURIComponent(
+                      item.img
+                    )}`}
                     loading="lazy"
                     alt={item.name || title}
                     css={{

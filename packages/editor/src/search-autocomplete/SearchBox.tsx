@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, {
   ChangeEvent,
   FocusEvent,
@@ -6,12 +10,12 @@ import React, {
   SVGProps,
   useEffect,
   useState,
-} from 'react';
-import styled, { ThemeProvider } from 'styled-components';
-import { DefaultTheme, defaultTheme } from './utils/config';
-import { debounce } from './utils';
-import Results, { Item } from './Suggested';
-import SearchInput from './SearchInput';
+} from "react";
+import styled, { ThemeProvider } from "styled-components";
+import { DefaultTheme, defaultTheme } from "./utils/config";
+import { debounce } from "./utils";
+import Results, { Item } from "./Suggested";
+import SearchInput from "./SearchInput";
 
 export const DEFAULT_INPUT_DEBOUNCE = 200;
 export const MAX_RESULTS = 10;
@@ -53,14 +57,14 @@ export default function SearchBox<T>({
   showIcon = true,
   showClear = true,
   maxResults = MAX_RESULTS,
-  placeholder = '',
+  placeholder = "",
   autoFocus = false,
   styling = {},
-  resultStringKeyName = 'name',
-  inputSearchString = '',
+  resultStringKeyName = "name",
+  inputSearchString = "",
   formatResult,
   showNoResults = true,
-  showNoResultsText = 'No results',
+  showNoResultsText = "No results",
   showItemsOnFocus = false,
   maxLength = 0,
   className,
@@ -79,7 +83,7 @@ export default function SearchBox<T>({
   }, [inputSearchString]);
 
   useEffect(() => {
-      setResults(items);
+    setResults(items);
   }, [items]);
 
   useEffect(() => {
@@ -113,9 +117,9 @@ export default function SearchBox<T>({
       setHasFocus(false);
     };
 
-    document.addEventListener('click', handleDocumentClick);
+    document.addEventListener("click", handleDocumentClick);
 
-    return () => document.removeEventListener('click', handleDocumentClick);
+    return () => document.removeEventListener("click", handleDocumentClick);
   }, []);
 
   const handleOnFocus = (event: FocusEvent<HTMLInputElement>) => {
@@ -178,7 +182,7 @@ export default function SearchBox<T>({
       results?.[index] && onHover(results[index]);
     } else if (event) {
       switch (event.key) {
-        case 'Enter':
+        case "Enter":
           if (results.length > 0 && results[highlightedItem]) {
             event.preventDefault();
             onSelect(results[highlightedItem]);
@@ -190,13 +194,13 @@ export default function SearchBox<T>({
           setHighlightedItem(-1);
           eraseResults();
           break;
-        case 'ArrowUp':
+        case "ArrowUp":
           event.preventDefault();
           itemIndex =
             highlightedItem > -1 ? highlightedItem - 1 : results.length - 1;
           setValues(itemIndex);
           break;
-        case 'ArrowDown':
+        case "ArrowDown":
           event.preventDefault();
           itemIndex =
             highlightedItem < results.length - 1 ? highlightedItem + 1 : -1;
@@ -211,7 +215,7 @@ export default function SearchBox<T>({
   return (
     <ThemeProvider theme={theme}>
       <StyledReactSearchAutocomplete className={className}>
-        <div className='wrapper'>
+        <div className="wrapper">
           <SearchInput
             searchString={searchString}
             setSearchString={handleSetSearchString}
@@ -226,7 +230,7 @@ export default function SearchBox<T>({
             setHighlightedItem={handleSetHighlightedItem}
             maxLength={maxLength}
           />
-          <Results
+          {/* <Results
             results={results}
             onClick={handleOnClick}
             setSearchString={setSearchString}
@@ -238,7 +242,7 @@ export default function SearchBox<T>({
             setHighlightedItem={handleSetHighlightedItem}
             showNoResultsFlag={showNoResultsFlag}
             showNoResultsText={showNoResultsText}
-          />
+          /> */}
         </div>
       </StyledReactSearchAutocomplete>
     </ThemeProvider>
@@ -248,7 +252,7 @@ export default function SearchBox<T>({
 const StyledReactSearchAutocomplete = styled.div`
   position: relative;
 
-  height: ${(props: any) => parseInt(props.theme.height) + 2 + 'px'};
+  height: ${(props: any) => parseInt(props.theme.height) + 2 + "px"};
 
   .wrapper {
     position: absolute;

@@ -11,6 +11,7 @@ import { Toaster } from "./components/ui/sonner";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import Favorites from "./pages/Favorites";
+import KioskViewer from "./pages/Kiosk/KioskViewer";
 
 function App() {
   return (
@@ -64,6 +65,9 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* Kiosk viewer route - public */}
+          <Route path="/kiosk/:id" element={<KioskViewer />} />
 
           {/* Fallback route */}
           <Route path="*" element={<NotFound />} />

@@ -13,7 +13,7 @@ const TextTemplate = require("./../models/textTemplate");
 const CLOUD_STORAGE_API = "https://business.foodyqueen.com/admin/UploadMedia";
 
 // Define folder name for text templates in cloud storage
-const STORAGE_FOLDER = "editor";
+const STORAGE_FOLDER = "editor/text-templates";
 
 const textTemplateController = {
   // Save text template and its metadata

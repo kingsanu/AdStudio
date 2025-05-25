@@ -21,6 +21,8 @@ import PlusIcon from "canva-editor/icons/PlusIcon";
 import GridViewIcon from "canva-editor/icons/GridViewIcon";
 import styled from "@emotion/styled";
 import { FC } from "react";
+import MediaContent from "@/components/editor/sidebar/MediaContent";
+import { Video } from "lucide-react";
 
 const FABButton = styled("button")`
   position: fixed;
@@ -61,6 +63,10 @@ const tabs = [
   {
     name: "Upload",
     icon: <UploadIcon />,
+  },
+  {
+    name: "Media",
+    icon: <Video />,
   },
 ];
 const Sidebar: FC<{ version: string }> = () => {
@@ -120,6 +126,16 @@ const Sidebar: FC<{ version: string }> = () => {
         return (
           <UploadContent
             visibility={true}
+            onClose={() => {
+              actions.setSidebarTab();
+              actions.setSidebar();
+            }}
+          />
+        );
+      case "Media":
+        return (
+          <MediaContent
+            // visibility={true}
             onClose={() => {
               actions.setSidebarTab();
               actions.setSidebar();

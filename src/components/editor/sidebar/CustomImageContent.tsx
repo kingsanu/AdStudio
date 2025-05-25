@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 import { useEditor } from "canva-editor/hooks";
 import useMobileDetect from "canva-editor/hooks/useMobileDetect";

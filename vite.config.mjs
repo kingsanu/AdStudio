@@ -1,10 +1,41 @@
 import { defineConfig } from "vite";
 import { fileURLToPath, URL } from "url";
+import react from "@vitejs/plugin-react-swc";
+import tsconfigPaths from "vite-tsconfig-paths";
 
 // https://vitejs.dev/config/
 export default defineConfig({
- server: {
-    allowedHosts: ['adstudio.foodyqueen.com']
+  plugins: [
+    react({
+      // Enable Fast Refresh for better development experience
+      fastRefresh: true,
+      // Configure JSX import source for emotion if needed
+      jsxImportSource: "@emotion/react",
+    }),
+    tsconfigPaths(), // This helps with path resolution from tsconfig.json
+  ],
+  server: {
+    allowedHosts: ["adstudio.foodyqueen.com"],
+    // Enable HMR
+    hmr: {
+      overlay: true, // Show error overlay
+    },
+    // Watch for changes in packages directory
+    watch: {
+      usePolling: false, // Use native file watching for better performance
+      ignored: ["**/node_modules/**", "**/dist/**"],
+    },
+  },
+  // Optimize dependencies for faster dev server startup
+  optimizeDeps: {
+    include: [
+      "react",
+      "react-dom",
+      "react-router-dom",
+      "@tanstack/react-query",
+      "framer-motion",
+      "lucide-react",
+    ],
   },
   resolve: {
     alias: [

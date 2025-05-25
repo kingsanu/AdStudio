@@ -1,13 +1,15 @@
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
-import axios from 'axios';
-import { useEditor } from 'canva-editor/hooks';
-import Draggable from 'canva-editor/layers/core/Dragable';
-import { Delta } from 'canva-editor/types';
-import CloseSidebarButton from './CloseButton';
-import ImageSearchBox from './components/ImageSearchBox';
-import HorizontalCarousel from 'canva-editor/components/carousel/HorizontalCarousel';
-import OutlineButton from 'canva-editor/components/button/OutlineButton';
-import useMobileDetect from 'canva-editor/hooks/useMobileDetect';
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { FC, useCallback, useEffect, useRef, useState } from "react";
+import axios from "axios";
+import { useEditor } from "canva-editor/hooks";
+import Draggable from "canva-editor/layers/core/Dragable";
+import { Delta } from "canva-editor/types";
+import CloseSidebarButton from "./CloseButton";
+import ImageSearchBox from "./components/ImageSearchBox";
+import HorizontalCarousel from "canva-editor/components/carousel/HorizontalCarousel";
+import OutlineButton from "canva-editor/components/button/OutlineButton";
+import useMobileDetect from "canva-editor/hooks/useMobileDetect";
 
 const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
   const [images, setImages] = useState<{ img: string }[]>([]);
@@ -16,15 +18,17 @@ const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [offset, setOffset] = useState(0);
   const dataRef = useRef(false);
-  const [keyword, setKeyword] = useState('');
+  const [keyword, setKeyword] = useState("");
   const isMobile = useMobileDetect();
 
   const loadData = useCallback(
-    async (offset = 0, kw = '') => {
+    async (offset = 0, kw = "") => {
       dataRef.current = true;
       setIsLoading(true);
-      const res: any = await axios.get(`${config.apis.url}${config.apis.searchImages}?ps=18&pi=${offset}&kw=${kw}`);
-      setImages((frames) => [...frames, ...res.data]);
+      const res: any = await axios.get(
+        `${config.apis.url}${config.apis.searchImages}?ps=18&pi=${offset}&kw=${kw}`
+      );
+      setImages((frames) => [...frames, ...res.data.data]);
       setIsLoading(false);
       if (res.data.length > 0) {
         dataRef.current = false;
@@ -48,9 +52,9 @@ const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
       }
     };
 
-    scrollRef.current?.addEventListener('scroll', handleLoadMore);
+    scrollRef.current?.addEventListener("scroll", handleLoadMore);
     return () => {
-      scrollRef.current?.removeEventListener('scroll', handleLoadMore);
+      scrollRef.current?.removeEventListener("scroll", handleLoadMore);
     };
   }, [loadData]);
 
@@ -69,7 +73,7 @@ const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
       console.error(err);
     };
     img.src = url;
-    img.crossOrigin = 'anonymous';
+    img.crossOrigin = "anonymous";
     img.onload = () => {
       actions.addImageLayer(
         { thumb, url, position },
@@ -84,11 +88,11 @@ const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
   return (
     <div
       css={{
-        width: '100%',
-        height: '100%',
-        flexDirection: 'column',
-        overflowY: 'auto',
-        display: 'flex',
+        width: "100%",
+        height: "100%",
+        flexDirection: "column",
+        overflowY: "auto",
+        display: "flex",
         padding: 16,
       }}
     >
@@ -97,31 +101,32 @@ const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
         <ImageSearchBox searchString={keyword} onStartSearch={handleSearch} />
         <div css={{ paddingTop: 8 }}>
           <HorizontalCarousel>
-            {config.imageKeywordSuggestions && config.imageKeywordSuggestions.split(',').map((kw) => (
-              <div key={kw} className='carousel-item'>
-                <OutlineButton
-                  onClick={() => {
-                    setKeyword(kw);
-                    handleSearch(kw);
-                  }}
-                >
-                  {kw}
-                </OutlineButton>
-              </div>
-            ))}
+            {config.imageKeywordSuggestions &&
+              config.imageKeywordSuggestions.split(",").map((kw) => (
+                <div key={kw} className="carousel-item">
+                  <OutlineButton
+                    onClick={() => {
+                      setKeyword(kw);
+                      handleSearch(kw);
+                    }}
+                  >
+                    {kw}
+                  </OutlineButton>
+                </div>
+              ))}
           </HorizontalCarousel>
         </div>
       </div>
       <div
-        css={{ flexDirection: 'column', overflowY: 'auto', display: 'flex' }}
+        css={{ flexDirection: "column", overflowY: "auto", display: "flex" }}
       >
         <div
           ref={scrollRef}
           css={{
             flexGrow: 1,
-            overflowY: 'auto',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3,minmax(0,1fr))',
+            overflowY: "auto",
+            display: "grid",
+            gridTemplateColumns: "repeat(3,minmax(0,1fr))",
             gridGap: 8,
           }}
         >
@@ -139,22 +144,22 @@ const ImageContent: FC<{ onClose: () => void }> = ({ onClose }) => {
             >
               <div
                 css={{
-                  cursor: 'pointer',
-                  position: 'relative',
-                  paddingBottom: '100%',
-                  width: '100%',
+                  cursor: "pointer",
+                  position: "relative",
+                  paddingBottom: "100%",
+                  width: "100%",
                 }}
               >
                 <img
                   src={item.img}
-                  loading='lazy'
+                  loading="lazy"
                   css={{
-                    position: 'absolute',
+                    position: "absolute",
                     top: 0,
                     left: 0,
-                    height: '100%',
-                    width: '100%',
-                    objectFit: 'cover',
+                    height: "100%",
+                    width: "100%",
+                    objectFit: "cover",
                   }}
                 />
               </div>

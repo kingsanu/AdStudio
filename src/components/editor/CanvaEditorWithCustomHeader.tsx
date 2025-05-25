@@ -14,6 +14,7 @@ interface CanvaEditorWithCustomHeaderProps {
   onDesignNameChanges?: (name: string) => void;
   isTextTemplate?: boolean;
   isAdmin?: boolean;
+  isKiosk?: boolean;
   onShare?: () => void;
   onSaveAsTemplate?: () => void;
   [key: string]: any;
@@ -26,6 +27,7 @@ const CanvaEditorWithCustomHeader: FC<CanvaEditorWithCustomHeaderProps> = ({
   onDesignNameChanges,
   isTextTemplate = false,
   isAdmin = false,
+  isKiosk = false,
   onShare,
   onSaveAsTemplate,
   ...rest
@@ -52,7 +54,7 @@ const CanvaEditorWithCustomHeader: FC<CanvaEditorWithCustomHeaderProps> = ({
       {/* The CanvaEditor component */}
       {/* Render the custom header separately */}
       <div className="absolute top-0 left-0 right-0 z-10">
-        <CustomHeader isAdmin={isAdmin} onShare={onShare} />
+        <CustomHeader isAdmin={isAdmin} isKiosk={isKiosk} onShare={onShare} />
       </div>
 
       {/* The CanvaEditor component */}

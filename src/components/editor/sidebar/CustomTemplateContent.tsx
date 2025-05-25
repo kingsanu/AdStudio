@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 import { useEditor } from "canva-editor/hooks";
 import useMobileDetect from "canva-editor/hooks/useMobileDetect";
@@ -6,10 +7,7 @@ import HorizontalCarousel from "canva-editor/components/carousel/HorizontalCarou
 import OutlineButton from "canva-editor/components/button/OutlineButton";
 import { unpack } from "canva-editor/utils/minifier";
 import axios from "axios";
-import Fuse from "fuse.js";
 import { useInfiniteQuery } from "@tanstack/react-query";
-
-import { Template } from "./types";
 import CustomTemplateSearchBox from "./CustomTemplateSearchBox";
 
 interface CustomTemplateContentProps {
@@ -311,12 +309,13 @@ const CustomTemplateContent: FC<CustomTemplateContentProps> = ({ onClose }) => {
                 key={`${item._id}-${index}`}
                 css={{ cursor: "pointer", position: "relative" }}
                 onClick={async () => {
-                  const file = item.templateUrl.split("/");
-                  const templateId = file[file.length - 1];
                   setIsTemplateLoading(true);
                   try {
+                    // Use the complete URL with the proxy endpoint
+                    const encodedUrl = encodeURIComponent(item.templateUrl);
+
                     const templateData = await axios.get(
-                      `${config.apis.url}/proxy-template/${templateId}`
+                      `${config.apis.url}/proxy-template-path/${encodedUrl}`
                     );
                     addPages(templateData.data);
                   } catch (error) {

@@ -14,7 +14,7 @@ const UploadedImage = require("./../models/uploadedImage");
 const CLOUD_STORAGE_API = "https://business.foodyqueen.com/admin/UploadMedia";
 
 // Define folder name for templates in cloud storage
-const STORAGE_FOLDER = "editor";
+const STORAGE_FOLDER = "editor/templates";
 
 const templateController = {
   // Upload image to cloud storage
@@ -91,6 +91,7 @@ const templateController = {
         tags = [],
         userId = "default-user", // Replace with actual user ID from auth
         isPublic = false, // Default to private templates
+        isKiosk = false, // Default to non-kiosk templates
       } = req.body;
 
       // Check if a template with the same name and user already exists
@@ -190,6 +191,7 @@ const templateController = {
         thumbnailUrl,
         tags,
         isPublic,
+        isKiosk,
       });
 
       await template.save();
@@ -315,6 +317,7 @@ const templateController = {
         templateDesc,
         tags = existingTemplate.tags,
         isPublic = existingTemplate.isPublic,
+        isKiosk = existingTemplate.isKiosk,
         userId = existingTemplate.userId,
       } = req.body;
 
@@ -326,43 +329,23 @@ const templateController = {
         // Still allow the update but log the warning
       }
 
-      // Extract existing filenames to reuse them
-      const existingTemplateFilename = existingTemplate.templateUrl
-        .split("/")
-        .pop();
-      const existingThumbnailFilename = existingTemplate.thumbnailUrl
-        .split("/")
-        .pop();
-
-      // Always reuse existing filenames if available to avoid creating duplicates
-      // If not available, create consistent filenames based on user ID and template name
+      // Create consistent filenames based on user ID and template name
       const sanitizedName = templateName
         .replace(/\s+/g, "_")
         .replace(/[^a-zA-Z0-9_-]/g, "");
       const sanitizedUserId = userId.replace(/[^a-zA-Z0-9_-]/g, "");
 
-      // If we have existing filenames, use them as is (they might already have the folder)
-      // Otherwise, create new filenames
-      const cloudTemplateFilename =
-        existingTemplateFilename ||
-        `${STORAGE_FOLDER}/template_${sanitizedUserId}_${sanitizedName}.json`;
-      const cloudThumbnailFilename =
-        existingThumbnailFilename ||
-        `${STORAGE_FOLDER}/thumbnail_${sanitizedUserId}_${sanitizedName}.png`;
+      // Use consistent naming pattern to match the save function
+      // Create filenames for local storage and cloud storage
+      const localTemplateFilename = `template_${sanitizedUserId}_${sanitizedName}.json`;
+      const localThumbnailFilename = `thumbnail_${sanitizedUserId}_${sanitizedName}.png`;
 
-      // Extract local filenames (without folder prefix)
-      const localTemplateFilename = existingTemplateFilename
-        ? existingTemplateFilename.split("/").pop()
-        : `template_${sanitizedUserId}_${sanitizedName}.json`;
-      const localThumbnailFilename = existingThumbnailFilename
-        ? existingThumbnailFilename.split("/").pop()
-        : `thumbnail_${sanitizedUserId}_${sanitizedName}.png`;
+      // Add folder prefix for cloud storage
+      const cloudTemplateFilename = `${STORAGE_FOLDER}/${localTemplateFilename}`;
+      const cloudThumbnailFilename = `${STORAGE_FOLDER}/${localThumbnailFilename}`;
 
       console.log(
         `Using filenames: ${cloudTemplateFilename} and ${cloudThumbnailFilename}`
-      );
-      console.log(
-        `Reusing existing files: ${!!existingTemplateFilename} and ${!!existingThumbnailFilename}`
       );
 
       // Save files temporarily to disk
@@ -423,6 +406,7 @@ const templateController = {
       existingTemplate.thumbnailUrl = thumbnailUrl;
       existingTemplate.tags = tags;
       existingTemplate.isPublic = isPublic;
+      existingTemplate.isKiosk = isKiosk;
       existingTemplate.updatedAt = new Date();
 
       await existingTemplate.save();
@@ -460,6 +444,29 @@ const templateController = {
     } catch (error) {
       res.status(500).json({
         message: "Failed to delete template",
+        error: error.message,
+      });
+    }
+  },
+
+  // Proxy template from cloud storage
+  proxyTemplate: async (req, res) => {
+    try {
+      const { url } = req.query;
+
+      if (!url) {
+        return res.status(400).json({ message: "URL parameter is required" });
+      }
+
+      // Fetch the template from the cloud storage URL
+      const response = await axios.get(url);
+
+      // Return the template data
+      res.json(response.data);
+    } catch (error) {
+      console.error("Error proxying template:", error);
+      res.status(500).json({
+        message: "Failed to proxy template",
         error: error.message,
       });
     }

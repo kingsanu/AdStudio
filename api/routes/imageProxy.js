@@ -7,20 +7,22 @@ const axios = require("axios");
 const { Buffer } = require("node:buffer");
 const { CLOUD_STORAGE } = require("../config/constants");
 
-// Route to proxy an image by path
+// Route to proxy an image by path or complete URL
 router.get("/proxy-image/*", async (req, res) => {
   try {
     // Get the full path from the URL
     const fullPath = req.params[0];
     console.log("Proxying image path:", fullPath);
-    console.log("Cloud storage base URL:", CLOUD_STORAGE.BASE_URL);
 
-    // Check if the path already has the editor/media/ prefix
-    const hasMediaPrefix = fullPath.startsWith("editor/media/");
+    // Check if it's a complete URL or just a path
+    const isCompleteUrl =
+      fullPath.startsWith("http") || fullPath.startsWith("https");
 
     // Function to handle the response for image files
     const handleResponse = async (url) => {
       try {
+        console.log(`Fetching image from URL: ${url}`);
+
         // For images, fetch as binary and convert to base64
         const response = await axios.get(url, {
           responseType: "arraybuffer",
@@ -41,38 +43,13 @@ router.get("/proxy-image/*", async (req, res) => {
           contentType: contentType,
         });
       } catch (error) {
-        console.error("Error fetching image:", error.message);
+        console.error(`Error fetching image from ${url}:`, error.message);
         throw error;
       }
     };
 
-    // Try different paths to find the image
-    const paths = [];
-
-    // Try with editor/media prefix if not already present
-    if (!hasMediaPrefix) {
-      paths.push(`editor/media/${fullPath}`);
-    }
-
-    // Always try the original path
-    paths.push(fullPath);
-
-    // Try each path until one works
-    let lastError = null;
-    for (const path of paths) {
-      try {
-        const url = `${CLOUD_STORAGE.BASE_URL}/${path}`;
-        console.log(`Trying to fetch image from: ${url}`);
-        return await handleResponse(url);
-      } catch (error) {
-        console.log(`Failed to fetch from ${path}:`, error.message);
-        lastError = error;
-        // Continue to the next path
-      }
-    }
-
-    // If we get here, all paths failed
-    throw lastError || new Error("Failed to fetch image from any path");
+    console.log(`Using complete URL: ${fullPath}`);
+    return await handleResponse(fullPath);
   } catch (error) {
     console.error("Error proxying image:", error);
     res.status(500).json({

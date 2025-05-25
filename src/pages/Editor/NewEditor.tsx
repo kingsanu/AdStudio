@@ -21,6 +21,7 @@ const NewEditor = () => {
   const [editorError, setEditorError] = useState(false);
   const [showCampaignDialog, setShowCampaignDialog] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isKiosk, setIsKiosk] = useState(false);
 
   // Check if user is admin
   useEffect(() => {
@@ -111,7 +112,7 @@ const NewEditor = () => {
 
       setTemplateData(emptyTemplate);
       setName("Untitled Design");
-      toast.success("Custom size design created");
+      // toast.success("Custom size design created");
     } catch (error) {
       console.error("Error creating empty template:", error);
       toast.error("Failed to create custom size design");
@@ -176,7 +177,7 @@ const NewEditor = () => {
           } else {
             setName(template.title || "Untitled Design");
           }
-          toast.success(`Template "${template.title}" loaded`);
+          // toast.success(`Template "${template.title}" loaded`);
         }
       } else {
         toast.error("Template not found");
@@ -196,6 +197,10 @@ const NewEditor = () => {
     const width = searchParams.get("width");
     const height = searchParams.get("height");
     const bgColor = searchParams.get("bgColor");
+    const kioskParam = searchParams.get("isKiosk");
+
+    // Check if this is a kiosk template
+    setIsKiosk(kioskParam === "true");
 
     if (templateId) {
       loadTemplate(templateId);
@@ -311,6 +316,7 @@ const NewEditor = () => {
         onChanges={handleOnChanges}
         onDesignNameChanges={handleOnDesignNameChanges}
         isAdmin={isAdmin}
+        isKiosk={isKiosk}
         key={location.search} // Force re-render when template changes
       />
 

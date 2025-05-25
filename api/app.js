@@ -29,6 +29,7 @@ const whatsappSettingsRoutes = require("./routes/whatsappSettings");
 const mediaRoutes = require("./routes/media");
 const mediaUploadRoutes = require("./routes/mediaUpload");
 const imageProxyRoutes = require("./routes/imageProxy");
+const kioskRoutes = require("./routes/kiosk");
 
 const app = express();
 // Increase JSON body size limit
@@ -66,6 +67,7 @@ app.use("/api", whatsappSettingsRoutes);
 app.use("/api/media", mediaRoutes);
 app.use("/api/media/upload", mediaUploadRoutes);
 app.use("/api", imageProxyRoutes);
+app.use("/api", kioskRoutes);
 
 // Get port from environment variables or use 4000 as default
 const PORT = process.env.PORT || 4000;
@@ -73,6 +75,7 @@ const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Server has started! Open http://localhost:${PORT}`);
 });
+
 app.use(express.static(__dirname + "/public")); //Serves resources from public folder
 app.use(express.static(__dirname + "/json")); //Serves resources from public folder
 

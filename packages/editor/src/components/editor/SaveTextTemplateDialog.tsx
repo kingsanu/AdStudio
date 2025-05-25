@@ -394,7 +394,7 @@ const SaveTextTemplateDialog: FC<Props> = ({
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="private" id="private" />
                   <Label
-                    htmlFor="private"
+                    htmlFor="public"
                     className="text-sm font-medium cursor-pointer"
                   >
                     Private

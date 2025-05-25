@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
@@ -328,7 +329,8 @@ const TextContent: FC<{ onClose: () => void }> = ({ onClose }) => {
       const res: any = await axios.get<Text[]>(
         `${config.apis.url}${config.apis.searchTexts}?ps=6&pi=${offset}&kw=${kw}`
       );
-      setTexts((texts) => [...texts, ...res.data]);
+      console.log(res);
+      setTexts((texts) => [...texts, ...res.data.data]);
       setIsLoading(false);
       if (res.data.length > 0) {
         dataRef.current = false;

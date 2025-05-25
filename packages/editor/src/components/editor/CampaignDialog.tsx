@@ -668,7 +668,6 @@ const CampaignDialog: React.FC<CampaignDialogProps> = ({ open, onClose }) => {
                   value={campaignData.customSegments}
                   onChange={handleCustomSegmentsChange}
                   placeholder="Select or add customer segments..."
-                  creatable
                   defaultOptions={[
                     { value: "vip", label: "VIP Customers" },
                     {

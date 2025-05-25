@@ -24,7 +24,7 @@ router.get("/text-templates/:id", textTemplateController.getTextTemplateById);
 // Route to delete a text template
 router.delete("/text-templates/:id", textTemplateController.deleteTextTemplate);
 
-// Route to get template data by filename
+// Route to get template data by filename or complete URL
 router.get("/get-text-template/:filename", async (req, res) => {
   try {
     const { filename } = req.params;
@@ -32,36 +32,55 @@ router.get("/get-text-template/:filename", async (req, res) => {
     if (!filename) {
       return res.status(400).json({ message: "Filename is required" });
     }
-    console.log(filename);
-    // Check if the filename already has the editor/ prefix
-    const hasEditorPrefix = filename.startsWith("editor/");
-    console.log(hasEditorPrefix);
-    // Try to fetch the template with the editor/ prefix first if it doesn't have it
-    try {
-      const prefixedFilename = hasEditorPrefix
-        ? filename
-        : `editor/${filename}`;
-      console.log(
-        `Trying to fetch template with prefixed filename: ${prefixedFilename}`
-      );
-      const response = await axios.get(
-        `${GET_TEMPLATE_ENDPOINT}/${prefixedFilename}`
-      );
-      console.log(response);
-      console.log("data");
-      return res.json(response.data);
-    } catch (prefixError) {
-      // If that fails and the filename had the prefix, we're out of options
+
+    console.log("Text template filename/URL:", filename);
+
+    // Check if it's a complete URL or just a filename
+    const isCompleteUrl =
+      filename.startsWith("http://") || filename.startsWith("https://");
+
+    if (isCompleteUrl) {
+      // If it's a complete URL, use it directly
+      console.log(`Using complete URL: ${filename}`);
+      try {
+        const response = await axios.get(filename);
+        return res.json(response.data);
+      } catch (error) {
+        console.error(`Error fetching from URL ${filename}:`, error.message);
+        throw error;
+      }
+    } else {
+      // If it's just a filename, handle it with the template endpoint
+
+      // Check if the filename already has the editor/ prefix
+      const hasEditorPrefix = filename.startsWith("editor/");
+      console.log("Has editor prefix:", hasEditorPrefix);
+
+      const possiblePaths = [];
+
       if (hasEditorPrefix) {
-        throw prefixError;
+        // If it already has editor/ prefix, use as is
+        possiblePaths.push(filename);
+      } else {
+        // Try new folder structure first, then fallback to old structure
+        possiblePaths.push(`editor/text-templates/${filename}`);
+        possiblePaths.push(`editor/${filename}`);
       }
 
-      // If the prefixed version failed, try the original filename as fallback
-      console.log(
-        `Trying to fetch template with original filename: ${filename}`
-      );
-      const response = await axios.get(`${GET_TEMPLATE_ENDPOINT}/${filename}`);
-      return res.json(response.data);
+      let lastError;
+      for (const path of possiblePaths) {
+        try {
+          console.log(`Trying to fetch text template from: ${path}`);
+          const response = await axios.get(`${GET_TEMPLATE_ENDPOINT}/${path}`);
+          return res.json(response.data);
+        } catch (error) {
+          console.log(`Failed to fetch from ${path}:`, error.message);
+          lastError = error;
+        }
+      }
+
+      // If all paths failed, throw the last error
+      throw lastError;
     }
   } catch (error) {
     console.error("Error fetching text template data:", error);
