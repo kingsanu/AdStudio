@@ -2,8 +2,8 @@
 
 /* Hide horizontal scrollbars for all elements */
 * {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: 1px;
+  -ms-overflow-style: 1px; 
 }
 
 /* Hide horizontal scrollbars for WebKit browsers */

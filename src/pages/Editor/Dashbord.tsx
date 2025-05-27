@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "motion/react";
 import "@/styles/hide-scrollbar.css";
@@ -28,6 +28,8 @@ import {
   Download,
   Layout,
   X,
+  Clock,
+  CreditCard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +37,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { templateService, Template } from "@/services/templateService";
+import { kioskService } from "@/services/kioskService";
 import {
   Sidebar as UISidebar,
   SidebarBody,
@@ -42,10 +45,12 @@ import {
 } from "@/components/ui/sidebar";
 import { IconArrowLeft, IconBrandTabler } from "@tabler/icons-react";
 import CustomSizeDialog from "@/components/CustomSizeDialog";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 
 export default function Dashboard() {
   const { user, logout, userLoading, refreshUserDetails } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [notificationCount] = useState(3); // Sample notification count
@@ -221,6 +226,46 @@ export default function Dashboard() {
   // Function to handle using a template
   const handleUseTemplate = (templateId: string) => {
     navigate(`/editor?template=${templateId}`);
+  };
+
+  // Function to handle kiosk creation/loading
+  const handleKioskClick = async () => {
+    if (!user?.userId) {
+      toast.error("Please log in to access kiosk functionality");
+      return;
+    }
+
+    try {
+      toast.loading("Loading your kiosk...");
+
+      // Get or create user's kiosk
+      const response = await kioskService.getUserKiosk(user.userId);
+      const kiosk = response.kiosk;
+
+      toast.dismiss();
+
+      if (kiosk.templateUrl || kiosk.templateData) {
+        // User has existing kiosk content, load it in editor
+        toast.success("Loading your existing kiosk");
+        navigate(
+          `/editor?width=900&height=1200&bgColor=${encodeURIComponent(
+            "rgb(239, 246, 255)"
+          )}&isKiosk=true&kioskId=${kiosk.id}`
+        );
+      } else {
+        // User has a kiosk but no content, start with blank kiosk template
+        toast.success("Creating your kiosk");
+        navigate(
+          `/editor?width=900&height=1200&bgColor=${encodeURIComponent(
+            "rgb(239, 246, 255)"
+          )}&isKiosk=true&kioskId=${kiosk.id}`
+        );
+      }
+    } catch (error) {
+      toast.dismiss();
+      console.error("Error handling kiosk click:", error);
+      toast.error("Failed to load kiosk. Please try again.");
+    }
   };
 
   // Function to open the classic editor (for testing)
@@ -560,13 +605,55 @@ export default function Dashboard() {
     };
   }, []);
 
-  // Sidebar links
+  // Enhanced sidebar links with new sections
   const sidebarLinks = [
     {
-      label: "Dashboard",
+      label: "Home",
       href: "/dashboard",
       icon: (
         <IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+      ),
+    },
+    {
+      label: "Recent Work",
+      href: "/recent-work",
+      icon: (
+        <Clock className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+      ),
+    },
+    {
+      label: "Templates",
+      href: "/templates",
+      icon: (
+        <Layout className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+      ),
+    },
+    {
+      label: "Google Feedback",
+      href: "/google-feedback",
+      icon: (
+        <MessageSquare className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+      ),
+    },
+    {
+      label: "Coupon Designer",
+      href: "/coupon-designer",
+      icon: (
+        <Tag className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+      ),
+    },
+    {
+      label: "Royalty Program",
+      href: "/royalty-program",
+      icon: (
+        <Award className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+      ),
+    },
+    {
+      label: "Membership Card",
+      href: "/membership-card",
+      icon: (
+        <CreditCard className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
     {
@@ -574,14 +661,6 @@ export default function Dashboard() {
       href: "/favorites",
       icon: (
         <Star className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
-    },
-    {
-      label: "Logout",
-      href: "#",
-      onClick: logout,
-      icon: (
-        <IconArrowLeft className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
   ];
@@ -600,7 +679,15 @@ export default function Dashboard() {
             </div>
             <div className="mt-8 flex flex-col gap-2">
               {sidebarLinks.map((link, idx) => (
-                <SidebarLink key={idx} link={link} />
+                <SidebarLink
+                  key={idx}
+                  link={link}
+                  className={
+                    location.pathname === link.href
+                      ? "bg-blue-50 dark:bg-blue-900/20 rounded-md"
+                      : ""
+                  }
+                />
               ))}
             </div>
           </div>
@@ -668,7 +755,7 @@ export default function Dashboard() {
               </div>
               <span className="font-bold">Ads Studio</span>
             </div>
-            <div className="relative ml-6 w-64" ref={searchDropdownRef}>
+            <div className="relative ml-6 w-96" ref={searchDropdownRef}>
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
               <Input
                 placeholder="Search all templates"
@@ -733,10 +820,10 @@ export default function Dashboard() {
                                     key={`search-design-${template.id}`}
                                     className="flex items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer"
                                     onClick={() => {
-                                      if (template.dimensions) {
-                                        const kioskParam = template.isKiosk
-                                          ? "&isKiosk=true"
-                                          : "";
+                                      if (template.isKiosk) {
+                                        // Handle kiosk template with single-kiosk-per-user logic
+                                        handleKioskClick();
+                                      } else if (template.dimensions) {
                                         navigate(
                                           `/editor?width=${
                                             template.dimensions.width
@@ -745,16 +832,19 @@ export default function Dashboard() {
                                           }&bgColor=${encodeURIComponent(
                                             template.backgroundColor ||
                                               "rgb(255, 255, 255)"
-                                          )}${kioskParam}`
+                                          )}`
+                                        );
+                                        toast.success(
+                                          `Creating ${template.title.toLowerCase()}`
                                         );
                                       } else {
                                         handleCreateNew();
+                                        toast.success(
+                                          `Creating ${template.title.toLowerCase()}`
+                                        );
                                       }
                                       setSearchQuery("");
                                       setShowSearchDropdown(false);
-                                      toast.success(
-                                        `Creating ${template.title.toLowerCase()}`
-                                      );
                                     }}
                                   >
                                     <div
@@ -991,23 +1081,24 @@ export default function Dashboard() {
                   key={template.id}
                   className="overflow-hidden border border-gray-200 dark:border-gray-800 hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300 cursor-pointer group flex-shrink-0 w-[180px]"
                   onClick={() => {
-                    if (template.dimensions) {
+                    if (template.isKiosk) {
+                      // Handle kiosk template with single-kiosk-per-user logic
+                      handleKioskClick();
+                    } else if (template.dimensions) {
                       // If template has specific dimensions, use them
-                      const kioskParam = template.isKiosk
-                        ? "&isKiosk=true"
-                        : "";
                       navigate(
                         `/editor?width=${template.dimensions.width}&height=${
                           template.dimensions.height
                         }&bgColor=${encodeURIComponent(
                           template.backgroundColor || "rgb(255, 255, 255)"
-                        )}${kioskParam}`
+                        )}`
                       );
+                      toast.success(`Creating ${template.title.toLowerCase()}`);
                     } else {
                       // Otherwise use default dimensions
                       handleCreateNew();
+                      toast.success(`Creating ${template.title.toLowerCase()}`);
                     }
-                    toast.success(`Creating ${template.title.toLowerCase()}`);
                   }}
                 >
                   <CardContent className="p-4 flex flex-col items-center justify-center h-[180px] text-center">

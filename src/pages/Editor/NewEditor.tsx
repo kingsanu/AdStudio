@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import axios from "axios";
@@ -8,12 +8,19 @@ import { Button } from "@/components/ui/button";
 
 import { templateService } from "@/services/templateService";
 import { data } from "@/sampleData";
-import { GET_TEMPLATE_ENDPOINT } from "canva-editor/utils/constants/api";
+import {
+  GET_TEMPLATE_ENDPOINT,
+  GET_TEMPLATE_PATH_ENDPOINT,
+  USER_KIOSK_ENDPOINT,
+} from "canva-editor/utils/constants/api";
 import CustomCanvaEditor from "@/components/editor/CustomCanvaEditor";
+import { useAuth } from "@/contexts/AuthContext";
+import Cookies from "js-cookie";
 
 const NewEditor = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
   const [name, setName] = useState("Untitled Design");
   const [templateData, setTemplateData] = useState<unknown[]>(data);
   const [loading, setLoading] = useState(true);
@@ -68,60 +75,137 @@ const NewEditor = () => {
   }, []);
 
   // Function to create an empty template with custom dimensions
-  const createEmptyTemplate = (
-    width: number,
-    height: number,
-    backgroundColor: string = "rgb(255, 255, 255)"
-  ) => {
-    try {
-      setLoading(true);
+  const createEmptyTemplate = useCallback(
+    (
+      width: number,
+      height: number,
+      backgroundColor: string = "rgb(255, 255, 255)"
+    ) => {
+      try {
+        setLoading(true);
 
-      // Create an empty template with the specified dimensions using the minified format
-      const emptyTemplate = [
-        {
-          a: "", // name
-          b: "", // notes
-          c: {
-            // layers
-            d: {
-              // ROOT layer
-              e: {
-                f: "RootLayer", // type.resolvedName
-              },
-              g: {
-                h: {
-                  i: width, // boxSize.width
-                  j: height, // boxSize.height
+        // Create an empty template with the specified dimensions using the minified format
+        const emptyTemplate = [
+          {
+            a: "", // name
+            b: "", // notes
+            c: {
+              // layers
+              d: {
+                // ROOT layer
+                e: {
+                  f: "RootLayer", // type.resolvedName
                 },
-                k: {
-                  l: 0, // position.x
-                  m: 0, // position.y
+                g: {
+                  h: {
+                    i: width, // boxSize.width
+                    j: height, // boxSize.height
+                  },
+                  k: {
+                    l: 0, // position.x
+                    m: 0, // position.y
+                  },
+                  n: 0, // rotate
+                  o: backgroundColor, // color
+                  p: null, // image
+                  q: null, // additional props
                 },
-                n: 0, // rotate
-                o: backgroundColor, // color
-                p: null, // image
-                q: null, // additional props
+                r: false, // locked
+                t: null, // parent
+                s: [], // child
               },
-              r: false, // locked
-              t: null, // parent
-              s: [], // child
             },
           },
-        },
-      ];
+        ];
 
-      setTemplateData(emptyTemplate);
-      setName("Untitled Design");
-      // toast.success("Custom size design created");
-    } catch (error) {
-      console.error("Error creating empty template:", error);
-      toast.error("Failed to create custom size design");
-      // Fallback to sample data
-      setTemplateData(data);
-    } finally {
-      setLoading(false);
-    }
-  };
+        setTemplateData(emptyTemplate);
+        setName("Untitled Design");
+        // toast.success("Custom size design created");
+      } catch (error) {
+        console.error("Error creating empty template:", error);
+        toast.error("Failed to create custom size design");
+        // Fallback to sample data
+        setTemplateData(data);
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+  // Function to load kiosk data
+  const loadKioskData = useCallback(
+    async (kioskId: string) => {
+      try {
+        setLoading(true);
+
+        // Get user ID from auth context or cookies
+        const userId = user?.userId || Cookies.get("auth_token") || "";
+        console.log(userId);
+        // Fetch kiosk data
+        const response = await axios.get(USER_KIOSK_ENDPOINT, {
+          params: { userId },
+        });
+        console.log(response);
+        const kiosk = response.data.kiosk;
+        console.log(kiosk);
+        if (kiosk && kiosk.templateUrl) {
+          // Load the kiosk template data from templateUrl using proxy (same as KioskContent.tsx)
+          try {
+            console.log(
+              "Fetching template through proxy with complete URL:",
+              kiosk.templateUrl
+            );
+
+            // URL encode the complete URL to handle special characters
+            const encodedUrl = encodeURIComponent(kiosk.templateUrl);
+
+            const templateResponse = await axios.get(
+              `${GET_TEMPLATE_PATH_ENDPOINT}/${encodedUrl}`
+            );
+            console.log("Loaded kiosk template data:", templateResponse.data);
+
+            // Load the template data
+            setTemplateData(templateResponse.data);
+            setName(kiosk.title || "My Kiosk");
+            console.log("Loaded existing kiosk data from templateUrl");
+          } catch (error) {
+            console.error("Error loading kiosk template from URL:", error);
+            // Fallback to templateData if available
+            if (kiosk.templateData) {
+              setTemplateData(kiosk.templateData);
+              setName(kiosk.title || "My Kiosk");
+              console.log("Loaded kiosk data from templateData fallback");
+            } else {
+              // Create empty template as final fallback
+              createEmptyTemplate(900, 1200, "rgb(239, 246, 255)");
+              setName("My Kiosk");
+              console.log("Created new kiosk template (fallback)");
+            }
+          }
+        } else if (kiosk && kiosk.templateData) {
+          // Load from templateData if no templateUrl
+          setTemplateData(kiosk.templateData);
+          setName(kiosk.title || "My Kiosk");
+          console.log("Loaded existing kiosk data from templateData");
+        } else {
+          // No existing data, create empty kiosk template
+          createEmptyTemplate(900, 1200, "rgb(239, 246, 255)");
+          setName("My Kiosk");
+          console.log("Created new kiosk template");
+        }
+      } catch (error) {
+        console.error("Error loading kiosk data:", error);
+        toast.error("Failed to load kiosk data");
+        // Fallback to empty template
+        createEmptyTemplate(900, 1200, "rgb(239, 246, 255)");
+        setName("My Kiosk");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [createEmptyTemplate, user?.userId]
+  );
 
   // Function to load a template by ID
   const loadTemplate = async (templateId: string) => {
@@ -198,11 +282,22 @@ const NewEditor = () => {
     const height = searchParams.get("height");
     const bgColor = searchParams.get("bgColor");
     const kioskParam = searchParams.get("isKiosk");
+    const kioskId = searchParams.get("kioskId");
 
     // Check if this is a kiosk template
     setIsKiosk(kioskParam === "true");
 
-    if (templateId) {
+    // Store kiosk ID in localStorage for the sync service to use
+    if (kioskId) {
+      localStorage.setItem("kiosk_id", kioskId);
+    } else {
+      localStorage.removeItem("kiosk_id");
+    }
+
+    if (kioskId && kioskParam === "true") {
+      // Load kiosk data
+      loadKioskData(kioskId);
+    } else if (templateId) {
       loadTemplate(templateId);
     } else if (width && height) {
       createEmptyTemplate(
@@ -211,7 +306,7 @@ const NewEditor = () => {
         bgColor || "rgb(255, 255, 255)"
       );
     }
-  }, [location.search]);
+  }, [location.search, loadKioskData, createEmptyTemplate]);
 
   // Handle back button
   const handleBack = () => {

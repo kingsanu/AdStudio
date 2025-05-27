@@ -15,6 +15,154 @@ const CLOUD_STORAGE_API = "https://business.foodyqueen.com/admin/UploadMedia";
 const STORAGE_FOLDER = "editor/kiosk";
 
 const kioskController = {
+  // Get or create user's single kiosk
+  getUserKiosk: async (req, res) => {
+    try {
+      const { userId: rawUserId } = req.query;
+
+      if (!rawUserId) {
+        return res.status(400).json({
+          message: "User ID is required",
+        });
+      }
+
+      // Extract just the ID part if userId contains city and name
+      let userId = rawUserId;
+      if (userId && userId.includes("_")) {
+        userId = userId.split("_").pop() || userId;
+      }
+
+      // Check if user already has a kiosk
+      let kiosk = await Kiosk.findOne({ userId });
+
+      if (kiosk) {
+        // Return existing kiosk
+        return res.status(200).json({
+          message: "User kiosk found",
+          kiosk: {
+            id: kiosk._id.toString(),
+            title: kiosk.title,
+            description: kiosk.description,
+            templateUrl: kiosk.templateUrl,
+            templateData: kiosk.templateData,
+            pageImages: kiosk.pageImages,
+            tags: kiosk.tags,
+            isPublic: kiosk.isPublic,
+            createdAt: kiosk.createdAt,
+            updatedAt: kiosk.updatedAt,
+          },
+        });
+      } else {
+        // Create a new kiosk for the user
+        const defaultTitle = `${userId}'s Kiosk`;
+
+        kiosk = new Kiosk({
+          title: defaultTitle,
+          description: "My personal kiosk display",
+          userId,
+          templateId: null,
+          templateUrl: null,
+          templateData: null,
+          pageImages: [],
+          tags: [],
+          isPublic: false,
+        });
+
+        await kiosk.save();
+
+        return res.status(201).json({
+          message: "New kiosk created for user",
+          kiosk: {
+            id: kiosk._id.toString(),
+            title: kiosk.title,
+            description: kiosk.description,
+            templateUrl: kiosk.templateUrl,
+            templateData: kiosk.templateData,
+            pageImages: kiosk.pageImages,
+            tags: kiosk.tags,
+            isPublic: kiosk.isPublic,
+            createdAt: kiosk.createdAt,
+            updatedAt: kiosk.updatedAt,
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Error getting/creating user kiosk:", error);
+      res.status(500).json({
+        message: "Failed to get or create user kiosk",
+        error: error.message,
+      });
+    }
+  },
+
+  // Update user's kiosk
+  updateUserKiosk: async (req, res) => {
+    try {
+      const {
+        userId: rawUserId,
+        templateUrl,
+        templateData,
+        title,
+        description,
+        pageImages,
+      } = req.body;
+
+      if (!rawUserId) {
+        return res.status(400).json({
+          message: "User ID is required",
+        });
+      }
+
+      // Extract just the ID part if userId contains city and name
+      let userId = rawUserId;
+      if (userId && userId.includes("_")) {
+        userId = userId.split("_").pop() || userId;
+      }
+
+      // Find user's kiosk
+      const kiosk = await Kiosk.findOne({ userId });
+
+      if (!kiosk) {
+        return res.status(404).json({
+          message: "User kiosk not found",
+        });
+      }
+
+      // Update kiosk fields
+      if (title !== undefined) kiosk.title = title;
+      if (description !== undefined) kiosk.description = description;
+      if (templateUrl !== undefined) kiosk.templateUrl = templateUrl;
+      if (templateData !== undefined) kiosk.templateData = templateData;
+      if (pageImages !== undefined) kiosk.pageImages = pageImages;
+
+      kiosk.updatedAt = new Date();
+
+      await kiosk.save();
+
+      res.status(200).json({
+        message: "Kiosk updated successfully",
+        kiosk: {
+          id: kiosk._id.toString(),
+          title: kiosk.title,
+          description: kiosk.description,
+          templateUrl: kiosk.templateUrl,
+          templateData: kiosk.templateData,
+          pageImages: kiosk.pageImages,
+          tags: kiosk.tags,
+          isPublic: kiosk.isPublic,
+          createdAt: kiosk.createdAt,
+          updatedAt: kiosk.updatedAt,
+        },
+      });
+    } catch (error) {
+      console.error("Error updating user kiosk:", error);
+      res.status(500).json({
+        message: "Failed to update user kiosk",
+        error: error.message,
+      });
+    }
+  },
+
   // Upload template JSON for kiosk
   uploadKioskTemplate: async (req, res) => {
     try {

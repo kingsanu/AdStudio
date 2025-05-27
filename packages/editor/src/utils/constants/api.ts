@@ -7,5 +7,6 @@ export const REMOVE_BACKGROUND_ENDPOINT = `${API_BASE_URL}/api/remove-background
 
 // Kiosk endpoints
 export const KIOSKS_ENDPOINT = `${API_BASE_URL}/api/kiosks`;
+export const USER_KIOSK_ENDPOINT = `${API_BASE_URL}/api/user-kiosk`;
 export const UPLOAD_KIOSK_IMAGE_ENDPOINT = `${API_BASE_URL}/api/upload-kiosk-image`;
 export const UPLOAD_KIOSK_TEMPLATE_ENDPOINT = `${API_BASE_URL}/api/upload-kiosk-template`;

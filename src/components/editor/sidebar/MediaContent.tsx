@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 import { useEditor } from "canva-editor/hooks";
@@ -9,6 +10,26 @@ import Draggable from "canva-editor/layers/core/Dragable";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import MediaUploadForm from "./MediaUploadForm";
+
+// Constants for infinite loading
+const PAGE_SIZE = 20;
+const SCROLL_THRESHOLD = 300; // pixels from bottom to trigger loading more
+
+// Media section types
+type MediaSection =
+  | "images"
+  | "backgrounds"
+  | "illustrations"
+  | "icons"
+  | "threeDImages";
+
+// View state types
+type ViewState = "overview" | "expanded";
+
+interface ExpandedViewState {
+  section: MediaSection;
+  title: string;
+}
 
 // Create a search box component for media
 const MediaSearchBox: FC<{
@@ -124,213 +145,152 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
   const isMobile = useMobileDetect();
   const [showUploadForm, setShowUploadForm] = useState(false);
 
-  // State for expanded sections
-  const [expandedSections, setExpandedSections] = useState<{
-    backgrounds: boolean;
-    illustrations: boolean;
-    icons: boolean;
-    threeDImages: boolean;
-  }>({
-    backgrounds: false,
-    illustrations: false,
-    icons: false,
-    threeDImages: false,
-  });
+  // Enhanced view state management
+  const [viewState, setViewState] = useState<ViewState>("overview");
+  const [expandedView, setExpandedView] = useState<ExpandedViewState | null>(
+    null
+  );
+  const [overviewScrollPosition, setOverviewScrollPosition] = useState(0);
 
-  // Constants for infinite loading
-  const PAGE_SIZE = 20;
-  const SCROLL_THRESHOLD = 300; // pixels from bottom to trigger loading more
+  // Helper function to get API endpoint for each media type
+  const getApiEndpoint = (section: MediaSection): string => {
+    switch (section) {
+      case "images":
+        return "/media/images";
+      case "backgrounds":
+        return "/media/backgrounds";
+      case "illustrations":
+        return "/media/illustrations";
+      case "icons":
+        return "/media/icons";
+      case "threeDImages":
+        return "/media/3dimages";
+      default:
+        return "/media/images";
+    }
+  };
 
-  // Fetch backgrounds with infinite loading
-  const {
-    data: backgroundsData,
-    fetchNextPage: fetchNextBackgrounds,
-    hasNextPage: hasNextBackgrounds,
-    isFetchingNextPage: isFetchingNextBackgrounds,
-    isLoading: isLoadingBackgrounds,
-    isError: isErrorBackgrounds,
-    refetch: backgroundsRefetch,
-  } = useInfiniteQuery({
-    queryKey: ["backgrounds", keyword],
-    initialPageParam: 0,
-    queryFn: async ({ pageParam }) => {
-      if (!config.apis) {
-        throw new Error("API configuration is missing");
+  // Helper function to get section title
+  const getSectionTitle = (section: MediaSection): string => {
+    switch (section) {
+      case "images":
+        return "Images";
+      case "backgrounds":
+        return "Backgrounds";
+      case "illustrations":
+        return "Illustrations";
+      case "icons":
+        return "Icons";
+      case "threeDImages":
+        return "3D Images";
+      default:
+        return "Images";
+    }
+  };
+
+  // Navigation functions
+  const handleViewMore = (section: MediaSection) => {
+    // Save current scroll position
+    if (scrollRef.current) {
+      setOverviewScrollPosition(scrollRef.current.scrollTop);
+    }
+
+    // Set expanded view state
+    setExpandedView({
+      section,
+      title: getSectionTitle(section),
+    });
+    setViewState("expanded");
+
+    // Reset scroll to top for expanded view
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+  };
+
+  const handleBackToOverview = () => {
+    setViewState("overview");
+    setExpandedView(null);
+
+    // Restore scroll position
+    setTimeout(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTop = overviewScrollPosition;
       }
+    }, 0);
+  };
 
-      let apiUrl = `${config.apis.url}/media/backgrounds`;
-      const params = new URLSearchParams();
+  // Generic media fetcher using React Query
+  const useMediaQuery = (section: MediaSection, enabled: boolean = true) => {
+    return useInfiniteQuery({
+      queryKey: [section, keyword, viewState],
+      initialPageParam: 0,
+      queryFn: async ({ pageParam }) => {
+        if (!config.apis) {
+          throw new Error("API configuration is missing");
+        }
 
-      // Add pagination parameters
-      params.append("ps", PAGE_SIZE.toString());
-      params.append("pi", pageParam.toString());
+        let apiUrl = `${config.apis.url}${getApiEndpoint(section)}`;
+        const params = new URLSearchParams();
 
-      // Add keyword if provided
-      if (keyword) {
-        params.append("kw", keyword);
-      }
+        // Add pagination parameters
+        params.append("ps", PAGE_SIZE.toString());
+        params.append("pi", pageParam.toString());
 
-      // Append params to URL
-      apiUrl += `?${params.toString()}`;
+        // Add keyword if provided
+        if (keyword) {
+          params.append("kw", keyword);
+        }
 
-      const response = await axios.get(apiUrl);
-      const items = response.data.data || response.data || [];
+        // Append params to URL
+        apiUrl += `?${params.toString()}`;
 
-      return {
-        items,
-        nextPage:
-          items.length === PAGE_SIZE ? (pageParam as number) + 1 : undefined,
-      };
-    },
-    getNextPageParam: (lastPage) => lastPage.nextPage,
-  });
+        const response = await axios.get(apiUrl);
+        const items = response.data.data || response.data || [];
 
-  // Fetch illustrations with infinite loading
-  const {
-    data: illustrationsData,
-    fetchNextPage: fetchNextIllustrations,
-    hasNextPage: hasNextIllustrations,
-    isFetchingNextPage: isFetchingNextIllustrations,
-    isLoading: isLoadingIllustrations,
-    isError: isErrorIllustrations,
-    refetch: illustrationsRefetch,
-  } = useInfiniteQuery({
-    queryKey: ["illustrations", keyword],
-    initialPageParam: 0,
-    queryFn: async ({ pageParam }) => {
-      if (!config.apis) {
-        throw new Error("API configuration is missing");
-      }
+        return {
+          items,
+          nextPage:
+            items.length === PAGE_SIZE ? (pageParam as number) + 1 : undefined,
+        };
+      },
+      getNextPageParam: (lastPage) => lastPage.nextPage,
+      enabled,
+    });
+  };
 
-      let apiUrl = `${config.apis.url}/media/illustrations`;
-      const params = new URLSearchParams();
-
-      // Add pagination parameters
-      params.append("ps", PAGE_SIZE.toString());
-      params.append("pi", pageParam.toString());
-
-      // Add keyword if provided
-      if (keyword) {
-        params.append("kw", keyword);
-      }
-
-      // Append params to URL
-      apiUrl += `?${params.toString()}`;
-
-      const response = await axios.get(apiUrl);
-      const items = response.data.data || response.data || [];
-
-      return {
-        items,
-        nextPage:
-          items.length === PAGE_SIZE ? (pageParam as number) + 1 : undefined,
-      };
-    },
-    getNextPageParam: (lastPage) => lastPage.nextPage,
-  });
-
-  // Fetch icons with infinite loading
-  const {
-    data: iconsData,
-    fetchNextPage: fetchNextIcons,
-    hasNextPage: hasNextIcons,
-    isFetchingNextPage: isFetchingNextIcons,
-    isLoading: isLoadingIcons,
-    isError: isErrorIcons,
-    refetch: iconsRefetch,
-  } = useInfiniteQuery({
-    queryKey: ["icons", keyword],
-    initialPageParam: 0,
-    queryFn: async ({ pageParam }) => {
-      if (!config.apis) {
-        throw new Error("API configuration is missing");
-      }
-
-      let apiUrl = `${config.apis.url}/media/icons`;
-      const params = new URLSearchParams();
-
-      // Add pagination parameters
-      params.append("ps", PAGE_SIZE.toString());
-      params.append("pi", pageParam.toString());
-
-      // Add keyword if provided
-      if (keyword) {
-        params.append("kw", keyword);
-      }
-
-      // Append params to URL
-      apiUrl += `?${params.toString()}`;
-
-      const response = await axios.get(apiUrl);
-      const items = response.data.data || response.data || [];
-
-      return {
-        items,
-        nextPage:
-          items.length === PAGE_SIZE ? (pageParam as number) + 1 : undefined,
-      };
-    },
-    getNextPageParam: (lastPage) => lastPage.nextPage,
-  });
-
-  // Fetch 3D images with infinite loading
-  const {
-    data: threeDImagesData,
-    fetchNextPage: fetchNextThreeDImages,
-    hasNextPage: hasNextThreeDImages,
-    isFetchingNextPage: isFetchingNextThreeDImages,
-    isLoading: isLoadingThreeDImages,
-    isError: isErrorThreeDImages,
-    refetch: threeDImagesRefetch,
-  } = useInfiniteQuery({
-    queryKey: ["3dimages", keyword],
-    initialPageParam: 0,
-    queryFn: async ({ pageParam }) => {
-      if (!config.apis) {
-        throw new Error("API configuration is missing");
-      }
-
-      let apiUrl = `${config.apis.url}/media/3dimages`;
-      const params = new URLSearchParams();
-
-      // Add pagination parameters
-      params.append("ps", PAGE_SIZE.toString());
-      params.append("pi", pageParam.toString());
-
-      // Add keyword if provided
-      if (keyword) {
-        params.append("kw", keyword);
-      }
-
-      // Append params to URL
-      apiUrl += `?${params.toString()}`;
-
-      const response = await axios.get(apiUrl);
-      const items = response.data.data || response.data || [];
-
-      return {
-        items,
-        nextPage:
-          items.length === PAGE_SIZE ? (pageParam as number) + 1 : undefined,
-      };
-    },
-    getNextPageParam: (lastPage) => lastPage.nextPage,
-  });
+  // Create queries for each media type
+  const backgroundsQuery = useMediaQuery(
+    "backgrounds",
+    viewState === "overview" || expandedView?.section === "backgrounds"
+  );
+  const illustrationsQuery = useMediaQuery(
+    "illustrations",
+    viewState === "overview" || expandedView?.section === "illustrations"
+  );
+  const iconsQuery = useMediaQuery(
+    "icons",
+    viewState === "overview" || expandedView?.section === "icons"
+  );
+  const threeDImagesQuery = useMediaQuery(
+    "threeDImages",
+    viewState === "overview" || expandedView?.section === "threeDImages"
+  );
+  const imagesQuery = useMediaQuery(
+    "images",
+    viewState === "overview" || expandedView?.section === "images"
+  );
 
   // Flatten the pages of data into single arrays
   const backgrounds =
-    backgroundsData?.pages.flatMap((page) => page.items) || [];
+    backgroundsQuery.data?.pages.flatMap((page: any) => page.items) || [];
   const illustrations =
-    illustrationsData?.pages.flatMap((page) => page.items) || [];
-  const icons = iconsData?.pages.flatMap((page) => page.items) || [];
+    illustrationsQuery.data?.pages.flatMap((page: any) => page.items) || [];
+  const icons = iconsQuery.data?.pages.flatMap((page: any) => page.items) || [];
   const threeDImages =
-    threeDImagesData?.pages.flatMap((page) => page.items) || [];
-
-  // No need for client-side filtering with Fuse.js since the API handles search
-  const filteredBackgrounds = backgrounds;
-  const filteredIllustrations = illustrations;
-  const filteredIcons = icons;
-  const filteredThreeDImages = threeDImages;
+    threeDImagesQuery.data?.pages.flatMap((page: any) => page.items) || [];
+  const images =
+    imagesQuery.data?.pages.flatMap((page: any) => page.items) || [];
 
   // Handle search
   const handleSearch = useCallback((kw: string) => {
@@ -338,47 +298,10 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = 0;
     }
-
     setKeyword(kw);
   }, []);
 
-  // Toggle section expansion and load more data if needed
-  const toggleSection = (section: keyof typeof expandedSections) => {
-    // If we're expanding a section, fetch the next page of data if available
-    if (!expandedSections[section]) {
-      // Load more data for the specific section
-      switch (section) {
-        case "backgrounds":
-          if (hasNextBackgrounds && !isFetchingNextBackgrounds) {
-            fetchNextBackgrounds();
-          }
-          break;
-        case "illustrations":
-          if (hasNextIllustrations && !isFetchingNextIllustrations) {
-            fetchNextIllustrations();
-          }
-          break;
-        case "icons":
-          if (hasNextIcons && !isFetchingNextIcons) {
-            fetchNextIcons();
-          }
-          break;
-        case "threeDImages":
-          if (hasNextThreeDImages && !isFetchingNextThreeDImages) {
-            fetchNextThreeDImages();
-          }
-          break;
-      }
-    }
-
-    // Toggle the section state
-    setExpandedSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
-
-  // Handle scroll to implement infinite loading
+  // Handle scroll for infinite loading
   const handleScroll = useCallback(() => {
     if (!scrollRef.current) return;
 
@@ -386,57 +309,39 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
     const scrollPosition = node.scrollTop + node.clientHeight;
     const scrollThreshold = node.scrollHeight - SCROLL_THRESHOLD;
 
-    // When user scrolls near the bottom, load more data for expanded sections
+    // When user scrolls near the bottom, load more data for the current view
     if (scrollPosition >= scrollThreshold) {
-      // Check each expanded section and load more data if available
-      if (
-        expandedSections.backgrounds &&
-        hasNextBackgrounds &&
-        !isFetchingNextBackgrounds
-      ) {
-        fetchNextBackgrounds();
-      }
-
-      if (
-        expandedSections.illustrations &&
-        hasNextIllustrations &&
-        !isFetchingNextIllustrations
-      ) {
-        fetchNextIllustrations();
-      }
-
-      if (expandedSections.icons && hasNextIcons && !isFetchingNextIcons) {
-        fetchNextIcons();
-      }
-
-      if (
-        expandedSections.threeDImages &&
-        hasNextThreeDImages &&
-        !isFetchingNextThreeDImages
-      ) {
-        fetchNextThreeDImages();
+      if (viewState === "expanded" && expandedView) {
+        // Load more data for the expanded section
+        const query = getQueryForSection(expandedView.section);
+        if (query.hasNextPage && !query.isFetchingNextPage) {
+          query.fetchNextPage();
+        }
       }
     }
-  }, [
-    expandedSections,
-    fetchNextBackgrounds,
-    hasNextBackgrounds,
-    isFetchingNextBackgrounds,
-    fetchNextIllustrations,
-    hasNextIllustrations,
-    isFetchingNextIllustrations,
-    fetchNextIcons,
-    hasNextIcons,
-    isFetchingNextIcons,
-    fetchNextThreeDImages,
-    hasNextThreeDImages,
-    isFetchingNextThreeDImages,
-  ]);
+  }, [viewState, expandedView]);
+
+  // Helper to get the appropriate query for a section
+  const getQueryForSection = (section: MediaSection) => {
+    switch (section) {
+      case "backgrounds":
+        return backgroundsQuery;
+      case "illustrations":
+        return illustrationsQuery;
+      case "icons":
+        return iconsQuery;
+      case "threeDImages":
+        return threeDImagesQuery;
+      case "images":
+        return imagesQuery;
+      default:
+        return backgroundsQuery;
+    }
+  };
 
   // Add scroll event listener
   useEffect(() => {
     const handleScrollThrottled = () => {
-      // Use requestAnimationFrame to throttle scroll events
       window.requestAnimationFrame(handleScroll);
     };
 
@@ -452,30 +357,124 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
     };
   }, [handleScroll]);
 
-  // Render a section with items
-  const renderSection = (
+  // Handle adding media to canvas with enhanced functionality
+  const handleAddMedia = async (item: MediaItem) => {
+    try {
+      // Show loading toast
+      toast.loading("Adding media to canvas...");
+
+      // Use the complete URL with the proxy endpoint
+      const encodedUrl = encodeURIComponent(item.img);
+
+      // Get the proxied image through the backend
+      const proxyResponse = await axios.get(
+        `${config.apis.url}/proxy-image/${encodedUrl}`
+      );
+      if (!proxyResponse.data || !proxyResponse.data.url) {
+        throw new Error("Invalid response from proxy server");
+      }
+
+      const imageUrl = proxyResponse.data.url;
+      // For image-based media, load the image first to get its natural dimensions
+      const img = new window.Image();
+
+      // Create a promise to handle image loading
+      const imageLoadPromise = new Promise<void>((resolve, reject) => {
+        img.onerror = (err) => {
+          console.error(err);
+          reject(new Error("Failed to load image"));
+        };
+
+        img.onload = () => {
+          try {
+            // Calculate position for the center of the canvas
+            const position = getPositionWhenLayerCenter(state.pageSize, {
+              width: img.naturalWidth,
+              height: img.naturalHeight,
+            });
+
+            // Add as image layer
+            actions.addImageLayer(
+              { thumb: imageUrl, url: imageUrl, position },
+              {
+                width: img.naturalWidth,
+                height: img.naturalHeight,
+              }
+            );
+
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
+        };
+      });
+
+      // Set the image source to start loading
+      img.src = imageUrl;
+      img.crossOrigin = "anonymous";
+
+      // Wait for the image to load
+      await imageLoadPromise;
+
+      // Dismiss loading toast and show success
+      toast.dismiss();
+      toast.success(`Added ${item.name || "media"} to canvas`);
+
+      // Close sidebar on mobile
+      if (isMobile) {
+        onClose();
+      }
+    } catch (error) {
+      console.error(`Error adding media:`, error);
+      toast.dismiss();
+      toast.error(`Failed to add media: ${(error as Error).message}`);
+    }
+  };
+
+  // Render breadcrumb navigation for expanded view
+  const renderBreadcrumb = () => {
+    if (viewState !== "expanded" || !expandedView) return null;
+
+    return (
+      <div
+        css={{
+          display: "flex",
+          alignItems: "center",
+          padding: "12px 16px",
+          borderBottom: "1px solid #eee",
+          fontSize: "14px",
+          color: "#666",
+        }}
+      >
+        <button
+          onClick={handleBackToOverview}
+          css={{
+            background: "none",
+            border: "none",
+            color: "#0070f3",
+            cursor: "pointer",
+            fontSize: "14px",
+            padding: 0,
+            marginRight: "8px",
+          }}
+        >
+          Media
+        </button>
+        <span css={{ margin: "0 4px" }}>{">"}</span>
+        <span css={{ fontWeight: 600 }}>{expandedView.title}</span>
+      </div>
+    );
+  };
+
+  // Render a media section for overview
+  const renderOverviewSection = (
     title: string,
     items: MediaItem[],
-    isLoading: boolean,
-    isError: boolean,
-    isExpanded: boolean,
-    sectionKey: keyof typeof expandedSections,
-    isFetchingNext?: boolean
-    // Removed hasNextPage parameter as it's not used in the function body
+    section: MediaSection,
+    isLoading: boolean
   ) => {
-    // If searching, show all items without "View More" button
-    const showAll = isExpanded || !!keyword;
-    const displayItems = showAll ? items : items.slice(0, 5);
-    const hasMoreItems = items.length > 5;
-
-    // Determine if we should show the "View More" button
-    const showViewMoreButton = !showAll;
-
-    // Determine if we should show the "View Less" button
-    const showViewLessButton = showAll && hasMoreItems && !keyword;
-
-    // Determine if we should show the loading indicator for infinite loading
-    const showInfiniteLoadingIndicator = showAll && isFetchingNext;
+    const displayItems = items.slice(0, 3);
+    const hasMoreItems = items.length > 3;
 
     return (
       <div css={{ marginBottom: "20px" }}>
@@ -497,7 +496,7 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
           >
             {title}
           </h3>
-          {showViewMoreButton && (
+          {hasMoreItems && (
             <button
               css={{
                 background: "none",
@@ -506,56 +505,37 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
                 cursor: "pointer",
                 fontSize: "14px",
               }}
-              onClick={() => toggleSection(sectionKey)}
+              onClick={() => handleViewMore(section)}
             >
               View More
             </button>
           )}
-          {showViewLessButton && (
-            <button
-              css={{
-                background: "none",
-                border: "none",
-                color: "#0070f3",
-                cursor: "pointer",
-                fontSize: "14px",
-              }}
-              onClick={() => toggleSection(sectionKey)}
-            >
-              View Less
-            </button>
-          )}
         </div>
 
-        {isLoading && items.length === 0 ? (
-          <div css={{ textAlign: "center", padding: "20px 0" }}>
-            Loading {title.toLowerCase()}...
-          </div>
-        ) : isError ? (
-          <div css={{ textAlign: "center", padding: "20px 0", color: "red" }}>
-            Failed to load {title.toLowerCase()}
-          </div>
-        ) : items.length === 0 ? (
-          <div css={{ textAlign: "center", padding: "20px 0" }}>
-            No {title.toLowerCase()} found
+        {items.length === 0 && !isLoading ? (
+          <div
+            css={{
+              padding: "20px 10px",
+              textAlign: "center",
+              color: "#666",
+              fontSize: "14px",
+            }}
+          >
+            No {title.toLowerCase()} available
           </div>
         ) : (
           <div
             css={{
-              overflowX: showAll ? "hidden" : "auto",
-              display: showAll ? "grid" : "flex",
-              gridTemplateColumns: showAll ? "repeat(3, 1fr)" : "none",
+              overflowX: "auto",
+              display: "flex",
               gap: "12px",
               padding: "0 10px",
               marginBottom: "10px",
-              scrollbarWidth: "none", // Hide scrollbar for Firefox
-              msOverflowStyle: "none", // Hide scrollbar for IE/Edge
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
               "&::-webkit-scrollbar": {
-                display: "none", // Hide scrollbar for Chrome/Safari
+                display: "none",
               },
-              // Ensure the container has proper spacing
-              paddingBottom: "5px",
-              paddingTop: "5px",
             }}
           >
             {displayItems.map((item) => (
@@ -563,182 +543,24 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
                 key={item._id}
                 onDrop={async (pos) => {
                   if (pos) {
-                    try {
-                      // Show loading toast
-                      toast.loading("Adding media to canvas...");
-
-                      // Use the complete URL with the proxy endpoint
-                      const encodedUrl = encodeURIComponent(item.img);
-
-                      // Get the proxied image through the backend
-                      const proxyResponse = await axios.get(
-                        `${config.apis.url}/proxy-image/${encodedUrl}`
-                      );
-                      if (!proxyResponse.data || !proxyResponse.data.url) {
-                        throw new Error("Invalid response from proxy server");
-                      }
-
-                      const imageUrl = proxyResponse.data.url;
-                      // For image-based media, load the image first to get its natural dimensions
-                      const img = new window.Image();
-
-                      // Create a promise to handle image loading
-                      const imageLoadPromise = new Promise<void>(
-                        (resolve, reject) => {
-                          img.onerror = (err) => {
-                            console.error(err);
-                            reject(new Error("Failed to load image"));
-                          };
-
-                          img.onload = () => {
-                            try {
-                              // Calculate position for the center of the canvas
-                              const position = getPositionWhenLayerCenter(
-                                state.pageSize,
-                                {
-                                  width: img.naturalWidth,
-                                  height: img.naturalHeight,
-                                }
-                              );
-
-                              // Add as image layer
-                              actions.addImageLayer(
-                                { thumb: imageUrl, url: imageUrl, position },
-                                {
-                                  width: img.naturalWidth,
-                                  height: img.naturalHeight,
-                                }
-                              );
-
-                              resolve();
-                            } catch (error) {
-                              reject(error);
-                            }
-                          };
-                        }
-                      );
-
-                      // Set the image source to start loading
-                      img.src = imageUrl;
-                      img.crossOrigin = "anonymous";
-
-                      // Wait for the image to load
-                      await imageLoadPromise;
-
-                      // Dismiss loading toast and show success
-                      toast.dismiss();
-                      toast.success(`Added ${item.name || "media"} to canvas`);
-
-                      // Close sidebar on mobile
-                      if (isMobile) {
-                        onClose();
-                      }
-                    } catch (error) {
-                      console.error(`Error adding media:`, error);
-                      toast.dismiss();
-                      toast.error(
-                        `Failed to add media: ${(error as Error).message}`
-                      );
-                    }
+                    await handleAddMedia(item);
                   }
                 }}
-                onClick={async () => {
-                  try {
-                    // Show loading toast
-                    toast.loading("Adding media to canvas...");
-
-                    // Use the complete URL with the proxy endpoint
-                    const encodedUrl = encodeURIComponent(item.img);
-
-                    // Get the proxied image through the backend
-                    const proxyResponse = await axios.get(
-                      `${config.apis.url}/proxy-image/${encodedUrl}`
-                    );
-
-                    if (!proxyResponse.data || !proxyResponse.data.url) {
-                      throw new Error("Invalid response from proxy server");
-                    }
-
-                    const imageUrl = proxyResponse.data.url;
-
-                    // For image-based media, load the image first to get its natural dimensions
-                    const img = new window.Image();
-
-                    // Create a promise to handle image loading
-                    const imageLoadPromise = new Promise<void>(
-                      (resolve, reject) => {
-                        img.onerror = (err) => {
-                          console.error(err);
-                          reject(new Error("Failed to load image"));
-                        };
-
-                        img.onload = () => {
-                          try {
-                            // Calculate position for the center of the canvas
-                            const position = getPositionWhenLayerCenter(
-                              state.pageSize,
-                              {
-                                width: img.naturalWidth,
-                                height: img.naturalHeight,
-                              }
-                            );
-
-                            // Add as image layer
-                            actions.addImageLayer(
-                              { thumb: imageUrl, url: imageUrl, position },
-                              {
-                                width: img.naturalWidth,
-                                height: img.naturalHeight,
-                              }
-                            );
-
-                            resolve();
-                          } catch (error) {
-                            reject(error);
-                          }
-                        };
-                      }
-                    );
-
-                    // Set the image source to start loading
-                    img.src = imageUrl;
-                    img.crossOrigin = "anonymous";
-
-                    // Wait for the image to load
-                    await imageLoadPromise;
-
-                    // Dismiss loading toast and show success
-                    toast.dismiss();
-                    toast.success(`Added ${item.name || "media"} to canvas`);
-
-                    // Close sidebar on mobile
-                    if (isMobile) {
-                      onClose();
-                    }
-                  } catch (error) {
-                    console.error(`Error adding media:`, error);
-                    toast.dismiss();
-                    toast.error(
-                      `Failed to add media: ${(error as Error).message}`
-                    );
-                  }
-                }}
+                onClick={() => handleAddMedia(item)}
               >
                 <div
                   css={{
                     cursor: "pointer",
                     position: "relative",
-                    width: showAll ? "100%" : "160px", // Fixed width for horizontal scrolling (larger)
-                    height: showAll ? "auto" : "160px", // Fixed height for horizontal scrolling (larger)
-                    flexShrink: 0, // Prevent shrinking in flex container
-                    paddingBottom: showAll ? "100%" : "0", // Only use aspect ratio in grid mode
+                    width: "120px",
+                    height: "120px",
+                    flexShrink: 0,
                     borderRadius: "8px",
                     overflow: "hidden",
                     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                    margin: "0 4px", // Add some horizontal spacing
-                    transition: "transform 0.2s ease-in-out", // Smooth hover effect
+                    transition: "transform 0.2s ease-in-out",
                     "&:hover": {
-                      transform: "scale(1.03)", // Slight zoom on hover
+                      transform: "scale(1.03)",
                       boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
                     },
                   }}
@@ -750,36 +572,112 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
                     loading="lazy"
                     alt={item.name || title}
                     css={{
-                      position: showAll ? "absolute" : "relative",
-                      top: showAll ? 0 : "auto",
-                      left: showAll ? 0 : "auto",
                       width: "100%",
                       height: "100%",
                       objectFit: "cover",
                     }}
                     onError={(e) => {
-                      // Fallback to original URL if proxy fails
                       (e.target as HTMLImageElement).src = item.img;
                     }}
                   />
                 </div>
               </Draggable>
             ))}
+          </div>
+        )}
+      </div>
+    );
+  };
 
-            {/* Show loading indicator when fetching next page */}
-            {showInfiniteLoadingIndicator && (
-              <div
-                css={{
-                  gridColumn: "1 / -1",
-                  textAlign: "center",
-                  padding: "15px 0",
-                  fontSize: "14px",
-                  color: "#666",
+  // Render expanded section view
+  const renderExpandedSection = () => {
+    if (viewState !== "expanded" || !expandedView) return null;
+
+    const query = getQueryForSection(expandedView.section);
+    const items = query.data?.pages.flatMap((page: any) => page.items) || [];
+
+    return (
+      <div css={{ padding: "16px" }}>
+        {items.length === 0 && !query.isLoading ? (
+          <div
+            css={{
+              padding: "40px 20px",
+              textAlign: "center",
+              color: "#666",
+              fontSize: "16px",
+            }}
+          >
+            No {expandedView.title.toLowerCase()} available
+          </div>
+        ) : (
+          <div
+            css={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: "12px",
+              marginBottom: "20px",
+            }}
+          >
+            {items.map((item) => (
+              <Draggable
+                key={item._id}
+                onDrop={async (pos) => {
+                  if (pos) {
+                    await handleAddMedia(item);
+                  }
                 }}
+                onClick={() => handleAddMedia(item)}
               >
-                Loading more {title.toLowerCase()}...
-              </div>
-            )}
+                <div
+                  css={{
+                    cursor: "pointer",
+                    position: "relative",
+                    width: "100%",
+                    paddingBottom: "100%",
+                    borderRadius: "8px",
+                    overflow: "hidden",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                    transition: "transform 0.2s ease-in-out",
+                    "&:hover": {
+                      transform: "scale(1.03)",
+                      boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
+                    },
+                  }}
+                >
+                  <img
+                    src={`${config.apis?.url}/proxy-image/${encodeURIComponent(
+                      item.img
+                    )}`}
+                    loading="lazy"
+                    alt={item.name || expandedView.title}
+                    css={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = item.img;
+                    }}
+                  />
+                </div>
+              </Draggable>
+            ))}
+          </div>
+        )}
+
+        {query.isFetchingNextPage && (
+          <div
+            css={{
+              textAlign: "center",
+              padding: "15px 0",
+              fontSize: "14px",
+              color: "#666",
+            }}
+          >
+            Loading more {expandedView.title.toLowerCase()}...
           </div>
         )}
       </div>
@@ -788,14 +686,13 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
 
   // Handle refreshing data after upload
   const handleUploadSuccess = () => {
-    // Close the upload form
     setShowUploadForm(false);
-
     // Refetch all media data
-    backgroundsRefetch();
-    illustrationsRefetch();
-    iconsRefetch();
-    threeDImagesRefetch();
+    backgroundsQuery.refetch();
+    illustrationsQuery.refetch();
+    iconsQuery.refetch();
+    threeDImagesQuery.refetch();
+    imagesQuery.refetch();
   };
 
   return (
@@ -806,7 +703,8 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
         flexDirection: "column",
         display: "flex",
         padding: 16,
-        overflow: "hidden", // Prevent double scrollbars
+        paddingBottom: 0,
+        overflow: "hidden",
       }}
     >
       {!isMobile && <CloseSidebarButton onClose={onClose} />}
@@ -818,88 +716,77 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
         />
       ) : (
         <>
+          {/* Media Title */}
           <div
             css={{
               marginBottom: 16,
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
+              padding: "0 4px",
             }}
           >
-            <div css={{ flex: 1 }}>
-              <MediaSearchBox
-                searchString={keyword}
-                onStartSearch={handleSearch}
-              />
-            </div>
-            {/* <button
-              onClick={() => setShowUploadForm(true)}
+            <h2
               css={{
-                marginLeft: 8,
-                padding: "8px 12px",
-                background: "#0070f3",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize: "14px",
+                fontSize: "18px",
+                fontWeight: 600,
+                margin: "0 0 12px 0",
+                color: "#333",
               }}
             >
-              Upload
-            </button> */}
+              Media
+            </h2>
+            <MediaSearchBox
+              searchString={keyword}
+              onStartSearch={handleSearch}
+            />
           </div>
 
-          {/* Scrollable content area */}
+          {renderBreadcrumb()}
+
           <div
             ref={scrollRef}
             css={{
               flexDirection: "column",
               display: "flex",
               flexGrow: 1,
-              height: "calc(100% - 80px)", // Subtract header height
-              overflowY: "auto", // Enable scrolling on this container
-              padding: "4px 0", // Add padding to ensure scrolling works properly
+              height: "calc(100% - 80px)",
+              overflowY: "auto",
+              padding: "4px 0",
             }}
           >
-            {/* Render each section with infinite loading state */}
-            {renderSection(
-              "Backgrounds",
-              filteredBackgrounds,
-              isLoadingBackgrounds,
-              isErrorBackgrounds,
-              expandedSections.backgrounds,
-              "backgrounds",
-              isFetchingNextBackgrounds
-            )}
-
-            {renderSection(
-              "Illustrations",
-              filteredIllustrations,
-              isLoadingIllustrations,
-              isErrorIllustrations,
-              expandedSections.illustrations,
-              "illustrations",
-              isFetchingNextIllustrations
-            )}
-
-            {renderSection(
-              "Icons",
-              filteredIcons,
-              isLoadingIcons,
-              isErrorIcons,
-              expandedSections.icons,
-              "icons",
-              isFetchingNextIcons
-            )}
-
-            {renderSection(
-              "3D Images",
-              filteredThreeDImages,
-              isLoadingThreeDImages,
-              isErrorThreeDImages,
-              expandedSections.threeDImages,
-              "threeDImages",
-              isFetchingNextThreeDImages
+            {viewState === "overview" ? (
+              <>
+                {/* {renderOverviewSection(
+                  "Images",
+                  images,
+                  "images",
+                  imagesQuery.isLoading
+                )} */}
+                {renderOverviewSection(
+                  "Backgrounds",
+                  backgrounds,
+                  "backgrounds",
+                  backgroundsQuery.isLoading
+                )}
+                {renderOverviewSection(
+                  "Illustrations",
+                  illustrations,
+                  "illustrations",
+                  illustrationsQuery.isLoading
+                )}
+                {renderOverviewSection(
+                  "Icons",
+                  icons,
+                  "icons",
+                  iconsQuery.isLoading
+                )}
+                {renderOverviewSection(
+                  "3D Images",
+                  threeDImages,
+                  "threeDImages",
+                  threeDImagesQuery.isLoading
+                )}
+              </>
+            ) : (
+              renderExpandedSection()
             )}
           </div>
         </>

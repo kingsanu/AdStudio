@@ -1,7 +1,11 @@
 import { pack } from "canva-editor/utils/minifier";
 import { dataMapping } from "canva-editor/utils/minifier";
 import axios, { AxiosError } from "axios";
-import { UPLOAD_TEMPLATE_ENDPOINT } from "canva-editor/utils/constants/api";
+import {
+  UPLOAD_TEMPLATE_ENDPOINT,
+  UPLOAD_KIOSK_TEMPLATE_ENDPOINT,
+  USER_KIOSK_ENDPOINT,
+} from "canva-editor/utils/constants/api";
 import { domToPng } from "modern-screenshot";
 import Cookies from "js-cookie";
 import { toast } from "sonner";
@@ -258,84 +262,121 @@ export const syncChangesToServer = async (
     // Get user ID from cookies or use default
     const userId = Cookies.get("auth_token") || "anonymous";
 
-    // Check if we have a template ID in localStorage
-    let templateId = localStorage.getItem(LOCAL_STORAGE_KEYS.TEMPLATE_ID);
+    // Check if we're working with a kiosk
+    const kioskId = localStorage.getItem("kiosk_id");
+    const isKiosk = !!kioskId;
 
-    // Prepare data for API
-    // Ensure the template name is consistent to help with filename consistency
-    const templateName = pendingChanges.designName || "Untitled design";
+    if (isKiosk) {
+      // Handle kiosk saving
+      console.log(`Syncing kiosk: ${kioskId} for user: ${userId}`);
 
-    // Initialize with default values
-    let isPublic = false;
-    let templateDesc = "";
-
-    // If we're updating an existing template, try to fetch its current public status
-    if (templateId) {
-      try {
-        const templateResponse = await axios.get(
-          `${UPLOAD_TEMPLATE_ENDPOINT.replace(
-            "/upload-template",
-            "/templates"
-          )}/${templateId}`
-        );
-        if (templateResponse.data) {
-          // Preserve the existing public status and description
-          isPublic = templateResponse.data.isPublic;
-          templateDesc = templateResponse.data.description || "";
-          console.log(`Preserving template status: isPublic=${isPublic}`);
+      // First, upload the template JSON to cloud storage
+      const templateResponse = await axios.post(
+        UPLOAD_KIOSK_TEMPLATE_ENDPOINT,
+        {
+          packedData: pendingChanges.packedData,
+          userId,
         }
-      } catch (error) {
-        console.warn("Could not fetch template details, using defaults", error);
-      }
-    }
+      );
 
-    const apiData = {
-      packedData: pendingChanges.packedData,
-      previewImage: pendingChanges.previewImage,
-      templateName: templateName,
-      templateDesc: templateDesc,
-      isPublic: isPublic,
-      userId,
-    };
+      // Get the template URL from the response
+      const templateUrl = templateResponse.data.templateUrl;
+      console.log("Kiosk template URL:", templateUrl);
 
-    console.log(`Syncing template: ${templateName} for user: ${userId}`);
+      // Update the user's kiosk with the new template
+      const kioskUpdateData = {
+        userId,
+        templateUrl,
+        templateData: pendingChanges.packedData,
+        title: pendingChanges.designName || "My Kiosk",
+      };
 
-    // Save to database - use PUT for update if we have a template ID
-    let response;
+      await axios.put(USER_KIOSK_ENDPOINT, kioskUpdateData);
+      console.log(`Updated kiosk with ID: ${kioskId}`);
+    } else {
+      // Handle regular template saving
+      // Check if we have a template ID in localStorage
+      let templateId = localStorage.getItem(LOCAL_STORAGE_KEYS.TEMPLATE_ID);
 
-    if (templateId) {
-      // Update existing template
-      try {
-        response = await axios.put(
-          `${UPLOAD_TEMPLATE_ENDPOINT}/${templateId}`,
-          apiData
-        );
-        console.log(`Updated existing template with ID: ${templateId}`);
-      } catch (error) {
-        // If the template doesn't exist anymore (404), create a new one
-        if (axios.isAxiosError(error) && error.response?.status === 404) {
-          console.log(
-            `Template with ID ${templateId} not found, creating new template`
+      // Prepare data for API
+      // Ensure the template name is consistent to help with filename consistency
+      const templateName = pendingChanges.designName || "Untitled design";
+
+      // Initialize with default values
+      let isPublic = false;
+      let templateDesc = "";
+
+      // If we're updating an existing template, try to fetch its current public status
+      if (templateId) {
+        try {
+          const templateResponse = await axios.get(
+            `${UPLOAD_TEMPLATE_ENDPOINT.replace(
+              "/upload-template",
+              "/templates"
+            )}/${templateId}`
           );
-          templateId = null; // Reset template ID to create a new one
-          localStorage.removeItem(LOCAL_STORAGE_KEYS.TEMPLATE_ID);
-        } else {
-          // For other errors, rethrow
-          throw error;
+          if (templateResponse.data) {
+            // Preserve the existing public status and description
+            isPublic = templateResponse.data.isPublic;
+            templateDesc = templateResponse.data.description || "";
+            console.log(`Preserving template status: isPublic=${isPublic}`);
+          }
+        } catch (error) {
+          console.warn(
+            "Could not fetch template details, using defaults",
+            error
+          );
         }
       }
-    }
 
-    // If no template ID or template not found, create a new one
-    if (!templateId) {
-      response = await axios.post(UPLOAD_TEMPLATE_ENDPOINT, apiData);
-      console.log("Created new template");
+      const apiData = {
+        packedData: pendingChanges.packedData,
+        previewImage: pendingChanges.previewImage,
+        templateName: templateName,
+        templateDesc: templateDesc,
+        isPublic: isPublic,
+        userId,
+      };
 
-      // Store the template ID for future updates
-      if (response.data?.template?.id) {
-        const newTemplateId = response.data.template.id;
-        localStorage.setItem(LOCAL_STORAGE_KEYS.TEMPLATE_ID, newTemplateId);
-        console.log(`Stored new template ID: ${newTemplateId}`);
+      console.log(`Syncing template: ${templateName} for user: ${userId}`);
+
+      // Save to database - use PUT for update if we have a template ID
+      let response;
+
+      if (templateId) {
+        // Update existing template
+        try {
+          response = await axios.put(
+            `${UPLOAD_TEMPLATE_ENDPOINT}/${templateId}`,
+            apiData
+          );
+          console.log(`Updated existing template with ID: ${templateId}`);
+        } catch (error) {
+          // If the template doesn't exist anymore (404), create a new one
+          if (axios.isAxiosError(error) && error.response?.status === 404) {
+            console.log(
+              `Template with ID ${templateId} not found, creating new template`
+            );
+            templateId = null; // Reset template ID to create a new one
+            localStorage.removeItem(LOCAL_STORAGE_KEYS.TEMPLATE_ID);
+          } else {
+            // For other errors, rethrow
+            throw error;
+          }
+        }
+      }
+
+      // If no template ID or template not found, create a new one
+      if (!templateId) {
+        response = await axios.post(UPLOAD_TEMPLATE_ENDPOINT, apiData);
+        console.log("Created new template");
+
+        // Store the template ID for future updates
+        if (response.data?.template?.id) {
+          const newTemplateId = response.data.template.id;
+          localStorage.setItem(LOCAL_STORAGE_KEYS.TEMPLATE_ID, newTemplateId);
+          console.log(`Stored new template ID: ${newTemplateId}`);
+        }
       }
     }
 
@@ -360,10 +401,17 @@ export const syncChangesToServer = async (
 
     if (showNotification) {
       toast.dismiss();
-      toast.success("Design Saved", {
-        description: `Last saved at ${now.toLocaleTimeString()}`,
-        duration: 2000,
-      });
+      if (isKiosk) {
+        toast.success("Kiosk Saved", {
+          description: `Last saved at ${now.toLocaleTimeString()}`,
+          duration: 2000,
+        });
+      } else {
+        toast.success("Design Saved", {
+          description: `Last saved at ${now.toLocaleTimeString()}`,
+          duration: 2000,
+        });
+      }
     }
 
     return now;

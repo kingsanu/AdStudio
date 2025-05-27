@@ -5,6 +5,12 @@ const express = require("express");
 const router = express.Router();
 const kioskController = require("../controllers/kioskController.js");
 
+// Get or create user's single kiosk
+router.get("/user-kiosk", kioskController.getUserKiosk);
+
+// Update user's kiosk
+router.put("/user-kiosk", kioskController.updateUserKiosk);
+
 // Create a new kiosk
 router.post("/kiosks", kioskController.createKiosk);
 
