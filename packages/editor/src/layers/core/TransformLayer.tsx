@@ -11,7 +11,6 @@ import {
   useAnimation,
   getAnimationStyles,
 } from "../../animations/AnimationController";
-import { useLayer } from "../../hooks/useLayer";
 import { useEditorStore } from "../../hooks/useEditorStore";
 import "../../animations/animations.css";
 
@@ -20,13 +19,27 @@ export interface TransformLayerProps {
   rotate: number;
   position: Delta;
   transparency?: number;
+  blur?: number;
+  backdropBlur?: number;
   layerId?: LayerId;
 }
 
 const TransformLayer: ForwardRefRenderFunction<
   HTMLDivElement,
   PropsWithChildren<TransformLayerProps>
-> = ({ boxSize, rotate, position, transparency, children, layerId }, ref) => {
+> = (
+  {
+    boxSize,
+    rotate,
+    position,
+    transparency,
+    blur,
+    backdropBlur,
+    children,
+    layerId,
+  },
+  ref
+) => {
   const { getState } = useEditorStore();
   const { animationState } = useAnimation();
   const [animationStyles, setAnimationStyles] = useState<React.CSSProperties>(
@@ -36,6 +49,17 @@ const TransformLayer: ForwardRefRenderFunction<
   // Get current page index
   const state = getState();
   const pageIndex = state.activePage;
+
+  // Build filter styles
+  const filterStyles: string[] = [];
+  if (blur && blur > 0) {
+    filterStyles.push(`blur(${blur}px)`);
+  }
+
+  const backdropFilterStyles: string[] = [];
+  if (backdropBlur && backdropBlur > 0) {
+    backdropFilterStyles.push(`blur(${backdropBlur}px)`);
+  }
 
   // Check if this layer has an animation
   useEffect(() => {
@@ -68,6 +92,15 @@ const TransformLayer: ForwardRefRenderFunction<
         height: boxSize.height,
         transform: getTransformStyle({ position, rotate }),
         opacity: transparency,
+        filter: filterStyles.length > 0 ? filterStyles.join(" ") : undefined,
+        backdropFilter:
+          backdropFilterStyles.length > 0
+            ? backdropFilterStyles.join(" ")
+            : undefined,
+        WebkitBackdropFilter:
+          backdropFilterStyles.length > 0
+            ? backdropFilterStyles.join(" ")
+            : undefined, // Safari support
         ...animationStyles,
       }}
       data-layer-id={layerId}

@@ -10,3 +10,8 @@ export const KIOSKS_ENDPOINT = `${API_BASE_URL}/api/kiosks`;
 export const USER_KIOSK_ENDPOINT = `${API_BASE_URL}/api/user-kiosk`;
 export const UPLOAD_KIOSK_IMAGE_ENDPOINT = `${API_BASE_URL}/api/upload-kiosk-image`;
 export const UPLOAD_KIOSK_TEMPLATE_ENDPOINT = `${API_BASE_URL}/api/upload-kiosk-template`;
+
+// Live Menu endpoints
+export const USER_LIVEMENU_ENDPOINT = `${API_BASE_URL}/api/user-livemenu`;
+export const UPLOAD_LIVEMENU_IMAGE_ENDPOINT = `${API_BASE_URL}/api/upload-livemenu-image`;
+export const UPLOAD_LIVEMENU_TEMPLATE_ENDPOINT = `${API_BASE_URL}/api/upload-livemenu-template`;

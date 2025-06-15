@@ -4,12 +4,22 @@ import {
   EditorContext,
   EditorContext as EditorContextType,
 } from "canva-editor/components/editor/EditorContext";
-import { Undo, Redo, Download, Share, Lightbulb, Monitor } from "lucide-react";
+import {
+  Undo,
+  Redo,
+  Download,
+  Share,
+  Lightbulb,
+  Monitor,
+  FileText,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import HeaderFileMenu from "canva-editor/layout/sidebar/components/HeaderFileMenu";
-import CampaignDialog from "canva-editor/components/editor/CampaignDialog";
+import WhatsAppCampaignDialog from "@/components/WhatsAppCampaignDialog";
 import PublishKioskDialog from "@/components/editor/PublishKioskDialog";
+import PublishLiveMenuDialog from "@/components/dialogs/PublishLiveMenuDialog";
+import BulkCouponDialog from "@/components/editor/BulkCouponDialog";
 import SyncStatusIndicator from "canva-editor/components/sync/SyncStatusIndicator";
 import { useSyncService } from "canva-editor/hooks/useSyncService";
 
@@ -42,6 +52,8 @@ interface CustomHeaderProps {
   onDownload?: () => void;
   isAdmin?: boolean;
   isKiosk?: boolean;
+  isLiveMenu?: boolean;
+  isCoupon?: boolean;
   editorContext?: CustomEditorContext; // Use our custom context type
 }
 
@@ -50,11 +62,16 @@ const CustomHeader: FC<CustomHeaderProps> = ({
   // onShare,
   onDownload,
   isKiosk = false,
+  isLiveMenu = false,
+  isCoupon = false,
   editorContext,
 }) => {
   // State for dialogs
   const [showCampaignDialog, setShowCampaignDialog] = useState(false);
   const [showPublishKioskDialog, setShowPublishKioskDialog] = useState(false);
+  const [showPublishLiveMenuDialog, setShowPublishLiveMenuDialog] =
+    useState(false);
+  const [showBulkCouponDialog, setShowBulkCouponDialog] = useState(false);
 
   // Reference to the page content element for generating previews
   const pageContentRef = useRef<HTMLElement | null>(null);
@@ -138,6 +155,11 @@ const CustomHeader: FC<CustomHeaderProps> = ({
     setShowPublishKioskDialog(true);
   };
 
+  // Handle publish live menu
+  const handlePublishLiveMenu = () => {
+    setShowPublishLiveMenuDialog(true);
+  };
+
   // Handle undo
   const handleUndo = () => {
     if (actions.undo) {
@@ -158,18 +180,6 @@ const CustomHeader: FC<CustomHeaderProps> = ({
 
   return (
     <>
-      {/* Campaign Dialog */}
-      <CampaignDialog
-        open={showCampaignDialog}
-        onClose={() => setShowCampaignDialog(false)}
-      />
-
-      {/* Publish Kiosk Dialog */}
-      <PublishKioskDialog
-        open={showPublishKioskDialog}
-        onClose={() => setShowPublishKioskDialog(false)}
-      />
-
       <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-neutral-900">
         <div className="flex items-center space-x-4">
           {/* Logo */}
@@ -276,18 +286,61 @@ const CustomHeader: FC<CustomHeaderProps> = ({
               <Monitor className="mr-2 h-4 w-4" />
               Publish to Kiosk
             </Button>
+          ) : isLiveMenu ? (
+            <Button
+              size="sm"
+              className="h-9 bg-purple-600 hover:bg-purple-700"
+              onClick={handlePublishLiveMenu}
+            >
+              <Monitor className="mr-2 h-4 w-4" />
+              Publish to Live Menu
+            </Button>
+          ) : isCoupon ? (
+            <Button
+              size="sm"
+              className="h-9 bg-orange-600 hover:bg-orange-700"
+              onClick={() => setShowBulkCouponDialog(true)}
+            >
+              <FileText className="mr-2 h-4 w-4" />
+              Bulk Generate
+            </Button>
           ) : (
             <Button
               size="sm"
-              className="h-9 bg-blue-600 hover:bg-blue-700"
+              className="h-9 bg-green-600 hover:bg-green-700"
               onClick={handleShare}
             >
               <Share className="mr-2 h-4 w-4" />
-              Share
+              WhatsApp Campaign
             </Button>
           )}
         </div>
       </div>
+
+      {/* Dialogs */}
+      <WhatsAppCampaignDialog
+        open={showCampaignDialog}
+        onClose={() => setShowCampaignDialog(false)}
+        onSuccess={() => {
+          setShowCampaignDialog(false);
+          // Optional: Show success message or refresh data
+        }}
+      />
+
+      <PublishKioskDialog
+        open={showPublishKioskDialog}
+        onClose={() => setShowPublishKioskDialog(false)}
+      />
+
+      <PublishLiveMenuDialog
+        open={showPublishLiveMenuDialog}
+        onClose={() => setShowPublishLiveMenuDialog(false)}
+      />
+
+      <BulkCouponDialog
+        open={showBulkCouponDialog}
+        onClose={() => setShowBulkCouponDialog(false)}
+      />
     </>
   );
 };

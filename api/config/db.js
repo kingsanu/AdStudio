@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+/* eslint-disable @typescript-eslint/no-var-requires */
 const mongoose = require("mongoose");
 const path = require("path");
 const dotenv = require("dotenv");

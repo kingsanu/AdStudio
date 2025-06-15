@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
@@ -124,9 +126,9 @@ export default function CouponDesigner() {
 
   const handleCreateCoupon = (templateId?: string) => {
     if (templateId) {
-      navigate(`/editor?template=${templateId}&type=coupon`);
+      navigate(`/editor?template=${templateId}&isCoupon=true`);
     } else {
-      navigate("/editor?type=coupon");
+      navigate("/editor?isCoupon=true");
     }
     toast.success("Opening coupon designer...");
   };

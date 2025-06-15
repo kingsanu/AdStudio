@@ -15,8 +15,15 @@ import useMobileDetect from "canva-editor/hooks/useMobileDetect";
 import axios from "axios";
 import Draggable from "canva-editor/layers/core/Dragable";
 import { Delta } from "canva-editor/types";
-import { GET_TEMPLATE_ENDPOINT } from "canva-editor/utils/constants/api";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import {
+  GET_TEMPLATE_ENDPOINT,
+  GET_TEMPLATE_PATH_ENDPOINT,
+} from "canva-editor/utils/constants/api";
+import {
+  QueryClient,
+  useInfiniteQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 import Cookies from "js-cookie";
 import { useAuth } from "@/contexts/AuthContext";
@@ -39,6 +46,7 @@ const UploadContent: FC<UploadContentProps> = ({ visibility, onClose }) => {
   const isMobile = useMobileDetect();
   const { user } = useAuth();
   const userId = user?.userId || Cookies.get("auth_token") || "anonymous";
+  const queryClient = useQueryClient();
 
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -303,7 +311,6 @@ const UploadContent: FC<UploadContentProps> = ({ visibility, onClose }) => {
 
       // The response is the direct URL string, not an object with a url property
       const imageUrl = response.data;
-
       console.log("Uploaded image URL:", imageUrl);
       return imageUrl; // Return the properly formatted URL
     } catch (error) {
@@ -339,6 +346,7 @@ const UploadContent: FC<UploadContentProps> = ({ visibility, onClose }) => {
           console.error("Failed to upload image:", error);
           window.alert("Failed to upload image. Please try again.");
         } finally {
+          queryClient.invalidateQueries({ queryKey: ["userImages"] });
           setIsUploading(false);
           setTempUploadingImage(null);
         }
@@ -352,7 +360,7 @@ const UploadContent: FC<UploadContentProps> = ({ visibility, onClose }) => {
         width: "100%",
         height: "100%",
         flexDirection: "column",
-        overflowY: "auto",
+        overflowY: "hidden",
         display: visibility ? "flex" : "none",
       }}
     >
@@ -427,7 +435,7 @@ const UploadContent: FC<UploadContentProps> = ({ visibility, onClose }) => {
                         const file = item.url.split("/");
                         console.log(file[file.length - 1]);
                         const templateData = await axios.get(
-                          `${GET_TEMPLATE_ENDPOINT}/${file[file.length - 1]}`
+                          `${GET_TEMPLATE_PATH_ENDPOINT}/${encodeURI(item.url)}`
                         );
                         console.log(templateData);
                         addImage(templateData.data.data);
@@ -438,7 +446,9 @@ const UploadContent: FC<UploadContentProps> = ({ visibility, onClose }) => {
                     const file = item.url.split("/");
                     console.log(file[file.length - 1]);
                     const templateData = await axios.get(
-                      `${GET_TEMPLATE_ENDPOINT}/${file[file.length - 1]}`
+                      `${GET_TEMPLATE_PATH_ENDPOINT}/${encodeURIComponent(
+                        item.url
+                      )}`
                     );
                     addImage(templateData.data.data);
                   }}

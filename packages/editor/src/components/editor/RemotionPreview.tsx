@@ -4,6 +4,7 @@ import { SlideshowComposition } from "../../remotion/SlideshowComposition";
 import { Download, X } from "lucide-react";
 import { toast } from "sonner";
 import { API_BASE_URL } from "../../utils/constants/api";
+import SyncService from "../../services/syncService";
 
 interface RemotionPreviewProps {
   open: boolean;
@@ -53,6 +54,20 @@ const RemotionPreview: React.FC<RemotionPreviewProps> = ({
   const handleExport = useCallback(async () => {
     try {
       setIsExporting(true);
+
+      // Force sync before video export
+      console.log("Forcing sync before video export...");
+      const canProceed = await SyncService.forceSyncBeforeCriticalAction(
+        "video export"
+      );
+
+      if (!canProceed) {
+        toast.warning("Export Warning", {
+          description:
+            "Unable to sync your latest changes before export. The video will be created with the last saved version.",
+          duration: 5000,
+        });
+      }
 
       // Show toast notification for starting the process
       toast.info("Exporting video", {
@@ -155,6 +170,7 @@ const RemotionPreview: React.FC<RemotionPreviewProps> = ({
         <div className="p-6 flex flex-col items-center">
           <div className="w-full aspect-video bg-black rounded-lg overflow-hidden mb-6">
             <Player
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               component={SlideshowComposition as any}
               durationInFrames={totalFrames}
               fps={fps}

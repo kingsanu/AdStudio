@@ -10,33 +10,35 @@ import TransformLayer from "./TransformLayer";
 import { useLayer, useEditor } from "../../hooks";
 
 const RenderLayer: FC = () => {
-  const { id, comp, props, layers, type, actions, parent } = useLayer(
-    (layer) => ({
-      id: layer.id,
-      comp: layer.data.comp,
-      props: layer.data.props,
-      layers: layer.data.child,
-      type: layer.data.type,
-      parent: layer.data.parent,
-    })
-  );
-  const { isResize, pageSize, isDragging, isRotate } = useEditor((state) => ({
+  const { id, comp, props, layers, actions, parent } = useLayer((layer) => ({
+    id: layer.id,
+    comp: layer.data.comp,
+    props: layer.data.props,
+    layers: layer.data.child,
+    parent: layer.data.parent,
+  }));
+  const { isResize, isDragging, isRotate } = useEditor((state) => ({
     isResize: state.resizeData.status,
     isDragging: state.dragData.status,
     isRotate: state.rotateData.status,
-    pageSize: state.pageSize,
   }));
-  const handleHover = (e: React.MouseEvent) => {
-    if (isResize || !["ROOT", null].includes(parent) || isDragging || isRotate)
-      return;
-    e.stopPropagation();
-    actions.hover();
-  };
-  const handleMouseOut = () => {
-    actions.hover(null);
-  };
 
   return useMemo(() => {
+    const handleHover = (e: React.MouseEvent) => {
+      if (
+        isResize ||
+        !["ROOT", null].includes(parent) ||
+        isDragging ||
+        isRotate
+      )
+        return;
+      e.stopPropagation();
+      actions.hover();
+    };
+    const handleMouseOut = () => {
+      actions.hover(null);
+    };
+
     if (!comp) {
       return null;
     }
@@ -69,6 +71,8 @@ const RenderLayer: FC = () => {
         rotate={props.rotate}
         position={props.position}
         transparency={props.transparency}
+        blur={props.blur}
+        backdropBlur={props.backdropBlur}
         layerId={id}
       >
         <div
@@ -80,7 +84,17 @@ const RenderLayer: FC = () => {
         </div>
       </TransformLayer>
     );
-  }, [type, comp, props, layers, isResize, pageSize, isRotate, isDragging]);
+  }, [
+    comp,
+    props,
+    layers,
+    id,
+    actions,
+    isDragging,
+    isResize,
+    isRotate,
+    parent,
+  ]);
 };
 
 export default React.memo(RenderLayer);

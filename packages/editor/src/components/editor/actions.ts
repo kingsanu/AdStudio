@@ -43,6 +43,24 @@ import { TextLayerProps } from "canva-editor/layers/TextLayer";
 import { arrayMoveMutable } from "canva-editor/drag-and-drop/DDUtils";
 
 export const ActionMethods = (state: EditorState) => {
+  // Helper function to get the index where lockHidden layers end
+  const getLockHiddenBoundary = (pageIndex: number): number => {
+    const child = state.pages[pageIndex].layers.ROOT.data.child;
+    let boundary = child.length;
+
+    // Find the last lockHidden layer from the end
+    for (let i = child.length - 1; i >= 0; i--) {
+      const layer = state.pages[pageIndex].layers[child[i]];
+      if (layer?.data?.lockHidden) {
+        boundary = i;
+      } else {
+        break;
+      }
+    }
+
+    return boundary;
+  };
+
   const addLayerTreeToParent = (
     pageIndex: number,
     { rootId, layers }: SerializedLayerTree,
@@ -469,10 +487,22 @@ export const ActionMethods = (state: EditorState) => {
       } else {
         ids.push(layerId);
       }
+
+      // Filter out layers that have lockHidden property set to true
+      const deletableIds = ids.filter((id) => {
+        const layer = state.pages[pageIndex].layers[id];
+        return !layer?.data?.lockHidden;
+      });
+
+      // If no layers can be deleted, return early
+      if (deletableIds.length === 0) {
+        return;
+      }
+
       state.selectedLayers[pageIndex] = state.selectedLayers[pageIndex].filter(
-        (id) => !ids.includes(id)
+        (id) => !deletableIds.includes(id)
       );
-      ids.forEach((id) => {
+      deletableIds.forEach((id) => {
         const parentId = state.pages[pageIndex].layers[id].data.parent;
         delete state.pages[pageIndex].layers[id];
         if (parentId && state.pages[pageIndex].layers[parentId]) {
@@ -588,6 +618,7 @@ export const ActionMethods = (state: EditorState) => {
       state.pages.splice(pageIndex - 1, 0, newPage);
       state.activePage = pageIndex - 1;
     },
+
     movePageDown: (pageIndex: number) => {
       const newPage = cloneDeep(state.pages[pageIndex]);
       state.pages.splice(pageIndex, 1);
@@ -614,9 +645,63 @@ export const ActionMethods = (state: EditorState) => {
         ids.push(...layerId);
       } else {
         ids.push(layerId);
+      } // Check if any layers have lockHidden and user is not admin
+      const hasAdminLockedLayers = ids.some((id) => {
+        const layer = state.pages[pageIndex].layers[id];
+        return layer?.data?.lockHidden;
+      });
+
+      if (hasAdminLockedLayers && !state.isAdmin) {
+        // Don't unlock anything and return early
+        return;
+      }
+
+      // Filter layers based on admin status for lockHidden layers
+      const unlockableIds = ids.filter((id) => {
+        const layer = state.pages[pageIndex].layers[id];
+        // If layer has lockHidden property, only admin can unlock it
+        if (layer?.data?.lockHidden) {
+          return state.isAdmin || false; // Check admin status
+        }
+        return true; // Regular locked layers can be unlocked by anyone
+      });
+
+      unlockableIds.forEach((id) => {
+        state.pages[pageIndex].layers[id].data.locked = false;
+      });
+    },
+    // Admin-only lock actions for lockHidden property
+    adminLock: (pageIndex: number, layerId: LayerId | LayerId[]) => {
+      // Only admins can set lockHidden
+      if (!state.isAdmin) {
+        return;
+      }
+
+      const ids: LayerId[] = [];
+      if (typeof layerId === "object") {
+        ids.push(...layerId);
+      } else {
+        ids.push(layerId);
+      }
+
+      ids.forEach((id) => {
+        state.pages[pageIndex].layers[id].data.lockHidden = true;
+        state.pages[pageIndex].layers[id].data.locked = true; // Also set regular lock
+      });
+    },
+    adminUnlock: (pageIndex: number, layerId: LayerId | LayerId[]) => {
+      // Only admins can remove lockHidden
+      if (!state.isAdmin) return;
+
+      const ids: LayerId[] = [];
+      if (typeof layerId === "object") {
+        ids.push(...layerId);
+      } else {
+        ids.push(layerId);
       }
       ids.forEach((id) => {
-        state.pages[pageIndex].layers[id].data.locked = false;
+        state.pages[pageIndex].layers[id].data.lockHidden = false;
+        state.pages[pageIndex].layers[id].data.locked = false; // Also remove regular lock
       });
     },
     ungroup(layerId: LayerId) {
@@ -771,12 +856,30 @@ export const ActionMethods = (state: EditorState) => {
       } else {
         ids.push(layerId);
       }
+
+      // Filter out lockHidden layers - they cannot be moved
+      const movableIds = ids.filter((id) => {
+        const layer = state.pages[pageIndex].layers[id];
+        return !layer?.data?.lockHidden;
+      });
+
+      if (movableIds.length === 0) return;
+
       const child = state.pages[pageIndex].layers.ROOT.data.child;
-      ids.sort((a, b) => child.indexOf(a) - child.indexOf(b));
-      ids.forEach((id) => {
+      const lockHiddenBoundary = getLockHiddenBoundary(pageIndex);
+
+      movableIds.sort((a, b) => child.indexOf(a) - child.indexOf(b));
+      movableIds.forEach((id) => {
         const fromIndex = child.findIndex((lId) => lId === id);
         child.splice(fromIndex, 1);
-        child.splice(toIndex === -1 ? child.length : toIndex, 0, id);
+
+        // Ensure we don't move above lockHidden layers
+        const targetIndex =
+          toIndex === -1
+            ? Math.min(child.length, lockHiddenBoundary)
+            : Math.min(toIndex, lockHiddenBoundary);
+
+        child.splice(targetIndex, 0, id);
       });
     },
     bringForward: (pageIndex: number, layerId: LayerId | LayerId[]) => {
@@ -786,13 +889,29 @@ export const ActionMethods = (state: EditorState) => {
       } else {
         ids.push(layerId);
       }
+
+      // Filter out lockHidden layers - they cannot be moved
+      const movableIds = ids.filter((id) => {
+        const layer = state.pages[pageIndex].layers[id];
+        return !layer?.data?.lockHidden;
+      });
+
+      if (movableIds.length === 0) return;
+
       const child = state.pages[pageIndex].layers.ROOT.data.child;
-      const lastIndex = child.findLastIndex((lId: string) => ids.includes(lId));
-      ids.sort((a, b) => child.indexOf(a) - child.indexOf(b));
-      ids.forEach((id) => {
+      const lockHiddenBoundary = getLockHiddenBoundary(pageIndex);
+      const lastIndex = child.findLastIndex((lId: string) =>
+        movableIds.includes(lId)
+      );
+
+      movableIds.sort((a, b) => child.indexOf(a) - child.indexOf(b));
+      movableIds.forEach((id) => {
         const fromIndex = child.findIndex((lId) => lId === id);
         child.splice(fromIndex, 1);
-        child.splice(lastIndex + 1, 0, id);
+
+        // Ensure we don't move above lockHidden layers
+        const targetIndex = Math.min(lastIndex + 1, lockHiddenBoundary);
+        child.splice(targetIndex, 0, id);
       });
     },
     sendToBack: (
@@ -806,9 +925,18 @@ export const ActionMethods = (state: EditorState) => {
       } else {
         ids.push(layerId);
       }
+
+      // Filter out lockHidden layers - they cannot be moved
+      const movableIds = ids.filter((id) => {
+        const layer = state.pages[pageIndex].layers[id];
+        return !layer?.data?.lockHidden;
+      });
+
+      if (movableIds.length === 0) return;
+
       const child = state.pages[pageIndex].layers.ROOT.data.child;
-      ids.sort((a, b) => child.indexOf(b) - child.indexOf(a));
-      ids.forEach((id) => {
+      movableIds.sort((a, b) => child.indexOf(b) - child.indexOf(a));
+      movableIds.forEach((id) => {
         const fromIndex = child.findIndex((lId) => lId === id);
         child.splice(fromIndex, 1);
         child.splice(toIndex === -1 ? 0 : toIndex, 0, id);
@@ -821,10 +949,19 @@ export const ActionMethods = (state: EditorState) => {
       } else {
         ids.push(layerId);
       }
+
+      // Filter out lockHidden layers - they cannot be moved
+      const movableIds = ids.filter((id) => {
+        const layer = state.pages[pageIndex].layers[id];
+        return !layer?.data?.lockHidden;
+      });
+
+      if (movableIds.length === 0) return;
+
       const child = state.pages[pageIndex].layers.ROOT.data.child;
-      const firstIndex = child.findIndex((lId) => ids.includes(lId));
-      ids.sort((a, b) => child.indexOf(b) - child.indexOf(a));
-      ids.forEach((id) => {
+      const firstIndex = child.findIndex((lId) => movableIds.includes(lId));
+      movableIds.sort((a, b) => child.indexOf(b) - child.indexOf(a));
+      movableIds.forEach((id) => {
         const fromIndex = child.findIndex((lId) => lId === id);
         child.splice(fromIndex, 1);
         child.splice(firstIndex - 1, 0, id);

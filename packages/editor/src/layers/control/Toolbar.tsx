@@ -9,6 +9,8 @@ import TrashIcon from "canva-editor/icons/TrashIcon";
 import MoreHorizIcon from "canva-editor/icons/MoreHorizIcon";
 import LockIcon from "canva-editor/icons/LockIcon";
 import RemoveBackgroundIcon from "canva-editor/icons/RemoveBackgroundIcon";
+import AdminLockIcon from "canva-editor/icons/AdminLockIcon";
+import AdminUnlockIcon from "canva-editor/icons/AdminUnlockIcon";
 import axios from "axios";
 import { REMOVE_BACKGROUND_ENDPOINT } from "canva-editor/utils/constants/api";
 import { toast } from "sonner";
@@ -31,6 +33,7 @@ const Toolbar: React.FC = () => {
     isOpenMenu,
     scale,
     isPageLocked,
+    isAdmin,
   } = useEditor((state) => ({
     isGroup: state.selectedLayers[state.activePage].length > 1,
     isDragging: state.dragData.status,
@@ -41,8 +44,11 @@ const Toolbar: React.FC = () => {
     isPageLocked: state.pages[state.activePage].layers.ROOT.data.locked,
     isOpenMenu: !!state.openMenu,
     scale: state.scale,
+    isAdmin: state.isAdmin,
   }));
   const isLocked = selectedLayers.find((i) => i.data.locked);
+  const hasLockHidden = selectedLayers.some((i) => i.data.lockHidden === true);
+
   const boundingBoxRect = useMemo(() => {
     if (!controlBox) {
       return {
@@ -149,8 +155,7 @@ const Toolbar: React.FC = () => {
     } finally {
       setIsProcessing(false);
     }
-  };
-  // Don't render toolbar during drag/resize/rotate operations
+  }; // Don't render toolbar during drag/resize/rotate operations
   if (
     isDragging ||
     isResizing ||
@@ -160,7 +165,6 @@ const Toolbar: React.FC = () => {
   ) {
     return null;
   }
-
   const containerGroupLayer = !!selectedLayers.find((l) => isGroupLayer(l));
   // Calculate toolbar position
   // Use boundingBoxRect if available, otherwise use fallback position
@@ -208,7 +212,7 @@ const Toolbar: React.FC = () => {
           }}
         >
           {/* Always show toolbar buttons when layers are selected */}
-          {!isPageLocked && !isLocked && (
+          {!isPageLocked && !isLocked && !hasLockHidden && (
             <Fragment>
               {selectedLayerIds.length > 1 && (
                 <div
@@ -278,13 +282,17 @@ const Toolbar: React.FC = () => {
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                    cursor: "pointer",
+                    cursor: hasLockHidden ? "not-allowed" : "pointer",
                     fontSize: 24,
+                    opacity: hasLockHidden ? 0.5 : 1,
                     ":hover": {
-                      backgroundColor: "rgba(64,87,109,.07)",
+                      backgroundColor: hasLockHidden
+                        ? undefined
+                        : "rgba(64,87,109,.07)",
                     },
                   }}
                   onClick={() =>
+                    !hasLockHidden &&
                     actions.deleteLayer(pageIndex, selectedLayerIds)
                   }
                 >
@@ -340,8 +348,9 @@ const Toolbar: React.FC = () => {
                 </div>
               </Tooltip>
             </Fragment>
-          )}
-          {(isLocked || isPageLocked) && (
+          )}{" "}
+          {/* Regular unlock button - only for normal locked layers */}
+          {isLocked && !hasLockHidden && (
             <Tooltip content="Unlock" delayDuration={300}>
               <div
                 css={{
@@ -350,7 +359,7 @@ const Toolbar: React.FC = () => {
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
-                  cursor: "pointer",
+                  cursor: isPageLocked ? "not-allowed" : "pointer",
                   fontSize: 24,
                   color: isPageLocked ? "rgba(36,49,61,.4)" : undefined,
                   ":hover": {
@@ -360,12 +369,109 @@ const Toolbar: React.FC = () => {
                   },
                 }}
                 onClick={() => {
-                  actions.unlock(pageIndex, selectedLayerIds);
+                  if (!isPageLocked) {
+                    actions.unlock(pageIndex, selectedLayerIds);
+                  }
                 }}
               >
                 <LockIcon />
               </div>
             </Tooltip>
+          )}
+          {/* Admin-locked indicator for non-admins - shows they can't unlock */}
+          {hasLockHidden && !isAdmin && (
+            <Tooltip
+              content="This layer can only be unlocked by an admin"
+              delayDuration={300}
+            >
+              <div
+                css={{
+                  width: 32,
+                  height: 32,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  cursor: "not-allowed",
+                  fontSize: 20,
+                  color: "#FF6B35",
+                  opacity: 0.7,
+                }}
+                onClick={() => {
+                  toast.error("Access denied", {
+                    description:
+                      "This layer can only be unlocked by an admin user.",
+                  });
+                }}
+              >
+                <AdminLockIcon />
+              </div>
+            </Tooltip>
+          )}
+          {/* Admin-only lock controls - only visible to admins */}
+          {isAdmin && (
+            <>
+              {/* Admin Lock Button - for setting lockHidden */}
+              {!hasLockHidden && !isPageLocked && (
+                <Tooltip
+                  content="Admin Lock (Coupon Protected)"
+                  delayDuration={300}
+                >
+                  <div
+                    css={{
+                      width: 32,
+                      height: 32,
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      cursor: "pointer",
+                      fontSize: 20,
+                      color: "#FF6B35",
+                      ":hover": {
+                        backgroundColor: "rgba(255, 107, 53, 0.1)",
+                      },
+                    }}
+                    onClick={() => {
+                      actions.adminLock(pageIndex, selectedLayerIds);
+                      toast.success("Admin Lock Applied", {
+                        description:
+                          "Layer is now protected for coupon editing.",
+                      });
+                    }}
+                  >
+                    <AdminLockIcon />
+                  </div>
+                </Tooltip>
+              )}
+
+              {/* Admin Unlock Button - for removing lockHidden */}
+              {hasLockHidden && (
+                <Tooltip content="Remove Admin Lock" delayDuration={300}>
+                  <div
+                    css={{
+                      width: 32,
+                      height: 32,
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      cursor: "pointer",
+                      fontSize: 20,
+                      color: "#10B981",
+                      ":hover": {
+                        backgroundColor: "rgba(16, 185, 129, 0.1)",
+                      },
+                    }}
+                    onClick={() => {
+                      actions.adminUnlock(pageIndex, selectedLayerIds);
+                      toast.success("Admin Lock Removed", {
+                        description: "Layer is no longer protected.",
+                      });
+                    }}
+                  >
+                    <AdminUnlockIcon />
+                  </div>
+                </Tooltip>
+              )}
+            </>
           )}
         </div>
       </div>

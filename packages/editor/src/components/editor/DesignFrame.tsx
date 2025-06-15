@@ -28,6 +28,7 @@ import { isPointInsideBox } from "canva-editor/utils/2d/isPointInsideBox";
 import { rectangleInsideAnother } from "canva-editor/utils/2d/rectangleInsideAnother";
 import LayerContextMenu from "canva-editor/layers/core/context-menu/LayerContextMenu";
 import SelectionBox from "canva-editor/layers/core/SelectionBox";
+import SyncService from "canva-editor/services/syncService";
 import { isMobile } from "react-device-detect";
 import PageSettings from "canva-editor/utils/settings/PageSettings";
 import { dataMapping, pack, unpack } from "canva-editor/utils/minifier";
@@ -245,6 +246,21 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
     }, 16);
   };
   const handleDownloadPNG = async (pageIndex: number) => {
+    // Force sync before PNG download
+    console.log(`Forcing sync before PNG download (page ${pageIndex + 1})...`);
+    try {
+      const canProceed = await SyncService.forceSyncBeforeCriticalAction(
+        `PNG download of page ${pageIndex + 1}`
+      );
+      if (!canProceed) {
+        console.warn(
+          "PNG download proceeding with potentially unsynced changes"
+        );
+      }
+    } catch (error) {
+      console.error("Error during forced sync before PNG download:", error);
+    }
+
     const pageContentEl =
       pageRef.current[pageIndex]?.querySelector(".page-content");
     if (pageContentEl) {
@@ -263,6 +279,21 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
     }
   };
   const handleDownloadPDF = async () => {
+    // Force sync before PDF download
+    console.log("Forcing sync before PDF download...");
+    try {
+      const canProceed = await SyncService.forceSyncBeforeCriticalAction(
+        "PDF download"
+      );
+      if (!canProceed) {
+        console.warn(
+          "PDF download proceeding with potentially unsynced changes"
+        );
+      }
+    } catch (error) {
+      console.error("Error during forced sync before PDF download:", error);
+    }
+
     const pageProcesses: Promise<string>[] = [];
     pages.forEach((_, idx) => {
       const pageContentEl =

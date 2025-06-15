@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { FC, useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useEditor } from "canva-editor/hooks";
 import { pack } from "canva-editor/utils/minifier";
 import { dataMapping } from "canva-editor/utils/minifier";
@@ -17,7 +17,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -25,22 +24,28 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { AlertCircle, CheckCircle } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle,
+  Monitor,
+  Eye,
+  Save,
+  Loader2,
+} from "lucide-react";
 
 interface PublishKioskDialogProps {
   open: boolean;
   onClose: () => void;
 }
 
-const PublishKioskDialog: FC<PublishKioskDialogProps> = ({ open, onClose }) => {
+const PublishKioskDialog: React.FC<PublishKioskDialogProps> = ({
+  open,
+  onClose,
+}) => {
   // State for form fields
   const [templateName, setTemplateName] = useState("");
   const [templateDesc, setTemplateDesc] = useState("");
-  const [isPublic, setIsPublic] = useState(false);
-  const [templateTags, setTemplateTags] = useState<string[]>([]);
-  const [tagsInput, setTagsInput] = useState("");
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveProgress, setSaveProgress] = useState(0);
@@ -86,33 +91,6 @@ const PublishKioskDialog: FC<PublishKioskDialogProps> = ({ open, onClose }) => {
       }
     };
   }, []);
-
-  // Handle tag input
-  const handleTagsInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTagsInput(e.target.value);
-  };
-
-  // Handle tag input key press
-  const handleTagsKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" || e.key === ",") {
-      e.preventDefault();
-      addTag();
-    }
-  };
-
-  // Add tag to list
-  const addTag = () => {
-    const tag = tagsInput.trim();
-    if (tag && !templateTags.includes(tag)) {
-      setTemplateTags([...templateTags, tag]);
-      setTagsInput("");
-    }
-  };
-
-  // Remove tag from list
-  const removeTag = (tagToRemove: string) => {
-    setTemplateTags(templateTags.filter((tag) => tag !== tagToRemove));
-  };
 
   // Handle publishing template and generating page images
   const handlePublishKiosk = async () => {
@@ -194,8 +172,6 @@ const PublishKioskDialog: FC<PublishKioskDialogProps> = ({ open, onClose }) => {
         description: templateDesc,
         userId,
         templateUrl, // Store the URL to the JSON file
-        tags: templateTags,
-        isPublic,
       };
       console.log("Kiosk payload:", kioskPayload);
 
@@ -210,11 +186,14 @@ const PublishKioskDialog: FC<PublishKioskDialogProps> = ({ open, onClose }) => {
       const pageImages = [];
       const originalActivePage = activePage;
 
+      // Get all pages from the design
+      const pageKeys = Object.keys(pages || {});
+
       // Capture each page as an image
-      console.log(`Starting to capture ${pages.length} pages`);
-      for (let i = 0; i < pages.length; i++) {
+      console.log(`Starting to capture ${pageKeys.length} pages`);
+      for (let i = 0; i < pageKeys.length; i++) {
         try {
-          console.log(`Processing page ${i + 1} of ${pages.length}`);
+          console.log(`Processing page ${i + 1} of ${pageKeys.length}`);
 
           // Set the active page - this is the key fix
           console.log(`Setting active page to ${i}`);
@@ -336,139 +315,128 @@ const PublishKioskDialog: FC<PublishKioskDialogProps> = ({ open, onClose }) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+    <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Publish to Kiosk</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Monitor className="h-5 w-5 text-blue-600" />
+            Publish Kiosk Display
+          </DialogTitle>
           <DialogDescription>
-            Save your design and generate images for kiosk display.
+            Configure your kiosk for display. This will be shown on your
+            restaurant's kiosk screens.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4 py-4">
-          {/* Template Name */}
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Name
-            </Label>
-            <Input
-              id="name"
-              value={templateName}
-              onChange={(e) => setTemplateName(e.target.value)}
-              className="col-span-3"
-              placeholder="My Kiosk Template"
-              disabled={isSaving}
-            />
-          </div>
-
-          {/* Template Description */}
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="description" className="text-right">
-              Description
-            </Label>
-            <Textarea
-              id="description"
-              value={templateDesc}
-              onChange={(e) => setTemplateDesc(e.target.value)}
-              className="col-span-3"
-              placeholder="A brief description of your template"
-              disabled={isSaving}
-            />
-          </div>
-
-          {/* Template Tags */}
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="tags" className="text-right">
-              Tags
-            </Label>
-            <div className="col-span-3">
-              <Input
-                id="tags"
-                value={tagsInput}
-                onChange={handleTagsInputChange}
-                onKeyDown={handleTagsKeyPress}
-                onBlur={addTag}
-                className="mb-2"
-                placeholder="Add tags (press Enter or comma to add)"
-                disabled={isSaving}
-              />
-              <div className="flex flex-wrap gap-2">
-                {templateTags.map((tag) => (
-                  <div
-                    key={tag}
-                    className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full flex items-center"
-                  >
-                    {tag}
-                    <button
-                      type="button"
-                      className="ml-1 text-blue-600 hover:text-blue-800"
-                      onClick={() => removeTag(tag)}
-                      disabled={isSaving}
-                    >
-                      &times;
-                    </button>
-                  </div>
-                ))}
-              </div>
+        {isSaving ? (
+          <div className="flex flex-col items-center justify-center py-8 space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <div className="text-center">
+              <p className="font-medium">Publishing Kiosk...</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Capturing pages and uploading to cloud storage
+              </p>
             </div>
-          </div>
-
-          {/* Public/Private Toggle */}
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="public" className="text-right">
-              Public
-            </Label>
-            <div className="flex items-center space-x-2 col-span-3">
-              <Switch
-                id="public"
-                checked={isPublic}
-                onCheckedChange={setIsPublic}
-                disabled={isSaving}
-              />
-              <Label htmlFor="public">
-                {isPublic ? "Public template" : "Private template"}
-              </Label>
-            </div>
-          </div>
-
-          {/* Preview Image */}
-          {previewImage && (
-            <div className="mt-4">
-              <Label className="block mb-2">Preview</Label>
-              <div className="border rounded-md overflow-hidden">
-                <img
-                  src={previewImage}
-                  alt="Template Preview"
-                  className="w-full h-auto"
+            <div className="w-full max-w-xs">
+              <div className="bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${saveProgress}%` }}
                 />
               </div>
+              <p className="text-xs text-center mt-1 text-gray-500">
+                {Math.round(saveProgress)}% complete
+              </p>
             </div>
-          )}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {/* Kiosk Info */}
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Monitor className="h-4 w-4 text-blue-600" />
+                <span className="font-medium text-blue-800 dark:text-blue-200">
+                  Kiosk Display Settings
+                </span>
+              </div>
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                Optimized for 900x1200 kiosk resolution. Your kiosk will be
+                displayed in portrait mode.
+              </p>
+            </div>
 
-          {/* Progress Bar (when saving) */}
-          {isSaving && (
-            <div className="mt-4">
-              <Label className="block mb-2">
-                Publishing Progress: {Math.round(saveProgress)}%
-              </Label>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div
-                  className="bg-blue-600 h-2.5 rounded-full"
-                  style={{ width: `${saveProgress}%` }}
-                ></div>
+            {/* Title Input */}
+            <div className="space-y-2">
+              <Label htmlFor="title">Kiosk Title</Label>
+              <Input
+                id="title"
+                value={templateName}
+                onChange={(e) => setTemplateName(e.target.value)}
+                placeholder="Enter kiosk title"
+                className="w-full"
+              />
+            </div>
+
+            {/* Description Input */}
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={templateDesc}
+                onChange={(e) => setTemplateDesc(e.target.value)}
+                placeholder="Enter kiosk description"
+                className="w-full min-h-[80px]"
+              />
+            </div>
+
+            {/* Preview Image */}
+            {previewImage && (
+              <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                <Label className="block mb-2">Preview</Label>
+                <div className="border rounded-md overflow-hidden">
+                  <img
+                    src={previewImage}
+                    alt="Kiosk Preview"
+                    className="w-full h-auto max-h-48 object-contain"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex justify-between pt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  // Preview functionality can be added later
+                  toast.info("Preview functionality coming soon");
+                }}
+                disabled={!previewImage}
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                Preview
+              </Button>
+
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={onClose}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handlePublishKiosk}
+                  disabled={isSaving || !templateName.trim()}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  {isSaving ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="mr-2 h-4 w-4" />
+                  )}
+                  {isSaving ? "Publishing..." : "Save & Publish"}
+                </Button>
               </div>
             </div>
-          )}
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={isSaving}>
-            Cancel
-          </Button>
-          <Button onClick={handlePublishKiosk} disabled={isSaving}>
-            {isSaving ? "Publishing..." : "Publish"}
-          </Button>
-        </DialogFooter>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

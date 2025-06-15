@@ -1,51 +1,40 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
+    "target": "ES2020",
     "useDefineForClassFields": true,
-    "lib": ["esnext", "ES2021.String", "DOM", "DOM.Iterable"],
-    "module": "esnext",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
     "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "jsxImportSource": "@emotion/react",
 
     /* Bundler mode */
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+    "jsxImportSource": "@emotion/react",
 
     /* Linting */
     "strict": true,
-    "allowJs": true,
     "noUnusedLocals": false,
-    "noUnusedParameters": true,
+    "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
+
+    /* Path Aliases */
     "baseUrl": ".",
-    "rootDir": ".",
     "paths": {
-      "canva-editor": ["packages/editor/src"],
-      "canva-editor/*": ["packages/editor/src/*"],
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@components/*": ["src/components/*"],
+      "@contexts/*": ["src/contexts/*"],
+      "@services/*": ["src/services/*"],
+      "@utils/*": ["src/utils/*"],
+      "@hooks/*": ["src/hooks/*"],
+      "@assets/*": ["src/assets/*"],
+      "@layouts/*": ["src/layouts/*"],
+      "canva-editor/*": ["packages/editor/src/*"]
     }
   },
-  "include": [
-    "**/*.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "vite.config.mjs",
-    "packages/editor/vite.config.mjs",
-    "packages/editor/src/layout/sidebar/TemplateContent.jsx",
-    "packages/editor/src/components/editor/SaveTemplate.jsx",
-    "packages/editor/src/components/editor/TemplateGallery.jsx"
-  ],
-
-  "exclude": [
-    "**/node_modules",
-    "**/dist",
-    "src/components/editor/CustomEditor.tsx"
-  ],
+  "include": ["src", "packages", "vite.config.mjs"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

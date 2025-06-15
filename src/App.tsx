@@ -12,12 +12,15 @@ import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import Favorites from "./pages/Favorites";
 import KioskViewer from "./pages/Kiosk/KioskViewer";
+import LiveMenuPreview from "./pages/LiveMenuPreview";
 import RecentWork from "./pages/RecentWork";
 import Templates from "./pages/Templates";
 import GoogleFeedback from "./pages/GoogleFeedback";
 import CouponDesigner from "./pages/CouponDesigner";
 import RoyaltyProgram from "./pages/RoyaltyProgram";
 import MembershipCard from "./pages/MembershipCard";
+import WhatsAppCampaigns from "./pages/WhatsAppCampaigns";
+import WhatsAppCampaignDetail from "./pages/WhatsAppCampaignDetail";
 
 function App() {
   return (
@@ -119,9 +122,31 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/whatsapp-campaigns"
+            element={
+              <ProtectedRoute>
+                <WhatsAppCampaigns />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/whatsapp-campaigns/:id"
+            element={
+              <ProtectedRoute>
+                <WhatsAppCampaignDetail />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Kiosk viewer route - public */}
           <Route path="/kiosk/:id" element={<KioskViewer />} />
+
+          {/* Live Menu preview route - public */}
+          <Route
+            path="/live-menu-preview/:liveMenuId"
+            element={<LiveMenuPreview />}
+          />
 
           {/* Fallback route */}
           <Route path="*" element={<NotFound />} />

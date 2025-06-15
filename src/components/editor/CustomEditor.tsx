@@ -5,7 +5,11 @@
  * The application is using CustomCanvaEditor.tsx or CanvaEditorWithCustomHeader.tsx instead.
  */
 import { FC, PropsWithChildren, useEffect, useState, useRef } from "react";
-import { EditorConfig, EditorContext } from "canva-editor/components/editor";
+import {
+  EditorConfig,
+  EditorContext,
+  Preview,
+} from "canva-editor/components/editor";
 import { CanvaEditor } from "canva-editor/components/editor";
 import { X, Plus } from "lucide-react";
 
@@ -30,6 +34,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useEditorStore } from "canva-editor/hooks/useEditorStore";
+import { AnimationState } from "canva-editor/animations/types";
+import { initSyncService } from "canva-editor/services/syncService";
+import {
+  cleanupDesignChangeListeners,
+  setupDesignChangeListeners,
+} from "canva-editor/index";
+import { dataMapping, pack } from "canva-editor/utils/minifier";
+import PageThumbnail from "canva-editor/components/editor/PageThumbnail";
+import { AnimationProvider } from "canva-editor/animations/AnimationController";
+import { TransitionProvider } from "canva-editor/animations/TransitionController";
+import Sidebar from "canva-editor/layout/Sidebar";
+import AppLayerSettings from "canva-editor/layout/AppLayerSettings";
+import EditorContent from "canva-editor/layout/pages/EditorContent";
+import CloseIcon from "canva-editor/icons/CloseIcon";
 
 export type CustomEditorProps = {
   data?: {

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Lock Test</title>
+    <script>
+      // Test template with lockHidden layers
+      const testTemplateData = [
+        {
+          a: "",
+          b: "",
+          c: {
+            d: {
+              e: { f: "RootLayer" },
+              g: {
+                h: { i: 1640, j: 924 },
+                k: { l: 0, m: 0 },
+                n: 0,
+                o: "rgb(255, 255, 255)",
+                p: null,
+              },
+              r: false,
+              s: ["test_text_layer", "test_admin_layer"],
+              t: null,
+            },
+            test_text_layer: {
+              e: { f: "TextLayer" },
+              g: {
+                k: { l: 100, m: 100 },
+                h: { i: 400, j: 100 },
+                v: "<p>This is a normal text layer</p>",
+                w: [],
+                ab: ["rgb(0, 0, 0)"],
+                ac: [32],
+                ag: 1,
+              },
+              r: false, // regular locked property
+              ak: false, // lockHidden property (not admin-only)
+              s: [],
+              t: "ROOT",
+            },
+            test_admin_layer: {
+              e: { f: "TextLayer" },
+              g: {
+                k: { l: 100, m: 250 },
+                h: { i: 600, j: 100 },
+                v: "<p>This is an ADMIN-ONLY layer - lockHidden: true</p>",
+                w: [],
+                ab: ["rgb(255, 0, 0)"],
+                ac: [32],
+                ag: 1,
+              },
+              r: true, // regular locked property
+              ak: true, // lockHidden property (ADMIN-ONLY)
+              s: [],
+              t: "ROOT",
+            },
+          },
+        },
+      ];
+
+      function openEditor(isAdmin) {
+        const adminParam = isAdmin ? "&adm=true" : "";
+        const templateData = encodeURIComponent(
+          JSON.stringify(testTemplateData)
+        );
+
+        // Open editor with test template
+        const url = `http://localhost:3000/editor/template/test-admin-lock?template=${templateData}${adminParam}`;
+        window.open(url, isAdmin ? "admin-editor" : "user-editor");
+      }
+
+      function runTest() {
+        document.getElementById("status").innerHTML = `
+                <h2>Admin Lock Test Instructions:</h2>
+                <ol>
+                    <li>Click "Open as Admin" - You should be able to unlock both layers</li>
+                    <li>Click "Open as User" - You should NOT be able to unlock the red admin-only layer</li>
+                    <li>Try clicking the unlock button on the red layer as a user - it should show an error toast</li>
+                    <li>The toolbar should show appropriate feedback for admin-only layers</li>
+                </ol>
+                <p><strong>Expected Behavior:</strong></p>
+                <ul>
+                    <li>Admin users can unlock any layer including lockHidden layers</li>
+                    <li>Regular users cannot unlock layers with lockHidden: true</li>
+                    <li>UI provides appropriate feedback when non-admins try to unlock admin-only layers</li>
+                </ul>
+            `;
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Admin-Only Layer Lock Test</h1>
+
+    <div>
+      <button
+        onclick="openEditor(true)"
+        style="
+          background: green;
+          color: white;
+          padding: 10px 20px;
+          margin: 10px;
+        "
+      >
+        Open as Admin (adm=true)
+      </button>
+
+      <button
+        onclick="openEditor(false)"
+        style="background: blue; color: white; padding: 10px 20px; margin: 10px"
+      >
+        Open as User (normal)
+      </button>
+
+      <button
+        onclick="runTest()"
+        style="
+          background: orange;
+          color: white;
+          padding: 10px 20px;
+          margin: 10px;
+        "
+      >
+        Show Test Instructions
+      </button>
+    </div>
+
+    <div
+      id="status"
+      style="
+        margin-top: 20px;
+        padding: 20px;
+        border: 1px solid #ccc;
+        background: #f9f9f9;
+      "
+    >
+      <p>
+        Click "Show Test Instructions" to see how to test the admin-only lock
+        functionality.
+      </p>
+    </div>
+
+    <div style="margin-top: 20px">
+      <h3>Test Template Structure:</h3>
+      <pre style="background: #f0f0f0; padding: 10px; border-radius: 5px">
+Layer 1: "This is a normal text layer"
+- locked: false
+- lockHidden: false
+- Should be unlockable by anyone
+
+Layer 2: "This is an ADMIN-ONLY layer - lockHidden: true" (red text)
+- locked: true  
+- lockHidden: true
+- Should ONLY be unlockable by admins
+        </pre
+      >
+    </div>
+  </body>
+</html>

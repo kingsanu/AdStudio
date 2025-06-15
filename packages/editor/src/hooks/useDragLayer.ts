@@ -1,10 +1,12 @@
-import { cloneDeep, throttle } from 'lodash';
-import { useEditor } from './useEditor';
-import { isMobile } from 'react-device-detect';
-import { RefObject, useEffect, useRef } from 'react';
-import { useLinkedRef } from './useLinkedRef';
-import { useTrackingShiftKey } from './useTrackingShiftKey';
-import { getPosition } from 'canva-editor/utils';
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { cloneDeep, throttle } from "lodash";
+import { useEditor } from "./useEditor";
+import { isMobile } from "react-device-detect";
+import { RefObject, useEffect, useRef } from "react";
+import { useLinkedRef } from "./useLinkedRef";
+import { useTrackingShiftKey } from "./useTrackingShiftKey";
+import { getPosition } from "canva-editor/utils";
 import {
   BoxData,
   CursorPosition,
@@ -15,15 +17,15 @@ import {
   LayerDataRef,
   LayerId,
   VerticalGuideline,
-} from 'canva-editor/types';
-import { getTransformStyle } from 'canva-editor/layers';
-import { boundingRect } from 'canva-editor/utils/2d/boundingRect';
-import { isPointInsideBox } from 'canva-editor/utils/2d/isPointInsideBox';
-import { rectangleInsideAnother } from 'canva-editor/utils/2d/rectangleInsideAnother';
-import { visualCorners } from 'canva-editor/utils/2d/visualCorners';
-import { getControlBoxSizeFromLayers } from 'canva-editor/utils/layer/getControlBoxSizeFromLayers';
-import { useSelectedLayers } from '.';
-import { isFrameLayer, isImageLayer } from 'canva-editor/utils/layer/layers';
+} from "canva-editor/types";
+import { getTransformStyle } from "canva-editor/layers";
+import { boundingRect } from "canva-editor/utils/2d/boundingRect";
+import { isPointInsideBox } from "canva-editor/utils/2d/isPointInsideBox";
+import { rectangleInsideAnother } from "canva-editor/utils/2d/rectangleInsideAnother";
+import { visualCorners } from "canva-editor/utils/2d/visualCorners";
+import { getControlBoxSizeFromLayers } from "canva-editor/utils/layer/getControlBoxSizeFromLayers";
+import { useSelectedLayers } from ".";
+import { isFrameLayer, isImageLayer } from "canva-editor/utils/layer/layers";
 
 export type DragCallbackData = {
   controlBox?: Delta;
@@ -87,7 +89,7 @@ export const useDragLayer = ({
           .reverse(),
     };
   });
-  let tempFrameLayer: Layer<LayerComponentProps> | null = null;
+  const tempFrameLayer: Layer<LayerComponentProps> | null = null;
 
   const calculateSize = ({ clientX, clientY }: CursorPosition) => {
     const layersData = getLayerData();
@@ -196,8 +198,7 @@ export const useDragLayer = ({
 
       if (ref2.current && dragRef.current) {
         actions.history.merge().setProp(dragRef.current.pageIndex, layer.id, {
-          transparency:
-            ref2.current.imageLayer.data.props.image.transparency || 1,
+          transparency: ref2.current.imageLayer.data.props.transparency || 1,
         });
 
         actions.history
@@ -321,7 +322,7 @@ export const useDragLayer = ({
         actions.selectLayers(
           hoveredPage,
           hoveredLayer.id,
-          shiftKeyRef.current ? 'add' : 'replace'
+          shiftKeyRef.current ? "add" : "replace"
         );
       actions.history.back();
     } else {
@@ -371,7 +372,6 @@ export const useDragLayer = ({
             actions.history
               .merge()
               .setProp(dragRef.current.pageIndex, layerId, {
-                transparency: 1,
                 position: {
                   x: position.x + (change?.x || 0),
                   y: position.y + (change?.y || 0),
@@ -399,27 +399,27 @@ export const useDragLayer = ({
     dragRef.current = null;
     setLayerData({});
     actions.setDragData(false);
-    window.removeEventListener('mousemove', handleDragging);
-    window.removeEventListener('mouseup', handleDragEnd);
-    window.removeEventListener('mouseleave', handleDragEnd);
-    window.removeEventListener('touchmove', handleDragging);
-    window.removeEventListener('touchend', handleDragEnd);
+    window.removeEventListener("mousemove", handleDragging);
+    window.removeEventListener("mouseup", handleDragEnd);
+    window.removeEventListener("mouseleave", handleDragEnd);
+    window.removeEventListener("touchmove", handleDragging);
+    window.removeEventListener("touchend", handleDragEnd);
   };
   const bindDraggingEvents = () => {
     actions.history.new();
-    window.addEventListener('touchmove', handleDragging);
-    window.addEventListener('mousemove', handleDragging);
-    window.addEventListener('mouseup', handleDragEnd, { once: true });
-    window.addEventListener('mouseleave', handleDragEnd, { once: true });
-    window.addEventListener('touchend', handleDragEnd, { once: true });
+    window.addEventListener("touchmove", handleDragging);
+    window.addEventListener("mousemove", handleDragging);
+    window.addEventListener("mouseup", handleDragEnd, { once: true });
+    window.addEventListener("mouseleave", handleDragEnd, { once: true });
+    window.addEventListener("touchend", handleDragEnd, { once: true });
   };
   useEffect(() => {
     const handleScroll = () => {
       dragRef.current && handleDragging(dragRef.current.e);
     };
-    frameRef.current?.addEventListener('scroll', handleScroll);
+    frameRef.current?.addEventListener("scroll", handleScroll);
     return () => {
-      frameRef.current?.removeEventListener('scroll', handleScroll);
+      frameRef.current?.removeEventListener("scroll", handleScroll);
     };
   }, [frameRef, handleDragging]);
   const handleDragStart = (e: TouchEvent | MouseEvent) => {
@@ -573,7 +573,7 @@ const getChange = (
       centerY: boxRect.centerY,
     };
     Object.entries(layers).forEach(([layerId, layer]) => {
-      if (selectedLayerIds.includes(layerId) || layer.data.parent !== 'ROOT') {
+      if (selectedLayerIds.includes(layerId) || layer.data.parent !== "ROOT") {
         return;
       }
       const layerRect = boundingRect(
@@ -589,8 +589,8 @@ const getChange = (
         centerX: layerRect.centerX,
         centerY: layerRect.centerY,
       };
-      const horizontalKey: (keyof Rect)[] = ['top', 'bottom', 'centerY'];
-      const verticalKey: (keyof Rect)[] = ['left', 'right', 'centerX'];
+      const horizontalKey: (keyof Rect)[] = ["top", "bottom", "centerY"];
+      const verticalKey: (keyof Rect)[] = ["left", "right", "centerX"];
       Object.keys(active).forEach((activePoint) => {
         if (horizontalKey.includes(activePoint as keyof Rect)) {
           horizontalKey.forEach((targetPoint) => {

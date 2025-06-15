@@ -5,6 +5,8 @@ import {
   UPLOAD_TEMPLATE_ENDPOINT,
   UPLOAD_KIOSK_TEMPLATE_ENDPOINT,
   USER_KIOSK_ENDPOINT,
+  USER_LIVEMENU_ENDPOINT,
+  UPLOAD_LIVEMENU_TEMPLATE_ENDPOINT,
 } from "canva-editor/utils/constants/api";
 import { domToPng } from "modern-screenshot";
 import Cookies from "js-cookie";
@@ -17,6 +19,9 @@ const SYNC_STORE_NAME = "pending-changes";
 const SYNC_META_STORE_NAME = "sync-metadata";
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_DELAY_MS = 5000;
+export const LOCAL_SAVE_INTERVAL = 2000; // 2 seconds for local saves
+export const SERVER_SYNC_INTERVAL = 15000; // 15 seconds for server sync (reduced from 60s)
+const FORCED_SYNC_TIMEOUT = 3000; // 3 seconds timeout for forced syncs
 const LOCAL_STORAGE_KEYS = {
   TEMPLATE_DATA: "canva_editor_template_data",
   TEMPLATE_NAME: "canva_editor_template_name",
@@ -119,7 +124,7 @@ const updateSyncMetadata = async (
 
 // Types for design data
 export interface DesignData {
-  pages: Record<string, unknown>;
+  pages?: Record<string, unknown> | unknown[];
   [key: string]: unknown;
 }
 
@@ -262,9 +267,11 @@ export const syncChangesToServer = async (
     // Get user ID from cookies or use default
     const userId = Cookies.get("auth_token") || "anonymous";
 
-    // Check if we're working with a kiosk
+    // Check if we're working with a kiosk or live menu
     const kioskId = localStorage.getItem("kiosk_id");
+    const liveMenuId = localStorage.getItem("livemenu_id");
     const isKiosk = !!kioskId;
+    const isLiveMenu = !!liveMenuId;
 
     if (isKiosk) {
       // Handle kiosk saving
@@ -293,6 +300,33 @@ export const syncChangesToServer = async (
 
       await axios.put(USER_KIOSK_ENDPOINT, kioskUpdateData);
       console.log(`Updated kiosk with ID: ${kioskId}`);
+    } else if (isLiveMenu) {
+      // Handle live menu saving
+      console.log(`Syncing live menu: ${liveMenuId} for user: ${userId}`);
+
+      // First, upload the template JSON to cloud storage
+      const templateResponse = await axios.post(
+        UPLOAD_LIVEMENU_TEMPLATE_ENDPOINT,
+        {
+          packedData: pendingChanges.packedData,
+          userId,
+        }
+      );
+
+      // Get the template URL from the response
+      const templateUrl = templateResponse.data.templateUrl;
+      console.log("Live menu template URL:", templateUrl);
+
+      // Update the user's live menu with the new template
+      const liveMenuUpdateData = {
+        userId,
+        templateUrl,
+        templateData: pendingChanges.packedData,
+        title: pendingChanges.designName || "My Live Menu",
+      };
+
+      await axios.put(USER_LIVEMENU_ENDPOINT, liveMenuUpdateData);
+      console.log(`Updated live menu with ID: ${liveMenuId}`);
     } else {
       // Handle regular template saving
       // Check if we have a template ID in localStorage
@@ -406,6 +440,11 @@ export const syncChangesToServer = async (
           description: `Last saved at ${now.toLocaleTimeString()}`,
           duration: 2000,
         });
+      } else if (isLiveMenu) {
+        toast.success("Live Menu Saved", {
+          description: `Last saved at ${now.toLocaleTimeString()}`,
+          duration: 2000,
+        });
       } else {
         toast.success("Design Saved", {
           description: `Last saved at ${now.toLocaleTimeString()}`,
@@ -458,34 +497,168 @@ export const syncChangesToServer = async (
   }
 };
 
+// Enhanced sync with forced save for critical actions
+export const forceSyncBeforeCriticalAction = async (
+  actionName: string = "critical action"
+): Promise<boolean> => {
+  console.log(`Forcing sync before ${actionName}...`);
+
+  try {
+    // Try to sync with a timeout
+    const syncPromise = syncChangesToServer({
+      force: true,
+      showNotification: false,
+    });
+
+    const timeoutPromise = new Promise<null>((_, reject) => {
+      setTimeout(() => reject(new Error("Sync timeout")), FORCED_SYNC_TIMEOUT);
+    });
+
+    const result = await Promise.race([syncPromise, timeoutPromise]);
+
+    if (result) {
+      console.log(`Successfully synced before ${actionName}`);
+      return true;
+    }
+
+    // If sync returns null (offline/error), check if we have pending changes
+    const hasPending = await hasPendingChanges();
+    if (hasPending) {
+      console.warn(
+        `Could not sync before ${actionName}, but changes are saved locally`
+      );
+      toast.warning("Sync Warning", {
+        description: `Your changes are saved locally but couldn't be synced to the cloud before ${actionName}. They will sync when you're back online.`,
+        duration: 5000,
+      });
+    }
+
+    return !hasPending; // Return true if no pending changes
+  } catch (error) {
+    console.error(`Error syncing before ${actionName}:`, error);
+
+    // Still check for pending changes
+    const hasPending = await hasPendingChanges();
+    if (hasPending) {
+      toast.error("Sync Failed", {
+        description: `Could not sync your changes before ${actionName}. Your work is saved locally and will sync when possible.`,
+        duration: 5000,
+      });
+    }
+
+    return !hasPending;
+  }
+};
+
 // Initialize sync service
 export const initSyncService = (): void => {
   // Listen for online/offline events
   window.addEventListener("online", () => {
+    console.log("Device came back online, attempting to sync...");
     // When we come back online, try to sync
     syncChangesToServer({ showNotification: false });
   });
 
   window.addEventListener("offline", async () => {
+    console.log("Device went offline");
     await updateSyncMetadata({ syncStatus: "offline" });
   });
 
-  // Set up beforeunload handler
-  window.addEventListener("beforeunload", (event) => {
+  // Enhanced visibility change handler (critical for mobile and tab switching)
+  const handleVisibilityChange = async () => {
+    if (document.visibilityState === "hidden") {
+      console.log("Page becoming hidden, saving changes...");
+      // Force save when page becomes hidden (tab switch, minimize, etc.)
+      try {
+        const hasPending = await hasPendingChanges();
+        if (hasPending) {
+          await syncChangesToServer({ force: true, showNotification: false });
+        }
+      } catch (error) {
+        console.error("Error saving on visibility change:", error);
+      }
+    }
+  };
+
+  document.addEventListener("visibilitychange", handleVisibilityChange);
+  // Page hide event (better mobile support than beforeunload)
+  const handlePageHide = async () => {
+    console.log("Page hide event, saving changes...");
+    try {
+      const hasPending = await hasPendingChanges();
+      if (hasPending) {
+        // For pagehide, we need to use sendBeacon or synchronous request
+        // as the page might be unloaded immediately
+        const designData = localStorage.getItem(
+          LOCAL_STORAGE_KEYS.TEMPLATE_DATA
+        );
+        if (designData) {
+          // Use sendBeacon for reliable delivery even if page is closing
+          const beaconData = new FormData();
+          beaconData.append("data", designData);
+          beaconData.append("action", "emergency_save");
+
+          try {
+            navigator.sendBeacon("/api/emergency-save", beaconData);
+          } catch (e) {
+            console.warn("Could not send beacon, trying sync:", e);
+            // Fallback to regular sync
+            await syncChangesToServer({ force: true, showNotification: false });
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error saving on page hide:", error);
+    }
+  };
+
+  window.addEventListener("pagehide", handlePageHide);
+
+  // Enhanced beforeunload handler with better messaging
+  const handleBeforeUnload = async (event: BeforeUnloadEvent) => {
     const syncStatus = localStorage.getItem(LOCAL_STORAGE_KEYS.SYNC_STATUS);
 
-    // If we have pending changes, try to sync before unloading
-    if (
-      syncStatus === "saving" ||
-      syncStatus === "error" ||
-      syncStatus === "offline"
-    ) {
-      // This will show a generic "Changes you made may not be saved" dialog
+    // Check for pending changes
+    const hasPending = await hasPendingChanges();
+
+    // If we have pending changes or are currently saving, warn the user
+    if (hasPending || syncStatus === "saving" || syncStatus === "error") {
+      const message =
+        "You have unsaved changes that haven't been synced to the cloud. Are you sure you want to leave?";
+
+      // Standard way to show confirmation dialog
       event.preventDefault();
-      // Modern approach without using deprecated returnValue
-      return undefined;
+      event.returnValue = message;
+      return message;
     }
+  };
+
+  window.addEventListener("beforeunload", handleBeforeUnload);
+
+  // Mobile-specific event handlers
+  const handleMobileEvents = async () => {
+    console.log("Mobile event triggered, saving changes...");
+    try {
+      const hasPending = await hasPendingChanges();
+      if (hasPending) {
+        await syncChangesToServer({ force: true, showNotification: false });
+      }
+    } catch (error) {
+      console.error("Error saving on mobile event:", error);
+    }
+  };
+
+  // Mobile app lifecycle events
+  document.addEventListener("resume", handleMobileEvents);
+  document.addEventListener("pause", handleMobileEvents);
+
+  // iOS Safari specific events
+  window.addEventListener("orientationchange", () => {
+    setTimeout(handleMobileEvents, 100); // Small delay for orientation change
   });
+
+  // Focus/blur events for additional coverage
+  window.addEventListener("blur", handleMobileEvents);
 
   // Initialize database
   initDB().catch(console.error);
@@ -494,6 +667,10 @@ export const initSyncService = (): void => {
   updateSyncMetadata({
     syncStatus: isOnline() ? "idle" : "offline",
   }).catch(console.error);
+
+  console.log(
+    "Enhanced sync service initialized with comprehensive event handling"
+  );
 };
 
 // Get current sync status
@@ -554,6 +731,7 @@ export const recoverUnsavedChanges = async (): Promise<void> => {
 export const SyncService = {
   saveChangesLocally,
   syncChangesToServer,
+  forceSyncBeforeCriticalAction,
   initSyncService,
   getCurrentSyncStatus,
   hasPendingChanges,

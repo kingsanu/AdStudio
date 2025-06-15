@@ -12,6 +12,8 @@ export type LayerComponentProps = {
   position: Delta;
   scale?: number;
   transparency?: number;
+  blur?: number;
+  backdropBlur?: number;
   text?: string;
   image?: ImageContentProps["image"] | null;
   name?: string;
@@ -48,6 +50,7 @@ export type SerializedLayer = {
   type: SerializedCompType;
   props: Record<string, unknown>;
   locked: boolean;
+  lockHidden?: boolean; // Include lockHidden property for admin-only locks
   parent: LayerId | null;
   child: LayerId[];
 };
@@ -60,7 +63,7 @@ export type BoxData = {
 };
 
 export type EffectSettings = {
-  position: any;
+  position?: number;
   offset?: number;
   direction?: number;
   blur?: number;
@@ -140,6 +143,7 @@ export type LayerData<P extends LayerComponentProps> = LayerInfo & {
   comp: LayerComponent<P>;
   props: P;
   locked: boolean;
+  lockHidden?: boolean; // Add lockHidden property for admin-only locking
   parent: LayerId | null;
   child: LayerId[];
   editor?: TextEditor;

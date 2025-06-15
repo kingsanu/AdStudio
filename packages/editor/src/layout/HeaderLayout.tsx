@@ -15,13 +15,13 @@ import HeaderFileMenu from "./sidebar/components/HeaderFileMenu";
 import useMobileDetect from "canva-editor/hooks/useMobileDetect";
 import styled from "@emotion/styled";
 import ExportIcon from "canva-editor/icons/ExportIcon";
-import SyncStatusIndicator from "../components/sync/SyncStatusIndicator";
-import { useSyncService } from "../hooks/useSyncService";
+import SyncStatusIndicator from "canva-editor/components/sync/SyncStatusIndicator";
+import { useSyncService } from "canva-editor/hooks/useSyncService";
 import {
   setupDesignChangeListeners,
   cleanupDesignChangeListeners,
   debouncedDispatchDesignChangeEvent,
-} from "../utils/designChangeEvent";
+} from "canva-editor/utils/designChangeEvent";
 
 const Button = styled("button")`
   display: flex;

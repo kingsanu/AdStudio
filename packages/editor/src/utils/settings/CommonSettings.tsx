@@ -9,8 +9,12 @@ import { RootLayerProps } from "canva-editor/layers/RootLayer";
 import { isRootLayer, isImageLayer } from "../layer/layers";
 import LockIcon from "canva-editor/icons/LockIcon";
 import LockOpenIcon from "canva-editor/icons/LockOpenIcon";
+import AdminLockIcon from "canva-editor/icons/AdminLockIcon";
+import AdminUnlockIcon from "canva-editor/icons/AdminUnlockIcon";
 import TransparencyIcon from "canva-editor/icons/TransparencyIcon";
 import RemoveBackgroundIcon from "canva-editor/icons/RemoveBackgroundIcon";
+import BlurIcon from "canva-editor/icons/BlurIcon";
+import BackdropBlurIcon from "canva-editor/icons/BackdropBlurIcon";
 import SettingDivider from "./components/SettingDivider";
 import useMobileDetect from "canva-editor/hooks/useMobileDetect";
 import axios from "axios";
@@ -21,47 +25,96 @@ import { toast } from "sonner";
 const CommonSettings = () => {
   const isMobile = useMobileDetect();
   const transparencyButtonRef = useRef<HTMLDivElement>(null);
+  const blurButtonRef = useRef<HTMLDivElement>(null);
+  const backdropBlurButtonRef = useRef<HTMLDivElement>(null);
   const [openTransparencySetting, setOpenTransparencySetting] = useState(false);
+  const [openBlurSetting, setOpenBlurSetting] = useState(false);
+  const [openBackdropBlurSetting, setOpenBackdropBlurSetting] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const { selectedLayers, selectedLayerIds } = useSelectedLayers();
-  const { actions, activePage, sidebar, isPageLocked } = useEditor((state) => ({
-    activePage: state.activePage,
-    sidebar: state.sidebar,
-    // pageSize: state.pageSize,
-    isPageLocked:
-      state.pages[state.activePage] &&
-      state.pages[state.activePage].layers.ROOT.data.locked,
-  }));
+  const { actions, activePage, sidebar, isPageLocked, isAdmin } = useEditor(
+    (state) => ({
+      activePage: state.activePage,
+      sidebar: state.sidebar,
+      // pageSize: state.pageSize,
+      isPageLocked:
+        state.pages[state.activePage] &&
+        state.pages[state.activePage].layers.ROOT.data.locked,
+      isAdmin: state.isAdmin,
+    })
+  );
   // const [size, setSize] = useState(pageSize);
   // useEffect(() => {
   //   setSize(pageSize);
   // }, [pageSize]);
-  const { transparency } = useMemo(() => {
-    return Object.entries(selectedLayers).reduce(
-      (acc, [, layer]) => {
-        if (isRootLayer(layer)) {
-          acc.transparency = Math.max(
-            acc.transparency,
+  const { transparency, blur, backdropBlur } = useMemo(() => {
+    if (selectedLayers.length === 0) {
+      return { transparency: 1, blur: 0, backdropBlur: 0 };
+    }
+
+    // For single layer selection, get the actual values
+    if (selectedLayers.length === 1) {
+      const layer = selectedLayers[0];
+      if (isRootLayer(layer)) {
+        return {
+          transparency:
             typeof layer.data.props.image?.transparency !== "undefined"
               ? layer.data.props.image.transparency
-              : 1
-          );
-        } else {
-          acc.transparency = Math.max(
-            acc.transparency,
+              : 1,
+          blur: layer.data.props.blur || 0,
+          backdropBlur: layer.data.props.backdropBlur || 0,
+        };
+      } else {
+        return {
+          transparency:
             typeof layer.data.props.transparency !== "undefined"
               ? layer.data.props.transparency
-              : 1
-          );
+              : 1,
+          blur: layer.data.props.blur || 0,
+          backdropBlur: layer.data.props.backdropBlur || 0,
+        };
+      }
+    }
+
+    // For multiple layers, find the minimum values
+    return selectedLayers.reduce(
+      (acc, layer) => {
+        let layerTransparency, layerBlur, layerBackdropBlur;
+        if (isRootLayer(layer)) {
+          layerTransparency =
+            typeof layer.data.props.image?.transparency !== "undefined"
+              ? layer.data.props.image.transparency
+              : 1;
+          layerBlur = layer.data.props.blur || 0;
+          layerBackdropBlur = layer.data.props.backdropBlur || 0;
+        } else {
+          layerTransparency =
+            typeof layer.data.props.transparency !== "undefined"
+              ? layer.data.props.transparency
+              : 1;
+          layerBlur = layer.data.props.blur || 0;
+          layerBackdropBlur = layer.data.props.backdropBlur || 0;
         }
+
+        acc.transparency = Math.min(acc.transparency, layerTransparency);
+        acc.blur = Math.min(acc.blur, layerBlur);
+        acc.backdropBlur = Math.min(acc.backdropBlur, layerBackdropBlur);
         return acc;
       },
-      { transparency: 0 }
+      { transparency: 1, blur: 0, backdropBlur: 0 }
     );
   }, [selectedLayers]);
   const isLocked = !!selectedLayers.find((l) => l.data.locked);
+  const hasLockHidden = !!selectedLayers.find((l) => l.data.lockHidden);
   const toggleLock = () => {
     if (isLocked) {
+      // Check if trying to unlock admin-only layers
+      if (hasLockHidden && !isAdmin) {
+        toast.error("Access denied", {
+          description: "This layer can only be unlocked by an admin user.",
+        });
+        return;
+      }
       actions.unlock(activePage, selectedLayerIds);
     } else {
       actions.lock(activePage, selectedLayerIds);
@@ -84,10 +137,27 @@ const CommonSettings = () => {
       }
     });
   };
+
+  const updateBlur = (blurValue: number) => {
+    selectedLayerIds.forEach((layerId) => {
+      actions.history.throttle(2000).setProp(activePage, layerId, {
+        blur: blurValue,
+      });
+    });
+  };
+
+  const updateBackdropBlur = (backdropBlurValue: number) => {
+    selectedLayerIds.forEach((layerId) => {
+      actions.history.throttle(2000).setProp(activePage, layerId, {
+        backdropBlur: backdropBlurValue,
+      });
+    });
+  };
+
   // Close transparency settings when selection changes
-  useEffect(() => {
-    setOpenTransparencySetting(false);
-  }, [selectedLayerIds]); // Use the actual array reference instead of JSON.stringify
+  // useEffect(() => {
+  //   setOpenTransparencySetting(false);
+  // }, [selectedLayerIds]); // Use the actual array reference instead of JSON.stringify
 
   const handleRemoveBackground = async () => {
     if (selectedLayerIds.length !== 1) return;
@@ -188,7 +258,10 @@ const CommonSettings = () => {
                 <SettingButton
                   ref={transparencyButtonRef}
                   css={{ fontSize: 20, minWidth: 30 }}
-                  onClick={() => setOpenTransparencySetting(true)}
+                  onClick={() => {
+                    console.log("tra");
+                    setOpenTransparencySetting(true);
+                  }}
                 >
                   <TransparencyIcon />
                 </SettingButton>
@@ -204,8 +277,75 @@ const CommonSettings = () => {
                   <div css={{ padding: 16 }}>
                     <Slider
                       label={"Transparency"}
-                      defaultValue={transparency * 100}
+                      value={transparency * 100}
                       onChange={updateTransparency}
+                    />
+                  </div>
+                </Popover>
+              </Fragment>
+            )}
+
+            {/* Blur Controls */}
+            {(!isRootLayer(selectedLayers[0]) ||
+              (isRootLayer(selectedLayers[0]) &&
+                selectedLayers[0].data.props.image)) && (
+              <Fragment>
+                <SettingDivider />
+                <SettingButton
+                  ref={blurButtonRef}
+                  css={{ fontSize: 20, minWidth: 30 }}
+                  onClick={() => {
+                    setOpenBlurSetting(true);
+                  }}
+                >
+                  <BlurIcon />
+                </SettingButton>
+                <Popover
+                  open={openBlurSetting}
+                  anchorEl={blurButtonRef.current}
+                  placement={isMobile ? "top-end" : "bottom-end"}
+                  onClose={() => setOpenBlurSetting(false)}
+                  offsets={{
+                    "bottom-end": { x: 0, y: 8 },
+                  }}
+                >
+                  <div css={{ padding: 16 }}>
+                    <Slider
+                      label={"Blur"}
+                      value={blur}
+                      max={20}
+                      min={0}
+                      onChange={updateBlur}
+                    />
+                  </div>
+                </Popover>
+
+                <SettingDivider />
+                <SettingButton
+                  ref={backdropBlurButtonRef}
+                  css={{ fontSize: 20, minWidth: 30 }}
+                  onClick={() => {
+                    setOpenBackdropBlurSetting(true);
+                  }}
+                >
+                  <BackdropBlurIcon />
+                </SettingButton>
+                <Popover
+                  open={openBackdropBlurSetting}
+                  anchorEl={backdropBlurButtonRef.current}
+                  placement={isMobile ? "top-end" : "bottom-end"}
+                  onClose={() => setOpenBackdropBlurSetting(false)}
+                  offsets={{
+                    "bottom-end": { x: 0, y: 8 },
+                  }}
+                >
+                  <div css={{ padding: 16 }}>
+                    <Slider
+                      label={"Backdrop Blur"}
+                      value={backdropBlur}
+                      max={20}
+                      min={0}
+                      onChange={updateBackdropBlur}
                     />
                   </div>
                 </Popover>
@@ -233,18 +373,92 @@ const CommonSettings = () => {
                 </Fragment>
               )}
           </Fragment>
-        )}
+        )}{" "}
         {selectedLayerIds.length > 0 && (
           <>
             <SettingDivider />
-            <SettingButton
-              css={{ fontSize: 20 }}
-              isActive={isLocked}
-              onClick={toggleLock}
-            >
-              {isLocked && <LockIcon />}
-              {!isLocked && <LockOpenIcon />}
-            </SettingButton>
+
+            {/* Regular lock controls - hidden if layer has lockHidden */}
+            {!hasLockHidden && (
+              <SettingButton
+                css={{ fontSize: 20 }}
+                isActive={isLocked}
+                onClick={toggleLock}
+              >
+                {isLocked && <LockIcon />}
+                {!isLocked && <LockOpenIcon />}
+              </SettingButton>
+            )}
+
+            {/* Admin lock controls - only visible to admins */}
+            {isAdmin && (
+              <>
+                {/* Admin Lock Button */}
+                {!hasLockHidden && (
+                  <SettingButton
+                    css={{
+                      fontSize: 20,
+                      color: "#FF6B35",
+                      ":hover": {
+                        backgroundColor: "rgba(255, 107, 53, 0.1)",
+                      },
+                    }}
+                    onClick={() => {
+                      actions.adminLock(activePage, selectedLayerIds);
+                      toast.success("Admin Lock Applied", {
+                        description:
+                          "Layer is now protected for coupon editing.",
+                      });
+                    }}
+                    title="Admin Lock (Coupon Protected)"
+                  >
+                    <AdminLockIcon />
+                  </SettingButton>
+                )}
+
+                {/* Admin Unlock Button */}
+                {hasLockHidden && (
+                  <SettingButton
+                    css={{
+                      fontSize: 20,
+                      color: "#10B981",
+                      ":hover": {
+                        backgroundColor: "rgba(16, 185, 129, 0.1)",
+                      },
+                    }}
+                    onClick={() => {
+                      actions.adminUnlock(activePage, selectedLayerIds);
+                      toast.success("Admin Lock Removed", {
+                        description: "Layer is no longer protected.",
+                      });
+                    }}
+                    title="Remove Admin Lock"
+                  >
+                    <AdminUnlockIcon />
+                  </SettingButton>
+                )}
+              </>
+            )}
+
+            {/* Show info for non-admin users when lockHidden layer is selected */}
+            {hasLockHidden && !isAdmin && (
+              <SettingButton
+                css={{
+                  fontSize: 20,
+                  color: "rgba(36,49,61,.4)",
+                  cursor: "not-allowed",
+                }}
+                onClick={() => {
+                  toast.error("Access denied", {
+                    description:
+                      "This layer can only be unlocked by an admin user.",
+                  });
+                }}
+                title="This layer can only be unlocked by an admin"
+              >
+                <LockIcon />
+              </SettingButton>
+            )}
           </>
         )}
       </div>

@@ -29,6 +29,7 @@ export const deserializeLayer = <P extends LayerComponentProps>(
     comp: type as LayerComponent<P>,
     props,
     locked: data.locked,
+    lockHidden: data.lockHidden, // Include lockHidden property when deserializing
     child: data.child,
     parent: data.parent,
   };
@@ -55,6 +56,7 @@ export const serializeLayers = (
     },
     props: layers[rootTreeId].data.props,
     locked: layers[rootTreeId].data.locked,
+    lockHidden: layers[rootTreeId].data.lockHidden, // Include lockHidden property
     child: layers[rootTreeId].data.child,
     parent: layers[rootTreeId].data.parent,
   };

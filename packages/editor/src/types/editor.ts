@@ -42,6 +42,7 @@ export type SidebarType =
 export interface EditorState {
   name: string;
   scale: number;
+  isAdmin?: boolean; // Add admin flag to track admin status
   selectedLayers: Record<number, LayerId[]>;
   hoveredLayer: Record<number, LayerId | null>;
   openMenu: {

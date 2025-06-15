@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "motion/react";
@@ -29,10 +30,10 @@ interface SharedDashboardLayoutProps {
   description: string;
 }
 
-export default function SharedDashboardLayout({ 
-  children, 
-  title, 
-  description 
+export default function SharedDashboardLayout({
+  children,
+  title,
+  description,
 }: SharedDashboardLayoutProps) {
   const { user, logout, userLoading } = useAuth();
   const navigate = useNavigate();
@@ -41,7 +42,6 @@ export default function SharedDashboardLayout({
   const [searchQuery, setSearchQuery] = useState("");
   const [notificationCount] = useState(3);
 
-  // Enhanced sidebar links with new sections
   const sidebarLinks = [
     {
       label: "Home",
@@ -93,6 +93,13 @@ export default function SharedDashboardLayout({
       ),
     },
     {
+      label: "WhatsApp Campaigns",
+      href: "/whatsapp-campaigns",
+      icon: (
+        <MessageSquare className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+      ),
+    },
+    {
       label: "Favorites",
       href: "/favorites",
       icon: (
@@ -102,7 +109,7 @@ export default function SharedDashboardLayout({
   ];
 
   return (
-    <div className="flex h-screen w-full flex-1 overflow-hidden bg-white dark:bg-neutral-900">
+    <div className="flex h-screen w-full flex-1 bg-white dark:bg-neutral-900">
       {/* Sidebar */}
       <UISidebar open={sidebarOpen} setOpen={setSidebarOpen} animate={true}>
         <SidebarBody className="justify-between gap-10">
@@ -160,7 +167,7 @@ export default function SharedDashboardLayout({
       </UISidebar>
 
       {/* Main Content */}
-      <div className="flex flex-1 flex-col overflow-auto h-screen">
+      <div className="flex flex-1 flex-col h-screen">
         {/* Header */}
         <motion.header
           initial={{ y: -20, opacity: 0 }}
@@ -219,10 +226,14 @@ export default function SharedDashboardLayout({
         </motion.header>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto p-6">
+        <main className="flex-1 p-6">
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{title}</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">{description}</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              {title}
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              {description}
+            </p>
           </div>
           {children}
         </main>

@@ -1,6 +1,7 @@
 // WhatsApp API endpoints and constants
 export const WHATSAPP_API = {
   BASE_URL: "http://whatsapp.foodyqueen.com",
+  // BASE_URL: "http://localhost:3000",
   // Start session endpoint - GET
   START_SESSION: (username: string) =>
     `${WHATSAPP_API.BASE_URL}/session/start/${username}`,

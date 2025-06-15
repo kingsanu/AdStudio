@@ -1,8 +1,9 @@
 /* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-var-requires */
-const { Schema, default: mongoose } = require("mongoose");
+const mongoose = require("mongoose");
+const { Schema } = mongoose;
 
-const kioskSchema = new Schema({
+const liveMenuSchema = new Schema({
   title: {
     type: String,
     required: true,
@@ -50,7 +51,7 @@ const kioskSchema = new Schema({
   ],
   isPublic: {
     type: Boolean,
-    default: true,
+    default: false, // Live menus are typically private by default
   },
   createdAt: {
     type: Date,
@@ -62,12 +63,15 @@ const kioskSchema = new Schema({
   },
 });
 
-// Update the updatedAt timestamp before saving
-kioskSchema.pre("save", function (next) {
-  this.updatedAt = new Date();
+// Update the updatedAt field before saving
+liveMenuSchema.pre("save", function (next) {
+  this.updatedAt = Date.now();
   next();
 });
 
-const Kiosk = mongoose.model("Kiosk", kioskSchema);
+// Create indexes for better query performance
+liveMenuSchema.index({ userId: 1 });
+liveMenuSchema.index({ createdAt: -1 });
+liveMenuSchema.index({ isPublic: 1 });
 
-module.exports = Kiosk;
+module.exports = mongoose.model("LiveMenu", liveMenuSchema);

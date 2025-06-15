@@ -3,12 +3,13 @@ import SyncService, {
   SyncMetadata,
   SyncStatus,
   SyncOptions,
+  DesignData,
 } from "../services/syncService";
 
 export interface UseSyncServiceProps {
   autoSaveInterval?: number; // in milliseconds
   syncDebounceDelay?: number; // in milliseconds
-  getDesignData: () => any;
+  getDesignData: () => DesignData;
   getDesignName: () => string;
   getPageContentElement: () => HTMLElement | null;
 }
@@ -22,6 +23,7 @@ export interface UseSyncServiceResult {
   hasPendingChanges: boolean;
   isUserTyping: boolean;
   saveNow: (options?: SyncOptions) => Promise<void>;
+  forceSyncBeforeCriticalAction: (actionName?: string) => Promise<boolean>;
   metadata: SyncMetadata | null;
 }
 
@@ -135,17 +137,21 @@ export const useSyncService = ({
         console.error("Error capturing initial design data:", error);
       }
     }, 1000);
-
     return () => {
       window.removeEventListener("design-changed", debouncedSave);
       clearTimeout(localSaveTimeout);
       clearTimeout(userActivityTimeoutRef.current!);
     };
-  }, [autoSaveInterval, getDesignData, getDesignName, getPageContentElement]);
-
-  // Set up server sync interval (every 60 seconds)
+  }, [
+    autoSaveInterval,
+    syncDebounceDelay,
+    getDesignData,
+    getDesignName,
+    getPageContentElement,
+  ]);
+  // Set up server sync interval (every 15 seconds for better reliability)
   useEffect(() => {
-    // Sync to server less frequently and only when there are changes
+    // Sync to server more frequently and only when there are changes
     serverSyncIntervalRef.current = setInterval(async () => {
       // Only sync if there are pending changes
       const hasPending = await SyncService.hasPendingChanges();
@@ -161,7 +167,7 @@ export const useSyncService = ({
       } else {
         console.log("No pending changes to sync");
       }
-    }, 60000); // Increased to 60 seconds
+    }, 15000); // Reduced from 60 seconds to 15 seconds for better reliability
 
     return () => {
       if (serverSyncIntervalRef.current) {
@@ -197,6 +203,10 @@ export const useSyncService = ({
     },
     [getDesignData, getDesignName, getPageContentElement]
   );
+  // Function to force sync before critical actions
+  const forceSyncBeforeCriticalAction = useCallback((actionName?: string) => {
+    return SyncService.forceSyncBeforeCriticalAction(actionName);
+  }, []);
 
   // Derived state
   const syncStatus = metadata?.syncStatus || "idle";
@@ -211,7 +221,6 @@ export const useSyncService = ({
 
   // For UI purposes, we want to show a different status when the user is typing
   const displayStatus = isUserTyping ? "idle" : syncStatus;
-
   return {
     syncStatus: displayStatus, // Use the display status for UI
     lastSavedAt,
@@ -221,6 +230,7 @@ export const useSyncService = ({
     hasPendingChanges,
     isUserTyping,
     saveNow,
+    forceSyncBeforeCriticalAction,
     metadata,
   };
 };

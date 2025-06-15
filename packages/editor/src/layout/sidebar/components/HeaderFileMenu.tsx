@@ -1,5 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { ChangeEvent, FC, useMemo, useRef, useState, useEffect } from "react";
+import {
+  ChangeEvent,
+  FC,
+  useMemo,
+  useRef,
+  useState,
+  useEffect,
+  useContext,
+} from "react";
 import DropdownButton, {
   DropdownMenuItem,
 } from "canva-editor/components/dropdown-button/DropdownButton";
@@ -28,6 +36,8 @@ import useMobileDetect from "canva-editor/hooks/useMobileDetect";
 import SaveTemplateDialog from "canva-editor/components/editor/SaveTemplateDialog";
 import SyncingIcon from "canva-editor/icons/SyncingIcon";
 import { useSyncService } from "../../../hooks/useSyncService";
+import { EditorContext } from "canva-editor/components/editor/EditorContext";
+import { toast } from "sonner";
 import { WifiOff, AlertCircle, MoreHorizontal } from "lucide-react";
 
 interface Props {
@@ -46,15 +56,20 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
   // Update current design name when prop changes
   useEffect(() => {
     setCurrentDesignName(designName);
-  }, [designName]);
-
-  // Use the sync service
-  const { lastSavedAt, isSyncing, hasError, isOffline, isUserTyping, saveNow } =
-    useSyncService({
-      getDesignData: () => query.serialize(),
-      getDesignName: () => currentDesignName,
-      getPageContentElement: () => pageContentRef.current,
-    });
+  }, [designName]); // Use the sync service
+  const {
+    lastSavedAt,
+    isSyncing,
+    hasError,
+    isOffline,
+    isUserTyping,
+    saveNow,
+    forceSyncBeforeCriticalAction,
+  } = useSyncService({
+    getDesignData: () => ({ pages: query.serialize() }),
+    getDesignName: () => currentDesignName,
+    getPageContentElement: () => pageContentRef.current,
+  });
   const { actions, query, state, activePage, pageSize, isPageLocked } =
     useEditor((state) => ({
       activePage: state.activePage,
@@ -64,6 +79,10 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
         state.pages[state.activePage] &&
         state.pages[state.activePage].layers.ROOT.data.locked,
     }));
+
+  // Get editor config to check type
+  const { config } = useContext(EditorContext);
+  const isCoupon = config.type === "coupon";
 
   // Resize
   const [openResizeSetting, setOpenResizeSetting] = useState(false);
@@ -185,39 +204,67 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
         {
           label: `Page ${activePage + 1} as PNG`,
           type: "normal",
-          action: () => {
-            actions.fireDownloadPNGCmd(1);
+          action: async () => {
+            const canProceed = await forceSyncBeforeCriticalAction(
+              "PNG export"
+            );
+            if (canProceed) {
+              actions.fireDownloadPNGCmd(1);
+            }
           },
         },
         {
           label: "All pages as PNG",
           type: "normal",
-          action: () => {
-            actions.fireDownloadPNGCmd(0);
+          action: async () => {
+            const canProceed = await forceSyncBeforeCriticalAction(
+              "PNG export"
+            );
+            if (canProceed) {
+              actions.fireDownloadPNGCmd(0);
+            }
           },
         },
         {
           label: `All pages as PDF`,
           type: "normal",
-          action: () => {
-            actions.fireDownloadPDFCmd(0);
+          action: async () => {
+            const canProceed = await forceSyncBeforeCriticalAction(
+              "PDF export"
+            );
+            if (canProceed) {
+              actions.fireDownloadPDFCmd(0);
+            }
           },
         },
       ],
     },
-
     { label: "Divider", type: "divider" },
     {
       label: "View settings",
       type: "submenu",
       icon: <ConfigurationIcon />,
+      disabled: isCoupon,
+      action: isCoupon
+        ? () => {
+            toast.error("Access denied", {
+              description: "Coupon size cannot be changed.",
+            });
+          }
+        : undefined,
       items: [
         {
           label: `Resize page (${activePage + 1})`,
           type: "normal",
           icon: <ResizeIcon />,
-          disabled: isPageLocked,
+          disabled: isPageLocked || isCoupon,
           action: () => {
+            if (isCoupon) {
+              toast.error("Access denied", {
+                description: "Coupon size cannot be changed.",
+              });
+              return;
+            }
             setIsCreating(false);
             setSize(pageSize);
             setOpenResizeSetting(true);
@@ -238,16 +285,24 @@ const HeaderFileMenu: FC<Props> = ({ designName }) => {
       label: "Download design",
       type: "normal",
       icon: <DownloadIcon />,
-      action: () => {
-        downloadObjectAsJson("file", pack(query.serialize(), dataMapping)[0]);
+      action: async () => {
+        const canProceed = await forceSyncBeforeCriticalAction(
+          "design download"
+        );
+        if (canProceed) {
+          downloadObjectAsJson("file", pack(query.serialize(), dataMapping)[0]);
+        }
       },
     },
     {
       label: "Save as Template",
       type: "normal",
       icon: <SyncedIcon />,
-      action: () => {
-        setOpenSaveTemplateDialog(true);
+      action: async () => {
+        const canProceed = await forceSyncBeforeCriticalAction("template save");
+        if (canProceed) {
+          setOpenSaveTemplateDialog(true);
+        }
       },
     },
     // { label: "Divider", type: "divider" },

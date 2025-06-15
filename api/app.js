@@ -30,6 +30,10 @@ const mediaRoutes = require("./routes/media");
 const mediaUploadRoutes = require("./routes/mediaUpload");
 const imageProxyRoutes = require("./routes/imageProxy");
 const kioskRoutes = require("./routes/kiosk");
+const liveMenuRoutes = require("./routes/liveMenu");
+const customerRoutes = require("./routes/customers");
+const campaignRoutes = require("./routes/campaigns");
+const outletRoutes = require("./routes/outlets");
 
 const app = express();
 // Increase JSON body size limit
@@ -68,6 +72,10 @@ app.use("/api/media", mediaRoutes);
 app.use("/api/media/upload", mediaUploadRoutes);
 app.use("/api", imageProxyRoutes);
 app.use("/api", kioskRoutes);
+app.use("/api", liveMenuRoutes);
+app.use("/api", customerRoutes);
+app.use("/api", campaignRoutes);
+app.use("/api", outletRoutes);
 
 // Get port from environment variables or use 4000 as default
 const PORT = process.env.PORT || 4000;
@@ -489,3 +497,41 @@ app.get("/api/image-suggestion", async (req, res) => {
     res.send(rs.map((kw, idx) => ({ id: idx + 1, name: kw })));
   });
 });
+
+/**
+ * Emergency save endpoint for critical sync operations
+ * This endpoint is called when the page is about to be unloaded
+ * and we need to save data using sendBeacon
+ */
+app.post("/api/emergency-save", (req, res) => {
+  try {
+    console.log("Emergency save request received");
+
+    // For now, just acknowledge the save attempt
+    // In a production environment, you would implement
+    // actual data persistence logic here
+
+    const { data, action } = req.body;
+
+    if (data && action === "emergency_save") {
+      console.log("Emergency save data received, length:", data.length);
+      // Store in temporary location for recovery
+      // This could be implemented with Redis, file system, or database
+    }
+
+    // Return success immediately for beacon requests
+    res.status(200).json({
+      success: true,
+      message: "Emergency save acknowledged",
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("Emergency save error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Emergency save failed",
+    });
+  }
+});
+
+module.exports = app;

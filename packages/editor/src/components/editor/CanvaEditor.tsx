@@ -20,7 +20,7 @@ import {
   cleanupDesignChangeListeners,
 } from "../../utils/designChangeEvent";
 import SaveTextTemplateDialog from "canva-editor/components/editor/SaveTextTemplateDialog";
-import CampaignDialog from "./CampaignDialog";
+// import CampaignDialog from "./CampaignDialog";
 import SimpleVideoPreview from "./SimpleVideoPreview";
 import { Save, AlertCircle, CheckCircle, Wand2, Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -51,7 +51,9 @@ const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
   isTextTemplate = false,
 }) => {
   const version = "1.0.69";
-  const { getState, actions, query } = useEditorStore();
+  const { getState, actions, query } = useEditorStore({
+    isAdmin: config.isAdmin,
+  });
   const [viewPortHeight, setViewPortHeight] = useState<number>();
   const [showPreview, setShowPreview] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
@@ -290,7 +292,7 @@ const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
               display: "flex",
               flexDirection: "column",
               width: "100vw",
-              height: "100 vh",
+              height: "100vh",
               maxHeight: viewPortHeight ? `${viewPortHeight}px` : "auto",
               background: "white",
             }}
@@ -303,11 +305,11 @@ const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
               />
             )}
 
-            {/* Campaign Dialog */}
+            {/* Campaign Dialog
             <CampaignDialog
               open={showCampaignDialog}
               onClose={() => setShowCampaignDialog(false)}
-            />
+            /> */}
 
             {/* Simple Video Preview Dialog */}
             <SimpleVideoPreview
@@ -425,7 +427,6 @@ const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
                   >
                     <span>Start Campaign</span>
                   </button>
-
                   <button
                     css={{
                       display: "flex",
@@ -445,7 +446,6 @@ const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
                     <Wand2 size={16} />
                     <span>Animations</span>
                   </button>
-
                   <button
                     css={{
                       display: "flex",
@@ -465,7 +465,6 @@ const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
                     <PlayArrowIcon />
                     <span>Transitions</span>
                   </button>
-
                   <button
                     css={{
                       display: "flex",
@@ -483,7 +482,6 @@ const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
                     <PlayArrowIcon />
                     <span>Preview</span>
                   </button>
-
                   <button
                     css={{
                       display: "flex",
@@ -507,8 +505,7 @@ const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
                     <span>
                       {isGeneratingVideo ? "Creating..." : "Create Video"}
                     </span>
-                  </button>
-
+                  </button>{" "}
                   <button
                     css={{
                       display: "flex",
@@ -522,8 +519,24 @@ const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
                       border: "none",
                       "&:hover": { background: "#4f46e5" },
                     }}
-                    onClick={() => {
-                      actions.fireDownloadPNGCmd(0);
+                    onClick={async () => {
+                      // Import sync service and force sync before download
+                      try {
+                        const SyncService = await import(
+                          "../../services/syncService"
+                        );
+                        const canProceed =
+                          await SyncService.default.forceSyncBeforeCriticalAction(
+                            "PNG download"
+                          );
+                        if (canProceed) {
+                          actions.fireDownloadPNGCmd(0);
+                        }
+                      } catch (error) {
+                        console.error("Error during forced sync:", error);
+                        // Proceed with download anyway
+                        actions.fireDownloadPNGCmd(0);
+                      }
                     }}
                   >
                     <span>Download</span>

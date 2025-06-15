@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { FC, useRef, useEffect } from "react";
 import { CanvaEditor } from "canva-editor/components/editor";
 import CustomHeader from "./CustomHeader";
@@ -15,6 +17,7 @@ interface CanvaEditorWithCustomHeaderProps {
   isTextTemplate?: boolean;
   isAdmin?: boolean;
   isKiosk?: boolean;
+  isLiveMenu?: boolean;
   onShare?: () => void;
   onSaveAsTemplate?: () => void;
   [key: string]: any;
@@ -28,6 +31,7 @@ const CanvaEditorWithCustomHeader: FC<CanvaEditorWithCustomHeaderProps> = ({
   isTextTemplate = false,
   isAdmin = false,
   isKiosk = false,
+  isLiveMenu = false,
   onShare,
   onSaveAsTemplate,
   ...rest
@@ -54,7 +58,12 @@ const CanvaEditorWithCustomHeader: FC<CanvaEditorWithCustomHeaderProps> = ({
       {/* The CanvaEditor component */}
       {/* Render the custom header separately */}
       <div className="absolute top-0 left-0 right-0 z-10">
-        <CustomHeader isAdmin={isAdmin} isKiosk={isKiosk} onShare={onShare} />
+        <CustomHeader
+          isAdmin={isAdmin}
+          isKiosk={isKiosk}
+          isLiveMenu={isLiveMenu}
+          onShare={onShare}
+        />
       </div>
 
       {/* The CanvaEditor component */}

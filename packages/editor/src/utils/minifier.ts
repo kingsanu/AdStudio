@@ -3,7 +3,6 @@
 import { isEditorID } from "./identityGenerator";
 
 export const dataMapping: any = {
-  // Original mappings
   name: "a",
   notes: "b",
   layers: "c",
@@ -45,33 +44,7 @@ export const dataMapping: any = {
   blur: "am",
   border: "an",
   weight: "ao",
-
-  // New mappings for text templates
-  // These are the reverse mappings for the new format
-  // Original property name: minified name
-  // aq: "name",
-  // as: "layers",
-  // ar: "locked",
-  // au: "type",
-  // av: "resolvedName",
-  // aw: "props",
-  // ax: "boxSize",
-  // ay: "width",
-  // az: "height",
-  // ba: "position",
-  // bg: "x",
-  // bh: "y",
-  // bb: "rotate",
-  // bc: "color",
-  // bd: "image",
-  // be: "child",
-  // bf: "parent",
-  // bi: "scale",
-  // bj: "text",
-  // bk: "fonts",
-  // bn: "colors",
-  // bo: "fontSizes",
-  // bp: "effect",
+  lockHidden: "ap",
 };
 
 function getAlphabetCharByOrder(order: number) {
@@ -128,57 +101,81 @@ const pack = (obj: any, mapping: any = {}, charCode = 1): any => {
   return [packedObj, mapping];
 };
 
-const unpack = (packed: any, depth = 0, path = "root"): any => {
-  // Handle null or undefined
-  if (packed === null || packed === undefined) {
-    return packed;
-  }
+// const unpack = (packed: any, depth = 0, path = "root"): any => {
+//   // Handle null or undefined
+//   if (packed === null || packed === undefined) {
+//     return packed;
+//   }
 
-  // Handle arrays
+//   // Handle arrays
+//   if (Array.isArray(packed)) {
+//     const unpackedArray: any = [];
+//     for (let i = 0; i < packed.length; i++) {
+//       unpackedArray.push(unpack(packed[i], depth + 1, `${path}[${i}]`));
+//     }
+
+//     return unpackedArray;
+//   }
+
+//   // Handle objects
+//   if (typeof packed === "object") {
+//     const unpackedObj: any = {};
+//     for (const key in packed) {
+//       if (packed.hasOwnProperty(key)) {
+//         // Find the original key from the mapping
+//         let originalKey = key;
+
+//         // First check if this is a key from the original mapping (a -> name)
+//         const originalMappingKey = Object.keys(dataMapping).find(
+//           (k) => dataMapping[k] === key
+//         );
+//         if (originalMappingKey) {
+//           originalKey = originalMappingKey;
+//         }
+//         // Then check if this is a key from the new format (aq -> name)
+//         else if (dataMapping[key]) {
+//           originalKey = dataMapping[key];
+//         }
+
+//         // Recursively unpack the value
+//         const value = packed[key];
+
+//         unpackedObj[originalKey] = unpack(
+//           value,
+//           depth + 1,
+//           `${path}.${originalKey}`
+//         );
+//       }
+//     }
+
+//     return unpackedObj;
+//   }
+
+//   return packed;
+// };
+
+const unpack = (packed: any): any => {
+  if (!packed) return packed;
   if (Array.isArray(packed)) {
     const unpackedArray: any = [];
     for (let i = 0; i < packed.length; i++) {
-      unpackedArray.push(unpack(packed[i], depth + 1, `${path}[${i}]`));
+      unpackedArray.push(unpack(packed[i]));
     }
-
     return unpackedArray;
   }
 
-  // Handle objects
   if (typeof packed === "object") {
     const unpackedObj: any = {};
     for (const key in packed) {
       if (packed.hasOwnProperty(key)) {
-        // Find the original key from the mapping
-        let originalKey = key;
-
-        // First check if this is a key from the original mapping (a -> name)
-        const originalMappingKey = Object.keys(dataMapping).find(
-          (k) => dataMapping[k] === key
-        );
-        if (originalMappingKey) {
-          originalKey = originalMappingKey;
-        }
-        // Then check if this is a key from the new format (aq -> name)
-        else if (dataMapping[key]) {
-          originalKey = dataMapping[key];
-        }
-
-        // Recursively unpack the value
-        const value = packed[key];
-
-        unpackedObj[originalKey] = unpack(
-          value,
-          depth + 1,
-          `${path}.${originalKey}`
-        );
+        const originalKey =
+          Object.keys(dataMapping).find((k) => dataMapping[k] === key) || key;
+        unpackedObj[originalKey] = unpack(packed[key]);
       }
     }
-
     return unpackedObj;
   }
 
   return packed;
 };
-
 export { pack, unpack };

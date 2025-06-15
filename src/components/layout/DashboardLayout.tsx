@@ -1,4 +1,6 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
@@ -33,6 +35,18 @@ interface DashboardLayoutProps {
   title?: string;
   description?: string;
 }
+const designTemplates = [
+  {
+    id: 1,
+    title: "Blank Design",
+    icon: <Layout className="h-4 w-4" />,
+    color: "bg-white dark:bg-neutral-800",
+    textColor: "text-blue-600 dark:text-blue-400",
+    dimensions: { width: 1080, height: 1080 },
+    backgroundColor: "rgb(255, 255, 255)",
+  },
+  // Add more design templates as needed
+];
 
 export default function DashboardLayout({
   children,
@@ -59,18 +73,6 @@ export default function DashboardLayout({
   const searchDropdownRef = useRef<HTMLDivElement>(null);
 
   // Design templates for search
-  const designTemplates = [
-    {
-      id: 1,
-      title: "Blank Design",
-      icon: <Layout className="h-4 w-4" />,
-      color: "bg-white dark:bg-neutral-800",
-      textColor: "text-blue-600 dark:text-blue-400",
-      dimensions: { width: 1080, height: 1080 },
-      backgroundColor: "rgb(255, 255, 255)",
-    },
-    // Add more design templates as needed
-  ];
 
   // Enhanced sidebar links with new sections
   const sidebarLinks = [
@@ -198,7 +200,7 @@ export default function DashboardLayout({
         setIsSearching(false);
       }
     },
-    [user?.userId, designTemplates]
+    [user?.userId]
   );
 
   // Handle search with debouncing
@@ -253,11 +255,12 @@ export default function DashboardLayout({
                   key={idx}
                   link={{
                     ...link,
-                    className:
-                      location.pathname === link.href
-                        ? "bg-blue-50 dark:bg-blue-900/20"
-                        : "",
                   }}
+                  className={
+                    location.pathname === link.href
+                      ? "bg-blue-50 dark:bg-blue-900/20"
+                      : ""
+                  }
                 />
               ))}
             </div>

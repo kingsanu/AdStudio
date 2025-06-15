@@ -28,6 +28,8 @@ export type CustomCanvaEditorProps = {
   isTextTemplate?: boolean;
   isAdmin?: boolean;
   isKiosk?: boolean;
+  isLiveMenu?: boolean;
+  isCoupon?: boolean;
   onShare?: () => void;
   onSaveAsTemplate?: () => void;
   onDownload?: () => void;
@@ -40,14 +42,25 @@ const CustomCanvaEditor: FC<PropsWithChildren<CustomCanvaEditorProps>> = ({
   onDesignNameChanges: _onDesignNameChanges, // Rename to avoid unused variable warning
   isAdmin = false,
   isKiosk = false,
+  isLiveMenu = false,
+  isCoupon = false,
   onShare,
   onSaveAsTemplate: _onSaveAsTemplate, // Rename to avoid unused variable warning
   onDownload,
 }) => {
   const version = "1.0.69";
-  const { getState, actions, query } = useEditorStore();
+  const { getState, actions, query } = useEditorStore({ isAdmin });
   const [viewPortHeight, setViewPortHeight] = useState<number>();
   const [showPreview, setShowPreview] = useState(false);
+
+  // Determine editor type based on props
+  const editorType = isCoupon
+    ? "coupon"
+    : isLiveMenu
+    ? "livemenu"
+    : isKiosk
+    ? "kiosk"
+    : "design";
 
   // Set up a callback to handle changes
   useEffect(() => {
@@ -78,7 +91,14 @@ const CustomCanvaEditor: FC<PropsWithChildren<CustomCanvaEditorProps>> = ({
   }, []);
 
   return (
-    <EditorContext.Provider value={{ config, getState, actions, query }}>
+    <EditorContext.Provider
+      value={{
+        config: { ...config, isAdmin, type: editorType },
+        getState,
+        actions,
+        query,
+      }}
+    >
       <div
         className="flex flex-col w-full h-screen overflow-hidden"
         style={{
@@ -90,6 +110,8 @@ const CustomCanvaEditor: FC<PropsWithChildren<CustomCanvaEditorProps>> = ({
         <CustomHeader
           isAdmin={isAdmin}
           isKiosk={isKiosk}
+          isLiveMenu={isLiveMenu}
+          isCoupon={isCoupon}
           onShare={onShare}
           onDownload={onDownload}
         />

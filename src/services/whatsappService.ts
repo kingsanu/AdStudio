@@ -1,6 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
-import { API_BASE_URL } from "./config";
-import { WHATSAPP_API, WhatsAppConnectionState } from "@/constants/whatsapp";
+
+const API_BASE_URL = "https://adstudioserver.foodyqueen.com/api";
+
+export type WhatsAppConnectionState =
+  | "checking"
+  | "disconnected"
+  | "connecting"
+  | "connected"
+  | "error";
 
 export interface WhatsAppSettings {
   _id: string;
@@ -12,12 +20,21 @@ export interface WhatsAppSettings {
   updatedAt: string;
 }
 
+export interface WhatsAppStatusResponse {
+  message: string;
+  settings?: WhatsAppSettings;
+  status?: WhatsAppConnectionState;
+  lastChecked?: string;
+  isConnected?: boolean;
+  error?: string;
+}
+
 export const whatsappService = {
   // Get WhatsApp settings for a user
   async getSettings(userId: string): Promise<WhatsAppSettings | null> {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/api/whatsapp-settings/${userId}`
+        `${API_BASE_URL}/whatsapp-settings/${userId}`
       );
 
       if (response.data && response.data.settings) {
@@ -49,13 +66,10 @@ export const whatsappService = {
     username: string
   ): Promise<WhatsAppSettings | null> {
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/whatsapp-settings`,
-        {
-          userId,
-          username,
-        }
-      );
+      const response = await axios.post(`${API_BASE_URL}/whatsapp-settings`, {
+        userId,
+        username,
+      });
 
       if (response.data && response.data.settings) {
         // Store in localStorage for offline access
@@ -76,7 +90,7 @@ export const whatsappService = {
   // Delete WhatsApp settings for a user
   async deleteSettings(userId: string): Promise<boolean> {
     try {
-      await axios.delete(`${API_BASE_URL}/api/whatsapp-settings/${userId}`);
+      await axios.delete(`${API_BASE_URL}/whatsapp-settings/${userId}`);
 
       // Remove from localStorage
       localStorage.removeItem("whatsapp_settings");
@@ -100,16 +114,16 @@ export const whatsappService = {
   ): Promise<{ status: WhatsAppConnectionState; lastChecked: string }> {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/api/whatsapp-status/${userId}`
+        `${API_BASE_URL}/whatsapp-status/${userId}`
       );
 
       if (response.data) {
         // Handle both response formats: either status or state property
-        let connectionStatus = WhatsAppConnectionState.DISCONNECTED;
+        let connectionStatus: WhatsAppConnectionState = "disconnected";
 
         if (response.data.success && response.data.state === "CONNECTED") {
           // New response format: { success: true, state: "CONNECTED", message: "session_connected" }
-          connectionStatus = WhatsAppConnectionState.CONNECTED;
+          connectionStatus = "connected";
         } else if (response.data.status) {
           // Old response format with status property
           connectionStatus = response.data.status;
@@ -130,13 +144,13 @@ export const whatsappService = {
       }
 
       return {
-        status: WhatsAppConnectionState.ERROR,
+        status: "error",
         lastChecked: new Date().toISOString(),
       };
     } catch (error) {
       console.error("Error checking WhatsApp connection status:", error);
       return {
-        status: WhatsAppConnectionState.ERROR,
+        status: "error",
         lastChecked: new Date().toISOString(),
       };
     }
@@ -148,7 +162,7 @@ export const whatsappService = {
   ): Promise<{ status: WhatsAppConnectionState; lastChecked: string }> {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/api/whatsapp-restart/${userId}`
+        `${API_BASE_URL}/whatsapp-restart/${userId}`
       );
 
       if (response.data) {
@@ -167,40 +181,107 @@ export const whatsappService = {
       }
 
       return {
-        status: WhatsAppConnectionState.ERROR,
+        status: "error",
         lastChecked: new Date().toISOString(),
       };
     } catch (error) {
       console.error("Error restarting WhatsApp session:", error);
       return {
-        status: WhatsAppConnectionState.ERROR,
+        status: "error",
         lastChecked: new Date().toISOString(),
       };
     }
   },
 
-  // Start a new WhatsApp session
+  // Terminate WhatsApp session
+  async terminateSession(
+    userId: string
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      console.log(`Terminating WhatsApp session for user ${userId}`);
+      const response = await axios.get(
+        `${API_BASE_URL}/whatsapp-terminate/${userId}`
+      );
+
+      return {
+        success: response.data && response.data.success,
+        message: response.data?.message || "Session terminated successfully",
+      };
+    } catch (error) {
+      console.error("Error terminating WhatsApp session:", error);
+
+      return {
+        success: false,
+        message: "Failed to terminate WhatsApp session",
+      };
+    }
+  },
+
+  // Start a new WhatsApp session (with automatic termination if session exists)
   async startSession(
     userId: string
   ): Promise<{ success: boolean; message: string; state?: string }> {
     try {
       console.log(`Starting WhatsApp session for user ${userId}`);
       const response = await axios.get(
-        `${API_BASE_URL}/api/whatsapp-start/${userId}`
+        `${API_BASE_URL}/whatsapp-start/${userId}`
       );
-
+      console.log(response);
       // Handle both response formats
       return {
         success: response.data && response.data.success,
         message: response.data?.message || "Session started successfully",
         state: response.data?.state, // Include state from new response format if available
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error starting WhatsApp session:", error);
+
+      // Check if error is "session already exists"
+      if (
+        error.response?.status === 422 &&
+        error.response?.data?.error?.includes("Session already exists")
+      ) {
+        console.log("Session already exists, terminating and retrying...");
+
+        // Terminate existing session
+        const terminateResult = await this.terminateSession(userId);
+
+        if (terminateResult.success) {
+          // Wait a bit for termination to complete
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+
+          // Retry starting session
+          try {
+            const retryResponse = await axios.get(
+              `${API_BASE_URL}/whatsapp-start/${userId}`
+            );
+
+            return {
+              success: retryResponse.data && retryResponse.data.success,
+              message:
+                retryResponse.data?.message ||
+                "Session started successfully after termination",
+              state: retryResponse.data?.state,
+            };
+          } catch (retryError) {
+            console.error("Error retrying session start:", retryError);
+            return {
+              success: false,
+              message: "Failed to start session after termination",
+            };
+          }
+        } else {
+          return {
+            success: false,
+            message: "Failed to terminate existing session",
+          };
+        }
+      }
 
       return {
         success: false,
-        message: "Failed to start WhatsApp session",
+        message:
+          error.response?.data?.message || "Failed to start WhatsApp session",
       };
     }
   },
@@ -209,31 +290,64 @@ export const whatsappService = {
   getQRCodeUrl(username: string): string {
     // Use the backend API to proxy the QR code request
     // This ensures proper handling of CORS and authentication
-    return `${API_BASE_URL}/api/whatsapp-qr/${username}?t=${Date.now()}`;
+    return `${API_BASE_URL}/whatsapp-qr/${username}?t=${Date.now()}`;
 
     // Direct access to WhatsApp API is not used here to avoid CORS issues
     // The backend proxy handles the actual request to:
     // WHATSAPP_API.GET_QR_CODE(username)
   },
 
-  // Send WhatsApp message
-  async sendMessage(
-    username: string,
-    number: string,
-    message: string,
-    document?: string
-  ): Promise<boolean> {
-    try {
-      const response = await axios.post(WHATSAPP_API.SEND_MESSAGE(username), {
-        number,
-        message,
-        document,
-      });
+  // Helper function to get status color
+  getStatusColor(status: WhatsAppConnectionState): string {
+    switch (status) {
+      case "connected":
+        return "text-green-600 bg-green-100 dark:bg-green-900/20";
+      case "connecting":
+        return "text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20";
+      case "disconnected":
+        return "text-gray-600 bg-gray-100 dark:bg-gray-900/20";
+      case "checking":
+        return "text-blue-600 bg-blue-100 dark:bg-blue-900/20";
+      case "error":
+        return "text-red-600 bg-red-100 dark:bg-red-900/20";
+      default:
+        return "text-gray-600 bg-gray-100 dark:bg-gray-900/20";
+    }
+  },
 
-      return response.data && response.data.success;
-    } catch (error) {
-      console.error("Error sending WhatsApp message:", error);
-      return false;
+  // Helper function to get status icon
+  getStatusIcon(status: WhatsAppConnectionState): string {
+    switch (status) {
+      case "connected":
+        return "✅";
+      case "connecting":
+        return "🔄";
+      case "disconnected":
+        return "❌";
+      case "checking":
+        return "🔍";
+      case "error":
+        return "⚠️";
+      default:
+        return "❓";
+    }
+  },
+
+  // Helper function to get status text
+  getStatusText(status: WhatsAppConnectionState): string {
+    switch (status) {
+      case "connected":
+        return "Connected";
+      case "connecting":
+        return "Connecting...";
+      case "disconnected":
+        return "Disconnected";
+      case "checking":
+        return "Checking...";
+      case "error":
+        return "Error";
+      default:
+        return "Unknown";
     }
   },
 };

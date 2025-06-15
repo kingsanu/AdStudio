@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+/* eslint-disable @typescript-eslint/no-var-requires */
 const { Schema, default: mongoose } = require("mongoose");
 
 const whatsappSettingsSchema = new Schema({
