@@ -17,6 +17,7 @@ import {
   USER_LIVEMENU_ENDPOINT,
 } from "canva-editor/utils/constants/api";
 import CustomCanvaEditor from "@/components/editor/CustomCanvaEditor";
+import CouponCampaignDialog from "@/components/editor/CouponCampaignDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import Cookies from "js-cookie";
 
@@ -34,15 +35,22 @@ const NewEditor = () => {
   const [isKiosk, setIsKiosk] = useState(false);
   const [isLiveMenu, setIsLiveMenu] = useState(false);
   const [isCoupon, setIsCoupon] = useState(false);
+  const [showCouponCampaignDialog, setShowCouponCampaignDialog] =
+    useState(false);
 
   // Check if user is admin
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const isAdminParam = searchParams.get("adm");
-    const isCoupon = searchParams.get("isCoupon");
+    const isCouponParam = searchParams.get("isCoupon");
     const typeParam = searchParams.get("type");
-    setIsCoupon(isCoupon === "true" || typeParam === "coupon");
+    setIsCoupon(isCouponParam === "true" || typeParam === "coupon");
     setIsAdmin(isAdminParam === "true");
+
+    // Show coupon campaign dialog if this is a coupon editor
+    if (isCouponParam === "true" || typeParam === "coupon") {
+      setShowCouponCampaignDialog(true);
+    }
   }, [location.search]);
 
   // Handle design name changes
@@ -85,8 +93,8 @@ const NewEditor = () => {
     (
       width: number,
       height: number,
-      backgroundColor: string = "rgb(255, 255, 255)",
-      isCoupon: boolean
+      isC: boolean,
+      backgroundColor: string = "rgb(255, 255, 255)"
     ) => {
       try {
         // setLoading(true);
@@ -141,29 +149,29 @@ const NewEditor = () => {
                 },
                 r: false,
                 s: [
-                  "ca_Iu2Acua",
-                  "ca_cmTJpOH",
-                  "ca_TPFS84p",
-                  "ca_X4x1Nqb",
-                  "ca_JznS18G",
-                  "ca_AzwL4v3",
-                  "ca_wdWG5MO",
-                  "ca_Zqo02XG",
-                  "ca_mcUHESr",
-                  "ca_6cMBwU3",
-                  "ca_zvawqEj",
-                  "ca_EJerYdk",
-                  "ca_PERgRRG",
-                  "ca_EFct9D4",
-                  "ca_fa2jTwj",
-                  "ca_IoQsGqj",
-                  "ca_AYYXgkp",
-                  "ca_N4b5eMW",
-                  "ca_Optytby",
+                  "ca_33sfQjR",
+                  "ca_zeXoT7W",
+                  "ca_mQt8HuL",
+                  "ca_lVSszfR",
+                  "ca_5N1tfNw",
+                  "ca_64Y9RPs",
+                  "ca_nwE3TC5",
+                  "ca_JMrAkmI",
+                  "ca_V3geT2j",
+                  "ca_dRv5jxR",
+                  "ca_IanmMZh",
+                  "ca_x0YAo5Z",
+                  "ca_AsfKuQB",
+                  "ca_lW3G0ES",
+                  "ca_WOt1HWA",
+                  "ca_ZxGc8dq",
+                  "ca_UtbgySe",
+                  "ca_SqUBwDf",
+                  "ca_4CKWq20",
                 ],
                 t: null,
               },
-              ca_Iu2Acua: {
+              ca_33sfQjR: {
                 e: { f: "ShapeLayer" },
                 g: {
                   k: { l: 909.8016042976262, m: 114.44730879945041 },
@@ -181,11 +189,12 @@ const NewEditor = () => {
                   ag: 1,
                   q: null,
                 },
-                r: false,
+                r: true,
+                ap: true,
                 s: [],
                 t: "ROOT",
               },
-              ca_cmTJpOH: {
+              ca_zeXoT7W: {
                 e: { f: "ShapeLayer" },
                 g: {
                   k: { l: 175, m: 392.5 },
@@ -200,7 +209,7 @@ const NewEditor = () => {
                 s: [],
                 t: "ROOT",
               },
-              ca_TPFS84p: {
+              ca_mQt8HuL: {
                 e: { f: "ShapeLayer" },
                 g: {
                   k: { l: 908.0436468780458, m: 174 },
@@ -218,11 +227,12 @@ const NewEditor = () => {
                   ag: 1,
                   q: null,
                 },
-                r: false,
+                r: true,
+                ap: true,
                 s: [],
                 t: "ROOT",
               },
-              ca_X4x1Nqb: {
+              ca_lVSszfR: {
                 e: { f: "TextLayer" },
                 g: {
                   k: { l: 891.0995947745712, m: 19.55440637906683 },
@@ -249,11 +259,12 @@ const NewEditor = () => {
                   ad: null,
                   ag: 1,
                 },
-                r: false,
+                r: true,
+                ap: true,
                 s: [],
                 t: "ROOT",
               },
-              ca_JznS18G: {
+              ca_5N1tfNw: {
                 e: { f: "ShapeLayer" },
                 g: {
                   k: { l: 256, m: 501.5 },
@@ -268,7 +279,7 @@ const NewEditor = () => {
                 s: [],
                 t: "ROOT",
               },
-              ca_AzwL4v3: {
+              ca_64Y9RPs: {
                 e: { f: "ShapeLayer" },
                 g: {
                   k: { l: 915.4746634737357, m: 51.39453737478598 },
@@ -286,11 +297,12 @@ const NewEditor = () => {
                   ag: 1,
                   q: null,
                 },
-                r: false,
+                r: true,
+                ap: true,
                 s: [],
                 t: "ROOT",
               },
-              ca_wdWG5MO: {
+              ca_nwE3TC5: {
                 e: { f: "TextLayer" },
                 g: {
                   k: { l: 897.2991785875431, m: 55.82159996436795 },
@@ -317,11 +329,12 @@ const NewEditor = () => {
                   ad: null,
                   ag: 1,
                 },
-                r: false,
+                r: true,
+                ap: true,
                 s: [],
                 t: "ROOT",
               },
-              ca_Zqo02XG: {
+              ca_JMrAkmI: {
                 e: { f: "TextLayer" },
                 g: {
                   k: { l: 887.7567243669338, m: 120.98570765076599 },
@@ -348,11 +361,12 @@ const NewEditor = () => {
                   ad: null,
                   ag: 1,
                 },
-                r: false,
+                r: true,
+                ap: true,
                 s: [],
                 t: "ROOT",
               },
-              ca_mcUHESr: {
+              ca_V3geT2j: {
                 e: { f: "TextLayer" },
                 g: {
                   k: { l: 909.8016042976261, m: 210.78743693455175 },
@@ -379,11 +393,12 @@ const NewEditor = () => {
                   ad: null,
                   ag: 1,
                 },
-                r: false,
+                r: true,
+                ap: true,
                 s: [],
                 t: "ROOT",
               },
-              ca_6cMBwU3: {
+              ca_dRv5jxR: {
                 e: { f: "ShapeLayer" },
                 g: {
                   k: { l: 155, m: 357.5 },
@@ -398,7 +413,7 @@ const NewEditor = () => {
                 s: [],
                 t: "ROOT",
               },
-              ca_zvawqEj: {
+              ca_IanmMZh: {
                 e: { f: "GroupLayer" },
                 g: {
                   k: { l: 860.8315134560204, m: -9.142747505755949 },
@@ -406,26 +421,27 @@ const NewEditor = () => {
                   u: 1,
                   n: 0,
                 },
-                r: false,
+                r: true,
+                ap: true,
                 s: [
-                  "ca_C1Yl1EJ",
-                  "ca_XI5lFai",
-                  "ca_8dXHps1",
-                  "ca_O8IwGTg",
-                  "ca_vcbDPfx",
-                  "ca_llkr44v",
-                  "ca_vVjXIuR",
-                  "ca_IHrfYqJ",
-                  "ca_9q5jekE",
-                  "ca_hwr3W80",
-                  "ca_9aMZeGL",
-                  "ca_viRCuMh",
-                  "ca_TUnX9E9",
-                  "ca_MEpqS2S",
+                  "ca_h7W5cb4",
+                  "ca_phgXNfs",
+                  "ca_dSbk48x",
+                  "ca_ukjkZCD",
+                  "ca_auQ3uoK",
+                  "ca_A8Ru9Rh",
+                  "ca_0okC1Bv",
+                  "ca_RCIAjtq",
+                  "ca_5M31iMh",
+                  "ca_L9PYs8o",
+                  "ca_uCIZXX3",
+                  "ca_TLLvqJ7",
+                  "ca_CDwJcJG",
+                  "ca_i1MEc8j",
                 ],
                 t: "ROOT",
               },
-              ca_C1Yl1EJ: {
+              ca_h7W5cb4: {
                 e: { f: "ShapeLayer" },
                 g: {
                   k: { l: 0, m: 0 },
@@ -445,9 +461,9 @@ const NewEditor = () => {
                 },
                 r: false,
                 s: [],
-                t: "ca_zvawqEj",
+                t: "ca_IanmMZh",
               },
-              ca_XI5lFai: {
+              ca_phgXNfs: {
                 e: { f: "ShapeLayer" },
                 g: {
                   k: { l: 0, m: 27.15279902518824 },
@@ -467,9 +483,9 @@ const NewEditor = () => {
                 },
                 r: false,
                 s: [],
-                t: "ca_zvawqEj",
+                t: "ca_IanmMZh",
               },
-              ca_8dXHps1: {
+              ca_dSbk48x: {
                 e: { f: "ShapeLayer" },
                 g: {
                   k: { l: 0, m: 54.9643474701239 },
@@ -489,9 +505,9 @@ const NewEditor = () => {
                 },
                 r: false,
                 s: [],
-                t: "ca_zvawqEj",
+                t: "ca_IanmMZh",
               },
-              ca_O8IwGTg: {
+              ca_ukjkZCD: {
                 e: { f: "ShapeLayer" },
                 g: {
                   k: { l: 0, m: 83.2223763803247 },
@@ -511,9 +527,9 @@ const NewEditor = () => {
                 },
                 r: false,
                 s: [],
-                t: "ca_zvawqEj",
+                t: "ca_IanmMZh",
               },
-              ca_vcbDPfx: {
+              ca_auQ3uoK: {
                 e: { f: "ShapeLayer" },
                 g: {
                   k: { l: 0, m: 110.12845515652194 },
@@ -533,9 +549,9 @@ const NewEditor = () => {
                 },
                 r: false,
                 s: [],
-                t: "ca_zvawqEj",
+                t: "ca_IanmMZh",
               },
-              ca_llkr44v: {
+              ca_A8Ru9Rh: {
                 e: { f: "ShapeLayer" },
                 g: {
                   k: { l: 0, m: 137.74321379284925 },
@@ -555,9 +571,9 @@ const NewEditor = () => {
                 },
                 r: false,
                 s: [],
-                t: "ca_zvawqEj",
+                t: "ca_IanmMZh",
               },
-              ca_vVjXIuR: {
+              ca_0okC1Bv: {
                 e: { f: "ShapeLayer" },
                 g: {
                   k: { l: 0, m: 165.72935957078798 },
@@ -577,9 +593,9 @@ const NewEditor = () => {
                 },
                 r: false,
                 s: [],
-                t: "ca_zvawqEj",
+                t: "ca_IanmMZh",
               },
-              ca_IHrfYqJ: {
+              ca_RCIAjtq: {
                 e: { f: "ShapeLayer" },
                 g: {
                   k: { l: 0, m: 193.14274750575595 },
@@ -594,9 +610,9 @@ const NewEditor = () => {
                 },
                 r: false,
                 s: [],
-                t: "ca_zvawqEj",
+                t: "ca_IanmMZh",
               },
-              ca_9q5jekE: {
+              ca_5M31iMh: {
                 e: { f: "ShapeLayer" },
                 g: {
                   k: { l: 0, m: 219.9301844403077 },
@@ -616,9 +632,9 @@ const NewEditor = () => {
                 },
                 r: false,
                 s: [],
-                t: "ca_zvawqEj",
+                t: "ca_IanmMZh",
               },
-              ca_hwr3W80: {
+              ca_L9PYs8o: {
                 e: { f: "ShapeLayer" },
                 g: {
                   k: { l: 0, m: 245.54896375122016 },
@@ -638,9 +654,9 @@ const NewEditor = () => {
                 },
                 r: false,
                 s: [],
-                t: "ca_zvawqEj",
+                t: "ca_IanmMZh",
               },
-              ca_9aMZeGL: {
+              ca_uCIZXX3: {
                 e: { f: "ShapeLayer" },
                 g: {
                   k: { l: 0, m: 272.45315774611475 },
@@ -660,9 +676,9 @@ const NewEditor = () => {
                 },
                 r: false,
                 s: [],
-                t: "ca_zvawqEj",
+                t: "ca_IanmMZh",
               },
-              ca_viRCuMh: {
+              ca_TLLvqJ7: {
                 e: { f: "ShapeLayer" },
                 g: {
                   k: { l: 0, m: 298.1372587588047 },
@@ -682,9 +698,9 @@ const NewEditor = () => {
                 },
                 r: false,
                 s: [],
-                t: "ca_zvawqEj",
+                t: "ca_IanmMZh",
               },
-              ca_TUnX9E9: {
+              ca_CDwJcJG: {
                 e: { f: "ShapeLayer" },
                 g: {
                   k: { l: 0, m: 324.1647174334578 },
@@ -704,9 +720,9 @@ const NewEditor = () => {
                 },
                 r: false,
                 s: [],
-                t: "ca_zvawqEj",
+                t: "ca_IanmMZh",
               },
-              ca_MEpqS2S: {
+              ca_i1MEc8j: {
                 e: { f: "ShapeLayer" },
                 g: {
                   k: { l: 0, m: 350.81776262744665 },
@@ -726,9 +742,9 @@ const NewEditor = () => {
                 },
                 r: false,
                 s: [],
-                t: "ca_zvawqEj",
+                t: "ca_IanmMZh",
               },
-              ca_EJerYdk: {
+              ca_x0YAo5Z: {
                 e: { f: "ImageLayer" },
                 g: {
                   p: {
@@ -752,7 +768,7 @@ const NewEditor = () => {
                 s: [],
                 t: "ROOT",
               },
-              ca_PERgRRG: {
+              ca_AsfKuQB: {
                 e: { f: "TextLayer" },
                 g: {
                   k: { l: 316.329582706297, m: 31.0502468687554 },
@@ -783,7 +799,7 @@ const NewEditor = () => {
                 s: [],
                 t: "ROOT",
               },
-              ca_EFct9D4: {
+              ca_lW3G0ES: {
                 e: { f: "TextLayer" },
                 g: {
                   k: { l: 323.160760157989, m: 128.6004662870933 },
@@ -814,7 +830,7 @@ const NewEditor = () => {
                 s: [],
                 t: "ROOT",
               },
-              ca_fa2jTwj: {
+              ca_WOt1HWA: {
                 e: { f: "ShapeLayer" },
                 g: {
                   k: { l: 525.9903428642858, m: 197.77921173080242 },
@@ -836,7 +852,7 @@ const NewEditor = () => {
                 s: [],
                 t: "ROOT",
               },
-              ca_IoQsGqj: {
+              ca_ZxGc8dq: {
                 e: { f: "TextLayer" },
                 g: {
                   k: { l: 520.205789848261, m: 205.32010366218634 },
@@ -867,7 +883,7 @@ const NewEditor = () => {
                 s: [],
                 t: "ROOT",
               },
-              ca_AYYXgkp: {
+              ca_UtbgySe: {
                 e: { f: "TextLayer" },
                 g: {
                   k: { l: 260, m: 189.46589445273784 },
@@ -898,7 +914,7 @@ const NewEditor = () => {
                 s: [],
                 t: "ROOT",
               },
-              ca_N4b5eMW: {
+              ca_SqUBwDf: {
                 e: { f: "TextLayer" },
                 g: {
                   k: { l: 286.57716842236846, m: 225.99772290967482 },
@@ -929,7 +945,7 @@ const NewEditor = () => {
                 s: [],
                 t: "ROOT",
               },
-              ca_Optytby: {
+              ca_4CKWq20: {
                 e: { f: "TextLayer" },
                 g: {
                   k: { l: 536.4276173342387, m: 263.40129710040287 },
@@ -964,10 +980,13 @@ const NewEditor = () => {
           },
         ];
 
-        if (isCoupon) {
+        console.log("createEmptyTemplate called with isC:", isC);
+        if (isC) {
+          console.log("Setting coupon template");
           setTemplateData(couponTemplate);
           setName("Untitled Coupon");
         } else {
+          console.log("Setting empty template");
           setTemplateData(emptyTemplate);
           setName("Untitled Design");
         }
@@ -1029,7 +1048,7 @@ const NewEditor = () => {
               console.log("Loaded kiosk data from templateData fallback");
             } else {
               // Create empty template as final fallback
-              createEmptyTemplate(900, 1200, "rgb(239, 246, 255)", false);
+              createEmptyTemplate(900, 1200, false, "rgb(239, 246, 255)");
               setName("My Kiosk");
               console.log("Created new kiosk template (fallback)");
             }
@@ -1041,7 +1060,7 @@ const NewEditor = () => {
           console.log("Loaded existing kiosk data from templateData");
         } else {
           // No existing data, create empty kiosk template
-          createEmptyTemplate(900, 1200, "rgb(239, 246, 255)", false);
+          createEmptyTemplate(900, 1200, false, "rgb(239, 246, 255)");
           setName("My Kiosk");
           console.log("Created new kiosk template");
         }
@@ -1049,7 +1068,7 @@ const NewEditor = () => {
         console.error("Error loading kiosk data:", error);
         toast.error("Failed to load kiosk data");
         // Fallback to empty template
-        createEmptyTemplate(900, 1200, "rgb(239, 246, 255)", false);
+        createEmptyTemplate(900, 1200, false, "rgb(239, 246, 255)");
         setName("My Kiosk");
       } finally {
         setLoading(false);
@@ -1103,7 +1122,7 @@ const NewEditor = () => {
               console.log("Loaded live menu data from templateData fallback");
             } else {
               // Create empty template as final fallback
-              createEmptyTemplate(1920, 1080, "rgb(250, 245, 255)", false);
+              createEmptyTemplate(1920, 1080, false, "rgb(250, 245, 255)");
               setName("My Live Menu");
               console.log("Created new live menu template (fallback)");
             }
@@ -1115,7 +1134,7 @@ const NewEditor = () => {
           console.log("Loaded existing live menu data from templateData");
         } else {
           // No existing data, create empty live menu template
-          createEmptyTemplate(1920, 1080, "rgb(250, 245, 255)", false);
+          createEmptyTemplate(1920, 1080, false, "rgb(250, 245, 255)");
           setName("My Live Menu");
           console.log("Created new live menu template");
         }
@@ -1123,7 +1142,7 @@ const NewEditor = () => {
         console.error("Error loading live menu data:", error);
         toast.error("Failed to load live menu data");
         // Fallback to empty template
-        createEmptyTemplate(1920, 1080, "rgb(250, 245, 255)", false);
+        createEmptyTemplate(1920, 1080, false, "rgb(250, 245, 255)");
         setName("My Live Menu");
       } finally {
         setLoading(false);
@@ -1210,6 +1229,7 @@ const NewEditor = () => {
     const kioskId = searchParams.get("kioskId");
     const liveMenuParam = searchParams.get("isLiveMenu");
     const liveMenuId = searchParams.get("liveMenuId");
+
     // Check if this is a kiosk template
     setIsKiosk(kioskParam === "true");
 
@@ -1233,7 +1253,8 @@ const NewEditor = () => {
     // Handle different editor types
     if (isCoupon) {
       // For coupon editor, create the coupon template with proper dimensions
-      createEmptyTemplate(1200, 350, bgColor || "rgb(253, 205, 7)", isCoupon);
+      console.log("Loading coupon template, isCoupon:", isCoupon);
+      createEmptyTemplate(1200, 350, true, bgColor ?? "rgb(253, 205, 7)");
     } else if (kioskId && kioskParam === "true") {
       // Load kiosk data
       loadKioskData(kioskId);
@@ -1246,14 +1267,65 @@ const NewEditor = () => {
       createEmptyTemplate(
         parseInt(width),
         parseInt(height),
-        bgColor || "rgb(255, 255, 255)",
-        isCoupon
+        isCoupon,
+        bgColor ?? "rgb(255, 255, 255)"
       );
     } else {
       // Default case: set loading to false if no specific action is taken
       setLoading(false);
     }
-  }, [location.search, loadKioskData, loadLiveMenuData, createEmptyTemplate]);
+  }, [
+    location.search,
+    isCoupon,
+    loadKioskData,
+    loadLiveMenuData,
+    createEmptyTemplate,
+  ]);
+
+  // Function to safely serialize template data
+  const serializeTemplateData = (data: unknown) => {
+    try {
+      // Create a deep clone that removes circular references and functions
+      return JSON.parse(
+        JSON.stringify(data, (key, value) => {
+          // Skip functions and undefined values
+          if (typeof value === "function" || typeof value === "undefined") {
+            return null;
+          }
+          // Skip DOM nodes and other complex objects that might have circular refs
+          if (
+            value &&
+            typeof value === "object" &&
+            value.constructor &&
+            (value.constructor.name.includes("Node") ||
+              value.constructor.name.includes("Element") ||
+              value.constructor.name.includes("View"))
+          ) {
+            return null;
+          }
+          return value;
+        })
+      );
+    } catch (error) {
+      console.warn("Failed to serialize template data:", error);
+      return data; // fallback to original data
+    }
+  };
+
+  // Handle coupon campaign dialog success
+  const handleCouponCampaignSuccess = (campaignId: string) => {
+    console.log("Coupon campaign created:", campaignId);
+    setShowCouponCampaignDialog(false);
+    // You can store the campaign ID for later use
+    localStorage.setItem("currentCouponCampaignId", campaignId);
+  };
+
+  // Handle coupon campaign dialog close
+  const handleCouponCampaignClose = () => {
+    setShowCouponCampaignDialog(false);
+    // Optionally redirect back to dashboard if user cancels
+    // navigate("/dashboard");
+  };
 
   // Handle back button
   const handleBack = () => {
@@ -1380,6 +1452,15 @@ const NewEditor = () => {
           </div>
         </div>
       )}
+
+      {/* Coupon Campaign Dialog */}
+      <CouponCampaignDialog
+        open={showCouponCampaignDialog}
+        onClose={() => setShowCouponCampaignDialog(false)}
+        onSuccess={handleCouponCampaignSuccess}
+        templateData={serializeTemplateData(templateData)}
+        templateImageUrl={undefined} // We'll need to get this from the editor if needed
+      />
 
       {/* Note: CSS for horizontal scrollbars is in styles/editor.css */}
     </div>

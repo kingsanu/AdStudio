@@ -1,3 +1,0 @@
-file 'temp/uploads/1746123206348-slide_0.png'
-duration 3
-file 'temp/uploads/1746123206348-slide_0.png'

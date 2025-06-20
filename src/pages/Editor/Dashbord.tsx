@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+, /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -30,15 +30,25 @@ import {
   X,
   Clock,
   CreditCard,
+  Percent,
+  Users,
+  TrendingUp,
+  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { templateService, Template } from "@/services/templateService";
 import { kioskService } from "@/services/kioskService";
 import { liveMenuService } from "@/services/liveMenuService";
+import {
+  couponCampaignService,
+  CouponCampaign,
+  CouponCampaignStatisticsOverview,
+} from "@/services/couponCampaignService";
 import {
   Sidebar as UISidebar,
   SidebarBody,
@@ -68,6 +78,12 @@ export default function Dashboard() {
   const [hasMoreUserTemplates, setHasMoreUserTemplates] = useState(true);
   const [publicTemplatePage, setPublicTemplatePage] = useState(1);
   const [userTemplatePage, setUserTemplatePage] = useState(1);
+
+  // Coupon campaigns state
+  const [couponCampaigns, setCouponCampaigns] = useState<CouponCampaign[]>([]);
+  const [couponStatistics, setCouponStatistics] =
+    useState<CouponCampaignStatisticsOverview | null>(null);
+  const [isLoadingCoupons, setIsLoadingCoupons] = useState(true);
 
   // Search dropdown state
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
@@ -150,15 +166,6 @@ export default function Dashboard() {
         textColor: "text-emerald-600 dark:text-emerald-400",
         dimensions: { width: 800, height: 800 },
         backgroundColor: "rgb(236, 253, 245)",
-      },
-      {
-        id: 5,
-        title: "Coupon Code Design",
-        icon: <Tag className="h-6 w-6" />,
-        color: "bg-yellow-50 dark:bg-yellow-900/20",
-        textColor: "text-yellow-600 dark:text-yellow-400",
-        dimensions: { width: 1200, height: 628 },
-        backgroundColor: "rgb(254, 252, 232)",
       },
       {
         id: 6,
@@ -444,6 +451,52 @@ export default function Dashboard() {
     },
     [user?.userId]
   );
+  // Fetch coupon campaigns
+  const fetchCouponCampaigns = useCallback(async () => {
+    if (!user?.userId) {
+      console.log("[Dashboard] No user ID, skipping coupon campaigns fetch");
+      return;
+    }
+
+    try {
+      console.log(
+        "[Dashboard] Fetching coupon campaigns for user:",
+        user.userId
+      );
+      setIsLoadingCoupons(true); // Fetch campaigns
+      const campaignsResponse = await couponCampaignService.getCouponCampaigns({
+        userId: user.userId,
+      });
+
+      console.log("[Dashboard] Campaigns response:", campaignsResponse);
+
+      if (campaignsResponse.success) {
+        console.log("[Dashboard] Setting campaigns:", campaignsResponse.data);
+        setCouponCampaigns(campaignsResponse.data);
+      } else {
+        console.error(
+          "[Dashboard] Failed to fetch campaigns:",
+          campaignsResponse.error
+        );
+      }
+
+      // Fetch statistics
+      const statsResponse =
+        await couponCampaignService.getCouponCampaignStatistics({
+          userId: user.userId,
+        });
+
+      console.log("[Dashboard] Statistics response:", statsResponse);
+
+      if (statsResponse.success) {
+        setCouponStatistics(statsResponse.data);
+      }
+    } catch (error) {
+      console.error("Error fetching coupon campaigns:", error);
+    } finally {
+      setIsLoadingCoupons(false);
+    }
+  }, [user?.userId]);
 
   // Fetch search results for dropdown
   const fetchSearchResults = useCallback(
@@ -541,6 +594,47 @@ export default function Dashboard() {
       fetchUserTemplates(1, false);
     }
   }, [fetchUserTemplates, user?.userId]);
+
+  // Load coupon campaigns when user changes
+  useEffect(() => {
+    if (user?.userId) {
+      fetchCouponCampaigns();
+    }
+  }, [fetchCouponCampaigns, user?.userId]);
+
+  // Debug effect to log coupon campaigns state
+  useEffect(() => {
+    console.log("[Dashboard] Coupon campaigns state changed:", {
+      isLoadingCoupons,
+      couponCampaignsLength: couponCampaigns.length,
+      couponCampaigns: couponCampaigns.slice(0, 2), // Log first 2 for debugging
+    });
+  }, [isLoadingCoupons, couponCampaigns]);
+
+  // Helper function to get status color for coupon campaigns
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "active":
+        return "text-green-600 border-green-600 bg-green-50 dark:bg-green-900/20";
+      case "expired":
+        return "text-red-600 border-red-600 bg-red-50 dark:bg-red-900/20";
+      case "completed":
+        return "text-blue-600 border-blue-600 bg-blue-50 dark:bg-blue-900/20";
+      case "draft":
+        return "text-gray-600 border-gray-600 bg-gray-50 dark:bg-gray-900/20";
+      default:
+        return "text-gray-600 border-gray-600 bg-gray-50 dark:bg-gray-900/20";
+    }
+  };
+
+  // Format date
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
 
   // Handle search when searchQuery changes
   useEffect(() => {
@@ -934,6 +1028,199 @@ export default function Dashboard() {
                       </span>
                     </div>
                   </div>
+                )}
+              </div>
+            </motion.section>
+
+            {/* Coupon Campaigns section */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="mb-10"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-semibold">
+                    Your Coupon Campaigns
+                  </h2>
+                  <p className="text-neutral-500 mt-1">
+                    Active and recent coupon campaigns
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  className="border-gray-300 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
+                  onClick={() => navigate("/coupon-campaigns")}
+                >
+                  <span className="mr-2">View all</span> →
+                </Button>
+              </div>{" "}
+              <div>
+                {isLoadingCoupons ? (
+                  <div className="grid grid-cols-1 gap-4">
+                    {Array.from(
+                      { length: 3 },
+                      (_, i) => `coupon-skeleton-${i}`
+                    ).map((key) => (
+                      <Card key={key} className="animate-pulse">
+                        <CardContent className="p-6">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-3"></div>
+                              <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3 mb-4"></div>
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                                {Array.from(
+                                  { length: 4 },
+                                  (_, i) => `metric-${i}`
+                                ).map((metricKey) => (
+                                  <div
+                                    key={metricKey}
+                                    className="h-3 bg-gray-200 dark:bg-gray-700 rounded"
+                                  ></div>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : couponCampaigns.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-4">
+                    {couponCampaigns.slice(0, 3).map((campaign, index) => (
+                      <motion.div
+                        key={campaign._id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: index * 0.05 }}
+                      >
+                        <Card
+                          className="hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                          onClick={() =>
+                            navigate(`/coupon-campaigns/${campaign._id}`)
+                          }
+                        >
+                          <CardContent className="p-6">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                    {campaign.campaignName}
+                                  </h3>{" "}
+                                  <Badge
+                                    variant="outline"
+                                    className={getStatusColor(campaign.status)}
+                                  >
+                                    {campaign.status.charAt(0).toUpperCase() +
+                                      campaign.status.slice(1)}
+                                  </Badge>
+                                </div>
+
+                                {campaign.description && (
+                                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                                    {campaign.description}
+                                  </p>
+                                )}
+
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                                  <div className="flex items-center gap-2 text-sm">
+                                    <Percent className="h-4 w-4 text-gray-400" />
+                                    <span className="text-gray-600 dark:text-gray-400">
+                                      {campaign.discountPercentage}% off
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-2 text-sm">
+                                    <Tag className="h-4 w-4 text-gray-400" />
+                                    <span className="text-gray-600 dark:text-gray-400">
+                                      {campaign.numberOfCoupons.toLocaleString()}{" "}
+                                      coupons
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-2 text-sm">
+                                    <Users className="h-4 w-4 text-gray-400" />
+                                    <span className="text-gray-600 dark:text-gray-400">
+                                      {campaign.statistics.totalUsed} used
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-2 text-sm">
+                                    <Calendar className="h-4 w-4 text-gray-400" />
+                                    <span className="text-gray-600 dark:text-gray-400">
+                                      Until{" "}
+                                      {new Date(
+                                        campaign.validity
+                                      ).toLocaleDateString()}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                  <div className="flex items-center gap-1">
+                                    <Clock className="h-3 w-3" />
+                                    <span>
+                                      Created{" "}
+                                      {new Date(
+                                        campaign.createdAt
+                                      ).toLocaleDateString()}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <TrendingUp className="h-3 w-3" />
+                                    <span>
+                                      {Math.round(
+                                        (campaign.statistics.totalUsed /
+                                          campaign.numberOfCoupons) *
+                                          100
+                                      )}
+                                      % redemption rate
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(
+                                      `/coupon-campaigns/${campaign._id}`
+                                    );
+                                  }}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <Card className="text-center py-12">
+                    <CardContent>
+                      <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 mb-6">
+                        <Tag className="h-10 w-10 text-gray-500" />
+                      </div>
+                      <h3 className="text-2xl font-semibold mb-4">
+                        No coupon campaigns yet
+                      </h3>
+                      <p className="text-gray-500 max-w-md mx-auto mb-6">
+                        Create your first coupon campaign to start offering
+                        discounts to your customers.
+                      </p>{" "}
+                      <Button
+                        onClick={() => navigate("/coupon-campaigns")}
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        View Coupon Campaigns
+                      </Button>
+                    </CardContent>
+                  </Card>
                 )}
               </div>
             </motion.section>

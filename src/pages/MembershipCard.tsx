@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import SharedDashboardLayout from "@/components/layout/SharedDashboardLayout";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 
 interface MembershipCard {
   id: string;
@@ -178,7 +178,7 @@ export default function MembershipCard() {
   };
 
   return (
-    <SharedDashboardLayout
+    <DashboardLayout
       title="Membership Card Templates"
       description="Create professional membership card designs for your business"
     >
@@ -449,6 +449,6 @@ export default function MembershipCard() {
           </div>
         )}
       </div>
-    </SharedDashboardLayout>
+    </DashboardLayout>
   );
 }

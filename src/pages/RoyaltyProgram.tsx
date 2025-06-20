@@ -17,7 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import SharedDashboardLayout from "@/components/layout/SharedDashboardLayout";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 
 interface LoyaltyTemplate {
   id: string;
@@ -153,7 +153,7 @@ export default function RoyaltyProgram() {
   };
 
   return (
-    <SharedDashboardLayout
+    <DashboardLayout
       title="Loyalty Program Templates"
       description="Create professional designs for your customer loyalty program"
     >
@@ -324,6 +324,6 @@ export default function RoyaltyProgram() {
           ))}
         </div>
       )}
-    </SharedDashboardLayout>
+    </DashboardLayout>
   );
 }

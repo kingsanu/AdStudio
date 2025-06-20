@@ -15,7 +15,7 @@ import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 // Using regular img tag instead of Next.js Image
 import { cn } from "@/lib/utils";
-import Dashboard from "./Dashbord";
+import Dashboard from "./Dashboard";
 
 export default function Sidebar() {
   const links = [

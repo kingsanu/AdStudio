@@ -34,6 +34,7 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
   title?: string;
   description?: string;
+  showSearch?: boolean;
 }
 const designTemplates = [
   {
@@ -52,7 +53,8 @@ export default function DashboardLayout({
   children,
   title = "Dashboard",
   description = "Manage your designs and templates",
-}: DashboardLayoutProps) {
+  showSearch = true,
+}: Readonly<DashboardLayoutProps>) {
   const { user, logout, userLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -105,13 +107,6 @@ export default function DashboardLayout({
       ),
     },
     {
-      label: "Coupon Designer",
-      href: "/coupon-designer",
-      icon: (
-        <Tag className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
-    },
-    {
       label: "Royalty Program",
       href: "/royalty-program",
       icon: (
@@ -123,6 +118,20 @@ export default function DashboardLayout({
       href: "/membership-card",
       icon: (
         <CreditCard className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+      ),
+    },
+    {
+      label: "WhatsApp Campaigns",
+      href: "/whatsapp-campaigns",
+      icon: (
+        <MessageSquare className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+      ),
+    },
+    {
+      label: "Coupon Campaigns",
+      href: "/coupon-campaigns",
+      icon: (
+        <Tag className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
     {
@@ -169,7 +178,7 @@ export default function DashboardLayout({
 
         const publicResponse = await axios.get(publicApiUrl);
         const publicSearchResults =
-          publicResponse.data.data || publicResponse.data || [];
+          publicResponse.data.data ?? publicResponse.data ?? [];
 
         // Fetch user templates
         let userSearchResults: Template[] = [];
@@ -185,7 +194,7 @@ export default function DashboardLayout({
           userApiUrl += `?${userParams.toString()}`;
 
           const userResponse = await axios.get(userApiUrl);
-          userSearchResults = userResponse.data.data || userResponse.data || [];
+          userSearchResults = userResponse.data.data ?? userResponse.data ?? [];
         }
 
         setSearchResults({
@@ -243,11 +252,20 @@ export default function DashboardLayout({
       <UISidebar open={sidebarOpen} setOpen={setSidebarOpen} animate={true}>
         <SidebarBody className="justify-between gap-10">
           <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
-            <div className="flex items-center space-x-2 py-1">
-              <div className="h-5 w-6 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-[#0070f3] dark:bg-[#0070f3]" />
-              <span className="font-medium whitespace-pre text-black dark:text-white">
-                Ads Studio
-              </span>
+            <div className="flex items-center space-x-3 py-2">
+              <div className="relative flex-shrink-0">
+                <div className="h-5 w-6 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-[#0070f3] dark:bg-[#0070f3]" />
+              </div>
+              {sidebarOpen && (
+                <div className="flex flex-col flex-1 min-w-0">
+                  <span className="font-bold text-lg text-black dark:text-white tracking-tight truncate">
+                    AdStudio
+                  </span>
+                  <span className="text-xs text-neutral-500 dark:text-neutral-400 -mt-0.5 truncate">
+                    Design Platform
+                  </span>
+                </div>
+              )}
             </div>
             <div className="mt-8 flex flex-col gap-2">
               {sidebarLinks.map((link, idx) => (
@@ -300,85 +318,84 @@ export default function DashboardLayout({
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top Navigation */}
-        <header className="flex h-16 items-center justify-between border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-neutral-900 px-6">
-          <div className="flex items-center">
-            <div className="flex items-center space-x-2">
-              <div className="h-6 w-7 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-[#0070f3]">
-                <span className="text-white font-bold">A</span>
-              </div>
-              <span className="font-bold">Ads Studio</span>
-            </div>
-            <div className="relative ml-6 w-64" ref={searchDropdownRef}>
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
-              <Input
-                placeholder="Search all templates"
-                className="w-full pl-10 pr-8 transition-all focus-visible:ring-blue-500 rounded-full bg-gray-100 dark:bg-gray-800 border-0"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Escape") {
-                    setSearchQuery("");
-                    setShowSearchDropdown(false);
-                  }
-                }}
-                onFocus={() => {
-                  if (searchQuery) {
-                    setShowSearchDropdown(true);
-                  }
-                }}
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => {
-                    setSearchQuery("");
-                    setShowSearchDropdown(false);
+        <header className="flex h-16 items-center justify-between border-b border-gray-200/80 dark:border-gray-800/80 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md px-6 sticky top-0 z-40">
+          <div className="flex items-center space-x-6">
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+              {title}
+            </h1>
+            {showSearch && (
+              <div className="relative" ref={searchDropdownRef}>
+                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                <Input
+                  placeholder="Search all templates, designs..."
+                  className="w-80 pl-11 pr-10 h-10 transition-all focus-visible:ring-2 focus-visible:ring-blue-500 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 focus:bg-white dark:focus:bg-gray-800 shadow-sm"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") {
+                      setSearchQuery("");
+                      setShowSearchDropdown(false);
+                    }
                   }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-
-              {/* Search Dropdown */}
-              <AnimatePresence>
-                {showSearchDropdown && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto"
+                  onFocus={() => {
+                    if (searchQuery) {
+                      setShowSearchDropdown(true);
+                    }
+                  }}
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => {
+                      setSearchQuery("");
+                      setShowSearchDropdown(false);
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                   >
-                    {isSearching ? (
-                      <div className="p-4 text-center">
-                        <div className="inline-flex h-6 w-6 animate-spin rounded-full border-2 border-solid border-blue-600 border-r-transparent"></div>
-                        <p className="mt-2 text-sm text-neutral-500">
-                          Searching...
-                        </p>
-                      </div>
-                    ) : (
-                      <>
-                        {/* Search results content */}
-                        {searchResults.designTemplates.length === 0 &&
-                          searchResults.publicTemplates.length === 0 &&
-                          searchResults.userTemplates.length === 0 &&
-                          searchQuery && (
-                            <div className="p-4 text-center">
-                              <Search className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                              <p className="text-sm text-gray-500">
-                                No results found for "{searchQuery}"
-                              </p>
-                              <p className="text-xs text-gray-400 mt-1">
-                                Try a different search term
-                              </p>
-                            </div>
-                          )}
-                      </>
-                    )}
-                  </motion.div>
+                    <X className="h-4 w-4" />
+                  </button>
                 )}
-              </AnimatePresence>
-            </div>
+
+                {/* Search Dropdown */}
+                <AnimatePresence>
+                  {showSearchDropdown && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto"
+                    >
+                      {isSearching ? (
+                        <div className="p-4 text-center">
+                          <div className="inline-flex h-6 w-6 animate-spin rounded-full border-2 border-solid border-blue-600 border-r-transparent"></div>
+                          <p className="mt-2 text-sm text-neutral-500">
+                            Searching...
+                          </p>
+                        </div>
+                      ) : (
+                        <>
+                          {/* Search results content */}
+                          {searchResults.designTemplates.length === 0 &&
+                            searchResults.publicTemplates.length === 0 &&
+                            searchResults.userTemplates.length === 0 &&
+                            searchQuery && (
+                              <div className="p-4 text-center">
+                                <Search className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                                <p className="text-sm text-gray-500">
+                                  No results found for "{searchQuery}"
+                                </p>
+                                <p className="text-xs text-gray-400 mt-1">
+                                  Try a different search term
+                                </p>
+                              </div>
+                            )}
+                        </>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-3">
             <Button variant="outline" size="sm" className="relative">

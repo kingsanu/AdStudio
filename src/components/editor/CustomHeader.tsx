@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { FC, useContext, useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   EditorContext,
   EditorContext as EditorContextType,
@@ -14,6 +15,8 @@ import {
   FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { HorizontalLoader } from "@/components/ui/horizontal-loader";
 import { Input } from "@/components/ui/input";
 import HeaderFileMenu from "canva-editor/layout/sidebar/components/HeaderFileMenu";
 import WhatsAppCampaignDialog from "@/components/WhatsAppCampaignDialog";
@@ -66,8 +69,15 @@ const CustomHeader: FC<CustomHeaderProps> = ({
   isCoupon = false,
   editorContext,
 }) => {
+  const navigate = useNavigate();
+
   // State for dialogs
   const [showCampaignDialog, setShowCampaignDialog] = useState(false);
+  const [campaignProgress, setCampaignProgress] = useState<{
+    isCreated: boolean;
+    campaignId?: string;
+    status?: string;
+  }>({ isCreated: false });
   const [showPublishKioskDialog, setShowPublishKioskDialog] = useState(false);
   const [showPublishLiveMenuDialog, setShowPublishLiveMenuDialog] =
     useState(false);
@@ -147,6 +157,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
 
   // Handle share
   const handleShare = () => {
+    setCampaignProgress({ isCreated: false }); // Reset campaign progress
     setShowCampaignDialog(true);
   };
 
@@ -304,6 +315,27 @@ const CustomHeader: FC<CustomHeaderProps> = ({
               <FileText className="mr-2 h-4 w-4" />
               Bulk Generate
             </Button>
+          ) : campaignProgress.isCreated ? (
+            <div className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-md h-9 min-w-[160px]">
+              <div className="flex-1">
+                <div className="text-xs mb-1">Campaign Created</div>
+                <HorizontalLoader className="h-1" />
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 text-xs text-white hover:bg-green-800 px-2"
+                onClick={() => {
+                  if (campaignProgress.campaignId) {
+                    navigate(
+                      `/whatsapp-campaigns/${campaignProgress.campaignId}`
+                    );
+                  }
+                }}
+              >
+                View Details
+              </Button>
+            </div>
           ) : (
             <Button
               size="sm"
@@ -321,9 +353,13 @@ const CustomHeader: FC<CustomHeaderProps> = ({
       <WhatsAppCampaignDialog
         open={showCampaignDialog}
         onClose={() => setShowCampaignDialog(false)}
-        onSuccess={() => {
+        onSuccess={(campaignId?: string) => {
           setShowCampaignDialog(false);
-          // Optional: Show success message or refresh data
+          setCampaignProgress({
+            isCreated: true,
+            campaignId,
+            status: "created",
+          });
         }}
       />
 
@@ -340,6 +376,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
       <BulkCouponDialog
         open={showBulkCouponDialog}
         onClose={() => setShowBulkCouponDialog(false)}
+        isCoupon={isCoupon}
       />
     </>
   );

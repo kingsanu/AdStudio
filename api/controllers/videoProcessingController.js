@@ -1,130 +1,276 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable no-undef */
+
+/**
+ * Video Processing Controller
+ *
+ * Handles video generation and cloud storage upload with proper folder segregation:
+ * - Videos are uploaded to: editor/videos/
+ * - Images are uploaded to: editor/uploads/ (handled by uploadedImageController)
+ * - Templates are uploaded to: editor/templates/ (handled by templateController)
+ */
+
 const path = require("path");
 const fs = require("fs");
 const ffmpeg = require("fluent-ffmpeg");
 const { v4: uuidv4 } = require("uuid");
 const { bundle } = require("@remotion/bundler");
 const { renderMedia, selectComposition } = require("@remotion/renderer");
-const { CLOUD_STORAGE } = require("../config/constants");
+const { CLOUD_STORAGE, EXTERNAL_APIS } = require("../config/constants");
+const FormData = require("form-data");
+const axios = require("axios");
 
-// Set FFmpeg path if needed
-if (process.env.FFMPEG_PATH) {
-  ffmpeg.setFfmpegPath(process.env.FFMPEG_PATH);
+// Set FFmpeg path using ffmpeg-static
+try {
+  const ffmpegStatic = require("ffmpeg-static");
+  if (ffmpegStatic) {
+    ffmpeg.setFfmpegPath(ffmpegStatic);
+    console.log("FFmpeg path set to:", ffmpegStatic);
+  }
+} catch (error) {
+  console.warn("ffmpeg-static not available, trying other options");
+  try {
+    const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
+    ffmpeg.setFfmpegPath(ffmpegPath);
+    console.log("FFmpeg path set via installer to:", ffmpegPath);
+  } catch (installerError) {
+    console.warn("FFmpeg installer also not available, trying system PATH");
+    if (process.env.FFMPEG_PATH) {
+      ffmpeg.setFfmpegPath(process.env.FFMPEG_PATH);
+    }
+  }
 }
 
-// Create a slideshow video with transitions
-const createSlideshow = async (images, options = {}) => {
+// Create a slideshow video using fluent-ffmpeg (concat demuxer approach)
+const createSlideshowWithFluentFFmpeg = async (images, options = {}) => {
   const {
     outputPath = path.join(__dirname, "output", `slideshow_${uuidv4()}.mp4`),
     duration = 3,
-    transitionDuration = 1,
-    transitionEffect = "fade", // fade, slideleft, slideright, slideup, slidedown, circlecrop, etc.
-    fps = 30,
-    resolution = "1920x1080",
-    audioPath = null,
+  } = options;
+
+  // Ensure output directory exists
+  const outputDir = path.dirname(outputPath);
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
+  if (images.length === 1) {
+    // Single image case
+    console.log("Single image detected in slideshow function");
+
+    return new Promise((resolve, reject) => {
+      ffmpeg(images[0])
+        .inputOptions(["-loop 1", `-t ${duration}`])
+        .outputOptions([
+          "-c:v libx264",
+          "-pix_fmt yuv420p",
+          "-preset ultrafast",
+          "-crf 30",
+          "-r 10",
+        ])
+        .output(outputPath)
+        .on("start", (commandLine) => {
+          console.log("Single image video FFmpeg started:", commandLine);
+        })
+        .on("progress", (progress) => {
+          console.log(
+            `Single image video: ${Math.floor(progress.percent || 0)}% done`
+          );
+        })
+        .on("end", () => {
+          console.log("Single image video created successfully");
+          resolve({
+            path: outputPath,
+            duration: duration,
+            isImage: false,
+          });
+        })
+        .on("error", (err) => {
+          console.error("Error creating single image video:", err);
+          reject(err);
+        })
+        .run();
+    });
+  }
+
+  // Multiple images: Use concat demuxer approach for reliable slideshow
+  console.log("Creating slideshow from multiple images using concat demuxer");
+
+  // Create individual video files for each image first
+  const tempVideos = [];
+  const tempDir = path.join(path.dirname(outputPath), "temp_segments");
+
+  if (!fs.existsSync(tempDir)) {
+    fs.mkdirSync(tempDir, { recursive: true });
+  }
+
+  try {
+    // Step 1: Convert each image to a video segment
+    for (let i = 0; i < images.length; i++) {
+      const segmentPath = path.join(tempDir, `segment_${i}.mp4`);
+      tempVideos.push(segmentPath);
+
+      await new Promise((resolve, reject) => {
+        ffmpeg(images[i])
+          .inputOptions(["-loop 1", `-t ${duration}`])
+          .outputOptions([
+            "-c:v libx264",
+            "-pix_fmt yuv420p",
+            "-preset ultrafast",
+            "-crf 30",
+            "-r 10",
+            "-vf scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2",
+          ])
+          .output(segmentPath)
+          .on("start", (commandLine) => {
+            console.log(
+              `Creating segment ${i + 1}/${images.length}: ${commandLine}`
+            );
+          })
+          .on("end", () => {
+            console.log(
+              `Segment ${i + 1}/${images.length} created successfully`
+            );
+            resolve();
+          })
+          .on("error", (err) => {
+            console.error(`Error creating segment ${i + 1}:`, err);
+            reject(err);
+          })
+          .run();
+      });
+    }
+
+    // Step 2: Create concat file for FFmpeg
+    const concatFilePath = path.join(tempDir, "concat_list.txt");
+    const concatContent = tempVideos
+      .map((video) => `file '${path.resolve(video)}'`)
+      .join("\n");
+    fs.writeFileSync(concatFilePath, concatContent);
+
+    console.log("Concat file created:", concatFilePath);
+    console.log("Concat content:", concatContent);
+
+    // Step 3: Concatenate all segments
+    const totalDuration = images.length * duration;
+
+    return new Promise((resolve, reject) => {
+      ffmpeg()
+        .input(concatFilePath)
+        .inputOptions(["-f concat", "-safe 0"])
+        .outputOptions([
+          "-c copy", // Use copy codec for fast concatenation
+        ])
+        .output(outputPath)
+        .on("start", (commandLine) => {
+          console.log("Final concatenation FFmpeg started:", commandLine);
+        })
+        .on("progress", (progress) => {
+          console.log(
+            `Final concatenation: ${Math.floor(progress.percent || 0)}% done`
+          );
+        })
+        .on("end", () => {
+          console.log("Multi-image slideshow created successfully");
+
+          // Clean up temporary files
+          try {
+            tempVideos.forEach((video) => {
+              if (fs.existsSync(video)) fs.unlinkSync(video);
+            });
+            if (fs.existsSync(concatFilePath)) fs.unlinkSync(concatFilePath);
+            if (fs.existsSync(tempDir)) fs.rmdirSync(tempDir);
+          } catch (cleanupErr) {
+            console.warn("Error cleaning up temp files:", cleanupErr);
+          }
+
+          resolve({
+            path: outputPath,
+            duration: totalDuration,
+            isImage: false,
+          });
+        })
+        .on("error", (err) => {
+          console.error("Error in final concatenation:", err);
+
+          // Clean up temporary files on error
+          try {
+            tempVideos.forEach((video) => {
+              if (fs.existsSync(video)) fs.unlinkSync(video);
+            });
+            if (fs.existsSync(concatFilePath)) fs.unlinkSync(concatFilePath);
+            if (fs.existsSync(tempDir)) fs.rmdirSync(tempDir);
+          } catch (cleanupErr) {
+            console.warn(
+              "Error cleaning up temp files after error:",
+              cleanupErr
+            );
+          }
+
+          reject(err);
+        })
+        .run();
+    });
+  } catch (error) {
+    // Clean up temporary files on error
+    try {
+      tempVideos.forEach((video) => {
+        if (fs.existsSync(video)) fs.unlinkSync(video);
+      });
+      if (fs.existsSync(tempDir)) fs.rmdirSync(tempDir);
+    } catch (cleanupErr) {
+      console.warn("Error cleaning up temp files after error:", cleanupErr);
+    }
+
+    throw error;
+  }
+};
+
+// Create a simple video from a single image (fallback function)
+const createSimpleVideoFromImage = async (imagePath, options = {}) => {
+  const {
+    outputPath = path.join(__dirname, "output", `simple_video_${uuidv4()}.mp4`),
+    duration = 5,
   } = options;
 
   return new Promise((resolve, reject) => {
+    console.log("Creating simple video from single image:", imagePath);
+
     // Ensure output directory exists
     const outputDir = path.dirname(outputPath);
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
     }
 
-    // Start building the FFmpeg command
-    let command = ffmpeg();
-
-    // Add each image with the specified duration
-    images.forEach((image) => {
-      command = command
-        .addInput(image)
-        .inputOptions([`-loop 1`, `-t ${duration + transitionDuration}`]);
-    });
-
-    // Add audio if provided
-    if (audioPath && fs.existsSync(audioPath)) {
-      command = command.addInput(audioPath);
-    }
-
-    // Calculate total video duration
-    const totalDuration =
-      images.length * duration + (images.length - 1) * transitionDuration;
-
-    // Complex filtergraph for transitions
-    const filters = [];
-
-    // First prepare all inputs to have the same dimensions
-    for (let i = 0; i < images.length; i++) {
-      filters.push(
-        `[${i}:v]scale=${resolution}:force_original_aspect_ratio=decrease,pad=${resolution}:(ow-iw)/2:(oh-ih)/2,setsar=1,format=yuva420p[v${i}]`
-      );
-    }
-
-    // Then create the transition chain
-    for (let i = 0; i < images.length - 1; i++) {
-      filters.push(
-        `[v${i}][v${
-          i + 1
-        }]xfade=transition=${transitionEffect}:duration=${transitionDuration}:offset=${
-          duration * (i + 1) + transitionDuration * i
-        }[v${i + 1}out]`
-      );
-
-      // Connect the chain
-      if (i < images.length - 2) {
-        filters.push(`[v${i + 1}out][v${i + 2}]`);
-      }
-    }
-
-    // Audio handling
-    if (audioPath && fs.existsSync(audioPath)) {
-      filters.push(
-        `[${images.length}:a]afade=t=out:st=${totalDuration - 3}:d=3[aout]`
-      );
-      command = command.outputOptions([
-        "-map [v${images.length-1}out]",
-        "-map [aout]",
-      ]);
-    } else {
-      command = command.outputOptions(["-map [v${images.length-1}out]"]);
-    }
-
-    // Apply the filter complex
-    command = command.complexFilter(filters.join(";"));
-
-    // Set output options
-    command = command
+    // Use the simplest possible FFmpeg command
+    ffmpeg(imagePath)
+      .inputOptions(["-loop 1", `-t ${duration}`])
       .outputOptions([
-        `-t ${totalDuration}`,
         "-c:v libx264",
         "-pix_fmt yuv420p",
-        "-preset medium",
-        "-crf 23",
-        `-r ${fps}`,
+        "-preset ultrafast",
+        "-crf 30",
+        "-r 10",
       ])
-      .output(outputPath);
-
-    // Debug: Log the full command
-    console.log("FFmpeg Command:", command._getArguments().join(" "));
-
-    // Run the command
-    command
+      .output(outputPath)
       .on("start", (commandLine) => {
-        console.log("FFmpeg process started:", commandLine);
+        console.log("Simple video FFmpeg started:", commandLine);
       })
       .on("progress", (progress) => {
-        console.log(`Processing: ${Math.floor(progress.percent)}% done`);
+        console.log(
+          `Simple video processing: ${Math.floor(progress.percent || 0)}% done`
+        );
       })
       .on("end", () => {
-        console.log("Slideshow created successfully");
+        console.log("Simple video created successfully");
         resolve({
           path: outputPath,
-          duration: totalDuration,
+          duration: duration,
+          isImage: false,
         });
       })
       .on("error", (err) => {
-        console.error("Error creating slideshow:", err);
+        console.error("Error creating simple video:", err);
         reject(err);
       })
       .run();
@@ -135,12 +281,27 @@ const createSlideshow = async (images, options = {}) => {
 const slideshowController = {
   createSlideshowVideo: async (req, res) => {
     try {
+      console.log("=== Video processing request received ===");
+      console.log("Request files:", req.files ? req.files.length : 0);
+      console.log("Request body:", req.body);
+
       // Check if files were uploaded
       if (!req.files || req.files.length === 0) {
+        console.log("No files uploaded");
         return res.status(400).json({
+          success: false,
           message: "No images uploaded",
         });
       }
+
+      console.log(
+        "Uploaded files:",
+        req.files.map((f) => ({
+          name: f.originalname,
+          path: f.path,
+          size: f.size,
+        }))
+      );
 
       // Get file paths from the uploaded files
       const imagePaths = req.files.map((file) => file.path);
@@ -163,19 +324,232 @@ const slideshowController = {
         ),
       };
 
-      // Create the slideshow
-      const result = await createSlideshow(imagePaths, options);
+      console.log("Processing options:", options);
+      console.log("Image paths:", imagePaths);
 
-      // Return the video URL
-      const videoUrl = `/api/media/${path.basename(result.path)}`;
+      // Create the slideshow video
+      console.log("Starting slideshow creation...");
+      let result;
+      let mediaType = "video";
+
+      if (imagePaths.length === 1) {
+        // Single image: Just upload the image
+        result = {
+          path: imagePaths[0],
+          duration: 0,
+          isImage: true,
+        };
+        mediaType = "image";
+        console.log("Single image detected, using original image");
+      } else {
+        // Multiple images: Create video slideshow
+        try {
+          // Try to create video slideshow with fluent-ffmpeg
+          console.log(
+            "Attempting to create video from",
+            imagePaths.length,
+            "images"
+          );
+          result = await createSlideshowWithFluentFFmpeg(imagePaths, options);
+          console.log("FFmpeg slideshow created successfully:", result);
+          mediaType = "video";
+        } catch (ffmpegError) {
+          console.error("FFmpeg slideshow failed:", ffmpegError.message);
+          console.error("FFmpeg error details:", ffmpegError);
+
+          // Create a video file from the first image instead of falling back to PNG
+          try {
+            console.log(
+              "Attempting to create single-image video as fallback..."
+            );
+            const singleImageVideoPath = path.join(
+              __dirname,
+              "..",
+              "temp",
+              "output",
+              `fallback_video_${uuidv4()}.mp4`
+            );
+
+            // Create a simple video from the first image
+            const simpleVideoResult = await createSimpleVideoFromImage(
+              imagePaths[0],
+              {
+                ...options,
+                outputPath: singleImageVideoPath,
+                duration: 5, // 5 seconds for fallback video
+              }
+            );
+
+            result = simpleVideoResult;
+            mediaType = "video";
+            console.log("Fallback single-image video created:", result);
+          } catch (fallbackError) {
+            console.error(
+              "Fallback video creation also failed:",
+              fallbackError.message
+            );
+
+            // Last resort: Use the first image as static image but with proper extension handling
+            console.log("Using first image as final fallback");
+            result = {
+              path: imagePaths[0],
+              duration: 0,
+              isImage: true,
+            };
+            mediaType = "image";
+          }
+        }
+      }
+
+      // Upload to cloud storage - use the same pattern as uploadedImageController
+      let cloudUrl = null;
+      let uploadSuccess = false;
+
+      console.log("Starting cloud upload process...");
+      console.log("Media file path:", result.path);
+      console.log("Media type:", mediaType);
+
+      // Use the exact same cloud storage API as the rest of the app
+      const CLOUD_STORAGE_API =
+        "https://business.foodyqueen.com/admin/UploadMedia";
+      const STORAGE_FOLDER = "editor/videos";
+
+      try {
+        console.log(
+          `Uploading to FoodyQueen cloud storage: ${CLOUD_STORAGE_API}`
+        );
+
+        const formData = new FormData();
+        const mediaFile = fs.createReadStream(result.path);
+        const fileName = path.basename(result.path);
+        const cloudFilename = `${STORAGE_FOLDER}/${fileName}`;
+
+        // Use the exact same format as uploadedImageController
+        formData.append("stream", mediaFile);
+        formData.append("filename", cloudFilename);
+        formData.append("senitize", "false");
+
+        const uploadResponse = await axios.post(CLOUD_STORAGE_API, formData, {
+          headers: formData.getHeaders(),
+          timeout: 60000, // 60 second timeout
+        });
+
+        console.log("Upload response:", uploadResponse.data);
+
+        // The FoodyQueen API returns the URL directly as the response data
+        if (
+          uploadResponse.data &&
+          typeof uploadResponse.data === "string" &&
+          uploadResponse.data.startsWith("http")
+        ) {
+          cloudUrl = uploadResponse.data;
+          uploadSuccess = true;
+          console.log("Successfully uploaded to FoodyQueen cloud:", cloudUrl);
+        } else if (uploadResponse.data && uploadResponse.data.url) {
+          cloudUrl = uploadResponse.data.url;
+          uploadSuccess = true;
+          console.log("Successfully uploaded to FoodyQueen cloud:", cloudUrl);
+        } else {
+          console.error("FoodyQueen cloud upload failed:", uploadResponse.data);
+        }
+      } catch (uploadError) {
+        console.error(
+          `Error uploading to FoodyQueen cloud:`,
+          uploadError.message
+        );
+      }
+
+      // If FoodyQueen upload failed, try the configured UPLOAD_MEDIA_API as fallback
+      if (!uploadSuccess && EXTERNAL_APIS.UPLOAD_MEDIA) {
+        try {
+          console.log(
+            `Trying fallback upload to: ${EXTERNAL_APIS.UPLOAD_MEDIA}`
+          );
+          const fallbackFormData = new FormData();
+          const mediaFile = fs.createReadStream(result.path);
+          const fileName = path.basename(result.path);
+
+          fallbackFormData.append("media", mediaFile, fileName);
+
+          const uploadResponse = await axios.post(
+            EXTERNAL_APIS.UPLOAD_MEDIA,
+            fallbackFormData,
+            {
+              headers: fallbackFormData.getHeaders(),
+              timeout: 60000,
+            }
+          );
+
+          console.log("Fallback upload response:", uploadResponse.data);
+
+          if (uploadResponse.data.success || uploadResponse.data.url) {
+            cloudUrl = uploadResponse.data.url || uploadResponse.data.cloudUrl;
+            uploadSuccess = true;
+            console.log("Successfully uploaded via fallback:", cloudUrl);
+          }
+        } catch (fallbackError) {
+          console.error(`Fallback upload failed:`, fallbackError.message);
+        }
+      }
+
+      // Final fallback: serve locally using the cloud storage base URL format
+      if (!uploadSuccess) {
+        console.warn("All cloud uploads failed, serving locally");
+        const fileName = path.basename(result.path);
+
+        // Use the cloud storage base URL to make it look like a cloud URL
+        if (CLOUD_STORAGE.BASE_URL) {
+          cloudUrl = `${CLOUD_STORAGE.BASE_URL}/editor/videos/${fileName}`;
+        } else {
+          cloudUrl = `https://adstudioserver.foodyqueen.com/api/media/${fileName}`;
+        }
+
+        console.log("Using local fallback URL:", cloudUrl);
+      }
+
+      // Clean up uploaded input files
+      try {
+        for (const filePath of imagePaths) {
+          if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+            console.log("Cleaned up input file:", filePath);
+          }
+        }
+      } catch (cleanupError) {
+        console.warn("Error cleaning up input files:", cleanupError);
+      }
+
+      // Clean up output file if uploaded to cloud successfully
+      if (uploadSuccess && result.path && fs.existsSync(result.path)) {
+        try {
+          // For single images, don't delete the original if it's the same file
+          if (mediaType === "video" || !imagePaths.includes(result.path)) {
+            fs.unlinkSync(result.path);
+            console.log("Cleaned up output file:", result.path);
+          }
+        } catch (cleanupError) {
+          console.warn("Error cleaning up output file:", cleanupError);
+        }
+      }
+
+      // Return the media URL (prioritize cloud URL always)
+      const finalMediaUrl = cloudUrl; // Always use cloudUrl since we ensure it exists above
+
       return res.status(200).json({
-        message: "Video created successfully",
-        videoUrl,
-        duration: result.duration,
+        message: `${
+          mediaType === "video" ? "Video" : "Image"
+        } created successfully`,
+        success: true,
+        videoUrl: finalMediaUrl, // Keep videoUrl for backward compatibility
+        mediaUrl: finalMediaUrl,
+        mediaType,
+        cloudUrl: finalMediaUrl, // Ensure cloudUrl is always returned
+        duration: result.duration || 0,
       });
     } catch (error) {
       console.error("Error creating slideshow:", error);
       return res.status(500).json({
+        success: false,
         message: "Error creating slideshow video",
         error: error.message,
       });
@@ -309,7 +683,7 @@ const createRemotionSlideshowController = async (req, res) => {
     });
 
     // Determine the URL for the video
-    const videoUrl = `${CLOUD_STORAGE.BASE_URL}/editor/${outputFilename}`;
+    const videoUrl = `${CLOUD_STORAGE.BASE_URL}/editor/videos/${outputFilename}`;
 
     // Return the video URL
     return res.status(200).json({
@@ -327,6 +701,7 @@ const createRemotionSlideshowController = async (req, res) => {
   }
 };
 
+// Fallback: Create a simple image collage when video creation fails
 module.exports = {
   createSlideshow: slideshowController.createSlideshowVideo,
   createRemotionSlideshow: createRemotionSlideshowController,

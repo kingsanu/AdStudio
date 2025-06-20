@@ -4,7 +4,7 @@ import { createContext } from "react";
 export type EditorConfig = {
   logoUrl?: string;
   isAdmin?: boolean; // Add admin flag to config
-  type?: "coupon" | "template" | "design" | string; // Add type field for editor mode
+  type?: "coupon" | "template" | "design"; // Add type field for editor mode
   apis: {
     url: string;
     searchFonts: string;

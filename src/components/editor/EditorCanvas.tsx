@@ -2,15 +2,14 @@ import { FC, useRef, useState, useEffect } from "react";
 import { useEditor } from "canva-editor/hooks";
 import { DesignFrame } from "canva-editor/components/editor";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 
 interface EditorCanvasProps {
-  data?: any;
-  onChanges?: (changes: any) => void;
+  data?: unknown;
+  onChanges?: (changes: unknown) => void;
 }
 
 const EditorCanvas: FC<EditorCanvasProps> = ({ data, onChanges }) => {
-  const { actions, query, state } = useEditor();
+  const { actions, state } = useEditor();
   const canvasRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
 
@@ -75,7 +74,7 @@ const EditorCanvas: FC<EditorCanvasProps> = ({ data, onChanges }) => {
     >
       {/* Canvas Area */}
       <div className="relative">
-        <DesignFrame data={data || defaultData} onChanges={onChanges} />
+        <DesignFrame data={data ?? defaultData} onChanges={onChanges} />
       </div>
 
       {/* Canvas Controls */}

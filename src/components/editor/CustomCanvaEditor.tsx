@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { FC, PropsWithChildren, useEffect, useState } from "react";
+import { FC, PropsWithChildren, useEffect, useState, useMemo } from "react";
 import {
   EditorConfig,
   EditorContext,
@@ -54,14 +54,10 @@ const CustomCanvaEditor: FC<PropsWithChildren<CustomCanvaEditorProps>> = ({
   const [showPreview, setShowPreview] = useState(false);
 
   // Determine editor type based on props
-  const editorType = isCoupon
-    ? "coupon"
-    : isLiveMenu
-    ? "livemenu"
-    : isKiosk
-    ? "kiosk"
-    : "design";
-
+  let editorType: "design" | "coupon" | "template" = "design";
+  if (isCoupon) {
+    editorType = "coupon";
+  }
   // Set up a callback to handle changes
   useEffect(() => {
     const handleChanges = () => {
@@ -92,12 +88,15 @@ const CustomCanvaEditor: FC<PropsWithChildren<CustomCanvaEditorProps>> = ({
 
   return (
     <EditorContext.Provider
-      value={{
-        config: { ...config, isAdmin, type: editorType },
-        getState,
-        actions,
-        query,
-      }}
+      value={useMemo(
+        () => ({
+          config: { ...config, isAdmin, type: editorType },
+          getState,
+          actions,
+          query,
+        }),
+        [config, isAdmin, editorType, getState, actions, query]
+      )}
     >
       <div
         className="flex flex-col w-full h-screen overflow-hidden"
@@ -129,47 +128,51 @@ const CustomCanvaEditor: FC<PropsWithChildren<CustomCanvaEditorProps>> = ({
             <EditorContent data={data?.editorConfig} onChanges={onChanges} />
           </div>
 
-          {/* Right Sidebar - Slide Thumbnails */}
-          <div className="w-64 border-l border-gray-200 bg-white flex flex-col">
-            <div className="p-4 border-b border-gray-200">
-              <h3 className="text-sm font-medium m-0">Pages</h3>
-            </div>
+          {/* Right Sidebar - Slide Thumbnails - Hidden for coupon editor */}
+          {!isCoupon && (
+            <div className="w-64 border-l border-gray-200 bg-white flex flex-col">
+              <div className="p-4 border-b border-gray-200">
+                <h3 className="text-sm font-medium m-0">Pages</h3>
+              </div>
 
-            <div className="flex-1 overflow-y-auto p-2">
-              {getState().pages.map((_, index) => (
-                <PageThumbnail
-                  key={index}
-                  pageIndex={index}
-                  isActive={getState().activePage === index}
-                  onClick={() => actions.setActivePage(index)}
-                />
-              ))}
+              <div className="flex-1 overflow-y-auto p-2">
+                {getState().pages.map((page, index) => (
+                  <PageThumbnail
+                    key={`page-${getState().pages.length}-${index}`}
+                    pageIndex={index}
+                    isActive={getState().activePage === index}
+                    onClick={() => actions.setActivePage(index)}
+                  />
+                ))}
 
-              {/* Add Page Button */}
-              <div className="p-2">
-                <Button
-                  variant="outline"
-                  className="w-full flex items-center justify-center gap-1 border-dashed"
-                  onClick={() => actions.addPage()}
-                >
-                  <Plus className="h-4 w-4" />
-                  <span>Add Page</span>
-                </Button>
+                {/* Add Page Button */}
+                <div className="p-2">
+                  <Button
+                    variant="outline"
+                    className="w-full flex items-center justify-center gap-1 border-dashed"
+                    onClick={() => actions.addPage()}
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span>Add Page</span>
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Preview/Presentation Mode */}
         {showPreview && (
           <div className="fixed inset-0 z-50 bg-black/95">
             <Preview onClose={() => setShowPreview(false)} />
-            <div
+            <button
+              type="button"
               className="bg-transparent w-15 h-15 flex items-center justify-center fixed right-6 top-6 rounded-full text-white cursor-pointer hover:bg-white/30 transition-colors duration-200"
               onClick={() => setShowPreview(false)}
+              aria-label="Close preview"
             >
               <CloseIcon />
-            </div>
+            </button>
           </div>
         )}
       </div>

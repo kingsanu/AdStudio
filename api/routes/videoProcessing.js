@@ -19,14 +19,14 @@ const upload = multer({ storage: storage });
 
 // Route to create a slideshow video from images (FFmpeg-based)
 router.post(
-  "/create-slideshow-video",
+  "/video-processing/create-slideshow-video",
   upload.any(), // Accept any field names for images
   videoProcessingController.createSlideshow
 );
 
 // Route to create a slideshow using Remotion (React-based solution)
 router.post(
-  "/create-remotion-slideshow",
+  "/video-processing/create-remotion-slideshow",
   upload.any(),
   videoProcessingController.createRemotionSlideshow
 );

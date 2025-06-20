@@ -1,5 +1,0 @@
-file 'temp/uploads/1746278068794-slide_0.png'
-duration 1
-file 'temp/uploads/1746278068801-slide_1.png'
-duration 3
-file 'temp/uploads/1746278068801-slide_1.png'

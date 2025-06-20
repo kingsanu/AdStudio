@@ -33,7 +33,9 @@ const kioskRoutes = require("./routes/kiosk");
 const liveMenuRoutes = require("./routes/liveMenu");
 const customerRoutes = require("./routes/customers");
 const campaignRoutes = require("./routes/campaigns");
+const couponCampaignRoutes = require("./routes/couponCampaigns");
 const outletRoutes = require("./routes/outlets");
+const fontRoutes = require("./routes/fonts");
 
 const app = express();
 // Increase JSON body size limit
@@ -55,8 +57,6 @@ app.use(
 );
 
 const fs = require("fs");
-// const path = require("path");
-// const axios = require("axios");
 
 // Connect to MongoDB
 connectDB();
@@ -75,7 +75,9 @@ app.use("/api", kioskRoutes);
 app.use("/api", liveMenuRoutes);
 app.use("/api", customerRoutes);
 app.use("/api", campaignRoutes);
+app.use("/api", couponCampaignRoutes);
 app.use("/api", outletRoutes);
+app.use("/api/fonts", fontRoutes);
 
 // Get port from environment variables or use 4000 as default
 const PORT = process.env.PORT || 4000;
@@ -86,98 +88,6 @@ app.listen(PORT, () => {
 
 app.use(express.static(__dirname + "/public")); //Serves resources from public folder
 app.use(express.static(__dirname + "/json")); //Serves resources from public folder
-
-/**
- * Upload template endpoint
- * Saves template data to the json/templates directory
- * and updates templates.json if it's a custom template
- */
-// app.post("/api/upload-template", async (req, res) => {
-//   try {
-//     const { type, filename, base64, templateName, templateDesc } = req.body;
-
-//     // Upload template base64 to external media service
-//     const templateUploadResponse = await axios.post(
-//       "http://business.foodyqueen.com/admin/uploadmedia",
-//       {
-//         base64: base64,
-//       }
-//     );
-
-//     // Generate and upload thumbnail base64
-//     const thumbnailUploadResponse = await axios.post(
-//       "http://business.foodyqueen.com/admin/uploadmedia",
-//       {
-//         base64: base64, // In a real app, you'd generate a proper thumbnail here
-//       }
-//     );
-
-//     // Ensure the templates directory exists
-//     const templatesDir = path.join(__dirname, "json", "templates");
-//     if (!fs.existsSync(templatesDir)) {
-//       fs.mkdirSync(templatesDir, { recursive: true });
-//     }
-
-//     // Handle nested directories in the filename (e.g., document/file-id)
-//     const filePath = path.join(templatesDir, filename);
-//     const fileDir = path.dirname(filePath);
-
-//     // Create all directories in the path if they don't exist
-//     if (!fs.existsSync(fileDir)) {
-//       fs.mkdirSync(fileDir, { recursive: true });
-//     }
-
-//     // Write the template data to a file
-//     fs.writeFileSync(filePath, base64);
-
-//     // If this is a custom template with name and description, add it to templates.json
-//     if (templateName && templateDesc) {
-//       const templatesJsonPath = path.join(__dirname, "json", "templates.json");
-//       let templatesData;
-
-//       try {
-//         // Read the existing templates.json file
-//         const templatesJson = fs.readFileSync(templatesJsonPath, "utf8");
-//         templatesData = JSON.parse(templatesJson);
-//       } catch (err) {
-//         // If file doesn't exist or is invalid, create a new structure
-//         templatesData = { data: [] };
-//       }
-
-//       // Add the new template to the templates data using uploaded URLs
-//       templatesData.data.unshift({
-//         img: thumbnailUploadResponse.data.url,
-//         data: templateUploadResponse.data.url,
-//         desc: templateDesc,
-//         pages: 1, // Assuming single page for now
-//         name: templateName,
-//         custom: true, // Mark as custom template
-//       });
-
-//       // Write the updated templates data back to the file
-//       fs.writeFileSync(
-//         templatesJsonPath,
-//         JSON.stringify(templatesData, null, 2)
-//       );
-//     }
-
-//     // Return success response
-//     res.status(200).json({
-//       success: true,
-//       message: "Template saved successfully",
-//       filePath: `/api/json/templates/${filename}`,
-//       templateUrl: templateUploadResponse.data.url,
-//       thumbnailUrl: thumbnailUploadResponse.data.url,
-//     });
-//   } catch (error) {
-//     console.error("Error saving template:", error);
-//     res.status(500).json({
-//       success: false,
-//       message: "Failed to save template",
-//       error: error.message,
-//     });
-//   }
-// });
 
 function paginateArrayWithFilter(array, size = 30, index = 0, keyword = "") {
   const startIndex = index * size;
@@ -259,27 +169,6 @@ app.get("/api/draft-fonts", async (req, res) => {
       };
     });
     res.send({ data: filtered });
-  });
-});
-
-/**
- * Get fonts
- */
-app.get("/api/fonts", async (req, res) => {
-  fs.readFile("./json/fonts.json", "utf8", (err, jsonString) => {
-    if (err) {
-      console.error(err);
-      res.send(null);
-      return;
-    }
-    const { ps, pi, kw } = req.query;
-    const result = paginateArrayWithFilter(
-      JSON.parse(jsonString).data,
-      +ps,
-      +pi,
-      kw
-    );
-    res.json(result);
   });
 });
 

@@ -283,146 +283,155 @@ export default function CouponDesigner() {
 
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="animate-pulse">
+            {Array.from(
+              { length: 6 },
+              (_, i) => `loading-${i}-${Date.now()}`
+            ).map((key) => (
+              <div key={key} className="animate-pulse">
                 <div className="bg-gray-200 dark:bg-gray-700 h-48 rounded-lg"></div>
               </div>
             ))}
           </div>
-        ) : coupons.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 mb-6">
-              <Tag className="h-10 w-10 text-gray-500" />
-            </div>
-            <h3 className="text-2xl font-semibold mb-4">No coupons yet</h3>
-            <p className="text-gray-500 max-w-md mx-auto mb-6">
-              Create your first coupon to start offering discounts to your
-              customers.
-            </p>
-            <Button
-              onClick={() => handleCreateCoupon()}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Create Your First Coupon
-            </Button>
-          </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {coupons.map((coupon, index) => (
-              <motion.div
-                key={coupon.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-              >
-                <Card className="hover:shadow-lg transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold">{coupon.title}</h3>
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              coupon.isActive
-                                ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
-                                : "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400"
-                            }`}
+          <>
+            {coupons.length === 0 ? (
+              <div className="text-center py-16">
+                <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 mb-6">
+                  <Tag className="h-10 w-10 text-gray-500" />
+                </div>
+                <h3 className="text-2xl font-semibold mb-4">No coupons yet</h3>
+                <p className="text-gray-500 max-w-md mx-auto mb-6">
+                  Create your first coupon to start offering discounts to your
+                  customers.
+                </p>
+                <Button
+                  onClick={() => handleCreateCoupon()}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Your First Coupon
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {coupons.map((coupon, index) => (
+                  <motion.div
+                    key={coupon.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                  >
+                    <Card className="hover:shadow-lg transition-shadow">
+                      <CardContent className="p-6">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="font-semibold">{coupon.title}</h3>
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  coupon.isActive
+                                    ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
+                                    : "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400"
+                                }`}
+                              >
+                                {coupon.isActive ? "Active" : "Inactive"}
+                              </span>
+                              {isExpired(coupon.expiryDate) && (
+                                <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400">
+                                  Expired
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                              {coupon.description}
+                            </p>
+                            <div className="flex items-center gap-4 text-sm">
+                              <div className="flex items-center gap-1">
+                                {coupon.discountType === "percentage" ? (
+                                  <Percent className="h-4 w-4 text-blue-600" />
+                                ) : (
+                                  <DollarSign className="h-4 w-4 text-green-600" />
+                                )}
+                                <span className="font-medium">
+                                  {coupon.discountType === "percentage"
+                                    ? `${coupon.discountValue}%`
+                                    : `$${coupon.discountValue}`}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Calendar className="h-4 w-4 text-gray-500" />
+                                <span>
+                                  {new Date(
+                                    coupon.expiryDate
+                                  ).toLocaleDateString()}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="mt-3">
+                              <div className="flex justify-between text-sm mb-1">
+                                <span>Usage</span>
+                                <span>
+                                  {coupon.usedCount}/{coupon.usageLimit}
+                                </span>
+                              </div>
+                              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                <div
+                                  className="bg-blue-600 h-2 rounded-full transition-all"
+                                  style={{
+                                    width: `${getUsagePercentage(
+                                      coupon.usedCount,
+                                      coupon.usageLimit
+                                    )}%`,
+                                  }}
+                                ></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditCoupon(coupon.id)}
                           >
-                            {coupon.isActive ? "Active" : "Inactive"}
-                          </span>
-                          {isExpired(coupon.expiryDate) && (
-                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400">
-                              Expired
-                            </span>
-                          )}
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDuplicateCoupon(coupon)}
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDownloadCoupon(coupon)}
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleToggleActive(coupon.id)}
+                          >
+                            {coupon.isActive ? "Deactivate" : "Activate"}
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteCoupon(coupon.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                          {coupon.description}
-                        </p>
-                        <div className="flex items-center gap-4 text-sm">
-                          <div className="flex items-center gap-1">
-                            {coupon.discountType === "percentage" ? (
-                              <Percent className="h-4 w-4 text-blue-600" />
-                            ) : (
-                              <DollarSign className="h-4 w-4 text-green-600" />
-                            )}
-                            <span className="font-medium">
-                              {coupon.discountType === "percentage"
-                                ? `${coupon.discountValue}%`
-                                : `$${coupon.discountValue}`}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4 text-gray-500" />
-                            <span>
-                              {new Date(coupon.expiryDate).toLocaleDateString()}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="mt-3">
-                          <div className="flex justify-between text-sm mb-1">
-                            <span>Usage</span>
-                            <span>
-                              {coupon.usedCount}/{coupon.usageLimit}
-                            </span>
-                          </div>
-                          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                            <div
-                              className="bg-blue-600 h-2 rounded-full transition-all"
-                              style={{
-                                width: `${getUsagePercentage(
-                                  coupon.usedCount,
-                                  coupon.usageLimit
-                                )}%`,
-                              }}
-                            ></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEditCoupon(coupon.id)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDuplicateCoupon(coupon)}
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDownloadCoupon(coupon)}
-                      >
-                        <Download className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleToggleActive(coupon.id)}
-                      >
-                        {coupon.isActive ? "Deactivate" : "Activate"}
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDeleteCoupon(coupon.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
     </SharedDashboardLayout>

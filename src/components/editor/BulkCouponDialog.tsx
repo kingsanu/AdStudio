@@ -7,20 +7,49 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Download, X, FileText } from "lucide-react";
+import CouponCampaignDialog from "./CouponCampaignDialog";
 
 interface BulkCouponDialogProps {
   open: boolean;
   onClose: () => void;
+  isCoupon?: boolean;
 }
 
 const BulkCouponDialog: React.FC<BulkCouponDialogProps> = ({
   open,
   onClose,
+  isCoupon = false,
 }) => {
   const { getState } = useContext(EditorContext);
   const [quantity, setQuantity] = useState<number>(10);
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [showCampaignDialog, setShowCampaignDialog] = useState(false);
+  const [campaignCreated, setCampaignCreated] = useState(false);
+
+  // Show campaign dialog first if this is a coupon editor
+  React.useEffect(() => {
+    if (open && isCoupon && !campaignCreated) {
+      setShowCampaignDialog(true);
+    }
+  }, [open, isCoupon, campaignCreated]);
+
+  const handleCampaignSuccess = (campaignId: string) => {
+    console.log("Campaign created:", campaignId);
+    setCampaignCreated(true);
+    setShowCampaignDialog(false);
+    toast.success(
+      "Coupon campaign created! Now you can generate the bulk PDF."
+    );
+  };
+
+  const handleCampaignClose = () => {
+    setShowCampaignDialog(false);
+    if (isCoupon && !campaignCreated) {
+      // If user closes campaign dialog without creating campaign, close the whole dialog
+      onClose();
+    }
+  };
 
   // Generate unique coupon codes
   const generateCouponCode = (index: number): string => {
@@ -239,14 +268,37 @@ const BulkCouponDialog: React.FC<BulkCouponDialogProps> = ({
           </Button>
           <Button
             onClick={handleGenerateBulkPDF}
-            disabled={isGenerating || quantity < 1 || quantity > 1000}
+            disabled={
+              isGenerating ||
+              quantity < 1 ||
+              quantity > 1000 ||
+              (isCoupon && !campaignCreated)
+            }
             className="flex items-center gap-2"
           >
             <Download className="h-4 w-4" />
             {isGenerating ? "Generating..." : "Generate PDF"}
           </Button>
         </div>
+
+        {isCoupon && (
+          <div className="mt-4 p-4 bg-yellow-50 rounded-lg">
+            <p className="text-sm text-yellow-800">
+              {campaignCreated
+                ? "✅ Campaign created! You can now generate the bulk PDF."
+                : "⚠️ Please create a coupon campaign first before generating bulk coupons."}
+            </p>
+          </div>
+        )}
       </div>
+
+      {/* Coupon Campaign Dialog */}
+      <CouponCampaignDialog
+        open={showCampaignDialog}
+        onClose={handleCampaignClose}
+        onSuccess={handleCampaignSuccess}
+        templateData={getState()}
+      />
     </div>
   );
 };

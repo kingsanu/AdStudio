@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import PhoneAuth from "./pages/auth/PhoneAuth";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
-import Dashbord from "./pages/Editor/Dashbord";
+import Dashboard from "./pages/Editor/Dashboard";
 import Editor from "./Editor";
 import NewEditor from "./pages/Editor/NewEditor";
 import TextTemplateEditor from "./TextTemplateEditor";
@@ -17,6 +17,8 @@ import RecentWork from "./pages/RecentWork";
 import Templates from "./pages/Templates";
 import GoogleFeedback from "./pages/GoogleFeedback";
 import CouponDesigner from "./pages/CouponDesigner";
+import CouponCampaigns from "./pages/CouponCampaigns";
+import CouponCampaignDetails from "./pages/CouponCampaignDetails";
 import RoyaltyProgram from "./pages/RoyaltyProgram";
 import MembershipCard from "./pages/MembershipCard";
 import WhatsAppCampaigns from "./pages/WhatsAppCampaigns";
@@ -29,10 +31,8 @@ function App() {
         <Routes>
           {/* Home route */}
           <Route path="/" element={<Home />} />
-
           {/* Auth routes */}
           <Route path="/auth" element={<PhoneAuth />} />
-
           {/* Protected routes */}
           <Route
             path="/editor"
@@ -57,12 +57,12 @@ function App() {
                 <TextTemplateEditor />
               </ProtectedRoute>
             }
-          />
+          />{" "}
           <Route
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <Dashbord />
+                <Dashboard />
               </ProtectedRoute>
             }
           />
@@ -105,6 +105,22 @@ function App() {
                 <CouponDesigner />
               </ProtectedRoute>
             }
+          />{" "}
+          <Route
+            path="/coupon-campaigns"
+            element={
+              <ProtectedRoute>
+                <CouponCampaigns />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/coupon-campaigns/:campaignId"
+            element={
+              <ProtectedRoute>
+                <CouponCampaignDetails />
+              </ProtectedRoute>
+            }
           />
           <Route
             path="/royalty-program"
@@ -138,16 +154,13 @@ function App() {
               </ProtectedRoute>
             }
           />
-
           {/* Kiosk viewer route - public */}
           <Route path="/kiosk/:id" element={<KioskViewer />} />
-
           {/* Live Menu preview route - public */}
           <Route
             path="/live-menu-preview/:liveMenuId"
             element={<LiveMenuPreview />}
           />
-
           {/* Fallback route */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { motion } from "motion/react";
+import { useLocation } from "react-router-dom";
 import {
-  Search,
   Bell,
   Star,
   MessageSquare,
@@ -14,9 +12,9 @@ import {
   CreditCard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
+import { COLORS } from "@/constants/styles";
 import {
   Sidebar as UISidebar,
   SidebarBody,
@@ -34,12 +32,10 @@ export default function SharedDashboardLayout({
   children,
   title,
   description,
-}: SharedDashboardLayoutProps) {
+}: Readonly<SharedDashboardLayoutProps>) {
   const { user, logout, userLoading } = useAuth();
-  const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [notificationCount] = useState(3);
 
   const sidebarLinks = [
@@ -72,13 +68,6 @@ export default function SharedDashboardLayout({
       ),
     },
     {
-      label: "Coupon Designer",
-      href: "/coupon-designer",
-      icon: (
-        <Tag className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
-    },
-    {
       label: "Royalty Program",
       href: "/royalty-program",
       icon: (
@@ -100,6 +89,13 @@ export default function SharedDashboardLayout({
       ),
     },
     {
+      label: "Coupon Campaigns",
+      href: "/coupon-campaigns",
+      icon: (
+        <Tag className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+      ),
+    },
+    {
       label: "Favorites",
       href: "/favorites",
       icon: (
@@ -114,11 +110,22 @@ export default function SharedDashboardLayout({
       <UISidebar open={sidebarOpen} setOpen={setSidebarOpen} animate={true}>
         <SidebarBody className="justify-between gap-10">
           <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
-            <div className="flex items-center space-x-2 py-1">
-              <div className="h-5 w-6 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-[#0070f3] dark:bg-[#0070f3]" />
-              <span className="font-medium whitespace-pre text-black dark:text-white">
-                Ads Studio
-              </span>
+            <div className="flex items-center space-x-3 py-2">
+              <div className="relative flex-shrink-0">
+                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+                  <span className="text-white font-bold text-lg">A</span>
+                </div>
+              </div>
+              {sidebarOpen && (
+                <div className="flex flex-col flex-1 min-w-0">
+                  <span className="font-bold text-lg text-black dark:text-white tracking-tight truncate">
+                    AdStudio
+                  </span>
+                  <span className="text-xs text-neutral-500 dark:text-neutral-400 -mt-0.5 truncate">
+                    Design Platform
+                  </span>
+                </div>
+              )}
             </div>
             <div className="mt-8 flex flex-col gap-2">
               {sidebarLinks.map((link, idx) => (
@@ -167,71 +174,66 @@ export default function SharedDashboardLayout({
       </UISidebar>
 
       {/* Main Content */}
-      <div className="flex flex-1 flex-col h-screen">
-        {/* Header */}
-        <motion.header
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="sticky top-0 z-10 flex items-center justify-between border-b border-neutral-200 bg-white/80 px-6 py-3 backdrop-blur-md dark:border-neutral-800 dark:bg-neutral-900/80"
-        >
-          <div className="flex items-center gap-4">
-            <div className="flex items-center">
-              <div className="h-8 w-8 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-[#0070f3] dark:bg-[#0070f3] flex items-center justify-center mr-2">
-                <span className="text-white font-bold">A</span>
-              </div>
-              <span className="font-bold">Ads Studio</span>
-            </div>
-            <div className="relative ml-6 w-96">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
-              <Input
-                placeholder="Search templates..."
-                className="w-full pl-10 pr-8 transition-all focus-visible:ring-blue-500 rounded-full bg-gray-100 dark:bg-gray-800 border-0"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
+      <div className="flex flex-1 flex-col overflow-hidden">
+        {/* Top Navigation */}
+        <header className="flex h-16 items-center justify-between border-b border-gray-200/80 dark:border-gray-800/80 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md px-6 sticky top-0 z-40">
+          <div className="flex items-center space-x-6">
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+              {title}
+            </h1>
           </div>
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-blue-500 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-            >
-              Try Premium
-            </Button>
+
+          <div className="flex items-center space-x-4">
             <Button
               variant="ghost"
-              size="icon"
-              className="relative text-neutral-700 dark:text-neutral-300"
+              size="sm"
+              className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             >
-              <Bell className="h-5 w-5" />
+              <Bell className="h-5 w-5 text-gray-600 dark:text-gray-400" />
               {notificationCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
+                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-xs font-medium text-white flex items-center justify-center">
                   {notificationCount}
                 </span>
               )}
             </Button>
-            <Avatar className="h-8 w-8 border border-gray-200 dark:border-gray-700">
-              <AvatarImage
-                src={user?.logo || "https://github.com/shadcn.png"}
-                alt={user?.name || "User"}
-                loading="lazy"
-              />
-              <AvatarFallback className="bg-blue-500 text-white">
-                {user?.name ? user.name.substring(0, 2).toUpperCase() : "U"}
-              </AvatarFallback>
-            </Avatar>
+
+            {!userLoading && user && (
+              <div className="flex items-center space-x-3">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage
+                    src={user?.logo ?? "https://github.com/shadcn.png"}
+                    alt={user?.name ?? "User"}
+                  />
+                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-medium">
+                    {user?.name?.charAt(0)?.toUpperCase() ?? "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="hidden md:block">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                    {user.name}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {user.email}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
-        </motion.header>
+        </header>
 
         {/* Main Content */}
-        <main className="flex-1 p-6">
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <main
+          className="flex-1 overflow-auto bg-gray-50/50 dark:bg-neutral-950/50 p-6"
+          style={{ backgroundColor: COLORS.background.secondary }}
+        >
+          <div className="mb-8">
+            <h1
+              className="text-3xl font-bold mb-2"
+              style={{ color: COLORS.text.primary }}
+            >
               {title}
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
+            <p className="text-lg" style={{ color: COLORS.text.secondary }}>
               {description}
             </p>
           </div>

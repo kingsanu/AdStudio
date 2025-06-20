@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { toast } from "sonner";
 import Cookies from "js-cookie";
 import axios from "axios";
@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { SliderWithTicks } from "@/components/ui/slider";
 import {
   Select,
   SelectContent,
@@ -37,6 +38,7 @@ import {
   WhatsAppSettings,
   WhatsAppConnectionState,
 } from "@/services/whatsappService";
+import { videoService } from "@/services/videoService";
 import {
   Users,
   MessageSquare,
@@ -62,7 +64,7 @@ import { UPLOAD_IMAGE_ENDPOINT } from "@/constants";
 interface WhatsAppCampaignDialogProps {
   open: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (campaignId?: string) => void;
 }
 
 export default function WhatsAppCampaignDialog({
@@ -79,6 +81,7 @@ export default function WhatsAppCampaignDialog({
   const [isLoadingCustomers, setIsLoadingCustomers] = useState(false);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedCustomers, setSelectedCustomers] = useState<string[]>([]);
+  const [customerSliderValue, setCustomerSliderValue] = useState<number[]>([0]);
   const [filterSegment, setFilterSegment] = useState<string>("");
   const [selectedSegments, setSelectedSegments] = useState<
     { value: string; label: string }[]
@@ -86,10 +89,12 @@ export default function WhatsAppCampaignDialog({
 
   // Page image capture state
   const [isCapturingImages, setIsCapturingImages] = useState(false);
+  const [isGeneratingMedia, setIsGeneratingMedia] = useState(false);
+  const [mediaGenerationProgress, setMediaGenerationProgress] = useState(0);
   const [captureProgress, setCaptureProgress] = useState(0);
   const [pageImages, setPageImages] = useState<string[]>([]);
-  const [selectedImageIndex, setSelectedImageIndex] = useState<number>(-1);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [mediaGenerated, setMediaGenerated] = useState(false);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // WhatsApp connection state
@@ -151,7 +156,6 @@ export default function WhatsAppCampaignDialog({
 
       // Clear page capture related states
       setPageImages([]);
-      setSelectedImageIndex(-1);
       setCaptureProgress(0);
       setIsCapturingImages(false);
       setUploadingImage(false);
@@ -180,10 +184,10 @@ export default function WhatsAppCampaignDialog({
     setIsPollingActive(false);
     setIsWaitingForQR(false);
     setPageImages([]);
-    setSelectedImageIndex(-1);
     setCaptureProgress(0);
     setIsCapturingImages(false);
     setUploadingImage(false);
+    setMediaGenerated(false);
     if (progressIntervalRef.current) {
       clearInterval(progressIntervalRef.current);
       progressIntervalRef.current = null;
@@ -204,17 +208,17 @@ export default function WhatsAppCampaignDialog({
   };
 
   // Function to capture page images, similar to PublishKioskDialog
-  const capturePageImages = async () => {
+  const capturePageImages = useCallback(async () => {
     try {
       setIsCapturingImages(true);
       setCaptureProgress(0);
       setPageImages([]);
 
-      // Show loading toast
-      toast.loading("Capturing Page Images", {
-        description: "Generating images for each page...",
-        duration: 30000, // 30 second timeout
-      });
+      // // Show loading toast
+      // toast.loading("Capturing Page Images", {
+      //   description: "Generating images for each page...",
+      //   duration: 30000, // 30 second timeout
+      // });
 
       // Simulate progress updates
       progressIntervalRef.current = setInterval(() => {
@@ -311,66 +315,7 @@ export default function WhatsAppCampaignDialog({
     } finally {
       setIsCapturingImages(false);
     }
-  };
-
-  // Function to upload the selected image and get its URL
-  const uploadSelectedImage = async () => {
-    if (selectedImageIndex === -1 || !pageImages[selectedImageIndex]) {
-      toast.error("Please select an image first");
-      return;
-    }
-
-    try {
-      setUploadingImage(true);
-
-      // Show loading toast
-      toast.loading("Uploading Image", {
-        description: "Uploading the selected image...",
-        duration: 20000,
-      });
-
-      // Extract the base64 data from the data URL
-      const dataUrl = pageImages[selectedImageIndex];
-      const base64Data = dataUrl.split(",")[1];
-
-      // Generate a unique filename
-      const timestamp = Date.now();
-      const filename = `whatsapp_image_${outletId}_${timestamp}.png`;
-
-      // Upload the image
-      const response = await axios.post(UPLOAD_IMAGE_ENDPOINT, {
-        base64: base64Data,
-        filename,
-        userId: outletId,
-      });
-      console.log(response);
-
-      if (response.data && response.data.url) {
-        // Update form data with the image URL
-        setFormData((prev) => ({
-          ...prev,
-          imageUrl: response.data.url,
-        }));
-
-        toast.dismiss();
-        toast.success("Image Uploaded", {
-          description: "The selected image has been uploaded successfully!",
-          duration: 3000,
-        });
-      } else {
-        throw new Error("Invalid response from server");
-      }
-    } catch (error) {
-      console.error("Error uploading selected image:", error);
-      toast.dismiss();
-      toast.error("Upload Failed", {
-        description: "Failed to upload the selected image. Please try again.",
-        duration: 4000,
-      });
-    } finally {
-      setUploadingImage(false);
-    }
-  };
+  }, [activePage, pages, actions]);
 
   // Generate unique session ID with timestamp
   const generateUniqueSessionId = () => {
@@ -470,10 +415,10 @@ export default function WhatsAppCampaignDialog({
         setConnectionStatus(statusResponse.status || "disconnected");
 
         if (statusResponse.status === "connected") {
-          console.log(
-            "WhatsApp already connected, no need to create new session"
-          );
-          toast.success("WhatsApp is already connected!");
+          // console.log(
+          //   "WhatsApp already connected, no need to create new session"
+          // );
+          // toast.success("WhatsApp is already connected!");
           setShowQRCode(false);
           setIsCreatingSession(false);
         } else {
@@ -923,23 +868,6 @@ export default function WhatsAppCampaignDialog({
         return;
       }
 
-      // Check if an image is selected but not uploaded
-      if (
-        selectedImageIndex !== -1 &&
-        pageImages[selectedImageIndex] &&
-        !formData.imageUrl
-      ) {
-        toast.warning(
-          "You have selected an image but haven't uploaded it yet",
-          {
-            description:
-              "Please click 'Use Selected Image' to upload the image before creating the campaign.",
-            duration: 5000,
-          }
-        );
-        return;
-      }
-
       handleCreateCampaign();
     }
   };
@@ -973,7 +901,7 @@ export default function WhatsAppCampaignDialog({
 
       if (response.success) {
         toast.success("Campaign created successfully!");
-        onSuccess();
+        onSuccess(response.data?._id);
         handleClose();
       }
     } catch (error) {
@@ -990,19 +918,26 @@ export default function WhatsAppCampaignDialog({
   };
 
   const toggleCustomerSelection = (customerId: string) => {
-    setSelectedCustomers((prev) =>
-      prev.includes(customerId)
+    setSelectedCustomers((prev) => {
+      const newSelection = prev.includes(customerId)
         ? prev.filter((id) => id !== customerId)
-        : [...prev, customerId]
-    );
+        : [...prev, customerId];
+
+      // Update slider to match manual selection
+      setCustomerSliderValue([newSelection.length]);
+      return newSelection;
+    });
   };
 
   const selectAllCustomers = () => {
-    setSelectedCustomers(customers.map((c) => c._id));
+    const allCustomers = filteredCustomers.map((c) => c._id);
+    setSelectedCustomers(allCustomers);
+    setCustomerSliderValue([allCustomers.length]);
   };
 
   const clearSelection = () => {
     setSelectedCustomers([]);
+    setCustomerSliderValue([0]);
   };
 
   const selectBySegment = (segment: string) => {
@@ -1014,9 +949,150 @@ export default function WhatsAppCampaignDialog({
     ]);
   };
 
+  const handleSliderChange = (value: number[]) => {
+    setCustomerSliderValue(value);
+    const numberOfCustomersToSelect = value[0];
+    const customersToSelect = filteredCustomers
+      .slice(0, numberOfCustomersToSelect)
+      .map((c) => c._id);
+    setSelectedCustomers(customersToSelect);
+  };
+
   const filteredCustomers = customers.filter(
     (customer) => !filterSegment || customer.customerSegment === filterSegment
   );
+
+  // Reset slider when filtered customers change
+  useEffect(() => {
+    if (customerSliderValue[0] > filteredCustomers.length) {
+      setCustomerSliderValue([filteredCustomers.length]);
+      setSelectedCustomers(
+        filteredCustomers.slice(0, filteredCustomers.length).map((c) => c._id)
+      );
+    }
+  }, [filteredCustomers.length, customerSliderValue, filteredCustomers]);
+
+  // Auto-generate media when step 3 is reached
+  const generateMediaWhenReady = useCallback(async () => {
+    let imagesToUse = pageImages;
+
+    // If no images are captured yet, capture them first
+    if (imagesToUse.length === 0) {
+      try {
+        setIsCapturingImages(true);
+        setCaptureProgress(0);
+
+        // Get all pages from the design
+        const pageKeys = Object.keys(pages || {});
+        const capturedImages: string[] = [];
+
+        console.log(`Starting to capture ${pageKeys.length} pages`);
+
+        // Store original active page to restore later
+        const originalActivePage = activePage;
+
+        for (let i = 0; i < pageKeys.length; i++) {
+          try {
+            console.log(`Processing page ${i + 1} of ${pageKeys.length}`);
+
+            // Set the active page
+            actions.setActivePage(i);
+
+            // Wait for the page to render
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+
+            // Get the page content element
+            const pageContentEl = document.querySelector(".page-content");
+
+            if (pageContentEl) {
+              // Generate image
+              const dataUrl = await domToPng(pageContentEl as HTMLElement, {
+                width: pageContentEl.clientWidth,
+                height: pageContentEl.clientHeight,
+                quality: 1.0,
+                scale: 1.0,
+              });
+
+              capturedImages.push(dataUrl);
+              console.log(`Captured image for page ${i + 1}`);
+            }
+          } catch (error) {
+            console.error(`Error processing page ${i}:`, error);
+          }
+        }
+
+        // Restore the original active page
+        actions.setActivePage(originalActivePage);
+
+        // Update state with captured images
+        setPageImages(capturedImages);
+        imagesToUse = capturedImages;
+
+        setIsCapturingImages(false);
+        setCaptureProgress(100);
+      } catch (error) {
+        console.error("Error capturing page images:", error);
+        setIsCapturingImages(false);
+        toast.error("Failed to capture page images");
+        return;
+      }
+    }
+
+    if (imagesToUse.length === 0) {
+      toast.error("No pages available to generate media");
+      return;
+    }
+
+    setIsGeneratingMedia(true);
+    setMediaGenerationProgress(0);
+
+    try {
+      // Update progress
+      setMediaGenerationProgress(20);
+
+      const result = await videoService.generateCampaignMedia(imagesToUse);
+
+      // Update progress
+      setMediaGenerationProgress(80);
+
+      // Update form data with the generated media URL
+      setFormData((prev) => ({
+        ...prev,
+        imageUrl: result.mediaUrl,
+      }));
+
+      setMediaGenerationProgress(100);
+      setMediaGenerated(true);
+
+      if (result.mediaType === "video") {
+        toast.success("Campaign video generated successfully!");
+      } else {
+        toast.success("Campaign image uploaded successfully!");
+      }
+    } catch (error) {
+      console.error("Error generating media:", error);
+      toast.error("Failed to generate campaign media");
+    } finally {
+      setIsGeneratingMedia(false);
+    }
+  }, [pageImages, pages, activePage, actions]);
+
+  useEffect(() => {
+    if (
+      step === 3 &&
+      !formData.imageUrl &&
+      !isGeneratingMedia &&
+      !mediaGenerated
+    ) {
+      generateMediaWhenReady();
+    }
+  }, [
+    step,
+    formData.imageUrl,
+    isGeneratingMedia,
+    mediaGenerated,
+    generateMediaWhenReady,
+  ]);
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -1302,6 +1378,38 @@ export default function WhatsAppCampaignDialog({
                     </div>
                   </div>
 
+                  {/* Customer Selection Slider */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-medium">
+                        Select Customers ({customerSliderValue[0]} of{" "}
+                        {filteredCustomers.length})
+                      </Label>
+                      <span className="text-xs text-gray-500">
+                        Use the slider to select customers
+                      </span>
+                    </div>
+                    <div className="px-3">
+                      {filteredCustomers.length > 0 ? (
+                        <SliderWithTicks
+                          value={customerSliderValue}
+                          onValueChange={handleSliderChange}
+                          max={filteredCustomers.length}
+                          min={0}
+                          step={1}
+                          className="w-full"
+                          showTicks={true}
+                        />
+                      ) : (
+                        <div className="text-center py-4 text-gray-500">
+                          <span className="text-sm">
+                            No customers available to select
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
                   <div className="flex gap-2 flex-wrap">
                     <Button
                       variant="outline"
@@ -1437,120 +1545,111 @@ export default function WhatsAppCampaignDialog({
                 </p>
               </div>
 
-              <div>
-                <Label>Campaign Image (Optional)</Label>
+              {/* Automatic Media Generation */}
+              <div className="max-w-[100%]">
+                <Label>Campaign Media</Label>
                 <div className="space-y-3">
-                  {/* Capture images button */}
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={capturePageImages}
-                      disabled={isCapturingImages}
-                    >
-                      {isCapturingImages ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Capturing Pages ({Math.round(captureProgress)}%)
-                        </>
-                      ) : (
-                        <>
-                          <Camera className="h-4 w-4 mr-2" />
-                          Capture Page Images
-                        </>
-                      )}
-                    </Button>
-                  </div>
-
-                  {/* Progress bar during capture */}
-                  {isCapturingImages && (
-                    <div className="w-full">
-                      <div className="bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  {isGeneratingMedia ? (
+                    <div className="border rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
+                      <div className="flex items-center gap-3 mb-3">
+                        <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                        <div>
+                          <div className="font-medium text-blue-900 dark:text-blue-100">
+                            {pageImages.length === 0
+                              ? "Capturing pages..."
+                              : pageImages.length === 1
+                              ? "Uploading image..."
+                              : "Creating video..."}
+                          </div>
+                          <div className="text-sm text-blue-700 dark:text-blue-300">
+                            {pageImages.length === 0
+                              ? "Preparing page content for capture"
+                              : pageImages.length === 1
+                              ? "Single page detected - uploading as image"
+                              : `Multiple pages detected (${pageImages.length}) - creating video slideshow`}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="w-full bg-blue-200 dark:bg-blue-800 rounded-full h-2">
                         <div
                           className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${captureProgress}%` }}
+                          style={{ width: `${mediaGenerationProgress}%` }}
                         />
                       </div>
+                      <div className="text-xs text-blue-600 dark:text-blue-400 mt-1 text-right">
+                        {mediaGenerationProgress.toFixed(0)}%
+                      </div>
                     </div>
-                  )}
+                  ) : formData.imageUrl ? (
+                    <div className="border rounded-lg p-4 bg-green-50 dark:bg-green-900/20">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                        <div>
+                          <div className="font-medium text-green-900 dark:text-green-100">
+                            {pageImages.length === 1
+                              ? "Campaign image ready"
+                              : "Campaign video ready"}
+                          </div>
+                          <div className="text-sm text-green-700 dark:text-green-300">
+                            {pageImages.length === 1
+                              ? "Single page uploaded as image to cloud storage"
+                              : `Video slideshow created from ${pageImages.length} pages and uploaded to cloud storage`}
+                          </div>
+                        </div>
+                      </div>
+                      {formData.imageUrl && (
+                        <div className="mt-3 space-y-3">
+                          <div>
+                            <Label className="text-xs">Media Preview:</Label>
+                            <div className="mt-2 border rounded-lg p-2 bg-white dark:bg-gray-800">
+                              {pageImages.length === 1 ? (
+                                <img
+                                  src={formData.imageUrl}
+                                  alt="Campaign image preview"
+                                  className="w-full max-w-xs mx-auto rounded-lg shadow-sm"
+                                  style={{
+                                    maxHeight: "200px",
 
-                  {/* Display captured images */}
-                  {pageImages.length > 0 && (
-                    <>
-                      <p className="text-sm text-gray-500 mt-2">
-                        Select an image to use in your WhatsApp campaign:
-                      </p>
-
-                      <div className="grid grid-cols-3 gap-2 mt-2">
-                        {pageImages.map((image, index) => (
-                          <div
-                            key={index}
-                            className={`relative border rounded-md overflow-hidden cursor-pointer transition-all ${
-                              selectedImageIndex === index
-                                ? "ring-2 ring-blue-500 border-blue-500"
-                                : "hover:border-gray-400"
-                            }`}
-                            onClick={() => setSelectedImageIndex(index)}
-                          >
-                            <img
-                              src={image}
-                              alt={`Page ${index + 1}`}
-                              className="w-full h-24 object-contain"
-                            />
-                            {selectedImageIndex === index && (
-                              <div className="absolute top-1 right-1 bg-blue-500 text-white rounded-full p-1">
-                                <CheckCircle className="h-3 w-3" />
-                              </div>
-                            )}
-                            <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-1 text-center">
-                              Page {index + 1}
+                                    objectFit: "contain",
+                                  }}
+                                />
+                              ) : (
+                                <video
+                                  src={formData.imageUrl}
+                                  controls
+                                  className="w-full max-w-sm mx-auto rounded-lg shadow-sm"
+                                  style={{ maxHeight: "200px" }}
+                                  preload="metadata"
+                                >
+                                  Your browser does not support the video tag.
+                                </video>
+                              )}
                             </div>
                           </div>
-                        ))}
-                      </div>
-
-                      {/* Upload selected image button */}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-2"
-                        onClick={uploadSelectedImage}
-                        disabled={selectedImageIndex === -1 || uploadingImage}
-                      >
-                        {uploadingImage ? (
-                          <>
-                            <Loader2 className="h-3 w-3 mr-2 animate-spin" />
-                            Uploading...
-                          </>
-                        ) : (
-                          <>
-                            <ImageIcon className="h-3 w-3 mr-2" />
-                            {formData.imageUrl
-                              ? "Change Selected Image"
-                              : "Use Selected Image"}
-                          </>
-                        )}
-                      </Button>
-
-                      {/* Manual URL input as fallback */}
-                      {formData.imageUrl && (
-                        <div className="mt-2">
-                          <Label htmlFor="imageUrl">Image URL</Label>
-                          <Input
-                            id="imageUrl"
-                            value={formData.imageUrl}
-                            onChange={(e) =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                imageUrl: e.target.value,
-                              }))
-                            }
-                            placeholder="Image URL"
-                            className="text-xs"
-                          />
+                          <div>
+                            <Label className="text-xs">Media URL:</Label>
+                            <div className="text-xs bg-white dark:bg-gray-800 p-2 rounded border truncate">
+                              {formData.imageUrl.slice(0, 90)}...
+                            </div>
+                          </div>
                         </div>
                       )}
-                    </>
+                    </div>
+                  ) : (
+                    <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800/20">
+                      <div className="flex items-center gap-3">
+                        <Loader2 className="h-5 w-5 animate-spin text-gray-600" />
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-gray-100">
+                            Preparing media generation...
+                          </div>
+                          <div className="text-sm text-gray-700 dark:text-gray-300">
+                            Campaign media will be automatically generated from
+                            your design pages
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
@@ -1590,44 +1689,18 @@ export default function WhatsAppCampaignDialog({
                       {formData.message.length} characters
                     </span>
                   </div>
-                </div>
-              </div>
-
-              {formData.imageUrl ? (
-                <div className="border rounded-lg p-3">
-                  <p className="text-sm font-medium mb-2">
-                    Image Preview (From URL):
-                  </p>
-                  <img
-                    src={formData.imageUrl}
-                    alt="Campaign"
-                    className="max-w-full h-32 object-cover rounded"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                      toast.error("Failed to load image from URL");
-                    }}
-                  />
-                </div>
-              ) : selectedImageIndex !== -1 &&
-                pageImages[selectedImageIndex] ? (
-                <div className="border rounded-lg p-3">
-                  <p className="text-sm font-medium mb-2">
-                    Selected Image Preview (Not Uploaded Yet):
-                  </p>
-                  <div className="flex items-center">
-                    <img
-                      src={pageImages[selectedImageIndex]}
-                      alt={`Page ${selectedImageIndex + 1}`}
-                      className="max-w-full h-32 object-contain rounded"
-                    />
-                    <div className="ml-3 text-sm text-orange-600">
-                      <AlertCircle className="h-4 w-4 inline-block mr-1" />
-                      Click "Use Selected Image" to upload and include this
-                      image
-                    </div>
+                  <div className="flex justify-between">
+                    <span>Media Type:</span>
+                    <span className="font-medium">
+                      {formData.imageUrl
+                        ? pageImages.length === 1
+                          ? "Image"
+                          : "Video"
+                        : "Pending"}
+                    </span>
                   </div>
                 </div>
-              ) : null}
+              </div>
             </div>
           )}
         </div>
