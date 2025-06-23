@@ -30,9 +30,11 @@ export type CustomCanvaEditorProps = {
   isKiosk?: boolean;
   isLiveMenu?: boolean;
   isCoupon?: boolean;
+  isInCouponTemplateMode?: boolean;
   onShare?: () => void;
   onSaveAsTemplate?: () => void;
   onDownload?: () => void;
+  onBulkGenerate?: () => void;
 };
 
 const CustomCanvaEditor: FC<PropsWithChildren<CustomCanvaEditorProps>> = ({
@@ -44,9 +46,11 @@ const CustomCanvaEditor: FC<PropsWithChildren<CustomCanvaEditorProps>> = ({
   isKiosk = false,
   isLiveMenu = false,
   isCoupon = false,
+  isInCouponTemplateMode = false,
   onShare,
   onSaveAsTemplate: _onSaveAsTemplate, // Rename to avoid unused variable warning
   onDownload,
+  onBulkGenerate,
 }) => {
   const version = "1.0.69";
   const { getState, actions, query } = useEditorStore({ isAdmin });
@@ -111,8 +115,10 @@ const CustomCanvaEditor: FC<PropsWithChildren<CustomCanvaEditorProps>> = ({
           isKiosk={isKiosk}
           isLiveMenu={isLiveMenu}
           isCoupon={isCoupon}
+          isInCouponTemplateMode={isInCouponTemplateMode}
           onShare={onShare}
           onDownload={onDownload}
+          onBulkGenerate={onBulkGenerate}
         />
 
         {/* Main Content Area */}

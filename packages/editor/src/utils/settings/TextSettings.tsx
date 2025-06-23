@@ -8,7 +8,7 @@ import React, {
   useState,
 } from "react";
 import { Tooltip as ReactTooltip } from "canva-editor/tooltip";
-import FontSidebar from "./sidebar/FontSidebar";
+import FontSidebar from "./sidebar/FontSidebarBulk";
 import TextEffectSidebar from "./sidebar/TextEffectSidebar";
 import ColorSidebar from "./sidebar/ColorSidebar";
 import { filter, isEqual, throttle, uniq, uniqBy } from "lodash";

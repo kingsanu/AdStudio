@@ -1,18 +1,15 @@
 import { useSelectedLayers, useEditor } from "canva-editor/hooks";
 import { boundingRect } from "canva-editor/utils/2d/boundingRect";
-import { isGroupLayer, isImageLayer } from "canva-editor/utils/layer/layers";
-import React, { Fragment, useContext, useMemo, useRef, useState } from "react";
+import { isGroupLayer } from "canva-editor/utils/layer/layers";
+import React, { Fragment, useContext, useMemo, useRef } from "react";
 import { duplicate } from "canva-editor/utils/menu/actions/duplicate";
 import { PageContext } from "../core/PageContext";
 import DuplicateIcon from "canva-editor/icons/DuplicateIcon";
 import TrashIcon from "canva-editor/icons/TrashIcon";
 import MoreHorizIcon from "canva-editor/icons/MoreHorizIcon";
 import LockIcon from "canva-editor/icons/LockIcon";
-import RemoveBackgroundIcon from "canva-editor/icons/RemoveBackgroundIcon";
 import AdminLockIcon from "canva-editor/icons/AdminLockIcon";
 import AdminUnlockIcon from "canva-editor/icons/AdminUnlockIcon";
-import axios from "axios";
-import { REMOVE_BACKGROUND_ENDPOINT } from "canva-editor/utils/constants/api";
 import { toast } from "sonner";
 // Import Shadcn tooltip component
 import { Tooltip } from "@/components/ui/tooltip";
@@ -21,7 +18,6 @@ const Toolbar: React.FC = () => {
   const { pageIndex } = useContext(PageContext);
   const toolbarRef = useRef<HTMLDivElement>(null);
   const { selectedLayerIds, selectedLayers } = useSelectedLayers();
-  const [isProcessing, setIsProcessing] = useState(false);
   const {
     actions,
     state,
@@ -87,75 +83,11 @@ const Toolbar: React.FC = () => {
       actions.ungroup(selectedLayerIds[0]);
     }
   };
-
   const handleGroup = () => {
     actions.group(selectedLayerIds);
   };
 
-  const handleRemoveBackground = async () => {
-    if (selectedLayerIds.length !== 1) return;
-
-    const selectedLayer = selectedLayers[0];
-    if (!isImageLayer(selectedLayer)) return;
-
-    try {
-      setIsProcessing(true);
-
-      const imageUrl = selectedLayer.data.props.image.url;
-      const layerId = selectedLayerIds[0];
-
-      // Show a more detailed loading toast
-      toast.loading("Processing image...", {
-        description:
-          "Removing background using AI. This may take a few seconds.",
-        duration: 60000, // Long duration as we'll dismiss it manually
-      });
-
-      const response = await axios.post(REMOVE_BACKGROUND_ENDPOINT, {
-        imageUrl,
-      });
-
-      if (response.data && response.data.processedImage) {
-        // Get the processed image URL
-        const processedImageUrl = response.data.processedImage;
-
-        // Create a new image element to get dimensions
-        const img = new Image();
-        img.onload = () => {
-          actions.history.merge().setProp(pageIndex, layerId, {
-            image: {
-              ...selectedLayer.data.props.image,
-              url: processedImageUrl,
-              thumb: processedImageUrl,
-            },
-          });
-
-          toast.dismiss();
-          toast.success("Background removed", {
-            description: "The image has been processed successfully.",
-          });
-        };
-
-        img.onerror = () => {
-          toast.dismiss();
-          toast.error("Error loading processed image", {
-            description: "The image was processed but could not be loaded.",
-          });
-        };
-
-        img.src = processedImageUrl;
-      }
-    } catch (error) {
-      console.error("Error removing background:", error);
-      toast.dismiss();
-      toast.error("Error removing background", {
-        description:
-          "There was an error processing your image. Please try again.",
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  }; // Don't render toolbar during drag/resize/rotate operations
+  // Don't render toolbar during drag/resize/rotate operations
   if (
     isDragging ||
     isResizing ||
@@ -299,34 +231,6 @@ const Toolbar: React.FC = () => {
                   <TrashIcon />
                 </div>
               </Tooltip>
-
-              {selectedLayerIds.length === 1 &&
-                isImageLayer(selectedLayers[0]) && (
-                  <Tooltip content="Remove Background" delayDuration={300}>
-                    <div
-                      css={{
-                        width: 32,
-                        height: 32,
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        cursor: isProcessing ? "not-allowed" : "pointer",
-                        fontSize: 24,
-                        opacity: isProcessing ? 0.5 : 1,
-                        ":hover": {
-                          backgroundColor: isProcessing
-                            ? undefined
-                            : "rgba(64,87,109,.07)",
-                        },
-                      }}
-                      onClick={
-                        isProcessing ? undefined : handleRemoveBackground
-                      }
-                    >
-                      <RemoveBackgroundIcon />
-                    </div>
-                  </Tooltip>
-                )}
 
               <Tooltip content="More Options" delayDuration={300}>
                 <div

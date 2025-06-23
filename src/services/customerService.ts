@@ -163,14 +163,34 @@ export const customerService = {
   // Get customers by outlet
   async getCustomersByOutlet(
     outletId: string,
-    options: { segment?: string; minPayments?: number } = {}
-  ): Promise<{ success: boolean; data: Customer[] }> {
+    options: {
+      segment?: string;
+      minPayments?: number;
+      page?: number;
+      limit?: number;
+      search?: string;
+    } = {}
+  ): Promise<{
+    success: boolean;
+    data: Customer[];
+    pagination?: {
+      page: number;
+      limit: number;
+      total: number;
+      pages: number;
+      hasNextPage: boolean;
+      hasPrevPage: boolean;
+    };
+  }> {
     try {
       const params = new URLSearchParams();
 
       if (options.segment) params.append("segment", options.segment);
       if (options.minPayments)
         params.append("minPayments", options.minPayments.toString());
+      if (options.page) params.append("page", options.page.toString());
+      if (options.limit) params.append("limit", options.limit.toString());
+      if (options.search) params.append("search", options.search);
 
       const response = await axios.get(
         `${API_BASE_URL}/customers/outlet/${outletId}?${params.toString()}`

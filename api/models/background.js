@@ -12,6 +12,10 @@ const backgroundSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    trend: {
+      type: Boolean,
+      default: false,
+    }  
   },
   {
     timestamps: true,

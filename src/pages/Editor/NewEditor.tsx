@@ -18,6 +18,7 @@ import {
 } from "canva-editor/utils/constants/api";
 import CustomCanvaEditor from "@/components/editor/CustomCanvaEditor";
 import CouponCampaignDialog from "@/components/editor/CouponCampaignDialog";
+import CouponVerifyDialog from "@/components/editor/CouponVerifyDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import Cookies from "js-cookie";
 
@@ -37,6 +38,9 @@ const NewEditor = () => {
   const [isCoupon, setIsCoupon] = useState(false);
   const [showCouponCampaignDialog, setShowCouponCampaignDialog] =
     useState(false);
+  const [couponCampaignData, setCouponCampaignData] = useState(null);
+  const [isInCouponTemplateMode, setIsInCouponTemplateMode] = useState(false);
+  const [showCouponVerifyDialog, setShowCouponVerifyDialog] = useState(false);
 
   // Check if user is admin
   useEffect(() => {
@@ -1313,18 +1317,53 @@ const NewEditor = () => {
   };
 
   // Handle coupon campaign dialog success
-  const handleCouponCampaignSuccess = (campaignId: string) => {
-    console.log("Coupon campaign created:", campaignId);
-    setShowCouponCampaignDialog(false);
-    // You can store the campaign ID for later use
-    localStorage.setItem("currentCouponCampaignId", campaignId);
+  const handleCouponCampaignSuccess = (result: string | { type: 'template-edit-mode'; data: any }) => {
+    if (typeof result === 'object' && result.type === 'template-edit-mode') {
+      console.log("Entering template edit mode for coupon campaign");
+      setIsInCouponTemplateMode(true);
+      setCouponCampaignData(result.data);
+      setShowCouponCampaignDialog(false);
+    } else {
+      console.log("Coupon campaign created:", result);
+      setShowCouponCampaignDialog(false);
+      if (typeof result === 'string') {
+        localStorage.setItem("currentCouponCampaignId", result);
+      }
+    }
   };
 
   // Handle coupon campaign dialog close
   const handleCouponCampaignClose = () => {
-    setShowCouponCampaignDialog(false);
-    // Optionally redirect back to dashboard if user cancels
-    // navigate("/dashboard");
+    // Don't allow closing the dialog - user must complete the form
+    // Show a message to inform the user
+    toast.info("Please complete the coupon campaign details to continue.");
+    
+    // The dialog will only close when handleCouponCampaignSuccess is called
+    // with valid data, or when the user navigates away
+    return false;
+  };
+
+  // Handle bulk generate from editor header
+  const handleBulkGenerateFromEditor = () => {
+    if (isInCouponTemplateMode && couponCampaignData) {
+      setShowCouponVerifyDialog(true);
+    }
+  };
+
+  // Handle coupon verify dialog success
+  const handleCouponVerifySuccess = (campaignId: string) => {
+    console.log("Coupon campaign created and PDF generated:", campaignId);
+    setShowCouponVerifyDialog(false);
+    setIsInCouponTemplateMode(false);
+    setCouponCampaignData(null);
+    localStorage.setItem("currentCouponCampaignId", campaignId);
+    // Optionally redirect to dashboard or show success message
+    toast.success("Coupon campaign created successfully!");
+  };
+
+  // Handle coupon verify dialog close
+  const handleCouponVerifyClose = () => {
+    setShowCouponVerifyDialog(false);
   };
 
   // Handle back button
@@ -1433,6 +1472,8 @@ const NewEditor = () => {
         isKiosk={isKiosk}
         isLiveMenu={isLiveMenu}
         isCoupon={isCoupon}
+        isInCouponTemplateMode={isInCouponTemplateMode}
+        onBulkGenerate={handleBulkGenerateFromEditor}
         key={location.search} // Force re-render when template changes
       />
 
@@ -1456,11 +1497,23 @@ const NewEditor = () => {
       {/* Coupon Campaign Dialog */}
       <CouponCampaignDialog
         open={showCouponCampaignDialog}
-        onClose={() => setShowCouponCampaignDialog(false)}
+        onClose={handleCouponCampaignClose}
         onSuccess={handleCouponCampaignSuccess}
         templateData={serializeTemplateData(templateData)}
         templateImageUrl={undefined} // We'll need to get this from the editor if needed
       />
+
+      {/* Coupon Verify Dialog */}
+      {couponCampaignData && (
+        <CouponVerifyDialog
+          open={showCouponVerifyDialog}
+          onClose={handleCouponVerifyClose}
+          onSuccess={handleCouponVerifySuccess}
+          campaignData={couponCampaignData}
+          templateData={serializeTemplateData(templateData)}
+          templateImageUrl={undefined}
+        />
+      )}
 
       {/* Note: CSS for horizontal scrollbars is in styles/editor.css */}
     </div>

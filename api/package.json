@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "@ffprobe-installer/ffprobe": "^2.1.2",
     "@remotion/bundler": "^4.0.295",
     "@remotion/cli": "^4.0.295",
     "@remotion/core": "^1.0.0-y.46",
@@ -26,6 +27,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "sharp": "^0.34.2",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "videoshow": "^0.1.12"
   }
 }

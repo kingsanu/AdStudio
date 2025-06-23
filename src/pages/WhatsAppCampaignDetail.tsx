@@ -18,6 +18,7 @@ import {
   FileText,
   Phone,
   Image as ImageIcon,
+  Video,
   Download,
   Repeat,
 } from "lucide-react";
@@ -47,6 +48,76 @@ export default function WhatsAppCampaignDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  // Helper function to determine media type
+  const getMediaType = (url: string): 'image' | 'video' | 'unknown' => {
+    if (!url) return 'unknown';
+    
+    const videoExtensions = ['.mp4', '.mov', '.avi', '.mkv', '.webm', '.ogg', '.3gp', '.flv', '.wmv', '.m4v'];
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp', '.tiff', '.ico'];
+    
+    const urlLower = url.toLowerCase();
+    
+    // Check by file extension
+    if (videoExtensions.some(ext => urlLower.includes(ext))) {
+      return 'video';
+    }
+    
+    if (imageExtensions.some(ext => urlLower.includes(ext))) {
+      return 'image';
+    }
+    
+    // Check by URL patterns (useful for dynamic URLs)
+    if (urlLower.includes('video') || urlLower.includes('mp4') || urlLower.includes('webm')) {
+      return 'video';
+    }
+    
+    if (urlLower.includes('image') || urlLower.includes('img') || urlLower.includes('photo')) {
+      return 'image';
+    }
+    
+    // Default to image for backward compatibility
+    return 'image';
+  };
+
+  // Helper function to get media icon
+  const getMediaIcon = (mediaType: 'image' | 'video' | 'unknown') => {
+    switch (mediaType) {
+      case 'video':
+        return <Video className="h-5 w-5 text-white" />;
+      case 'image':
+        return <ImageIcon className="h-5 w-5 text-white" />;
+      default:
+        return <ImageIcon className="h-5 w-5 text-white" />;
+    }
+  };
+
+  // Helper function to get media title
+  const getMediaTitle = (mediaType: 'image' | 'video' | 'unknown') => {
+    switch (mediaType) {
+      case 'video':
+        return 'Campaign Video';
+      case 'image':
+        return 'Campaign Image';
+      default:
+        return 'Campaign Media';
+    }
+  };  // Helper function to determine media type from campaign data
+  const getCampaignMediaType = (campaign: Campaign): 'image' | 'video' | 'unknown' => {
+    if (!campaign.imageUrl) return 'unknown';
+    return getMediaType(campaign.imageUrl);
+  };
+
+  // Helper function to get download text
+  const getDownloadText = (mediaType: 'image' | 'video' | 'unknown') => {
+    switch (mediaType) {
+      case 'video':
+        return 'Download Video';
+      case 'image':
+        return 'Download Image';
+      default:
+        return 'Download Media';
+    }
+  };
 
   // Fetch campaign data
   const fetchCampaign = useCallback(
@@ -678,9 +749,7 @@ export default function WhatsAppCampaignDetail() {
                         </p>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Media Content (if any) */}
+                  </div>                  {/* Media Content (if any) */}
                   {campaign.imageUrl && (
                     <div
                       className="p-6 border"
@@ -697,10 +766,10 @@ export default function WhatsAppCampaignDetail() {
                             backgroundColor: "rgba(255, 255, 255, 0.2)",
                           }}
                         >
-                          <ImageIcon className="h-5 w-5 text-white" />
+                          {getMediaIcon(getCampaignMediaType(campaign))}
                         </div>
                         <h3 className="font-semibold text-lg text-white">
-                          Campaign Media
+                          {getMediaTitle(getCampaignMediaType(campaign))}
                         </h3>
                       </div>
 
@@ -711,17 +780,26 @@ export default function WhatsAppCampaignDetail() {
                           borderRadius: BORDER_RADIUS.lg,
                           boxShadow: SHADOWS.md,
                         }}
-                      >
-                        <div className="relative overflow-hidden rounded-md max-w-lg mx-auto">
-                          <img
-                            src={campaign.imageUrl}
-                            alt="Campaign media"
-                            className="w-full h-auto max-h-[300px] object-contain"
-                          />
+                      >                        <div className="relative overflow-hidden rounded-md max-w-lg mx-auto">                          {getCampaignMediaType(campaign) === 'video' ? (
+                            <video
+                              src={campaign.imageUrl}
+                              controls
+                              preload="metadata"
+                              className="w-full h-auto max-h-[300px] object-contain"
+                              style={{ borderRadius: BORDER_RADIUS.md }}                            >
+                              Your browser does not support the video tag.
+                            </video>
+                          ) : (                            <img
+                              src={campaign.imageUrl}
+                              alt="Campaign media"
+                              className="w-full h-auto max-h-[300px] object-contain"
+                              style={{ borderRadius: BORDER_RADIUS.md }}
+                              loading="lazy"
+                            />
+                          )}
                         </div>
 
-                        <div className="mt-3 flex justify-end">
-                          <a
+                        <div className="mt-3 flex justify-end">                          <a
                             href={campaign.imageUrl}
                             target="_blank"
                             rel="noopener noreferrer"
@@ -733,7 +811,7 @@ export default function WhatsAppCampaignDetail() {
                             }}
                           >
                             <Download className="h-3.5 w-3.5" />
-                            Download Image
+                            {getDownloadText(getCampaignMediaType(campaign))}
                           </a>
                         </div>
                       </div>

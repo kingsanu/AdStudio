@@ -2,11 +2,15 @@ const express = require("express");
 const router = express.Router();
 const {
   getFonts,
+  getAllFonts,
   getFontByFamily,
   createFont,
   updateFont,
   deleteFont,
 } = require("../controllers/fontController");
+
+// Get all fonts at once (no pagination) - cached
+router.get("/all", getAllFonts);
 
 // Get all fonts with pagination and filtering
 router.get("/", getFonts);

@@ -6,6 +6,17 @@ const router = express.Router();
 const mediaController = require("../controllers/mediaController");
 
 // Route to serve generated media files (videos/images)
+// Route to get backgrounds
+router.get("/backgrounds", mediaController.getBackgrounds);
+
+// Route to get illustrations
+router.get("/illustrations", mediaController.getIllustrations);
+
+// Route to get icons
+router.get("/icons", mediaController.getIcons);
+
+// Route to get 3D images
+router.get("/3dimages", mediaController.getThreeDImages);
 router.get("/:filename", (req, res) => {
   const filename = req.params.filename;
   const filePath = path.join(__dirname, "..", "temp", "output", filename);
@@ -30,16 +41,5 @@ router.get("/:filename", (req, res) => {
   });
 });
 
-// Route to get backgrounds
-router.get("/backgrounds", mediaController.getBackgrounds);
-
-// Route to get illustrations
-router.get("/illustrations", mediaController.getIllustrations);
-
-// Route to get icons
-router.get("/icons", mediaController.getIcons);
-
-// Route to get 3D images
-router.get("/3dimages", mediaController.getThreeDImages);
 
 module.exports = router;

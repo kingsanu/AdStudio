@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Direction } from "./resize";
 import {
   BoxData,
@@ -35,6 +36,7 @@ export type ImageEditorData = {
 };
 export type SidebarType =
   | "TEXT_EFFECT"
+  | "IMAGE_EFFECT"
   | "FONT_FAMILY"
   | "LAYER_MANAGEMENT"
   | "CHOOSING_COLOR";
@@ -90,9 +92,9 @@ export interface EditorState {
     cursor?: CursorPosition;
   };
   animations?: AnimationState;
-  isPreviewMode: boolean;
-  downloadPNGCmd: -1 | 0 | 1;
+  isPreviewMode: boolean;  downloadPNGCmd: -1 | 0 | 1;
   downloadPDFCmd: -1 | 0 | 1;
+  captureCmd: -1 | 0 | 1;
   saving: boolean;
   githubLink: string;
   gumroadLink: string;

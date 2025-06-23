@@ -36,7 +36,6 @@ export const deserializeLayer = <P extends LayerComponentProps>(
 };
 
 const deserializeComponent = (data: SerializedLayer): ReactElement => {
-  console.log(data);
   const {
     type: { resolvedName },
     props,

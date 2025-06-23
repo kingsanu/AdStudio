@@ -1287,12 +1287,14 @@ export const ActionMethods = (state: EditorState) => {
       }
 
       state.imageEditor = undefined;
-    },
-    fireDownloadPNGCmd(cmdEnum: -1 | 0 | 1) {
+    },    fireDownloadPNGCmd(cmdEnum: -1 | 0 | 1) {
       state.downloadPNGCmd = cmdEnum;
     },
     fireDownloadPDFCmd(cmdEnum: -1 | 0) {
       state.downloadPDFCmd = cmdEnum;
+    },
+    fireCaptureCmd(cmdEnum: -1 | 0 | 1) {
+      state.captureCmd = cmdEnum;
     },
     goToGithubPage() {
       window?.open(state.githubLink, "_blank")?.focus();

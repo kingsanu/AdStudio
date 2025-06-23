@@ -1,4 +1,5 @@
 const Font = require("../models/font");
+const fontCache = require("../utils/fontCache");
 
 /**
  * Paginate array with filter functionality
@@ -29,11 +30,68 @@ function paginateData(data, size = 30, index = 0, keyword = "") {
 }
 
 /**
- * Get all fonts with pagination and filtering
+ * Get all fonts at once (no pagination)
+ */
+const getAllFonts = async (req, res) => {
+  try {
+    // Check cache first
+    const cachedResult = fontCache.getAllFonts();
+    if (cachedResult) {
+      console.log(`[FontController] Serving all fonts from cache (${cachedResult.length} fonts)`);
+      return res.json({
+        data: cachedResult,
+        total: cachedResult.length,
+        cached: true,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    console.log(`[FontController] Fetching all fonts from database`);
+    const fonts = await Font.find({ isActive: true })
+      .select("family styles")
+      .sort("family")
+      .lean(); // Use lean() for better performance
+
+    // Transform data to match the expected format
+    const transformedFonts = fonts.map((font) => ({
+      family: font.family,
+      styles: font.styles.map((style) => ({
+        name: style.name,
+        style: style.style,
+        url: style.url,
+      })),
+    }));
+
+    // Cache all fonts for 3 days
+    fontCache.setAllFonts(transformedFonts);
+    console.log(`[FontController] Cached ${transformedFonts.length} fonts for 3 days`);
+
+    res.json({
+      data: transformedFonts,
+      total: transformedFonts.length,
+      cached: false,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error("Error fetching all fonts:", error);
+    res.status(500).json({ error: "Failed to fetch fonts" });
+  }
+};
+
+/**
+ * Get fonts with pagination and filtering (legacy endpoint)
  */
 const getFonts = async (req, res) => {
   try {
     const { ps = 30, pi = 0, kw = "" } = req.query;
+
+    // Check cache first
+    const cacheQuery = { ps, pi, kw };
+    const cachedResult = fontCache.getFontList(cacheQuery);
+    if (cachedResult) {
+      console.log(`[FontController] Serving fonts from cache for query:`, cacheQuery);
+      return res.json(cachedResult);
+    }
 
     // Build query for filtering
     let query = { isActive: true };
@@ -45,6 +103,7 @@ const getFonts = async (req, res) => {
       ];
     }
 
+    console.log(`[FontController] Fetching fonts from database for query:`, cacheQuery);
     const fonts = await Font.find(query)
       .select("family styles")
       .sort("family")
@@ -61,6 +120,11 @@ const getFonts = async (req, res) => {
     }));
 
     const result = paginateData(transformedFonts, +ps, +pi, kw);
+    
+    // Cache the result
+    fontCache.setFontList(cacheQuery, result);
+    console.log(`[FontController] Cached fonts result for query:`, cacheQuery);
+    
     res.json(result);
   } catch (error) {
     console.error("Error fetching fonts:", error);
@@ -75,6 +139,14 @@ const getFontByFamily = async (req, res) => {
   try {
     const { family } = req.params;
 
+    // Check cache first
+    const cachedResult = fontCache.getFontFamily(family);
+    if (cachedResult) {
+      console.log(`[FontController] Serving font family '${family}' from cache`);
+      return res.json(cachedResult);
+    }
+
+    console.log(`[FontController] Fetching font family '${family}' from database`);
     const font = await Font.findOne({
       family: { $regex: new RegExp(`^${family}$`, "i") },
       isActive: true,
@@ -92,6 +164,10 @@ const getFontByFamily = async (req, res) => {
         url: style.url,
       })),
     };
+
+    // Cache the result
+    fontCache.setFontFamily(family, transformedFont);
+    console.log(`[FontController] Cached font family '${family}'`);
 
     res.json(transformedFont);
   } catch (error) {
@@ -183,6 +259,7 @@ const deleteFont = async (req, res) => {
 
 module.exports = {
   getFonts,
+  getAllFonts,
   getFontByFamily,
   createFont,
   updateFont,

@@ -34,13 +34,23 @@ const BulkCouponDialog: React.FC<BulkCouponDialogProps> = ({
     }
   }, [open, isCoupon, campaignCreated]);
 
-  const handleCampaignSuccess = (campaignId: string) => {
-    console.log("Campaign created:", campaignId);
-    setCampaignCreated(true);
-    setShowCampaignDialog(false);
-    toast.success(
-      "Coupon campaign created! Now you can generate the bulk PDF."
-    );
+  const handleCampaignSuccess = (result: string | { type: 'template-edit-mode'; data: any }) => {
+    if (typeof result === 'string') {
+      // Campaign ID returned - campaign was created successfully
+      console.log("Campaign created:", result);
+      setCampaignCreated(true);
+      setShowCampaignDialog(false);
+      toast.success(
+        "Coupon campaign created! Now you can generate the bulk PDF."
+      );
+    } else if (result.type === 'template-edit-mode') {
+      // User wants to edit template first
+      console.log("Template edit mode requested:", result.data);
+      setShowCampaignDialog(false);
+      // You might want to handle template editing here if needed
+      // For now, we'll just close the dialog
+      onClose();
+    }
   };
 
   const handleCampaignClose = () => {

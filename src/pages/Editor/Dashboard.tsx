@@ -40,7 +40,6 @@ import {
 } from "@/services/couponCampaignService";
 import { kioskService } from "@/services/kioskService";
 import { liveMenuService } from "@/services/liveMenuService";
-import CustomSizeDialog from "@/components/CustomSizeDialog";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import {
   COLORS,
@@ -55,11 +54,11 @@ import { TemplateCard } from "@/components/dashboard/TemplateCard";
 import { DesignTemplateCard } from "@/components/dashboard/DesignTemplateCard";
 import { ScrollableSection } from "@/components/dashboard/ScrollableSection";
 import { SectionHeader } from "@/components/dashboard/SectionHeader";
+import CustomSizeDialog from "@/components/CustomSizeDialog";
 
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [showCustomSizeDialog, setShowCustomSizeDialog] = useState(false);
   const [publicTemplates, setPublicTemplates] = useState<Template[]>([]);
   const [userTemplates, setUserTemplates] = useState<Template[]>([]);
   const [whatsappCampaigns, setWhatsappCampaigns] = useState<Campaign[]>([]);
@@ -67,6 +66,7 @@ export default function Dashboard() {
   const [isLoadingCoupons, setIsLoadingCoupons] = useState(true);
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(true);
   const [isLoadingUserTemplates, setIsLoadingUserTemplates] = useState(true);
+  const [showCustomSizeDialog, setShowCustomSizeDialog] = useState(false);
 
   const templatesScrollRef = useRef<HTMLDivElement>(null);
   const lastPublicTemplateRef = useRef<HTMLDivElement>(null);
@@ -138,6 +138,7 @@ export default function Dashboard() {
       textColor: "text-yellow-600 dark:text-yellow-400",
       dimensions: { width: 1200, height: 628 },
       backgroundColor: "rgb(254, 252, 232)",
+      isCoupon: true,
     },
     {
       id: 6,
@@ -495,7 +496,9 @@ export default function Dashboard() {
               </div>
 
               {/* Quick action buttons */}
-              <div className="flex flex-wrap gap-3 lg:ml-auto">
+              <motion.div
+                className="flex flex-wrap gap-3 lg:ml-auto"
+              >
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -527,7 +530,7 @@ export default function Dashboard() {
                     Start Creating
                   </Button>
                 </motion.div>
-              </div>
+              </motion.div>
             </motion.div>
             {/* Enhanced Quick Stats */}{" "}
             <motion.div
@@ -652,7 +655,14 @@ export default function Dashboard() {
                     handleKioskClick();
                   } else if (template.isLiveMenu) {
                     handleLiveMenuClick();
-                  } else {
+                  }else if(template.isCoupon){
+                     navigate(
+                      `/editor?width=${template.dimensions.width}&height=${
+                        template.dimensions.height
+                      }&bgColor=${encodeURIComponent(template.backgroundColor)}&isCoupon=${true}`
+                    )
+                  }
+                   else {
                     navigate(
                       `/editor?width=${template.dimensions.width}&height=${
                         template.dimensions.height
@@ -1454,51 +1464,7 @@ export default function Dashboard() {
           </div>
         </motion.div>
       </div>
-      {/* Custom Size Dialog */}
-      {showCustomSizeDialog && (
-        <CustomSizeDialog
-          open={showCustomSizeDialog}
-          onClose={() => setShowCustomSizeDialog(false)}
-        />
-      )}{" "}
-      {/* Enhanced Floating Action Button */}
-      <motion.div
-        className="fixed bottom-8 right-8 z-50"
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      >
-        <div className="relative group">
-          {/* Glow effect */}
-          <div
-            className="absolute inset-0 rounded-full blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-300"
-            style={{
-              background: COLORS.gradients.primary,
-              transform: "scale(1.2)",
-            }}
-          />
-
-          {/* Main button */}
-          <Button
-            size="lg"
-            className="relative w-16 h-16 rounded-full shadow-2xl border-0 text-white cursor-pointer group-hover:shadow-3xl transition-all duration-300"
-            style={{
-              background: COLORS.gradients.primary,
-              boxShadow:
-                "0 20px 40px rgba(147, 51, 234, 0.3), 0 8px 16px rgba(147, 51, 234, 0.2)",
-            }}
-            onClick={() => setShowCustomSizeDialog(true)}
-          >
-            <Sparkles className="h-7 w-7 transition-transform duration-300 group-hover:scale-110" />
-          </Button>
-
-          {/* Fixed Tooltip positioning */}
-          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 px-3 py-2 bg-black/90 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap pointer-events-none">
-            Create New Design
-            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-black/90" />
-          </div>
-        </div>
-      </motion.div>
+      <CustomSizeDialog open={showCustomSizeDialog} onClose={() => setShowCustomSizeDialog(false)} />
     </DashboardLayout>
   );
 }

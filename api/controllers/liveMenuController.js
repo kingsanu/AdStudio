@@ -97,7 +97,7 @@ const liveMenuController = {
     }
   },
 
-  // Update user's live menu
+  // Update or create user's live menu (upsert logic)
   updateUserLiveMenu: async (req, res) => {
     try {
       const {
@@ -121,29 +121,45 @@ const liveMenuController = {
         userId = userId.split("_").pop() || userId;
       }
 
-      // Find user's live menu
-      const liveMenu = await LiveMenu.findOne({ userId });
+      // Find user's live menu or create if doesn't exist
+      let liveMenu = await LiveMenu.findOne({ userId });
 
       if (!liveMenu) {
-        return res.status(404).json({
-          message: "User live menu not found",
+        // Create new live menu if not found
+        liveMenu = new LiveMenu({
+          title: title || "Live Menu Display",
+          description: description || "Restaurant live menu for TV display",
+          userId,
+          templateUrl,
+          templateData,
+          pageImages: [],
+          tags: [],
+          isPublic: false,
         });
+
+        console.log(`Created new live menu for user: ${userId}`);
+      } else {
+        // Update existing live menu
+        if (templateUrl !== undefined) liveMenu.templateUrl = templateUrl;
+        if (templateData !== undefined) liveMenu.templateData = templateData;
+        if (title !== undefined) liveMenu.title = title;
+        if (description !== undefined) liveMenu.description = description;
+        if (pageImages !== undefined) {
+          liveMenu.pageImages = pageImages;
+        } else {
+          // Clear existing page images when updating template - they will be re-uploaded
+          liveMenu.pageImages = [];
+        }
+        liveMenu.updatedAt = new Date();
+
+        console.log(`Updated existing live menu for user: ${userId}`);
       }
 
-      // Update fields if provided
-      if (templateUrl !== undefined) liveMenu.templateUrl = templateUrl;
-      if (templateData !== undefined) liveMenu.templateData = templateData;
-      if (title !== undefined) liveMenu.title = title;
-      if (description !== undefined) liveMenu.description = description;
-      if (pageImages !== undefined) liveMenu.pageImages = pageImages;
-
-      // Save the updated live menu
+      // Save the live menu
       await liveMenu.save();
 
-      console.log(`Updated live menu for user: ${userId}`);
-
       res.status(200).json({
-        message: "Live menu updated successfully",
+        message: liveMenu.isNew ? "Live menu created successfully" : "Live menu updated successfully",
         liveMenu: {
           id: liveMenu._id.toString(),
           title: liveMenu.title,
@@ -158,9 +174,9 @@ const liveMenuController = {
         },
       });
     } catch (error) {
-      console.error("Error updating user live menu:", error);
+      console.error("Error updating/creating user live menu:", error);
       res.status(500).json({
-        message: "Failed to update user live menu",
+        message: "Failed to update or create user live menu",
         error: error.message,
       });
     }
@@ -280,8 +296,8 @@ const liveMenuController = {
       const imagePath = path.join(tempDir, filename);
       fs.writeFileSync(imagePath, imageBuffer);
 
-      // Create cloud filename with live menu ID folder
-      const cloudFilename = `${STORAGE_FOLDER}/${liveMenuId}/${filename}`;
+      // Create cloud filename with user ID folder
+      const cloudFilename = `${STORAGE_FOLDER}/${liveMenu.userId}/${filename}`;
 
       formData.append("stream", fs.createReadStream(imagePath));
       formData.append("filename", cloudFilename);

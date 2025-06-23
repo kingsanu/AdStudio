@@ -9,6 +9,7 @@ import { getPositionWhenLayerCenter } from "canva-editor/utils/layer/getPosition
 import Draggable from "canva-editor/layers/core/Dragable";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import MediaUploadForm from "./MediaUploadForm";
 
 // Constants for infinite loading
@@ -151,6 +152,28 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
     null
   );
   const [overviewScrollPosition, setOverviewScrollPosition] = useState(0);
+
+  // Create refs for scroll containers (main screen - collapsed state)
+  const backgroundsMainScrollRef = useRef<HTMLDivElement>(null);
+  const illustrationsMainScrollRef = useRef<HTMLDivElement>(null);
+  const iconsMainScrollRef = useRef<HTMLDivElement>(null);
+  const threeDMainScrollRef = useRef<HTMLDivElement>(null);
+
+  // Scroll functions for horizontal scroll
+  const scrollHorizontal = (containerRef: React.RefObject<HTMLDivElement>, direction: 'left' | 'right') => {
+    if (containerRef.current) {
+      const scrollAmount = 140; // Width of 1 item + gap
+      const currentScroll = containerRef.current.scrollLeft;
+      const targetScroll = direction === 'left' 
+        ? currentScroll - scrollAmount 
+        : currentScroll + scrollAmount;
+      
+      containerRef.current.scrollTo({
+        left: targetScroll,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   // Helper function to get API endpoint for each media type
   const getApiEndpoint = (section: MediaSection): string => {
@@ -471,10 +494,11 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
     title: string,
     items: MediaItem[],
     section: MediaSection,
-    isLoading: boolean
+    isLoading: boolean,
+    scrollContainerRef: React.RefObject<HTMLDivElement>
   ) => {
-    const displayItems = items.slice(0, 3);
-    const hasMoreItems = items.length > 3;
+    const displayItems = items.slice(0, 8); // Show 8 items instead of 3
+    const hasMoreItems = items.length > 4; // Show "View More" if more than 4 items
 
     return (
       <div css={{ marginBottom: "20px" }}>
@@ -526,63 +550,130 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
         ) : (
           <div
             css={{
-              overflowX: "auto",
-              display: "flex",
-              gap: "12px",
-              padding: "0 10px",
+              position: "relative",
               marginBottom: "10px",
-              scrollbarWidth: "none",
-              msOverflowStyle: "none",
-              "&::-webkit-scrollbar": {
-                display: "none",
-              },
             }}
           >
-            {displayItems.map((item) => (
-              <Draggable
-                key={item._id}
-                onDrop={async (pos) => {
-                  if (pos) {
-                    await handleAddMedia(item);
-                  }
-                }}
-                onClick={() => handleAddMedia(item)}
-              >
-                <div
-                  css={{
-                    cursor: "pointer",
-                    position: "relative",
-                    width: "120px",
-                    height: "120px",
-                    flexShrink: 0,
-                    borderRadius: "8px",
-                    overflow: "hidden",
-                    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                    transition: "transform 0.2s ease-in-out",
-                    "&:hover": {
-                      transform: "scale(1.03)",
-                      boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
-                    },
+            {/* Left scroll arrow */}
+            <button
+              css={{
+                position: "absolute",
+                left: "18px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                zIndex: 10,
+                background: "rgba(255, 255, 255, 0.9)",
+                border: "1px solid rgba(0, 0, 0, 0.1)",
+                borderRadius: "50%",
+                width: "24px",
+                height: "24px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                transition: "all 0.2s",
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+                "&:hover": {
+                  background: "white",
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                },
+              }}
+              onClick={() => scrollHorizontal(scrollContainerRef, 'left')}
+            >
+              <ChevronLeft size={12} />
+            </button>
+
+            {/* Right scroll arrow */}
+            <button
+              css={{
+                position: "absolute",
+                right: "18px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                zIndex: 10,
+                background: "rgba(255, 255, 255, 0.9)",
+                border: "1px solid rgba(0, 0, 0, 0.1)",
+                borderRadius: "50%",
+                width: "24px",
+                height: "24px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                transition: "all 0.2s",
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+                "&:hover": {
+                  background: "white",
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                },
+              }}
+              onClick={() => scrollHorizontal(scrollContainerRef, 'right')}
+            >
+              <ChevronRight size={12} />
+            </button>
+
+            {/* Scrollable container */}
+            <div
+              ref={scrollContainerRef}
+              css={{
+                overflowX: "auto",
+                display: "flex",
+                gap: "12px",
+                padding: "0 10px",
+                scrollBehavior: "smooth",
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+                "&::-webkit-scrollbar": {
+                  display: "none",
+                },
+              }}
+            >
+              {displayItems.map((item) => (
+                <Draggable
+                  key={item._id}
+                  onDrop={async (pos) => {
+                    if (pos) {
+                      await handleAddMedia(item);
+                    }
                   }}
+                  onClick={() => handleAddMedia(item)}
                 >
-                  <img
-                    src={`${config.apis?.url}/proxy-image/${encodeURIComponent(
-                      item.img
-                    )}`}
-                    loading="lazy"
-                    alt={item.name || title}
+                  <div
                     css={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
+                      cursor: "pointer",
+                      position: "relative",
+                      width: "120px",
+                      height: "120px",
+                      flexShrink: 0,
+                      borderRadius: "8px",
+                      overflow: "hidden",
+                      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                      transition: "transform 0.2s ease-in-out",
+                      "&:hover": {
+                        transform: "scale(1.03)",
+                        boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
+                      },
                     }}
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = item.img;
-                    }}
-                  />
-                </div>
-              </Draggable>
-            ))}
+                  >
+                    <img
+                      src={`${config.apis?.url}/proxy-image/${encodeURIComponent(
+                        item.img
+                      )}`}
+                      loading="lazy"
+                      alt={item.name || title}
+                      css={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = item.img;
+                      }}
+                    />
+                  </div>
+                </Draggable>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -597,7 +688,24 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
     const items = query.data?.pages.flatMap((page: any) => page.items) || [];
 
     return (
-      <div css={{ padding: "16px" }}>
+      <div 
+        css={{ 
+          padding: "16px",
+          height: "100%",
+          overflowY: "auto",
+          scrollbarWidth: "thin",
+          "&::-webkit-scrollbar": {
+            width: "6px",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "rgba(0, 0, 0, 0.2)",
+            borderRadius: "3px",
+          },
+          "&::-webkit-scrollbar-track": {
+            backgroundColor: "rgba(0, 0, 0, 0.05)",
+          },
+        }}
+      >
         {items.length === 0 && !query.isLoading ? (
           <div
             css={{
@@ -764,25 +872,29 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
                   "Backgrounds",
                   backgrounds,
                   "backgrounds",
-                  backgroundsQuery.isLoading
+                  backgroundsQuery.isLoading,
+                  backgroundsMainScrollRef
                 )}
                 {renderOverviewSection(
                   "Illustrations",
                   illustrations,
                   "illustrations",
-                  illustrationsQuery.isLoading
+                  illustrationsQuery.isLoading,
+                  illustrationsMainScrollRef
                 )}
                 {renderOverviewSection(
                   "Icons",
                   icons,
                   "icons",
-                  iconsQuery.isLoading
+                  iconsQuery.isLoading,
+                  iconsMainScrollRef
                 )}
                 {renderOverviewSection(
                   "3D Images",
                   threeDImages,
                   "threeDImages",
-                  threeDImagesQuery.isLoading
+                  threeDImagesQuery.isLoading,
+                  threeDMainScrollRef
                 )}
               </>
             ) : (

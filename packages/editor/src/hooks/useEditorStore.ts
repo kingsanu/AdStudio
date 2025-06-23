@@ -71,7 +71,6 @@ const autoHistoryForActions: string[] = [
   "deleteLayer",
 ];
 export const useEditorStore = (config?: { isAdmin?: boolean }) => {
-  console.log("useEditorStore config:", config);
   const history = useMemo(() => new History(), []);
   const currState = useRef<EditorState>();
   const getState = useCallback(() => currState.current as EditorState, []);
@@ -237,9 +236,10 @@ export const useEditorStore = (config?: { isAdmin?: boolean }) => {
     },
     selectData: {
       status: false,
-    },
-    fireDownloadPNGCmd: -1,
+    },    fireDownloadPNGCmd: -1,
     downloadPNGCmd: -1,
+    downloadPDFCmd: -1,
+    captureCmd: -1,
     githubLink: "https://github.com/kenvinlu/canva-editor/",
     gumroadLink: "https://kenvinlu.gumroad.com/l/canva-editor",
     isAdmin: config?.isAdmin || false, // Initialize isAdmin from config

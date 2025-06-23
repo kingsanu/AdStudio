@@ -69,9 +69,9 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
     dragData,
     imageEditor,
     pageSize,
-    openPageSettings,
-    downloadPNGCmd,
+    openPageSettings,    downloadPNGCmd,
     downloadPDFCmd,
+    captureCmd,
   } = useEditor((state) => {
     const hoveredPage = parseInt(Object.keys(state.hoveredLayer)[0]);
     const hoverLayerId = state.hoveredLayer[hoveredPage];
@@ -91,9 +91,9 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
       dragData: state.dragData,
       imageEditor: state.imageEditor,
       pageSize: state.pageSize,
-      openPageSettings: state.openPageSettings,
-      downloadPNGCmd: state.downloadPNGCmd,
+      openPageSettings: state.openPageSettings,      downloadPNGCmd: state.downloadPNGCmd,
       downloadPDFCmd: state.downloadPDFCmd,
+      captureCmd: state.captureCmd,
     };
   });
   const {
@@ -135,15 +135,51 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
       return;
     }
   }, [downloadPNGCmd]);
-
   useEffect(() => {
-    if (downloadPNGCmd === -1) return;
+    if (downloadPDFCmd === -1) return;
     // Download all pages
     if (downloadPDFCmd === 0) {
       handleDownloadPDF();
       return;
     }
   }, [downloadPDFCmd]);
+
+  useEffect(() => {
+    if (captureCmd === -1) return;
+    
+    const handleCapture = async () => {
+      let capturedImages: string[] = [];
+      
+      // Capture active page
+      if (captureCmd === 1) {
+        const dataUrl = await handleCapturePage(activePage);
+        if (dataUrl) {
+          capturedImages = [dataUrl];
+        }
+      }
+      // Capture all pages
+      else if (captureCmd === 0) {
+        capturedImages = await handleCapturePages();
+      }
+      
+      // Store captured images in a global variable or emit an event
+      // You can customize this part based on how you want to use the captured images
+      (window as any).capturedImages = capturedImages;
+      
+      // Emit a custom event so other parts of the app can listen for it
+      window.dispatchEvent(new CustomEvent('pagesCapture', { 
+        detail: { 
+          images: capturedImages,
+          pageCount: captureCmd === 1 ? 1 : pages.length
+        } 
+      }));
+      
+      console.log(`Captured ${capturedImages.length} page(s)`);
+      actions.fireCaptureCmd(-1); // Reset
+    };
+    
+    handleCapture();
+  }, [captureCmd]);
 
   useDebouncedEffect(
     () => {
@@ -272,11 +308,54 @@ const DesignFrame: FC<DesignFrameProps> = ({ data, onChanges }) => {
         const link = document.createElement("a");
         link.download = `design-id-page-${pageIndex + 1}.png`;
         link.href = dataUrl;
-        link.click();
-      } catch (e) {
+        link.click();      } catch (e) {
         window.alert("Cannot download: " + (e as Error).message);
       }
     }
+  };
+
+  const handleCapturePage = async (pageIndex: number): Promise<string | null> => {
+    // Force sync before capture
+    console.log(`Forcing sync before page capture (page ${pageIndex + 1})...`);
+    try {
+      const canProceed = await SyncService.forceSyncBeforeCriticalAction(
+        `Page capture of page ${pageIndex + 1}`
+      );
+      if (!canProceed) {
+        console.warn(
+          "Page capture proceeding with potentially unsynced changes"
+        );
+      }
+    } catch (error) {
+      console.error("Error during forced sync before page capture:", error);
+    }
+
+    const pageContentEl =
+      pageRef.current[pageIndex]?.querySelector(".page-content");
+    if (pageContentEl) {
+      try {
+        const dataUrl = await domToPng(pageContentEl as HTMLElement, {
+          width: pageSize.width,
+          height: pageSize.height,
+        });
+        return dataUrl;
+      } catch (e) {
+        console.error("Cannot capture page: " + (e as Error).message);
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const handleCapturePages = async (): Promise<string[]> => {
+    const capturedImages: string[] = [];
+    for (let i = 0; i < pages.length; i++) {
+      const dataUrl = await handleCapturePage(i);
+      if (dataUrl) {
+        capturedImages.push(dataUrl);
+      }
+    }
+    return capturedImages;
   };
   const handleDownloadPDF = async () => {
     // Force sync before PDF download

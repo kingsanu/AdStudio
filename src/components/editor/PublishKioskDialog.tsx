@@ -9,7 +9,6 @@ import {
   UPLOAD_KIOSK_TEMPLATE_ENDPOINT,
 } from "canva-editor/utils/constants/api";
 
-import { domToPng } from "modern-screenshot";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useAuth } from "@/contexts/AuthContext";
@@ -21,16 +20,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import {
   AlertCircle,
   CheckCircle,
   Monitor,
-  Eye,
-  Save,
   Loader2,
 } from "lucide-react";
 
@@ -43,12 +37,9 @@ const PublishKioskDialog: React.FC<PublishKioskDialogProps> = ({
   open,
   onClose,
 }) => {
-  // State for form fields
-  const [templateName, setTemplateName] = useState("");
-  const [templateDesc, setTemplateDesc] = useState("");
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveProgress, setSaveProgress] = useState(0);
+  // State for loading and progress
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [publishProgress, setPublishProgress] = useState(0);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get editor state and actions
@@ -57,31 +48,6 @@ const PublishKioskDialog: React.FC<PublishKioskDialogProps> = ({
 
   // Get user from auth context
   const { user } = useAuth();
-
-  // Generate preview image when dialog opens
-  useEffect(() => {
-    const generatePreview = async () => {
-      const pageContentEl = document.querySelector(".page-content");
-      if (pageContentEl) {
-        try {
-          const thumbnailData = await domToPng(pageContentEl as HTMLElement, {
-            width: pageContentEl.clientWidth,
-            height: pageContentEl.clientHeight,
-          });
-          setPreviewImage(thumbnailData);
-        } catch (error) {
-          console.error("Error generating preview:", error);
-          toast.error("Preview Generation Failed", {
-            description:
-              "Could not generate template preview. Please try again.",
-            icon: <AlertCircle className="h-5 w-5 text-white" />,
-            duration: 5000,
-          });
-        }
-      }
-    };
-    generatePreview();
-  }, [open]);
 
   // Cleanup interval on unmount
   useEffect(() => {
@@ -92,64 +58,50 @@ const PublishKioskDialog: React.FC<PublishKioskDialogProps> = ({
     };
   }, []);
 
-  // Handle publishing template and generating page images
+  // Auto-publish when dialog opens
+  useEffect(() => {
+    if (open && !isPublishing) {
+      handlePublishKiosk();
+    }
+  }, [open]);
+
+  // Handle publishing - capture images and update existing kiosk document
   const handlePublishKiosk = async () => {
-    if (!templateName.trim()) {
-      toast.error("Validation Error", {
-        description: "Please enter a template name to save your template.",
-        icon: <AlertCircle className="h-5 w-5 text-white" />,
-        duration: 4000,
-      });
-      return;
-    }
-
-    if (!previewImage) {
-      toast.error("Preview Error", {
-        description: "Preview image generation failed. Please try again.",
-        icon: <AlertCircle className="h-5 w-5 text-white" />,
-        duration: 4000,
-      });
-      return;
-    }
-
-    // Start saving process
-    setIsSaving(true);
-    setSaveProgress(0);
+    // Start publishing process
+    setIsPublishing(true);
+    setPublishProgress(0);
 
     // Show loading toast
-    toast.loading("Publishing Kiosk Template", {
-      description: "Saving template and generating page images...",
+    toast.loading("Publishing Kiosk", {
+      description: "Capturing pages and updating kiosk display...",
       duration: 60000, // 1 minute timeout
     });
 
     // Simulate progress updates
     progressIntervalRef.current = setInterval(() => {
-      setSaveProgress((prev) => {
+      setPublishProgress((prev) => {
         const newProgress = prev + Math.random() * 10;
         return newProgress > 90 ? 90 : newProgress; // Cap at 90% until complete
       });
     }, 500);
 
     try {
-      // Get user's ID as unique identifier (outletId from auth)
-      // Extract just the ID part if userId contains city and name
+      // Get user's ID as unique identifier
       let userId = user?.userId || Cookies.get("auth_token") || "anonymous";
       // If userId contains underscores, extract just the ID part (last segment)
       if (userId.includes("_")) {
         userId = userId.split("_").pop() || userId;
       }
 
-      // Use a timestamp for the template filename
-      const timestamp = Date.now();
-      const templateFilename = `kiosk_template_${timestamp}.json`;
-
       // Get the design data
       const designData = query.serialize();
 
       // Pack the data
       const [packedResult] = pack(designData, dataMapping);
-      // Don't extract just the first element if it's an array - we need all pages
       const packedData = packedResult;
+
+      // Update progress
+      setPublishProgress(20);
 
       // First, upload the template JSON to cloud storage
       console.log("Uploading template JSON to cloud storage");
@@ -165,11 +117,12 @@ const PublishKioskDialog: React.FC<PublishKioskDialogProps> = ({
       const templateUrl = templateResponse.data.templateUrl;
       console.log("Template URL:", templateUrl);
 
-      // Create a kiosk entry with the template URL
-      console.log("Creating kiosk with template URL");
+      // Update progress
+      setPublishProgress(40);
+
+      // Create or update kiosk entry (the backend should handle upsert logic)
+      console.log("Creating/updating kiosk with template URL");
       const kioskPayload = {
-        title: templateName,
-        description: templateDesc,
         userId,
         templateUrl, // Store the URL to the JSON file
       };
@@ -182,96 +135,78 @@ const PublishKioskDialog: React.FC<PublishKioskDialogProps> = ({
       const kioskId = kioskResponse.data.kiosk.id;
       console.log("Kiosk ID:", kioskId);
 
-      // Generate and upload images for each page
-      const pageImages = [];
-      const originalActivePage = activePage;
+      // Update progress
+      setPublishProgress(60);
 
-      // Get all pages from the design
-      const pageKeys = Object.keys(pages || {});
+      // Generate all page images using command-based capture
+      console.log("Capturing all pages using fireCaptureCmd...");
+      
+      // Use the new capture command to get all page images
+      const pageImages = await new Promise<string[]>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          window.removeEventListener('pagesCapture', handleCaptureComplete);
+          reject(new Error('Page capture timeout after 30 seconds'));
+        }, 30000);
 
-      // Capture each page as an image
-      console.log(`Starting to capture ${pageKeys.length} pages`);
-      for (let i = 0; i < pageKeys.length; i++) {
-        try {
-          console.log(`Processing page ${i + 1} of ${pageKeys.length}`);
+        const handleCaptureComplete = (event: Event) => {
+          clearTimeout(timeout);
+          const customEvent = event as CustomEvent;
+          const { images } = customEvent.detail;
+          window.removeEventListener('pagesCapture', handleCaptureComplete);
+          resolve(images || []);
+        };
 
-          // Set the active page - this is the key fix
-          console.log(`Setting active page to ${i}`);
-          actions.setActivePage(i);
+        window.addEventListener('pagesCapture', handleCaptureComplete);
+        
+        // Trigger capture of all pages
+        console.log('[PublishKioskDialog] Triggering fireCaptureCmd for all pages');
+        actions.fireCaptureCmd(0); // 0 = capture all pages
+      });
 
-          // Add a small delay to ensure the page is set
-          await new Promise((resolve) => setTimeout(resolve, 100));
-
-          // Force a re-render by updating the state
-          setSaveProgress((prev) => {
-            console.log(`Updating progress to force re-render: ${prev + 0.1}`);
-            return prev + 0.1;
-          });
-
-          // Wait for the page to render - need a longer delay to ensure the page is fully rendered
-          console.log(`Waiting for page ${i + 1} to render...`);
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-
-          // Get the page content element
-          const pageContentEl = document.querySelector(".page-content");
-          console.log(
-            `Page content element found:`,
-            pageContentEl ? "Yes" : "No"
-          );
-          if (pageContentEl) {
-            // Generate image
-            const dataUrl = await domToPng(pageContentEl as HTMLElement, {
-              width: pageContentEl.clientWidth,
-              height: pageContentEl.clientHeight,
-              quality: 1.0,
-              scale: 1.0,
-            });
-
-            // Upload the image to cloud storage
-            const pageImageFilename = `page_${i + 1}.png`;
-            console.log(
-              `Uploading image for page ${
-                i + 1
-              } with filename: ${pageImageFilename}`
-            );
-
-            // Log a small part of the image data to verify it's different for each page
-            const base64Data = dataUrl.split(",")[1];
-            console.log(
-              `Image data preview for page ${i + 1}: ${base64Data.substring(
-                0,
-                50
-              )}...`
-            );
-
-            const response = await axios.post(UPLOAD_KIOSK_IMAGE_ENDPOINT, {
-              base64: base64Data, // Remove the data:image/png;base64, part
-              filename: pageImageFilename,
-              kioskId,
-              pageIndex: i,
-            });
-
-            console.log(`Upload response for page ${i + 1}:`, response.data);
-            pageImages.push(dataUrl);
-          }
-        } catch (error) {
-          console.error(`Error processing page ${i}:`, error);
-        }
+      if (pageImages.length === 0) {
+        throw new Error('Failed to capture any page images');
       }
 
-      // Restore the original active page
-      actions.setActivePage(originalActivePage);
+      console.log(`Successfully captured ${pageImages.length} page images`);
+
+      // Update progress
+      setPublishProgress(80);
+
+      // Upload each captured image to cloud storage
+      for (let i = 0; i < pageImages.length; i++) {
+        try {
+          const dataUrl = pageImages[i];
+          const pageImageFilename = `page_${i + 1}.png`;
+          
+          console.log(`Uploading image for page ${i + 1} with filename: ${pageImageFilename}`);
+
+          // Log a small part of the image data to verify it's different for each page
+          const base64Data = dataUrl.split(",")[1];
+          console.log(`Image data preview for page ${i + 1}: ${base64Data.substring(0, 50)}...`);
+
+          const response = await axios.post(UPLOAD_KIOSK_IMAGE_ENDPOINT, {
+            base64: base64Data, // Remove the data:image/png;base64, part
+            filename: pageImageFilename,
+            kioskId,
+            pageIndex: i,
+          });
+
+          console.log(`Upload response for page ${i + 1}:`, response.data);
+        } catch (error) {
+          console.error(`Error uploading page ${i + 1}:`, error);
+        }
+      }
 
       // Clear the interval and set progress to 100%
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
       }
-      setSaveProgress(100);
+      setPublishProgress(100);
 
       // Dismiss the loading toast and show success toast
       toast.dismiss();
-      toast.success("Kiosk Published", {
-        description: `Kiosk "${templateName}" has been published successfully with ${pageImages.length} page images!`,
+      toast.success("Kiosk Updated", {
+        description: `Your kiosk display has been updated with ${pageImages.length} page images!`,
         icon: <CheckCircle className="h-5 w-5 text-white" />,
         duration: 4000,
       });
@@ -291,7 +226,7 @@ const PublishKioskDialog: React.FC<PublishKioskDialogProps> = ({
 
       // Get a more specific error message if available
       let errorMessage =
-        "There was an error publishing your kiosk. Please try again.";
+        "There was an error updating your kiosk. Please try again.";
 
       // Check if it's an Axios error
       if (axios.isAxiosError(error)) {
@@ -304,139 +239,49 @@ const PublishKioskDialog: React.FC<PublishKioskDialogProps> = ({
         errorMessage = `Error: ${error.message}`;
       }
 
-      toast.error("Publishing Failed", {
+      toast.error("Update Failed", {
         description: errorMessage,
         icon: <AlertCircle className="h-5 w-5 text-white" />,
         duration: 5000,
       });
     } finally {
-      setIsSaving(false);
+      setIsPublishing(false);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Monitor className="h-5 w-5 text-blue-600" />
-            Publish Kiosk Display
+            Update Kiosk Display
           </DialogTitle>
           <DialogDescription>
-            Configure your kiosk for display. This will be shown on your
-            restaurant's kiosk screens.
+            Updating your kiosk display with the latest design...
           </DialogDescription>
         </DialogHeader>
 
-        {isSaving ? (
-          <div className="flex flex-col items-center justify-center py-8 space-y-4">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-            <div className="text-center">
-              <p className="font-medium">Publishing Kiosk...</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Capturing pages and uploading to cloud storage
-              </p>
-            </div>
-            <div className="w-full max-w-xs">
-              <div className="bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                <div
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${saveProgress}%` }}
-                />
-              </div>
-              <p className="text-xs text-center mt-1 text-gray-500">
-                {Math.round(saveProgress)}% complete
-              </p>
-            </div>
+        <div className="flex flex-col items-center justify-center py-8 space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <div className="text-center">
+            <p className="font-medium">Publishing Kiosk...</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Capturing pages and uploading to display
+            </p>
           </div>
-        ) : (
-          <div className="space-y-4">
-            {/* Kiosk Info */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <Monitor className="h-4 w-4 text-blue-600" />
-                <span className="font-medium text-blue-800 dark:text-blue-200">
-                  Kiosk Display Settings
-                </span>
-              </div>
-              <p className="text-sm text-blue-700 dark:text-blue-300">
-                Optimized for 900x1200 kiosk resolution. Your kiosk will be
-                displayed in portrait mode.
-              </p>
-            </div>
-
-            {/* Title Input */}
-            <div className="space-y-2">
-              <Label htmlFor="title">Kiosk Title</Label>
-              <Input
-                id="title"
-                value={templateName}
-                onChange={(e) => setTemplateName(e.target.value)}
-                placeholder="Enter kiosk title"
-                className="w-full"
+          <div className="w-full max-w-xs">
+            <div className="bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+              <div
+                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${publishProgress}%` }}
               />
             </div>
-
-            {/* Description Input */}
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={templateDesc}
-                onChange={(e) => setTemplateDesc(e.target.value)}
-                placeholder="Enter kiosk description"
-                className="w-full min-h-[80px]"
-              />
-            </div>
-
-            {/* Preview Image */}
-            {previewImage && (
-              <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
-                <Label className="block mb-2">Preview</Label>
-                <div className="border rounded-md overflow-hidden">
-                  <img
-                    src={previewImage}
-                    alt="Kiosk Preview"
-                    className="w-full h-auto max-h-48 object-contain"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex justify-between pt-4">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  // Preview functionality can be added later
-                  toast.info("Preview functionality coming soon");
-                }}
-                disabled={!previewImage}
-              >
-                <Eye className="mr-2 h-4 w-4" />
-                Preview
-              </Button>
-
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={onClose}>
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handlePublishKiosk}
-                  disabled={isSaving || !templateName.trim()}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  {isSaving ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Save className="mr-2 h-4 w-4" />
-                  )}
-                  {isSaving ? "Publishing..." : "Save & Publish"}
-                </Button>
-              </div>
-            </div>
+            <p className="text-xs text-center mt-1 text-gray-500">
+              {Math.round(publishProgress)}% complete
+            </p>
           </div>
-        )}
+        </div>
       </DialogContent>
     </Dialog>
   );

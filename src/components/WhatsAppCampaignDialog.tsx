@@ -3,8 +3,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { toast } from "sonner";
 import Cookies from "js-cookie";
 import axios from "axios";
-import { domToPng } from "modern-screenshot";
 import { useEditor } from "canva-editor/hooks";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -60,6 +60,7 @@ import {
 } from "lucide-react";
 import MultipleSelector from "./ui/multiselect";
 import { UPLOAD_IMAGE_ENDPOINT } from "@/constants";
+import { formatTimeAgo } from "@/lib/utils";
 
 interface WhatsAppCampaignDialogProps {
   open: boolean;
@@ -78,8 +79,6 @@ export default function WhatsAppCampaignDialog({
 
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingCustomers, setIsLoadingCustomers] = useState(false);
-  const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedCustomers, setSelectedCustomers] = useState<string[]>([]);
   const [customerSliderValue, setCustomerSliderValue] = useState<number[]>([0]);
   const [filterSegment, setFilterSegment] = useState<string>("");
@@ -171,6 +170,7 @@ export default function WhatsAppCampaignDialog({
   const resetForm = () => {
     setStep(1);
     setSelectedCustomers([]);
+    setCustomerSliderValue([0]);
     setFilterSegment("");
     setSelectedSegments([]);
     setShowQRCode(false);
@@ -187,6 +187,8 @@ export default function WhatsAppCampaignDialog({
     setCaptureProgress(0);
     setIsCapturingImages(false);
     setUploadingImage(false);
+    setIsGeneratingMedia(false);
+    setMediaGenerationProgress(0);
     setMediaGenerated(false);
     if (progressIntervalRef.current) {
       clearInterval(progressIntervalRef.current);
@@ -207,115 +209,61 @@ export default function WhatsAppCampaignDialog({
     });
   };
 
-  // Function to capture page images, similar to PublishKioskDialog
+  // Function to capture page images using the new fireCaptureCmd action
   const capturePageImages = useCallback(async () => {
     try {
+      // Safety check - ensure we have pages to capture
+      if (!pages || pages.length === 0) {
+        throw new Error('No pages available to capture');
+      }
+
       setIsCapturingImages(true);
       setCaptureProgress(0);
       setPageImages([]);
 
-      // // Show loading toast
-      // toast.loading("Capturing Page Images", {
-      //   description: "Generating images for each page...",
-      //   duration: 30000, // 30 second timeout
-      // });
+      console.log('[WhatsAppCampaignDialog] Starting page capture using fireCaptureCmd');
+      console.log(`[WhatsAppCampaignDialog] Pages to capture: ${pages.length}`);
 
-      // Simulate progress updates
-      progressIntervalRef.current = setInterval(() => {
-        setCaptureProgress((prev) => {
-          const newProgress = prev + Math.random() * 15;
-          return newProgress > 90 ? 90 : newProgress; // Cap at 90% until complete
-        });
-      }, 500);
-
-      // Store original active page to restore later
-      const originalActivePage = activePage;
-
-      // Get all pages from the design
-      const pageKeys = Object.keys(pages || {});
-      const capturedImages: string[] = [];
-
-      // Capture each page as an image
-      console.log(`Starting to capture ${pageKeys.length} pages`);
-      for (let i = 0; i < pageKeys.length; i++) {
-        try {
-          console.log(`Processing page ${i + 1} of ${pageKeys.length}`);
-
-          // Set the active page
-          console.log(`Setting active page to ${i}`);
-          actions.setActivePage(i);
-
-          // Add a small delay to ensure the page is set
-          await new Promise((resolve) => setTimeout(resolve, 100));
-
-          // Force a re-render by updating the state
-          setCaptureProgress((prev) => {
-            console.log(`Updating progress to force re-render: ${prev + 0.1}`);
-            return prev + 0.1;
+      // Set up event listener to receive captured images
+      const handleCaptureComplete = (event: Event) => {
+        const customEvent = event as CustomEvent;
+        const { images, pageCount } = customEvent.detail;
+        console.log(`[WhatsAppCampaignDialog] Received ${images.length} captured images from fireCaptureCmd`);
+        
+        if (images.length > 0) {
+          setCaptureProgress(100);
+          setPageImages(images);
+          
+          // Log image previews for debugging
+          images.forEach((dataUrl: string, index: number) => {
+            const base64Data = dataUrl.split(',')[1];
+            const preview = base64Data.substring(0, 50);
           });
 
-          // Wait for the page to render
-          console.log(`Waiting for page ${i + 1} to render...`);
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-
-          // Get the page content element
-          const pageContentEl = document.querySelector(".page-content");
-          console.log(
-            `Page content element found:`,
-            pageContentEl ? "Yes" : "No"
-          );
-
-          if (pageContentEl) {
-            // Generate image
-            const dataUrl = await domToPng(pageContentEl as HTMLElement, {
-              width: pageContentEl.clientWidth,
-              height: pageContentEl.clientHeight,
-              quality: 1.0,
-              scale: 1.0,
-            });
-
-            capturedImages.push(dataUrl);
-            console.log(`Captured image for page ${i + 1}`);
-          }
-        } catch (error) {
-          console.error(`Error processing page ${i}:`, error);
-          toast.error(`Failed to capture page ${i + 1}`, {
-            description: "Try again or select a different page.",
-          });
+        
+        } else {
+          throw new Error('Failed to capture any pages');
         }
-      }
+        
+        // Remove event listener after use
+        window.removeEventListener('pagesCapture', handleCaptureComplete);
+        setIsCapturingImages(false);
+      };
 
-      // Restore the original active page
-      actions.setActivePage(originalActivePage);
+      // Add event listener for capture completion
+      window.addEventListener('pagesCapture', handleCaptureComplete);
 
-      // Clear the interval and set progress to 100%
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
-        progressIntervalRef.current = null;
-      }
-      setCaptureProgress(100);
+      // Update progress to show capture is starting
+      setCaptureProgress(20);
 
-      // Update state with captured images
-      setPageImages(capturedImages);
+      // Trigger capture of all pages using the new command
+      actions.fireCaptureCmd(0); // 0 = capture all pages
 
-      // Dismiss the loading toast and show success toast
-      toast.dismiss();
-      toast.success("Pages Captured", {
-        description: `${capturedImages.length} page images captured successfully!`,
-        duration: 3000,
-      });
     } catch (error) {
-      console.error("Error capturing page images:", error);
-      toast.dismiss();
-      toast.error("Failed to Capture Pages", {
-        description:
-          "There was an error capturing the page images. Please try again.",
-        duration: 4000,
-      });
-    } finally {
+   
       setIsCapturingImages(false);
     }
-  }, [activePage, pages, actions]);
+  }, [pages, actions]);
 
   // Generate unique session ID with timestamp
   const generateUniqueSessionId = () => {
@@ -415,10 +363,7 @@ export default function WhatsAppCampaignDialog({
         setConnectionStatus(statusResponse.status || "disconnected");
 
         if (statusResponse.status === "connected") {
-          // console.log(
-          //   "WhatsApp already connected, no need to create new session"
-          // );
-          // toast.success("WhatsApp is already connected!");
+        
           setShowQRCode(false);
           setIsCreatingSession(false);
         } else {
@@ -445,28 +390,82 @@ export default function WhatsAppCampaignDialog({
     }
   };
 
-  const loadCustomers = async () => {
-    try {
-      setIsLoadingCustomers(true);
-      console.log("Loading customers for outlet:", outletId);
-      const response = await customerService.getCustomersByOutlet(
-        outletId,
-        filterSegment ? { segment: filterSegment } : {}
-      );
-      if (response.success) {
-        setCustomers(response.data);
-        console.log(`Loaded ${response.data.length} customers`);
-      } else {
-        console.error("Failed to load customers:", response);
-        toast.error("Failed to load customers");
+  // Define types for the infinite query data
+  interface CustomerPageData {
+    customers: Customer[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      pages: number;
+      hasNextPage: boolean;
+      hasPrevPage: boolean;
+    } | undefined;
+    nextPage: number | undefined;
+  }
+
+  // Infinite query for customers with pagination
+  const {
+    data: customersData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: isLoadingCustomers,
+    error: customersError,
+    refetch: refetchCustomers,
+  } = useInfiniteQuery<CustomerPageData, Error>({
+    queryKey: ['customers', outletId, filterSegment],
+    queryFn: async ({ pageParam = 1 }): Promise<CustomerPageData> => {
+      const response = await customerService.getCustomersByOutlet(outletId, {
+        segment: filterSegment || undefined,
+        page: pageParam as number,
+        limit: 20, // Load 20 customers per page
+      });
+      
+      if (!response.success) {
+        throw new Error('Failed to fetch customers');
       }
-    } catch (error) {
-      console.error("Error loading customers:", error);
-      toast.error("Failed to load customers");
-    } finally {
-      setIsLoadingCustomers(false);
+      
+      return {
+        customers: response.data,
+        pagination: response.pagination,
+        nextPage: response.pagination?.hasNextPage ? (pageParam as number) + 1 : undefined,
+      };
+    },
+    getNextPageParam: (lastPage: CustomerPageData) => lastPage.nextPage,
+    initialPageParam: 1,
+    enabled: open && !!outletId && step === 2, // Only fetch when needed
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+  });
+
+  // Flatten customers from all pages
+  const customers = customersData?.pages.flatMap(page => page.customers) ?? [];
+  const totalCustomersCount = customersData?.pages[0]?.pagination?.total ?? 0;
+
+  // Filter customers based on selected segments
+  const filteredCustomers = customers.filter(
+    (customer) => !filterSegment || customer.customerSegment === filterSegment
+  );
+
+  // Use total count from server for slider max, but consider current filter
+  // For filtered customers, we need to be more conservative since we don't know the total filtered count
+  const maxSelectableCustomers = filterSegment 
+    ? Math.max(filteredCustomers.length, customerSliderValue[0]) // Allow current selection or loaded amount
+    : totalCustomersCount > 0 ? totalCustomersCount : filteredCustomers.length;
+
+  // Reset slider when filtered customers change, but don't reduce selection if user has more selected
+  useEffect(() => {
+    // Only reset if the current selection is impossible with current filter
+    if (customerSliderValue[0] > maxSelectableCustomers) {
+      setCustomerSliderValue([Math.min(customerSliderValue[0], maxSelectableCustomers)]);
+      // Update selected customers to match the available filtered customers
+      const availableSelections = selectedCustomers.filter(id => 
+        filteredCustomers.some(customer => customer._id === id)
+      );
+      setSelectedCustomers(availableSelections);
     }
-  };
+  }, [filteredCustomers.length, customerSliderValue, filteredCustomers, maxSelectableCustomers, selectedCustomers]);
 
   const checkConnectionStatus = async () => {
     if (!whatsappSettings) return;
@@ -852,9 +851,8 @@ export default function WhatsAppCampaignDialog({
         return;
       }
 
-      // Load customers only when moving to step 2
-      console.log("Loading customers for step 2...");
-      await loadCustomers();
+      // Customers are loaded automatically by React Query when step === 2
+      // The infinite query is triggered by the enabled condition
       setStep(2);
     } else if (step === 2) {
       if (selectedCustomers.length === 0) {
@@ -944,96 +942,242 @@ export default function WhatsAppCampaignDialog({
     const segmentCustomers = customers
       .filter((c) => c.customerSegment === segment)
       .map((c) => c._id);
-    setSelectedCustomers((prev) => [
-      ...new Set([...prev, ...segmentCustomers]),
-    ]);
+    setSelectedCustomers((prev) => {
+      const newSelection = [...new Set([...prev, ...segmentCustomers])];
+      setCustomerSliderValue([newSelection.length]);
+      return newSelection;
+    });
   };
 
   const handleSliderChange = (value: number[]) => {
     setCustomerSliderValue(value);
     const numberOfCustomersToSelect = value[0];
-    const customersToSelect = filteredCustomers
-      .slice(0, numberOfCustomersToSelect)
-      .map((c) => c._id);
-    setSelectedCustomers(customersToSelect);
+    
+    // Filter customers based on current segment filter
+    const availableCustomers = customers.filter(
+      (customer) => !filterSegment || customer.customerSegment === filterSegment
+    );
+    
+    // If user wants to select more customers than currently loaded, 
+    // we need to load more data first
+    if (numberOfCustomersToSelect > availableCustomers.length && hasNextPage && !isFetchingNextPage) {
+      // Show info message to user
+      toast.info(`Loading more customers to reach ${numberOfCustomersToSelect} selections...`);
+      
+      // Try to fetch more pages until we have enough customers
+      const loadMoreCustomers = async () => {
+        let attempts = 0;
+        const maxAttempts = 5; // Prevent infinite loops
+        
+        while (
+          customers.filter(c => !filterSegment || c.customerSegment === filterSegment).length < numberOfCustomersToSelect && 
+          hasNextPage && 
+          attempts < maxAttempts
+        ) {
+          await fetchNextPage();
+          attempts++;
+          // Small delay to prevent overwhelming the API
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        
+        // After loading more, select the customers
+        const updatedAvailableCustomers = customers.filter(
+          (customer) => !filterSegment || customer.customerSegment === filterSegment
+        );
+        const customersToSelect = updatedAvailableCustomers
+          .slice(0, Math.min(numberOfCustomersToSelect, updatedAvailableCustomers.length))
+          .map((c) => c._id);
+        setSelectedCustomers(customersToSelect);
+        
+        // Show completion message
+        if (customersToSelect.length < numberOfCustomersToSelect) {
+          toast.warning(`Only ${customersToSelect.length} customers available (requested ${numberOfCustomersToSelect})`);
+        } else {
+          toast.success(`Successfully selected ${customersToSelect.length} customers`);
+        }
+      };
+      
+      loadMoreCustomers();
+    } else {
+      // Select from currently available customers
+      const customersToSelect = availableCustomers
+        .slice(0, Math.min(numberOfCustomersToSelect, availableCustomers.length))
+        .map((c) => c._id);
+      setSelectedCustomers(customersToSelect);
+      
+      // Show warning if user requested more than available
+      if (numberOfCustomersToSelect > availableCustomers.length && !hasNextPage) {
+        toast.warning(`Only ${availableCustomers.length} customers available (requested ${numberOfCustomersToSelect})`);
+      }
+    }
   };
 
-  const filteredCustomers = customers.filter(
-    (customer) => !filterSegment || customer.customerSegment === filterSegment
-  );
-
-  // Reset slider when filtered customers change
-  useEffect(() => {
-    if (customerSliderValue[0] > filteredCustomers.length) {
-      setCustomerSliderValue([filteredCustomers.length]);
-      setSelectedCustomers(
-        filteredCustomers.slice(0, filteredCustomers.length).map((c) => c._id)
-      );
+  // Scroll handler for infinite loading
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    
+    // Load more when user scrolls to bottom
+    if (
+      scrollHeight - scrollTop <= clientHeight * 1.5 && // Trigger before reaching exact bottom
+      hasNextPage &&
+      !isFetchingNextPage &&
+      !isLoadingCustomers
+    ) {
+      fetchNextPage();
     }
-  }, [filteredCustomers.length, customerSliderValue, filteredCustomers]);
+  }, [hasNextPage, isFetchingNextPage, isLoadingCustomers, fetchNextPage]);
 
-  // Auto-generate media when step 3 is reached
+  // Generate media immediately when dialog opens to minimize user wait time
+  const generateMediaImmediately = useCallback(async () => {
+    // Prevent multiple simultaneous calls
+    if (isGeneratingMedia || mediaGenerated || formData.imageUrl) {
+      console.log('[WhatsAppCampaignDialog] Media generation already in progress or completed, skipping');
+      return;
+    }
+
+    console.log('[WhatsAppCampaignDialog] Starting immediate media generation on dialog open');
+    
+    try {
+      // Safety check - ensure we have pages to capture
+      if (!pages || pages.length === 0) {
+        console.log('[WhatsAppCampaignDialog] No pages available, skipping immediate media generation');
+        return;
+      }
+
+      setIsGeneratingMedia(true);
+      setMediaGenerationProgress(0);
+
+      // Use the new capture command to get images
+      const capturedImages = await new Promise<string[]>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          window.removeEventListener('pagesCapture', handleCaptureComplete);
+          reject(new Error('Capture timeout after 30 seconds'));
+        }, 30000);
+
+        const handleCaptureComplete = (event: Event) => {
+          clearTimeout(timeout);
+          const customEvent = event as CustomEvent;
+          const { images } = customEvent.detail;
+          window.removeEventListener('pagesCapture', handleCaptureComplete);
+          resolve(images || []);
+        };
+
+        window.addEventListener('pagesCapture', handleCaptureComplete);
+        
+        // Trigger capture of all pages
+        console.log('[WhatsAppCampaignDialog] Triggering fireCaptureCmd for immediate generation');
+        actions.fireCaptureCmd(0); // 0 = capture all pages
+      });
+
+      if (capturedImages.length === 0) {
+        throw new Error('No images were captured');
+      }
+
+      // Store captured images
+      setPageImages(capturedImages);
+      
+      console.log(`[WhatsAppCampaignDialog] Successfully captured ${capturedImages.length} pages immediately`);
+
+      // Update progress
+      setMediaGenerationProgress(60);
+      
+      // Log detailed image information before sending to backend
+      console.log('[WhatsAppCampaignDialog] 📤 Images being sent to backend immediately:');
+      capturedImages.forEach((dataUrl, index) => {
+        const base64Data = dataUrl.split(',')[1];
+        const preview = base64Data.substring(0, 50);
+        console.log(`  Page ${index + 1}: ${preview}... (${dataUrl.length} chars)`);
+      });
+      
+      // Generate media from captured images
+      const result = await videoService.generateCampaignMedia(capturedImages);
+
+      // Update progress
+      setMediaGenerationProgress(100);
+
+      // Update form data with the generated media URL
+      setFormData((prev) => ({
+        ...prev,
+        imageUrl: result.mediaUrl,
+      }));
+
+      setMediaGenerated(true);
+
+      if (result.mediaType === "video") {
+        toast.success("Campaign Video Generated", {
+          description: `Video created successfully from ${capturedImages.length} pages!`,
+          duration: 4000,
+        });
+      } else {
+        toast.success("Campaign Image Generated", {
+          description: `Image slideshow created successfully from ${capturedImages.length} pages!`,
+          duration: 4000,
+        });
+      }
+    } catch (error) {
+      console.error("[WhatsAppCampaignDialog] Error in immediate media generation:", error);
+      // Don't show error toast as this is background process
+      // User can still try again when they reach step 3
+      console.log("[WhatsAppCampaignDialog] Will retry media generation when user reaches step 3");
+    } finally {
+      setIsGeneratingMedia(false);
+    }
+  }, [pages, actions, isGeneratingMedia, mediaGenerated, formData.imageUrl]);
+
+  // Auto-generate media when step 3 is reached (fallback if immediate generation failed)
   const generateMediaWhenReady = useCallback(async () => {
+    // If media was already generated immediately, skip this
+    if (mediaGenerated || formData.imageUrl) {
+      console.log('[WhatsAppCampaignDialog] Media already generated, skipping step 3 generation');
+      return;
+    }
+
     let imagesToUse = pageImages;
 
-    // If no images are captured yet, capture them first
+    // If no images are captured yet, capture them first using the new command system
     if (imagesToUse.length === 0) {
       try {
-        setIsCapturingImages(true);
-        setCaptureProgress(0);
-
-        // Get all pages from the design
-        const pageKeys = Object.keys(pages || {});
-        const capturedImages: string[] = [];
-
-        console.log(`Starting to capture ${pageKeys.length} pages`);
-
-        // Store original active page to restore later
-        const originalActivePage = activePage;
-
-        for (let i = 0; i < pageKeys.length; i++) {
-          try {
-            console.log(`Processing page ${i + 1} of ${pageKeys.length}`);
-
-            // Set the active page
-            actions.setActivePage(i);
-
-            // Wait for the page to render
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-
-            // Get the page content element
-            const pageContentEl = document.querySelector(".page-content");
-
-            if (pageContentEl) {
-              // Generate image
-              const dataUrl = await domToPng(pageContentEl as HTMLElement, {
-                width: pageContentEl.clientWidth,
-                height: pageContentEl.clientHeight,
-                quality: 1.0,
-                scale: 1.0,
-              });
-
-              capturedImages.push(dataUrl);
-              console.log(`Captured image for page ${i + 1}`);
-            }
-          } catch (error) {
-            console.error(`Error processing page ${i}:`, error);
-          }
+        // Safety check - ensure we have pages to capture
+        if (!pages || pages.length === 0) {
+          throw new Error('No pages available to capture for media generation');
         }
 
-        // Restore the original active page
-        actions.setActivePage(originalActivePage);
+        console.log('[WhatsAppCampaignDialog] No images captured yet, using fireCaptureCmd for media generation...');
+        
+        // Use the new capture command to get images
+        const capturedImages = await new Promise<string[]>((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            window.removeEventListener('pagesCapture', handleCaptureComplete);
+            reject(new Error('Capture timeout after 30 seconds'));
+          }, 30000);
 
-        // Update state with captured images
-        setPageImages(capturedImages);
-        imagesToUse = capturedImages;
+          const handleCaptureComplete = (event: Event) => {
+            clearTimeout(timeout);
+            const customEvent = event as CustomEvent;
+            const { images } = customEvent.detail;
+            window.removeEventListener('pagesCapture', handleCaptureComplete);
+            resolve(images || []);
+          };
 
-        setIsCapturingImages(false);
-        setCaptureProgress(100);
+          window.addEventListener('pagesCapture', handleCaptureComplete);
+          
+          // Trigger capture of all pages
+          console.log('[WhatsAppCampaignDialog] Triggering fireCaptureCmd for step 3 media generation');
+          actions.fireCaptureCmd(0); // 0 = capture all pages
+        });
+
+        if (capturedImages.length > 0) {
+          setPageImages(capturedImages);
+          imagesToUse = capturedImages;
+          console.log(`[WhatsAppCampaignDialog] Successfully captured ${capturedImages.length} pages for media generation`);
+        } else {
+          throw new Error('Failed to capture pages for media generation');
+        }
       } catch (error) {
-        console.error("Error capturing page images:", error);
-        setIsCapturingImages(false);
-        toast.error("Failed to capture page images");
+        console.error("[WhatsAppCampaignDialog] Error capturing page images for media:", error);
+        // toast.error("Failed to capture page images", {
+        //   description: error instanceof Error ? error.message : "Could not capture pages for media generation.",
+        // });
         return;
       }
     }
@@ -1049,7 +1193,18 @@ export default function WhatsAppCampaignDialog({
     try {
       // Update progress
       setMediaGenerationProgress(20);
-
+      console.log('[WhatsAppCampaignDialog] Starting media generation with images:', imagesToUse.length);
+      
+      // Log detailed image information before sending to backend
+      console.log('[WhatsAppCampaignDialog] 📤 Images being sent to backend:');
+      imagesToUse.forEach((dataUrl, index) => {
+        const base64Data = dataUrl.split(',')[1];
+        const imageSize = Math.round((base64Data.length * 3) / 4 / 1024);
+        const preview = base64Data.substring(0, 30);
+        const mimeType = dataUrl.split(';')[0].split(':')[1];
+        console.log(`  Image ${index + 1}: ${mimeType}, ~${imageSize}KB, preview: ${preview}...`);
+      });
+      
       const result = await videoService.generateCampaignMedia(imagesToUse);
 
       // Update progress
@@ -1064,35 +1219,27 @@ export default function WhatsAppCampaignDialog({
       setMediaGenerationProgress(100);
       setMediaGenerated(true);
 
-      if (result.mediaType === "video") {
-        toast.success("Campaign video generated successfully!");
-      } else {
-        toast.success("Campaign image uploaded successfully!");
-      }
+    
     } catch (error) {
       console.error("Error generating media:", error);
-      toast.error("Failed to generate campaign media");
+    
     } finally {
       setIsGeneratingMedia(false);
     }
-  }, [pageImages, pages, activePage, actions]);
+  }, [pages, pageImages, actions]);
 
+  // Capture images and generate media immediately when dialog opens
   useEffect(() => {
-    if (
-      step === 3 &&
-      !formData.imageUrl &&
-      !isGeneratingMedia &&
-      !mediaGenerated
-    ) {
-      generateMediaWhenReady();
+    if (open && pages && pages.length > 0 && !mediaGenerated && !isGeneratingMedia && !formData.imageUrl) {
+      console.log('[WhatsAppCampaignDialog] Dialog opened - starting immediate media generation');
+      // Small delay to ensure the dialog is fully rendered
+      const timer = setTimeout(() => {
+        generateMediaImmediately();
+      }, 500);
+      
+      return () => clearTimeout(timer);
     }
-  }, [
-    step,
-    formData.imageUrl,
-    isGeneratingMedia,
-    mediaGenerated,
-    generateMediaWhenReady,
-  ]);
+  }, [open, pages, mediaGenerated, isGeneratingMedia, formData.imageUrl, generateMediaImmediately]);
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -1333,27 +1480,32 @@ export default function WhatsAppCampaignDialog({
           {/* Step 2: Customer Selection */}
           {step === 2 && (
             <div className="space-y-4">
-              {isLoadingCustomers ? (
-                <div className="flex items-center justify-center py-8">
+              {/* Customer Header with inline Segment Filter */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <RefreshCw className="h-5 w-5 animate-spin" />
-                    <span>Loading customers...</span>
+                    <Users className="h-5 w-5" />
+                    <span className="font-medium">
+                      {customers.length > 0 
+                        ? `${totalCustomersCount > 0 ? totalCustomersCount : customers.length} customers available`
+                        : isLoadingCustomers 
+                          ? 'Loading customers...'
+                          : 'No customers found'
+                      }
+                    </span>
+                    {selectedCustomers.length > 0 && (
+                      <Badge variant="secondary" className="ml-2">
+                        {selectedCustomers.length} selected
+                      </Badge>
+                    )}
                   </div>
-                </div>
-              ) : (
-                <>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Users className="h-5 w-5" />
-                      <span className="font-medium">
-                        {filteredCustomers.length} customers available
-                      </span>
-                    </div>
-                    <div className="flex gap-2">
+                  <div className="flex items-center gap-2 ">
+                    <Label className="text-sm font-medium whitespace-nowrap pt-2">Customer<br/> Segments:</Label>
+                    <div className="w-64">
                       <MultipleSelector
                         value={selectedSegments}
                         onChange={handleSegmentChange}
-                        placeholder="Select or add customer segments..."
+                        placeholder="Select segments..."
                         defaultOptions={[
                           { value: "vip", label: "VIP Customers" },
                           {
@@ -1366,7 +1518,7 @@ export default function WhatsAppCampaignDialog({
                           },
                           { value: "high_spenders", label: "High Spenders" },
                           { value: "new_customers", label: "New Customers" },
-                          { value: "all", label: "All Customers" },
+                          { value: "regular", label: "Regular Customers" },
                         ]}
                         emptyIndicator={
                           <p className="text-center text-sm text-gray-500">
@@ -1377,148 +1529,161 @@ export default function WhatsAppCampaignDialog({
                       />
                     </div>
                   </div>
+                </div>
+              </div>
 
-                  {/* Customer Selection Slider */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-sm font-medium">
-                        Select Customers ({customerSliderValue[0]} of{" "}
-                        {filteredCustomers.length})
-                      </Label>
-                      <span className="text-xs text-gray-500">
-                        Use the slider to select customers
-                      </span>
-                    </div>
-                    <div className="px-3">
-                      {filteredCustomers.length > 0 ? (
-                        <SliderWithTicks
-                          value={customerSliderValue}
-                          onValueChange={handleSliderChange}
-                          max={filteredCustomers.length}
-                          min={0}
-                          step={1}
-                          className="w-full"
-                          showTicks={true}
-                        />
-                      ) : (
-                        <div className="text-center py-4 text-gray-500">
-                          <span className="text-sm">
-                            No customers available to select
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+              {/* Customer Selection Tools */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium">
+                    Select Customers ({customerSliderValue[0]} of {maxSelectableCustomers})
+                  </Label>
+                  <span className="text-xs text-gray-500">
+                    {filteredCustomers.length} loaded, {hasNextPage ? 'more available' : 'all loaded'}
+                  </span>
+                </div>
 
-                  <div className="flex gap-2 flex-wrap">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={selectAllCustomers}
-                    >
-                      Select All
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={clearSelection}
-                    >
-                      Clear All
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => selectBySegment("vip")}
-                    >
-                      Select VIP
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => selectBySegment("regular")}
-                    >
-                      Select Regular
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={loadCustomers}
-                      disabled={isLoadingCustomers}
-                    >
-                      <RefreshCw
-                        className={`h-4 w-4 ${
-                          isLoadingCustomers ? "animate-spin" : ""
-                        }`}
-                      />
-                      Reload
-                    </Button>
-                  </div>
-
-                  <div className="border rounded-lg p-4 max-h-80 overflow-y-auto">
-                    {filteredCustomers.length > 0 ? (
-                      <div className="space-y-2">
-                        {filteredCustomers.map((customer) => (
-                          <div
-                            key={customer._id}
-                            className="flex items-center space-x-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg border"
-                          >
-                            <Checkbox
-                              checked={selectedCustomers.includes(customer._id)}
-                              onCheckedChange={() =>
-                                toggleCustomerSelection(customer._id)
-                              }
-                            />
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium">
-                                  {customer.name}
-                                </span>
-                                <Badge
-                                  className={customerService.getSegmentColor(
-                                    customer.customerSegment
-                                  )}
-                                >
-                                  {customer.customerSegment}
-                                </Badge>
-                              </div>
-                              <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
-                                <div className="flex items-center gap-1">
-                                  <Phone className="h-3 w-3" />
-                                  {customer.phoneNumber}
-                                </div>
-                                <div>
-                                  Total:{" "}
-                                  {customerService.formatCurrency(
-                                    customer.totalPayments
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8 text-gray-500">
-                        <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                        <p>No customers found for this outlet</p>
-                        <p className="text-sm">
-                          Try selecting a different outlet or add customers
-                          first
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {selectedCustomers.length > 0 && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
-                      <Target className="h-4 w-4" />
-                      <span>
-                        {selectedCustomers.length} customers selected for
-                        campaign
+                {/* Customer Selection Slider */}
+                <div className="px-3">
+                  {maxSelectableCustomers > 0 ? (
+                    <SliderWithTicks
+                      value={customerSliderValue}
+                      onValueChange={handleSliderChange}
+                      max={maxSelectableCustomers}
+                      min={0}
+                      step={1}
+                      className="w-full"
+                      showTicks={true}
+                    />
+                  ) : (
+                    <div className="text-center py-4 text-gray-500">
+                      <span className="text-sm">
+                        No customers available to select
                       </span>
                     </div>
                   )}
-                </>
+                  
+                  {/* Loading indicator for when fetching more customers for slider */}
+                  {isFetchingNextPage && customerSliderValue[0] > filteredCustomers.length && (
+                    <div className="flex items-center justify-center mt-2 text-sm text-blue-600">
+                      <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                      Loading more customers...
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium">
+                    Selected Customers ({selectedCustomers.length} total)
+                  </Label>
+                </div>
+              </div>
+
+              {/* Infinite Scroll Customer List */}
+              <div 
+                className="border rounded-lg p-4 max-h-80 overflow-y-auto"
+                onScroll={handleScroll}
+              >
+                {isLoadingCustomers && customers.length === 0 ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="flex items-center gap-2">
+                      <RefreshCw className="h-5 w-5 animate-spin" />
+                      <span>Loading customers...</span>
+                    </div>
+                  </div>
+                ) : customers.length > 0 ? (
+                  <div className="space-y-2">
+                    {customers.map((customer) => (
+                      <div
+                        key={customer._id}
+                        className="flex items-center space-x-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg border"
+                      >
+                        <Checkbox
+                          checked={selectedCustomers.includes(customer._id)}
+                          onCheckedChange={() =>
+                            toggleCustomerSelection(customer._id)
+                          }
+                        />
+                        <div className="flex-1 flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">
+                                {customer.name}
+                              </span>
+                              <Badge
+                                className={customerService.getSegmentColor(
+                                  customer.customerSegment
+                                )}
+                              >
+                                {customer.customerSegment}
+                              </Badge>
+                            </div>
+                            <div className="text-sm text-gray-500 flex items-center gap-4">
+                              <span className="flex items-center gap-1">
+                                <Phone className="h-3 w-3" />
+                                {customer.phoneNumber}
+                              </span>
+                              {customer.email && (
+                                <span>{customer.email}</span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-xs text-gray-400 flex-shrink-0">
+                            Last visit: {formatTimeAgo(customer.lastVisit)}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {/* Loading more indicator */}
+                    {isFetchingNextPage && (
+                      <div className="flex items-center justify-center py-4">
+                        <div className="flex items-center gap-2">
+                          <RefreshCw className="h-4 w-4 animate-spin" />
+                          <span className="text-sm text-gray-500">Loading more customers...</span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* End of list indicator */}
+                    {!hasNextPage && customers.length > 0 && (
+                      <div className="text-center py-4">
+                        <span className="text-sm text-gray-500">
+                          All customers loaded ({customers.length} total)
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ) : customersError ? (
+                  <div className="text-center py-8">
+                    <div className="flex flex-col items-center gap-2">
+                      <AlertCircle className="h-8 w-8 text-red-500" />
+                      <span className="text-sm text-red-600">Failed to load customers</span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => refetchCustomers()}
+                      >
+                        Retry
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <span className="text-sm text-gray-500">
+                      No customers found. Try adjusting your search or filters.
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {selectedCustomers.length > 0 && (
+                <div className="flex items-center gap-2 text-sm text-gray-600 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                  <Target className="h-4 w-4" />
+                  <span>
+                    {selectedCustomers.length} customers selected for campaign
+                  </span>
+                </div>
               )}
             </div>
           )}
@@ -1717,12 +1882,12 @@ export default function WhatsAppCampaignDialog({
 
           <Button
             onClick={handleNext}
-            disabled={isLoading || isLoadingCustomers}
+            disabled={isLoading || (isLoadingCustomers && customers.length === 0)}
             className={step === 3 ? "bg-green-600 hover:bg-green-700" : ""}
           >
             {isLoading ? (
               "Creating..."
-            ) : isLoadingCustomers ? (
+            ) : (isLoadingCustomers && customers.length === 0) ? (
               "Loading Customers..."
             ) : step === 3 ? (
               <>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLayer, useEditor, useSelectedLayers } from '../hooks';
-import { Delta, BoxSize, LayerComponent } from 'canva-editor/types';
+import { Delta, BoxSize, LayerComponent, ImageEffectSettings } from 'canva-editor/types';
 import { ImageContentProps, ImageContent } from '.';
 
 export interface ImageLayerProps extends ImageContentProps {
@@ -12,9 +12,10 @@ export interface ImageLayerProps extends ImageContentProps {
         boxSize: BoxSize;
         transparency?: number;
     };
+    imageEffects?: ImageEffectSettings;
 }
 
-const ImageLayer: LayerComponent<ImageLayerProps> = ({ image, boxSize, position, rotate }) => {
+const ImageLayer: LayerComponent<ImageLayerProps> = ({ image, boxSize, position, rotate, imageEffects }) => {
     const { actions, pageIndex, id } = useLayer();
     const { selectedLayerIds } = useSelectedLayers();
     const { imageEditor } = useEditor((state) => ({ imageEditor: state.imageEditor }));
@@ -43,7 +44,7 @@ const ImageLayer: LayerComponent<ImageLayerProps> = ({ image, boxSize, position,
                 selectedLayerIds.includes(id) && actions.openImageEditor({ position, rotate, boxSize, image })
             }
         >
-            <ImageContent image={imageData} boxSize={boxSize} rotate={rotate} position={position} />
+            <ImageContent image={imageData} boxSize={boxSize} rotate={rotate} position={position} imageEffects={imageEffects} />
         </div>
     );
 };

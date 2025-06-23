@@ -63,12 +63,12 @@ connectDB();
 
 // Use routes
 app.use("/api", templateRoutes);
+app.use("/api/media", mediaRoutes);
 app.use("/api", textTemplateRoutes);
 app.use("/api", uploadedImageRoutes);
 app.use("/api", imageProcessingRoutes);
 app.use("/api", videoProcessingRoutes);
 app.use("/api", whatsappSettingsRoutes);
-app.use("/api/media", mediaRoutes);
 app.use("/api/media/upload", mediaUploadRoutes);
 app.use("/api", imageProxyRoutes);
 app.use("/api", kioskRoutes);
@@ -88,6 +88,7 @@ app.listen(PORT, () => {
 
 app.use(express.static(__dirname + "/public")); //Serves resources from public folder
 app.use(express.static(__dirname + "/json")); //Serves resources from public folder
+app.use('/temp', express.static(__dirname + "/temp")); //Serves video output files
 
 function paginateArrayWithFilter(array, size = 30, index = 0, keyword = "") {
   const startIndex = index * size;

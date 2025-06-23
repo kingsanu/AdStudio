@@ -73,6 +73,24 @@ export type EffectSettings = {
   thickness?: number;
 };
 
+export type ImageEffectSettings = {
+  brightness?: number; // 0-200, default 100
+  contrast?: number; // 0-200, default 100
+  saturation?: number; // 0-200, default 100
+  hue?: number; // -180 to 180, default 0
+  borderRadius?: number; // 0-50, default 0 (percentage)
+  sepia?: number; // 0-100, default 0
+  grayscale?: number; // 0-100, default 0
+  invert?: number; // 0-100, default 0
+  removeBackground?: boolean; // default false
+  // Border properties
+  borderWidth?: number; // 0-20, default 0 (pixels)
+  borderColor?: string; // default '#000000'
+  borderStyle?: 'solid' | 'dotted' | 'dashed' | 'curved'; // default 'solid'
+  // Original image tracking
+  originalImageUrl?: string; // Track original image URL before background removal
+};
+
 export type ShapeType =
   | "circle"
   | "rectangle"

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { FC, useContext, useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   EditorContext,
   EditorContext as EditorContextType,
@@ -57,6 +57,8 @@ interface CustomHeaderProps {
   isKiosk?: boolean;
   isLiveMenu?: boolean;
   isCoupon?: boolean;
+  isInCouponTemplateMode?: boolean;
+  onBulkGenerate?: () => void;
   editorContext?: CustomEditorContext; // Use our custom context type
 }
 
@@ -67,6 +69,8 @@ const CustomHeader: FC<CustomHeaderProps> = ({
   isKiosk = false,
   isLiveMenu = false,
   isCoupon = false,
+  isInCouponTemplateMode = false,
+  onBulkGenerate,
   editorContext,
 }) => {
   const navigate = useNavigate();
@@ -194,6 +198,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
       <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-neutral-900">
         <div className="flex items-center space-x-4">
           {/* Logo */}
+        <Link to="/dashboard" className="flex items-center space-x-2">
           <div className="flex items-center">
             <div className="h-8 w-8 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-[#0070f3] dark:bg-[#0070f3] flex items-center justify-center">
               <span className="text-white font-bold">A</span>
@@ -202,6 +207,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
               Ads Studio
             </span>
           </div>
+        </Link>
 
           {/* Project Title */}
           <div className="flex items-center space-x-2">
@@ -307,14 +313,25 @@ const CustomHeader: FC<CustomHeaderProps> = ({
               Publish to Live Menu
             </Button>
           ) : isCoupon ? (
-            <Button
-              size="sm"
-              className="h-9 bg-orange-600 hover:bg-orange-700"
-              onClick={() => setShowBulkCouponDialog(true)}
-            >
-              <FileText className="mr-2 h-4 w-4" />
-              Bulk Generate
-            </Button>
+            isInCouponTemplateMode ? (
+              <Button
+                size="sm"
+                className="h-9 bg-orange-600 hover:bg-orange-700"
+                onClick={onBulkGenerate}
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                Bulk Generate
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                className="h-9 bg-orange-600 hover:bg-orange-700"
+                onClick={() => setShowBulkCouponDialog(true)}
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                Bulk Generate
+              </Button>
+            )
           ) : campaignProgress.isCreated ? (
             <div className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-md h-9 min-w-[160px]">
               <div className="flex-1">

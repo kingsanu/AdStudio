@@ -10,14 +10,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
-  Monitor,
   Tv,
-  Eye,
-  Save,
   Loader2,
   AlertCircle,
   CheckCircle,
@@ -32,7 +26,6 @@ import {
   UPLOAD_LIVEMENU_TEMPLATE_ENDPOINT,
   UPLOAD_LIVEMENU_IMAGE_ENDPOINT,
 } from "canva-editor/utils/constants/api";
-import { domToPng } from "modern-screenshot";
 import axios from "axios";
 
 interface PublishLiveMenuDialogProps {
@@ -47,50 +40,20 @@ const PublishLiveMenuDialog: React.FC<PublishLiveMenuDialogProps> = ({
   const { user } = useAuth();
   const { query, actions, state } = useEditor();
   const { pages, activePage } = state;
-  const [liveMenuData, setLiveMenuData] = useState<any>(null);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveProgress, setSaveProgress] = useState(0);
-  const [previewImage, setPreviewImage] = useState<string>("");
+  
+  // State for loading and progress
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [publishProgress, setPublishProgress] = useState(0);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load live menu data when dialog opens
+  // Auto-publish when dialog opens
   useEffect(() => {
-    if (open && user?.userId) {
-      loadLiveMenuData();
-    }
-  }, [open, user?.userId]);
-
-  // Generate preview image when dialog opens
-  useEffect(() => {
-    if (open) {
-      const generatePreview = async () => {
-        const pageContentEl = document.querySelector(".page-content");
-        if (pageContentEl) {
-          try {
-            const thumbnailData = await domToPng(pageContentEl as HTMLElement, {
-              width: pageContentEl.clientWidth,
-              height: pageContentEl.clientHeight,
-            });
-            setPreviewImage(thumbnailData);
-          } catch (error) {
-            console.error("Error generating preview:", error);
-            toast.error("Preview Generation Failed", {
-              description:
-                "Could not generate template preview. Please try again.",
-              icon: <AlertCircle className="h-5 w-5 text-white" />,
-              duration: 5000,
-            });
-          }
-        }
-      };
-      generatePreview();
+    if (open && !isPublishing) {
+      handlePublish();
     }
   }, [open]);
 
-  // Cleanup effect
+  // Cleanup interval on unmount
   useEffect(() => {
     return () => {
       if (progressIntervalRef.current) {
@@ -99,44 +62,29 @@ const PublishLiveMenuDialog: React.FC<PublishLiveMenuDialogProps> = ({
     };
   }, []);
 
-  const loadLiveMenuData = async () => {
-    try {
-      setIsLoading(true);
-      const response = await liveMenuService.getUserLiveMenu(user!.userId);
-      const liveMenu = response.liveMenu;
-      setLiveMenuData(liveMenu);
-      setTitle(liveMenu.title || "");
-      setDescription(liveMenu.description || "");
-    } catch (error) {
-      console.error("Error loading live menu data:", error);
-      toast.error("Failed to load live menu data");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSave = async () => {
+  const handlePublish = async () => {
     if (!user?.userId) {
-      toast.error("Please log in to save live menu");
-      return;
-    }
-
-    if (!title.trim()) {
-      toast.error("Please enter a title for your live menu");
+      toast.error("Please log in to publish live menu");
       return;
     }
 
     try {
-      setIsSaving(true);
-      setSaveProgress(0);
+      setIsPublishing(true);
+      setPublishProgress(0);
+
+      // Show loading toast
+      toast.loading("Publishing Live Menu", {
+        description: "Updating your TV display with latest design...",
+        duration: 60000, // 1 minute timeout
+      });
 
       // Start progress animation
       progressIntervalRef.current = setInterval(() => {
-        setSaveProgress((prev) => {
-          if (prev >= 90) return prev;
-          return prev + Math.random() * 10;
+        setPublishProgress((prev) => {
+          const newProgress = prev + Math.random() * 10;
+          return newProgress > 90 ? 90 : newProgress; // Cap at 90% until complete
         });
-      }, 200);
+      }, 500);
 
       const userId = user.userId;
 
@@ -146,6 +94,9 @@ const PublishLiveMenuDialog: React.FC<PublishLiveMenuDialogProps> = ({
       // Pack the data
       const [packedResult] = pack(designData, dataMapping);
       const packedData = packedResult;
+
+      // Update progress
+      setPublishProgress(20);
 
       // First, upload the template JSON to cloud storage
       console.log("Uploading live menu template JSON to cloud storage");
@@ -161,10 +112,13 @@ const PublishLiveMenuDialog: React.FC<PublishLiveMenuDialogProps> = ({
       const templateUrl = templateResponse.data.templateUrl;
       console.log("Live menu template URL:", templateUrl);
 
-      // Update the user's live menu with the new template
+      // Update progress
+      setPublishProgress(40);
+
+      // Update the user's live menu with the new template (backend should handle upsert)
       await liveMenuService.updateUserLiveMenu(userId, {
-        title,
-        description,
+        title: "Live Menu Display",
+        description: "Restaurant live menu for TV display",
         templateUrl,
         templateData: packedData,
       });
@@ -173,260 +127,147 @@ const PublishLiveMenuDialog: React.FC<PublishLiveMenuDialogProps> = ({
       const liveMenuResponse = await liveMenuService.getUserLiveMenu(userId);
       const liveMenuId = liveMenuResponse.liveMenu.id;
 
-      // Get all pages from the design - use the same logic as kiosk
-      const pageKeys = Object.keys(pages || {});
-      const originalActivePage = activePage;
+      // Update progress
+      setPublishProgress(60);
 
-      // Capture each page as an image
-      console.log(`Starting to capture ${pageKeys.length} pages`);
-      console.log(`Editor state pages:`, pageKeys);
-      for (let i = 0; i < pageKeys.length; i++) {
-        try {
-          console.log(`Processing page ${i + 1} of ${pageKeys.length}`);
+      // Generate all page images using command-based capture
+      console.log("Capturing all pages using fireCaptureCmd...");
+      
+      // Use the new capture command to get all page images
+      const pageImages = await new Promise<string[]>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          window.removeEventListener('pagesCapture', handleCaptureComplete);
+          reject(new Error('Page capture timeout after 30 seconds'));
+        }, 30000);
 
-          // Set the active page
-          console.log(`Setting active page to ${i}`);
-          actions.setActivePage(i);
+        const handleCaptureComplete = (event: Event) => {
+          clearTimeout(timeout);
+          const customEvent = event as CustomEvent;
+          const { images } = customEvent.detail;
+          window.removeEventListener('pagesCapture', handleCaptureComplete);
+          resolve(images || []);
+        };
 
-          // Add a small delay to ensure the page is set
-          await new Promise((resolve) => setTimeout(resolve, 100));
+        window.addEventListener('pagesCapture', handleCaptureComplete);
+        
+        // Trigger capture of all pages
+        console.log('[PublishLiveMenuDialog] Triggering fireCaptureCmd for all pages');
+        actions.fireCaptureCmd(0); // 0 = capture all pages
+      });
 
-          // Force a re-render by updating the state
-          setSaveProgress((prev) => {
-            console.log(`Updating progress to force re-render: ${prev + 0.1}`);
-            return prev + 0.1;
-          });
-
-          // Add another delay to ensure the DOM is updated
-          await new Promise((resolve) => setTimeout(resolve, 200));
-
-          // Find the page content element
-          const pageContentEl = document.querySelector(".page-content");
-          console.log(`Page content element found:`, !!pageContentEl);
-
-          if (pageContentEl) {
-            // Generate image
-            const dataUrl = await domToPng(pageContentEl as HTMLElement, {
-              width: pageContentEl.clientWidth,
-              height: pageContentEl.clientHeight,
-              quality: 1.0,
-              scale: 1.0,
-            });
-
-            // Upload the image to cloud storage
-            const pageImageFilename = `page_${i + 1}.png`;
-            console.log(
-              `Uploading image for page ${
-                i + 1
-              } with filename: ${pageImageFilename}`
-            );
-
-            const base64Data = dataUrl.split(",")[1];
-            console.log(
-              `Image data preview for page ${i + 1}: ${base64Data.substring(
-                0,
-                50
-              )}...`
-            );
-
-            const response = await axios.post(UPLOAD_LIVEMENU_IMAGE_ENDPOINT, {
-              base64: base64Data,
-              pageIndex: i,
-              liveMenuId,
-            });
-
-            console.log(`Upload response for page ${i + 1}:`, response.data);
-          }
-        } catch (error) {
-          console.error(`Error processing page ${i}:`, error);
-        }
+      if (pageImages.length === 0) {
+        throw new Error('Failed to capture any page images');
       }
 
-      // Restore the original active page
-      actions.setActivePage(originalActivePage);
+      console.log(`Successfully captured ${pageImages.length} page images`);
+
+      // Update progress
+      setPublishProgress(80);
+
+      // Upload each captured image to cloud storage
+      for (let i = 0; i < pageImages.length; i++) {
+        try {
+          const dataUrl = pageImages[i];
+          console.log(`Uploading image for page ${i + 1}`);
+
+          const base64Data = dataUrl.split(",")[1];
+          console.log(`Image data preview for page ${i + 1}: ${base64Data.substring(0, 50)}...`);
+
+          const response = await axios.post(UPLOAD_LIVEMENU_IMAGE_ENDPOINT, {
+            base64: base64Data,
+            pageIndex: i,
+            liveMenuId,
+          });
+
+          console.log(`Upload response for page ${i + 1}:`, response.data);
+        } catch (error) {
+          console.error(`Error uploading page ${i + 1}:`, error);
+        }
+      }
 
       // Clear the interval and set progress to 100%
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
       }
-      setSaveProgress(100);
+      setPublishProgress(100);
 
-      toast.success("Live Menu Published", {
-        description: `Live menu "${title}" has been published successfully!`,
+      // Dismiss the loading toast and show success toast
+      toast.dismiss();
+      toast.success("Live Menu Updated", {
+        description: `Your TV display has been updated with ${pageImages.length} page images!`,
         icon: <CheckCircle className="h-5 w-5 text-white" />,
         duration: 4000,
       });
 
       onClose();
     } catch (error) {
-      console.error("Error saving live menu:", error);
+      console.error("Error publishing live menu:", error);
 
       // Clear the interval on error
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
       }
 
-      toast.error("Failed to publish live menu", {
-        description:
-          "Please try again or contact support if the issue persists.",
+      // Dismiss the loading toast and show error toast
+      toast.dismiss();
+
+      // Get a more specific error message if available
+      let errorMessage = "There was an error updating your live menu. Please try again.";
+
+      if (axios.isAxiosError(error)) {
+        if (error.response?.data?.message) {
+          errorMessage = `Error: ${error.response.data.message}`;
+        } else if (error.message) {
+          errorMessage = `Error: ${error.message}`;
+        }
+      } else if (error instanceof Error) {
+        errorMessage = `Error: ${error.message}`;
+      }
+
+      toast.error("Update Failed", {
+        description: errorMessage,
         icon: <AlertCircle className="h-5 w-5 text-white" />,
         duration: 5000,
       });
     } finally {
-      setIsSaving(false);
-      setSaveProgress(0);
-    }
-  };
-
-  const handlePreview = () => {
-    if (liveMenuData?.pageImages && liveMenuData.pageImages.length > 0) {
-      // Open preview in a new window/tab
-      const previewUrl = `/live-menu-preview/${liveMenuData.id}`;
-      window.open(previewUrl, "_blank", "width=1920,height=1080");
-    } else {
-      toast.error(
-        "No preview available. Please publish your live menu first to generate page images."
-      );
+      setIsPublishing(false);
+      setPublishProgress(0);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Tv className="h-5 w-5 text-purple-600" />
-            Publish Live Menu to TV
+            Update Live Menu Display
           </DialogTitle>
           <DialogDescription>
-            Configure your live menu for TV display. This will be shown on your
-            restaurant's TV screens.
+            Updating your live menu display with the latest design...
           </DialogDescription>
         </DialogHeader>
 
-        {isLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
-            <span className="ml-2">Loading live menu data...</span>
+        <div className="flex flex-col items-center justify-center py-8 space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+          <div className="text-center">
+            <p className="font-medium">Publishing Live Menu...</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Capturing pages and uploading to TV display
+            </p>
           </div>
-        ) : isSaving ? (
-          <div className="flex flex-col items-center justify-center py-8 space-y-4">
-            <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
-            <div className="text-center">
-              <p className="font-medium">Publishing Live Menu...</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Capturing pages and uploading to cloud storage
-              </p>
-            </div>
-            <div className="w-full max-w-xs">
-              <div className="bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                <div
-                  className="bg-purple-600 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${saveProgress}%` }}
-                />
-              </div>
-              <p className="text-xs text-center mt-1 text-gray-500">
-                {Math.round(saveProgress)}% complete
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {/* Live Menu Info */}
-            <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <Monitor className="h-4 w-4 text-purple-600" />
-                <span className="font-medium text-purple-800 dark:text-purple-200">
-                  TV Display Settings
-                </span>
-              </div>
-              <p className="text-sm text-purple-700 dark:text-purple-300">
-                Optimized for 1920x1080 TV resolution. Your live menu will be
-                displayed in landscape mode.
-              </p>
-            </div>
-
-            {/* Title Input */}
-            <div className="space-y-2">
-              <Label htmlFor="title">Live Menu Title</Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Enter live menu title"
-                className="w-full"
+          <div className="w-full max-w-xs">
+            <div className="bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+              <div
+                className="bg-purple-600 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${publishProgress}%` }}
               />
             </div>
-
-            {/* Description Input */}
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Enter live menu description"
-                className="w-full min-h-[80px]"
-              />
-            </div>
-
-            {/* Live Menu Stats */}
-            {liveMenuData && (
-              <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-gray-600 dark:text-gray-400">
-                      Pages:
-                    </span>
-                    <span className="ml-1 font-medium">
-                      {liveMenuData.pageImages?.length || 0}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600 dark:text-gray-400">
-                      Last Updated:
-                    </span>
-                    <span className="ml-1 font-medium">
-                      {liveMenuData.updatedAt
-                        ? new Date(liveMenuData.updatedAt).toLocaleDateString()
-                        : "Never"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex justify-between pt-4">
-              <Button
-                variant="outline"
-                onClick={handlePreview}
-                disabled={!liveMenuData?.pageImages?.length}
-              >
-                <Eye className="mr-2 h-4 w-4" />
-                Preview
-              </Button>
-
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={onClose}>
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleSave}
-                  disabled={isSaving || !title.trim()}
-                  className="bg-purple-600 hover:bg-purple-700"
-                >
-                  {isSaving ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Save className="mr-2 h-4 w-4" />
-                  )}
-                  {isSaving ? "Saving..." : "Save & Publish"}
-                </Button>
-              </div>
-            </div>
+            <p className="text-xs text-center mt-1 text-gray-500">
+              {Math.round(publishProgress)}% complete
+            </p>
           </div>
-        )}
+        </div>
       </DialogContent>
     </Dialog>
   );

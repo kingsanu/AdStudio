@@ -284,10 +284,10 @@ const DesignPage: ForwardRefRenderFunction<HTMLDivElement, PageProps> = (
       >
         <div css={{ flexGrow: 1 }}>
           <div css={{ display: "flex" }}>
-            <div>Page {pageIndex + 1} -</div>&nbsp;
+            <div>Image {pageIndex + 1} -</div>&nbsp;
             <EditInlineInput
               text={pageName}
-              placeholder="Add page title"
+              placeholder="Add Image title"
               onSetText={(newText) => {
                 actions.setPageName(pageIndex, newText);
               }}

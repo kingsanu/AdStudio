@@ -43,7 +43,7 @@ export interface Campaign {
   whatsappUsername: string;
   targetCustomers: CampaignTarget[];
   message: string;
-  imageUrl?: string;
+  imageUrl?: string; // Can contain either image or video URL
   status:
     | "draft"
     | "pending"

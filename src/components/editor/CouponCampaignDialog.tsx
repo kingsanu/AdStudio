@@ -3,17 +3,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { X, Tag, Calendar, Percent, Users, Download } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { X, Tag, Calendar as CalendarIcon, Percent, Users, Download } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { couponCampaignService } from "@/services/couponCampaignService";
 import { domToPng } from "modern-screenshot";
 import { jsPDF } from "jspdf";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface CouponCampaignDialogProps {
   open: boolean;
   onClose: () => void;
-  onSuccess: (campaignId: string) => void;
+  onSuccess: (result: string | { type: 'template-edit-mode'; data: any }) => void;
   templateData?: unknown;
   templateImageUrl?: string;
 }
@@ -25,16 +29,15 @@ const CouponCampaignDialog: React.FC<CouponCampaignDialogProps> = ({
   templateData,
   templateImageUrl,
 }) => {
-  const { user } = useAuth();
-  const [formData, setFormData] = useState({
+  const { user } = useAuth();  const [formData, setFormData] = useState({
     campaignName: "",
     description: "",
     discountPercentage: 10,
     validity: "",
     numberOfCoupons: 100,
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [step, setStep] = useState<"verify" | "edit">("verify");
+  const [validityDate, setValidityDate] = useState<Date>();
+  const [isLoading, setIsLoading] = useState(false);  const [step, setStep] = useState<"create" | "verify" | "edit">("create");
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [pdfProgress, setPdfProgress] = useState(0);
 
@@ -185,29 +188,11 @@ const CouponCampaignDialog: React.FC<CouponCampaignDialogProps> = ({
     if (isLoading) return "Creating Campaign...";
     if (isGeneratingPDF) return "Generating PDF...";
     return "Create Campaign ";
-  };
-  useEffect(() => {
-    if (open && user) {
-      const defaultValidity = new Date();
-      defaultValidity.setMonth(defaultValidity.getMonth() + 1); // Default to 1 month from now
-      setFormData((prev) => ({
-        ...prev,
-        campaignName: user.businessName
-          ? `${user.businessName} Special Offer`
-          : "Special Offer",
-        description: `Exclusive discount coupon for ${
-          user.businessName ?? "our valued customers"
-        }`,
-        validity: defaultValidity.toISOString().split("T")[0],
-      }));
-    }
-  }, [open, user]);
-
-  // Get tomorrow's date as minimum validity date
+  };  // Get tomorrow's date as minimum validity date
   const getTomorrowDate = () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split("T")[0];
+    return tomorrow;
   };
 
   const handleInputChange = (
@@ -223,6 +208,15 @@ const CouponCampaignDialog: React.FC<CouponCampaignDialogProps> = ({
     }));
   };
 
+  const handleDateSelect = (date: Date | undefined) => {
+    if (date) {
+      setValidityDate(date);
+      setFormData((prev) => ({
+        ...prev,
+        validity: format(date, "yyyy-MM-dd"),
+      }));
+    }
+  };
   const validateForm = () => {
     if (!formData.campaignName.trim()) {
       toast.error("Campaign name is required");
@@ -236,11 +230,11 @@ const CouponCampaignDialog: React.FC<CouponCampaignDialogProps> = ({
       toast.error("Number of coupons must be between 1 and 10,000");
       return false;
     }
-    if (!formData.validity) {
+    if (!validityDate) {
       toast.error("Validity date is required");
       return false;
     }
-    if (new Date(formData.validity) <= new Date()) {
+    if (validityDate <= new Date()) {
       toast.error("Validity date must be greater than today");
       return false;
     }
@@ -286,8 +280,7 @@ const CouponCampaignDialog: React.FC<CouponCampaignDialogProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
-  const resetForm = () => {
+  };  const resetForm = () => {
     setFormData({
       campaignName: "",
       description: "",
@@ -295,10 +288,30 @@ const CouponCampaignDialog: React.FC<CouponCampaignDialogProps> = ({
       validity: "",
       numberOfCoupons: 100,
     });
-    setStep("verify");
+    setValidityDate(undefined);
+    setStep("create");
+  };  const handleBulkGenerate = () => {
+    if (!validateForm()) {
+      return;
+    }
+    // Close the dialog and let user edit the template
+    // Pass the campaign data to the parent component
+    onSuccess({ 
+      type: 'template-edit-mode', 
+      data: {
+        ...formData,
+        validity: validityDate ? format(validityDate, "yyyy-MM-dd") : formData.validity
+      }
+    });
+    onClose();
   };
 
   const handleClose = () => {
+    // Only allow closing if not in create step or if form is not filled
+    if (step === "create" && (formData.campaignName.trim() || formData.description.trim())) {
+      toast.error("Please complete the campaign creation or clear all fields to cancel");
+      return;
+    }
     resetForm();
     onClose();
   };
@@ -310,44 +323,49 @@ const CouponCampaignDialog: React.FC<CouponCampaignDialogProps> = ({
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
         <div className="flex items-center justify-between p-6 border-b dark:border-gray-700">
           <div className="flex items-center gap-2">
-            <Tag className="h-5 w-5 text-blue-600 dark:text-blue-400" />{" "}
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              {step === "verify"
+            <Tag className="h-5 w-5 text-blue-600 dark:text-blue-400" />{" "}            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+              {step === "create"
+                ? "Create New Coupon Campaign"
+                : step === "verify"
                 ? "Verify Coupon Campaign Details"
                 : "Edit Coupon Campaign"}
             </h2>
-          </div>
-          <button
-            onClick={handleClose}
+          </div>          <button
+            onClick={step === "create" ? handleClose : () => setStep("create")}
             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+            title={step === "create" ? "Cancel (only if form is empty)" : "Back to create step"}
           >
             <X className="h-5 w-5" />
           </button>
-        </div>{" "}
-        <div className="p-6">
-          {step === "edit" ? (
+        </div>{" "}        <div className="p-6">
+          {step === "create" ? (
             <div className="space-y-4">
-              <div>
-                <Label htmlFor="campaignName">Coupon Campaign Name *</Label>{" "}
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-4">
+                <p className="text-sm text-blue-800 dark:text-blue-200">
+                  <strong>Create a new coupon campaign</strong> by filling in the details below. 
+                  All fields marked with * are required.
+                </p>
+              </div>              <div>
+                <Label htmlFor="campaignName">Coupon Campaign Name *</Label>
                 <Input
                   id="campaignName"
                   name="campaignName"
                   value={formData.campaignName}
                   onChange={handleInputChange}
-                  placeholder="e.g., Summer Sale 2024"
+                  placeholder="Summer Sale 2024, Holiday Special, Black Friday Deal"
                   required
                   disabled={isLoading || isGeneratingPDF}
                 />
               </div>
 
               <div>
-                <Label htmlFor="description">Description (Optional)</Label>{" "}
+                <Label htmlFor="description">Description (Optional)</Label>
                 <Textarea
                   id="description"
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
-                  placeholder="Brief description of the campaign..."
+                  placeholder="Get 20% off on all items. Valid for new and existing customers. Cannot be combined with other offers."
                   rows={3}
                   disabled={isLoading || isGeneratingPDF}
                 />
@@ -356,7 +374,7 @@ const CouponCampaignDialog: React.FC<CouponCampaignDialogProps> = ({
               <div>
                 <Label htmlFor="numberOfCoupons">Number of Coupons *</Label>
                 <div className="relative">
-                  <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />{" "}
+                  <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
                     id="numberOfCoupons"
                     name="numberOfCoupons"
@@ -366,6 +384,7 @@ const CouponCampaignDialog: React.FC<CouponCampaignDialogProps> = ({
                     value={formData.numberOfCoupons}
                     onChange={handleInputChange}
                     className="pl-10"
+                    placeholder="100"
                     required
                     disabled={isLoading || isGeneratingPDF}
                   />
@@ -380,7 +399,7 @@ const CouponCampaignDialog: React.FC<CouponCampaignDialogProps> = ({
                   Discount Percentage *
                 </Label>
                 <div className="relative">
-                  <Percent className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />{" "}
+                  <Percent className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
                     id="discountPercentage"
                     name="discountPercentage"
@@ -390,30 +409,159 @@ const CouponCampaignDialog: React.FC<CouponCampaignDialogProps> = ({
                     value={formData.discountPercentage}
                     onChange={handleInputChange}
                     className="pl-10"
+                    placeholder="10"
                     required
                     disabled={isLoading || isGeneratingPDF}
                   />
                 </div>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Enter percentage value (1-100)
+                </p>
               </div>
 
               <div>
-                <Label htmlFor="validity">Validity Date *</Label>
+                <Label>Validity Date *</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full pl-3 text-left font-normal",
+                        !validityDate && "text-muted-foreground"
+                      )}
+                      disabled={isLoading || isGeneratingPDF}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {validityDate ? (
+                        format(validityDate, "PPP")
+                      ) : (
+                        <span>Pick an expiry date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={validityDate}
+                      onSelect={handleDateSelect}
+                      disabled={(date) =>
+                        date <= new Date() || date < getTomorrowDate()
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Choose when the coupons will expire
+                </p>
+              </div>
+            </div>
+          ) : step === "edit" ? (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="campaignName">Coupon Campaign Name *</Label>{" "}
+                <Input
+                  id="campaignName"
+                  name="campaignName"
+                  value={formData.campaignName}
+                  onChange={handleInputChange}
+                  placeholder="Summer Sale 2024, Holiday Special, Black Friday Deal"
+                  required
+                  disabled={isLoading || isGeneratingPDF}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="description">Description (Optional)</Label>{" "}
+                <Textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  placeholder="Get 20% off on all items. Valid for new and existing customers. Cannot be combined with other offers."
+                  rows={3}
+                  disabled={isLoading || isGeneratingPDF}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="numberOfCoupons">Number of Coupons *</Label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />{" "}
-                  <Input
-                    id="validity"
-                    name="validity"
-                    type="date"
-                    min={getTomorrowDate()}
-                    value={formData.validity}
+                  <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />{" "}                  <Input
+                    id="numberOfCoupons"
+                    name="numberOfCoupons"
+                    type="number"
+                    min="1"
+                    max="10000"
+                    value={formData.numberOfCoupons}
                     onChange={handleInputChange}
                     className="pl-10"
+                    placeholder="100"
                     required
                     disabled={isLoading || isGeneratingPDF}
                   />
-                </div>{" "}
+                </div>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  Must be greater than today
+                  Maximum 10,000 coupons per campaign
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="discountPercentage">
+                  Discount Percentage *
+                </Label>
+                <div className="relative">
+                  <Percent className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />{" "}                  <Input
+                    id="discountPercentage"
+                    name="discountPercentage"
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={formData.discountPercentage}
+                    onChange={handleInputChange}
+                    className="pl-10"
+                    placeholder="10"
+                    required
+                    disabled={isLoading || isGeneratingPDF}
+                  />
+                </div>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Enter percentage value (1-100)
+                </p>
+              </div>              <div>
+                <Label htmlFor="validity">Validity Date *</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full pl-3 text-left font-normal",
+                        !validityDate && "text-muted-foreground"
+                      )}
+                      disabled={isLoading || isGeneratingPDF}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {validityDate ? (
+                        format(validityDate, "PPP")
+                      ) : (
+                        <span>Pick an expiry date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={validityDate}
+                      onSelect={handleDateSelect}
+                      disabled={(date) =>
+                        date <= new Date() || date < getTomorrowDate()
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Choose when the coupons will expire
                 </p>
               </div>
 
@@ -497,9 +645,8 @@ const CouponCampaignDialog: React.FC<CouponCampaignDialogProps> = ({
                   <div className="flex justify-between">
                     <span className="text-gray-600 dark:text-gray-400">
                       Valid Until:
-                    </span>
-                    <span className="font-medium text-gray-900 dark:text-white">
-                      {new Date(formData.validity).toLocaleDateString()}
+                    </span>                    <span className="font-medium text-gray-900 dark:text-white">
+                      {validityDate ? format(validityDate, "PPP") : "Not selected"}
                     </span>
                   </div>
                   {formData.description && (
@@ -567,9 +714,8 @@ const CouponCampaignDialog: React.FC<CouponCampaignDialogProps> = ({
               )}
             </div>
           )}
-        </div>{" "}
-        <div className="flex justify-end gap-3 p-6 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
-          {step === "verify" ? (
+        </div>{" "}        <div className="flex justify-end gap-3 p-6 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+          {step === "create" ? (
             <>
               <Button
                 variant="outline"
@@ -577,6 +723,21 @@ const CouponCampaignDialog: React.FC<CouponCampaignDialogProps> = ({
                 disabled={isLoading || isGeneratingPDF}
               >
                 Cancel
+              </Button>              <Button
+                onClick={handleBulkGenerate}
+                disabled={isLoading || isGeneratingPDF || !formData.campaignName.trim()}
+              >
+                Continue
+              </Button>
+            </>
+          ) : step === "verify" ? (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => setStep("create")}
+                disabled={isLoading || isGeneratingPDF}
+              >
+                Back to Edit
               </Button>
               <Button
                 onClick={() => setStep("edit")}
@@ -598,7 +759,7 @@ const CouponCampaignDialog: React.FC<CouponCampaignDialogProps> = ({
                 onClick={() => setStep("verify")}
                 disabled={isLoading || isGeneratingPDF}
               >
-                Back
+                Back to Verify
               </Button>
               <Button
                 onClick={handleSubmit}

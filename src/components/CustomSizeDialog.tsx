@@ -84,7 +84,7 @@ export default function CustomSizeDialog({ open, onClose }: CustomSizeDialogProp
     // We'll encode the dimensions in the URL and handle them in the Editor component
     navigate(`/editor?width=${size.width}&height=${size.height}`);
     onClose();
-    toast.success("Creating new design");
+    // toast.success("Creating new design");
   };
 
   return (
@@ -92,14 +92,7 @@ export default function CustomSizeDialog({ open, onClose }: CustomSizeDialogProp
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-center">Custom Size</DialogTitle>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-4 top-4"
-            onClick={onClose}
-          >
-            <X className="h-4 w-4" />
-          </Button>
+         
         </DialogHeader>
         
         <div className="grid gap-6 py-4">

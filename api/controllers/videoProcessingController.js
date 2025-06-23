@@ -41,11 +41,13 @@ try {
   }
 }
 
-// Create a slideshow video using fluent-ffmpeg (concat demuxer approach)
+// Create a slideshow video using fluent-ffmpeg with proper transitions
 const createSlideshowWithFluentFFmpeg = async (images, options = {}) => {
   const {
     outputPath = path.join(__dirname, "output", `slideshow_${uuidv4()}.mp4`),
     duration = 3,
+    transitionDuration = 0.5,
+    transitionEffect = "fade",
   } = options;
 
   // Ensure output directory exists
@@ -65,8 +67,9 @@ const createSlideshowWithFluentFFmpeg = async (images, options = {}) => {
           "-c:v libx264",
           "-pix_fmt yuv420p",
           "-preset ultrafast",
-          "-crf 30",
-          "-r 10",
+          "-crf 23",
+          "-r 30",
+          "-vf scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2:black"
         ])
         .output(outputPath)
         .on("start", (commandLine) => {
@@ -93,137 +96,238 @@ const createSlideshowWithFluentFFmpeg = async (images, options = {}) => {
     });
   }
 
-  // Multiple images: Use concat demuxer approach for reliable slideshow
-  console.log("Creating slideshow from multiple images using concat demuxer");
+  // Multiple images: Create slideshow with transitions
+  console.log(`Creating slideshow from ${images.length} images with transitions`);
 
-  // Create individual video files for each image first
-  const tempVideos = [];
-  const tempDir = path.join(path.dirname(outputPath), "temp_segments");
-
+  const tempDir = path.join(path.dirname(outputPath), "temp_slideshow");
   if (!fs.existsSync(tempDir)) {
     fs.mkdirSync(tempDir, { recursive: true });
   }
 
   try {
-    // Step 1: Convert each image to a video segment
-    for (let i = 0; i < images.length; i++) {
-      const segmentPath = path.join(tempDir, `segment_${i}.mp4`);
-      tempVideos.push(segmentPath);
-
-      await new Promise((resolve, reject) => {
-        ffmpeg(images[i])
-          .inputOptions(["-loop 1", `-t ${duration}`])
-          .outputOptions([
-            "-c:v libx264",
-            "-pix_fmt yuv420p",
-            "-preset ultrafast",
-            "-crf 30",
-            "-r 10",
-            "-vf scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2",
-          ])
-          .output(segmentPath)
-          .on("start", (commandLine) => {
-            console.log(
-              `Creating segment ${i + 1}/${images.length}: ${commandLine}`
-            );
-          })
-          .on("end", () => {
-            console.log(
-              `Segment ${i + 1}/${images.length} created successfully`
-            );
-            resolve();
-          })
-          .on("error", (err) => {
-            console.error(`Error creating segment ${i + 1}:`, err);
-            reject(err);
-          })
-          .run();
+    // Method 1: Use FFmpeg's complex filter with crossfade transitions
+    if (transitionEffect === "fade" && images.length <= 10) {
+      return await createSlideshowWithCrossfade(images, {
+        outputPath,
+        duration,
+        transitionDuration,
+        tempDir
       });
     }
 
-    // Step 2: Create concat file for FFmpeg
-    const concatFilePath = path.join(tempDir, "concat_list.txt");
-    const concatContent = tempVideos
-      .map((video) => `file '${path.resolve(video)}'`)
-      .join("\n");
-    fs.writeFileSync(concatFilePath, concatContent);
+    // Method 2: Fallback - Create individual segments and concatenate
+    return await createSlideshowWithSegments(images, {
+      outputPath,
+      duration,
+      transitionDuration,
+      tempDir
+    });
 
-    console.log("Concat file created:", concatFilePath);
-    console.log("Concat content:", concatContent);
+  } catch (error) {
+    // Clean up temp directory
+    try {
+      if (fs.existsSync(tempDir)) {
+        fs.rmSync(tempDir, { recursive: true, force: true });
+      }
+    } catch (cleanupErr) {
+      console.warn("Error cleaning up temp directory:", cleanupErr);
+    }
+    throw error;
+  }
+};
 
-    // Step 3: Concatenate all segments
-    const totalDuration = images.length * duration;
+// Create slideshow using crossfade transitions (works well for fewer images)
+const createSlideshowWithCrossfade = async (images, options) => {
+  const { outputPath, duration, transitionDuration, tempDir } = options;
+  
+  return new Promise((resolve, reject) => {
+    console.log("Creating slideshow with crossfade transitions");
+    
+    const totalDuration = images.length * duration - (images.length - 1) * transitionDuration;
+    
+    // Build the complex filter
+    let filterComplex = "";
+    let inputs = [];
+    
+    // Add all images as inputs
+    images.forEach((image, index) => {
+      inputs.push(`-loop 1 -t ${duration + transitionDuration} -i "${image}"`);
+    });
+    
+    // Scale and pad all inputs first
+    for (let i = 0; i < images.length; i++) {
+      filterComplex += `[${i}:v]scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2:black,setpts=PTS-STARTPTS[v${i}];`;
+    }
+    
+    // Create crossfade transitions
+    if (images.length === 2) {
+      const offset = duration - transitionDuration;
+      filterComplex += `[v0][v1]xfade=transition=fade:duration=${transitionDuration}:offset=${offset}[outv]`;
+    } else {
+      // For multiple images, chain crossfades
+      let currentInput = "v0";
+      for (let i = 1; i < images.length; i++) {
+        const offset = (duration - transitionDuration) * i;
+        const outputName = i === images.length - 1 ? "outv" : `fade${i}`;
+        filterComplex += `[${currentInput}][v${i}]xfade=transition=fade:duration=${transitionDuration}:offset=${offset}[${outputName}];`;
+        currentInput = outputName;
+      }
+    }
+    
+    // Remove the trailing semicolon
+    filterComplex = filterComplex.replace(/;$/, "");
+    
+    const command = ffmpeg();
+    
+    // Add all inputs
+    images.forEach(image => {
+      command.input(image).inputOptions(["-loop 1", `-t ${duration + transitionDuration}`]);
+    });
+    
+    command
+      .complexFilter(filterComplex)
+      .outputOptions([
+        "-map [outv]",
+        "-c:v libx264",
+        "-pix_fmt yuv420p",
+        "-preset medium",
+        "-crf 23",
+        "-r 30",
+        `-t ${totalDuration}`
+      ])
+      .output(outputPath)
+      .on("start", (commandLine) => {
+        console.log("Crossfade slideshow FFmpeg started:", commandLine);
+      })
+      .on("progress", (progress) => {
+        console.log(`Crossfade slideshow: ${Math.floor(progress.percent || 0)}% done`);
+      })
+      .on("end", () => {
+        console.log("Crossfade slideshow created successfully");
+        resolve({
+          path: outputPath,
+          duration: totalDuration,
+          isImage: false,
+        });
+      })
+      .on("error", (err) => {
+        console.error("Error creating crossfade slideshow:", err);
+        reject(err);
+      })
+      .run();
+  });
+};
 
-    return new Promise((resolve, reject) => {
-      ffmpeg()
-        .input(concatFilePath)
-        .inputOptions(["-f concat", "-safe 0"])
+// Create slideshow by creating segments and concatenating (more reliable for many images)
+const createSlideshowWithSegments = async (images, options) => {
+  const { outputPath, duration, tempDir } = options;
+  
+  console.log("Creating slideshow with individual segments");
+  
+  const tempVideos = [];
+  
+  // Step 1: Convert each image to a video segment
+  for (let i = 0; i < images.length; i++) {
+    const segmentPath = path.join(tempDir, `segment_${i}.mp4`);
+    tempVideos.push(segmentPath);
+    
+    console.log(`Creating segment ${i + 1}/${images.length} from: ${images[i]}`);
+    
+    await new Promise((resolve, reject) => {
+      ffmpeg(images[i])
+        .inputOptions(["-loop 1", `-t ${duration}`])
         .outputOptions([
-          "-c copy", // Use copy codec for fast concatenation
+          "-c:v libx264",
+          "-pix_fmt yuv420p",
+          "-preset ultrafast",
+          "-crf 23",
+          "-r 30",
+          "-vf scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2:black"
         ])
-        .output(outputPath)
+        .output(segmentPath)
         .on("start", (commandLine) => {
-          console.log("Final concatenation FFmpeg started:", commandLine);
-        })
-        .on("progress", (progress) => {
-          console.log(
-            `Final concatenation: ${Math.floor(progress.percent || 0)}% done`
-          );
+          console.log(`Segment ${i + 1} FFmpeg command:`, commandLine);
         })
         .on("end", () => {
-          console.log("Multi-image slideshow created successfully");
-
-          // Clean up temporary files
-          try {
-            tempVideos.forEach((video) => {
-              if (fs.existsSync(video)) fs.unlinkSync(video);
-            });
-            if (fs.existsSync(concatFilePath)) fs.unlinkSync(concatFilePath);
-            if (fs.existsSync(tempDir)) fs.rmdirSync(tempDir);
-          } catch (cleanupErr) {
-            console.warn("Error cleaning up temp files:", cleanupErr);
-          }
-
-          resolve({
-            path: outputPath,
-            duration: totalDuration,
-            isImage: false,
-          });
+          console.log(`Segment ${i + 1}/${images.length} created successfully`);
+          resolve();
         })
         .on("error", (err) => {
-          console.error("Error in final concatenation:", err);
-
-          // Clean up temporary files on error
-          try {
-            tempVideos.forEach((video) => {
-              if (fs.existsSync(video)) fs.unlinkSync(video);
-            });
-            if (fs.existsSync(concatFilePath)) fs.unlinkSync(concatFilePath);
-            if (fs.existsSync(tempDir)) fs.rmdirSync(tempDir);
-          } catch (cleanupErr) {
-            console.warn(
-              "Error cleaning up temp files after error:",
-              cleanupErr
-            );
-          }
-
+          console.error(`Error creating segment ${i + 1}:`, err);
           reject(err);
         })
         .run();
     });
-  } catch (error) {
-    // Clean up temporary files on error
-    try {
-      tempVideos.forEach((video) => {
-        if (fs.existsSync(video)) fs.unlinkSync(video);
-      });
-      if (fs.existsSync(tempDir)) fs.rmdirSync(tempDir);
-    } catch (cleanupErr) {
-      console.warn("Error cleaning up temp files after error:", cleanupErr);
-    }
-
-    throw error;
   }
+  
+  // Step 2: Create concat file for FFmpeg
+  const concatFilePath = path.join(tempDir, "concat_list.txt");
+  const concatContent = tempVideos
+    .map((video) => `file '${path.resolve(video)}'`)
+    .join("\n");
+  fs.writeFileSync(concatFilePath, concatContent);
+  
+  console.log("Concat file created with content:");
+  console.log(concatContent);
+  
+  // Step 3: Concatenate all segments
+  const totalDuration = images.length * duration;
+  
+  return new Promise((resolve, reject) => {
+    ffmpeg()
+      .input(concatFilePath)
+      .inputOptions(["-f concat", "-safe 0"])
+      .outputOptions([
+        "-c:v libx264", // Re-encode to ensure compatibility
+        "-pix_fmt yuv420p",
+        "-preset medium",
+        "-crf 23"
+      ])
+      .output(outputPath)
+      .on("start", (commandLine) => {
+        console.log("Final concatenation FFmpeg started:", commandLine);
+      })
+      .on("progress", (progress) => {
+        console.log(`Final concatenation: ${Math.floor(progress.percent || 0)}% done`);
+      })
+      .on("end", () => {
+        console.log("Slideshow concatenation completed successfully");
+        
+        // Clean up temporary files
+        try {
+          tempVideos.forEach((video) => {
+            if (fs.existsSync(video)) fs.unlinkSync(video);
+          });
+          if (fs.existsSync(concatFilePath)) fs.unlinkSync(concatFilePath);
+          if (fs.existsSync(tempDir)) fs.rmSync(tempDir, { recursive: true, force: true });
+        } catch (cleanupErr) {
+          console.warn("Error cleaning up temp files:", cleanupErr);
+        }
+        
+        resolve({
+          path: outputPath,
+          duration: totalDuration,
+          isImage: false,
+        });
+      })
+      .on("error", (err) => {
+        console.error("Error in final concatenation:", err);
+        
+        // Clean up temporary files on error
+        try {
+          tempVideos.forEach((video) => {
+            if (fs.existsSync(video)) fs.unlinkSync(video);
+          });
+          if (fs.existsSync(concatFilePath)) fs.unlinkSync(concatFilePath);
+          if (fs.existsSync(tempDir)) fs.rmSync(tempDir, { recursive: true, force: true });
+        } catch (cleanupErr) {
+          console.warn("Error cleaning up temp files after error:", cleanupErr);
+        }
+        
+        reject(err);
+      })
+      .run();
+  });
 };
 
 // Create a simple video from a single image (fallback function)
@@ -249,8 +353,9 @@ const createSimpleVideoFromImage = async (imagePath, options = {}) => {
         "-c:v libx264",
         "-pix_fmt yuv420p",
         "-preset ultrafast",
-        "-crf 30",
-        "-r 10",
+        "-crf 23",
+        "-r 30",
+        "-vf scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2:black"
       ])
       .output(outputPath)
       .on("start", (commandLine) => {
@@ -306,14 +411,32 @@ const slideshowController = {
       // Get file paths from the uploaded files
       const imagePaths = req.files.map((file) => file.path);
 
+      // Validate that all image files exist
+      const validImagePaths = [];
+      for (const imagePath of imagePaths) {
+        if (fs.existsSync(imagePath)) {
+          validImagePaths.push(imagePath);
+          console.log("Valid image found:", imagePath);
+        } else {
+          console.warn("Image file not found:", imagePath);
+        }
+      }
+
+      if (validImagePaths.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "No valid image files found",
+        });
+      }
+
       // Get options from request body
       const options = {
         duration: req.body.duration ? parseFloat(req.body.duration) : 3,
         transitionDuration: req.body.transitionDuration
           ? parseFloat(req.body.transitionDuration)
-          : 1,
+          : 0.5,
         transitionEffect: req.body.transitionEffect || "fade",
-        resolution: req.body.resolution || "1920x1080",
+        resolution: req.body.resolution || "1280x720",
         audioPath: req.body.audioPath || null,
         outputPath: path.join(
           __dirname,
@@ -325,32 +448,38 @@ const slideshowController = {
       };
 
       console.log("Processing options:", options);
-      console.log("Image paths:", imagePaths);
+      console.log("Valid image paths:", validImagePaths);
 
       // Create the slideshow video
       console.log("Starting slideshow creation...");
       let result;
       let mediaType = "video";
 
-      if (imagePaths.length === 1) {
-        // Single image: Just upload the image
-        result = {
-          path: imagePaths[0],
-          duration: 0,
-          isImage: true,
-        };
-        mediaType = "image";
-        console.log("Single image detected, using original image");
+      if (validImagePaths.length === 1) {
+        // Single image: Create a video from it
+        try {
+          result = await createSimpleVideoFromImage(validImagePaths[0], options);
+          mediaType = "video";
+          console.log("Single image video created successfully:", result);
+        } catch (singleImageError) {
+          console.error("Single image video creation failed:", singleImageError);
+          // Fallback to using image directly
+          result = {
+            path: validImagePaths[0],
+            duration: 0,
+            isImage: true,
+          };
+          mediaType = "image";
+        }
       } else {
         // Multiple images: Create video slideshow
         try {
-          // Try to create video slideshow with fluent-ffmpeg
           console.log(
-            "Attempting to create video from",
-            imagePaths.length,
+            "Attempting to create slideshow from",
+            validImagePaths.length,
             "images"
           );
-          result = await createSlideshowWithFluentFFmpeg(imagePaths, options);
+          result = await createSlideshowWithFluentFFmpeg(validImagePaths, options);
           console.log("FFmpeg slideshow created successfully:", result);
           mediaType = "video";
         } catch (ffmpegError) {
@@ -370,13 +499,12 @@ const slideshowController = {
               `fallback_video_${uuidv4()}.mp4`
             );
 
-            // Create a simple video from the first image
             const simpleVideoResult = await createSimpleVideoFromImage(
-              imagePaths[0],
+              validImagePaths[0],
               {
                 ...options,
                 outputPath: singleImageVideoPath,
-                duration: 5, // 5 seconds for fallback video
+                duration: 5,
               }
             );
 
@@ -389,10 +517,8 @@ const slideshowController = {
               fallbackError.message
             );
 
-            // Last resort: Use the first image as static image but with proper extension handling
-            console.log("Using first image as final fallback");
             result = {
-              path: imagePaths[0],
+              path: validImagePaths[0],
               duration: 0,
               isImage: true,
             };
@@ -533,7 +659,7 @@ const slideshowController = {
       }
 
       // Return the media URL (prioritize cloud URL always)
-      const finalMediaUrl = cloudUrl; // Always use cloudUrl since we ensure it exists above
+      const finalMediaUrl = cloudUrl;
 
       return res.status(200).json({
         message: `${
@@ -543,8 +669,9 @@ const slideshowController = {
         videoUrl: finalMediaUrl, // Keep videoUrl for backward compatibility
         mediaUrl: finalMediaUrl,
         mediaType,
-        cloudUrl: finalMediaUrl, // Ensure cloudUrl is always returned
+        cloudUrl: finalMediaUrl,
         duration: result.duration || 0,
+        imagesProcessed: validImagePaths.length,
       });
     } catch (error) {
       console.error("Error creating slideshow:", error);

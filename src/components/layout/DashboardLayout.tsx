@@ -16,6 +16,9 @@ import {
   CreditCard,
   Star,
   X,
+  PlusIcon,
+  SparklesIcon,
+  NewspaperIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,8 +30,10 @@ import {
   SidebarBody,
   SidebarLink,
 } from "@/components/ui/sidebar";
-import { IconArrowLeft, IconBrandTabler } from "@tabler/icons-react";
+import { IconArrowLeft, IconArtboardOff, IconBrandTabler } from "@tabler/icons-react";
 import axios from "axios";
+import CustomSizeDialog from "@/components/CustomSizeDialog";
+import { Sparkles, Plus } from "lucide-react";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -72,6 +77,7 @@ export default function DashboardLayout({
     userTemplates: [],
   });
   const [isSearching, setIsSearching] = useState(false);
+  const [showCustomSizeDialog, setShowCustomSizeDialog] = useState(false);
   const searchDropdownRef = useRef<HTMLDivElement>(null);
 
   // Design templates for search
@@ -167,8 +173,7 @@ export default function DashboardLayout({
         );
 
         // Fetch public templates
-        let publicApiUrl =
-          "https://adstudioserver.foodyqueen.com/api/templates";
+        let publicApiUrl = "https://adstudioserver.foodyqueen.com/api/templates";
         const publicParams = new URLSearchParams();
         publicParams.append("ps", "6");
         publicParams.append("pi", "0");
@@ -183,8 +188,7 @@ export default function DashboardLayout({
         // Fetch user templates
         let userSearchResults: Template[] = [];
         if (user?.userId) {
-          let userApiUrl =
-            "https://adstudioserver.foodyqueen.com/api/templates";
+          let userApiUrl = "https://adstudioserver.foodyqueen.com/api/templates";
           const userParams = new URLSearchParams();
           userParams.append("ps", "4");
           userParams.append("pi", "0");
@@ -319,12 +323,12 @@ export default function DashboardLayout({
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top Navigation */}
         <header className="flex h-16 items-center justify-between border-b border-gray-200/80 dark:border-gray-800/80 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md px-6 sticky top-0 z-40">
-          <div className="flex items-center space-x-6">
-            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+          <div className="flex items-center space-x-6    w-full">
+            <h1 className="text-xl font-semibold  text-gray-900 dark:text-white">
               {title}
             </h1>
             {showSearch && (
-              <div className="relative" ref={searchDropdownRef}>
+              <div className="relative  mx-auto  " ref={searchDropdownRef}>
                 <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
                 <Input
                   placeholder="Search all templates, designs..."
@@ -398,7 +402,9 @@ export default function DashboardLayout({
             )}
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" className="relative">
+            <Button variant="outline" size="sm" className="relative cursor-pointer" onClick={()=>{
+              toast.info('Notifications will be available soon!')
+            }}>
               <Bell className="h-4 w-4" />
               {notificationCount > 0 && (
                 <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
@@ -433,6 +439,46 @@ export default function DashboardLayout({
             {children}
           </div>
         </main>
+        {/* Floating Action Button and Dialog */}
+        <CustomSizeDialog open={showCustomSizeDialog} onClose={() => setShowCustomSizeDialog(false)} />
+        <motion.div
+          className="fixed bottom-8 right-8 z-50"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        >
+          <div className="relative group">
+            {/* Glow effect */}
+            <div
+              className="absolute inset-0 rounded-full blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-300"
+              style={{
+                background: "linear-gradient(90deg, #a78bfa 0%, #f472b6 100%)",
+                transform: "scale(1.2)",
+              }}
+            />
+            {/* Main button */}
+            <div
+              // size="lg"
+              className="relative w-16 h-16 rounded-full shadow-2xl border-0 text-white cursor-pointer group-hover:shadow-3xl transition-all duration-300 flex items-center justify-center"
+              style={{
+                background: "linear-gradient(90deg, #a78bfa 0%, #f472b6 100%)",
+                boxShadow:
+                  "0 20px 40px rgba(147, 51, 234, 0.3), 0 8px 16px rgba(147, 51, 234, 0.2)",
+              }}
+              onClick={() => setShowCustomSizeDialog(true)}
+              aria-label="Create New Design"
+            >
+              {/* <NewspaperIcon className="w-9 h-9 bg-green-200"/> */}
+              {/* <IconArtboardOff className="h-5 w-5 mr-1 text-white" /> */}
+              <SparklesIcon className="h-7 w-7 transition-transform duration-300 group-hover:scale-110 z-10 text-white stroke-amber-50" />
+            </div>
+            {/* Tooltip */}
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 px-3 py-2 bg-black/90 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap pointer-events-none">
+              Create New Design
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-black/90" />
+            </div>
+          </div>
+        </motion.div>
       </div>
     </div>
   );

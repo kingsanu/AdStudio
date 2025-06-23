@@ -227,14 +227,12 @@ const kioskController = {
     }
   },
 
-  // Create a new kiosk
+  // Create or update user's kiosk (upsert logic for single kiosk per user)
   createKiosk: async (req, res) => {
     try {
       const {
-        title,
-        description,
         userId: rawUserId,
-        templateId = null, // Make templateId optional
+        templateUrl,
         tags = [],
         isPublic = false,
       } = req.body;
@@ -245,46 +243,77 @@ const kioskController = {
         userId = userId.split("_").pop() || userId;
       }
 
-      // Check if a kiosk with the same name and user already exists
-      const existingKiosk = await Kiosk.findOne({
-        title,
-        userId,
-      });
-
-      if (existingKiosk) {
+      if (!userId) {
         return res.status(400).json({
-          message: "A kiosk with this name already exists",
+          message: "User ID is required",
         });
       }
 
-      // Get templateUrl from the request
-      const templateUrl = req.body.templateUrl || null;
+      if (!templateUrl) {
+        return res.status(400).json({
+          message: "Template URL is required",
+        });
+      }
 
-      // Create a new kiosk
-      const kiosk = new Kiosk({
-        title,
-        description,
-        userId,
-        templateId,
-        templateUrl, // Store the URL to the JSON file
-        pageImages: [],
-        tags,
-        isPublic,
-      });
+      // Check if user already has a kiosk
+      let kiosk = await Kiosk.findOne({ userId });
 
-      await kiosk.save();
+      if (kiosk) {
+        // Update existing kiosk
+        kiosk.templateUrl = templateUrl;
+        kiosk.tags = tags;
+        kiosk.isPublic = isPublic;
+        kiosk.updatedAt = new Date();
+        // Clear existing page images - they will be re-uploaded
+        kiosk.pageImages = [];
+        
+        await kiosk.save();
 
-      res.status(201).json({
-        message: "Kiosk created successfully",
-        kiosk: {
-          id: kiosk._id.toString(),
-          title: kiosk.title,
-        },
-      });
+        console.log(`Updated existing kiosk for user ${userId}`);
+        
+        return res.status(200).json({
+          message: "Kiosk updated successfully",
+          kiosk: {
+            id: kiosk._id.toString(),
+            title: kiosk.title || `Kiosk Display`,
+            description: kiosk.description || "Updated kiosk display",
+            templateUrl: kiosk.templateUrl,
+            userId: kiosk.userId,
+            updatedAt: kiosk.updatedAt,
+          },
+        });
+      } else {
+        // Create a new kiosk
+        kiosk = new Kiosk({
+          title: `Kiosk Display`,
+          description: "Restaurant kiosk display",
+          userId,
+          templateUrl,
+          pageImages: [],
+          tags,
+          isPublic,
+        });
+
+        await kiosk.save();
+
+        console.log(`Created new kiosk for user ${userId}`);
+
+        return res.status(201).json({
+          message: "Kiosk created successfully",
+          kiosk: {
+            id: kiosk._id.toString(),
+            title: kiosk.title,
+            description: kiosk.description,
+            templateUrl: kiosk.templateUrl,
+            userId: kiosk.userId,
+            createdAt: kiosk.createdAt,
+          },
+        });
+      }
     } catch (error) {
-      console.error("Error creating kiosk:", error);
+      console.error("Error creating/updating kiosk:", error);
       res.status(500).json({
-        message: "Failed to create kiosk",
+        message: "Failed to create or update kiosk",
         error: error.message,
       });
     }
@@ -330,8 +359,8 @@ const kioskController = {
       const imagePath = path.join(tempDir, filename);
       fs.writeFileSync(imagePath, imageBuffer);
 
-      // Create cloud filename with kiosk ID folder
-      const cloudFilename = `${STORAGE_FOLDER}/${kioskId}/${filename}`;
+      // Create cloud filename with user ID folder
+      const cloudFilename = `${STORAGE_FOLDER}/${kiosk.userId}/${filename}`;
 
       formData.append("stream", fs.createReadStream(imagePath));
       formData.append("filename", cloudFilename);
