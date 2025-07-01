@@ -4,7 +4,7 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 
 # Install dependencies (only for frontend and internal packages)
-COPY package.json yarn.lock ./
+COPY package.json package-lock.json ./
 COPY packages ./packages
 COPY public ./public
 COPY src ./src
@@ -16,8 +16,8 @@ COPY tailwind.config.js ./
 COPY tailwind.config.cjs ./
 COPY .npmrc ./
 
-RUN yarn install --frozen-lockfile
-RUN yarn build
+RUN npm ci
+RUN npm run build
 
 # Stage 2: Serve
 FROM node:22-alpine AS runner
@@ -27,10 +27,11 @@ WORKDIR /app
 # Only copy the built output and necessary files
 COPY --from=builder /app/dist ./dist
 COPY package.json ./
+COPY package-lock.json ./
 
 # Install only production dependencies (if any)
-RUN yarn install --production --frozen-lockfile
+RUN npm ci --omit=dev
 
 EXPOSE 4173
 
-CMD ["yarn", "preview", "--host", "0.0.0.0", "--port", "4173"]
+CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "4173"]
