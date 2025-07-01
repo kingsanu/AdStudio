@@ -13,7 +13,7 @@ COPY tsconfig.node.json ./
 COPY vite.config.mjs ./
 COPY postcss.config.mjs ./
 
-RUN npm ci
+RUN npm install --legacy-peer-deps
 RUN npm run build
 
 # Stage 2: Serve
@@ -27,7 +27,7 @@ COPY package.json ./
 COPY package-lock.json ./
 
 # Install only production dependencies (if any)
-RUN npm ci --omit=dev
+RUN npm install --production --legacy-peer-deps
 
 EXPOSE 4173
 
