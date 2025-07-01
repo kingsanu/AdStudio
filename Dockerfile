@@ -5,6 +5,8 @@ WORKDIR /app
 
 # Install dependencies (only for frontend and internal packages)
 COPY package.json package-lock.json ./
+COPY index.html ./
+COPY components.json ./
 COPY packages ./packages
 COPY public ./public
 COPY src ./src
