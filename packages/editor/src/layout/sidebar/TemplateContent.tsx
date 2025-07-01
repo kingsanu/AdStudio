@@ -215,7 +215,7 @@ const TemplateContent: FC<{ onClose: () => void }> = ({ onClose }) => {
               }}
             >
               <img
-                // src={`https://adstudioserver.foodyqueen.com${item.thumbnailUrl}`}
+                // src={`http://localhost:4000${item.thumbnailUrl}`}
                 src={`${item.thumbnailUrl}`}
                 loading="lazy"
                 alt={item.title}

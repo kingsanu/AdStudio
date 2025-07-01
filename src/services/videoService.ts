@@ -7,6 +7,9 @@ interface VideoGenerationOptions {
   transition?: string; // Alternative naming for new endpoint
   resolution?: string;
   outputName?: string;
+  audioUrl?: string;
+  audioDuration?: number;
+  slideTimings?: number[];
 }
 
 interface VideoGenerationResult {
@@ -31,15 +34,20 @@ interface ImageUploadResult {
 class VideoService {
   private readonly baseUrl: string;
 
-  constructor() {
-    this.baseUrl = "https://adstudioserver.foodyqueen.com/api";
-  }
-
+constructor() {
+  // For Vite apps, use import.meta.env with VITE_ prefix
+  this.baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000/api";
+}
   /**
    * Automatically generate media based on page count
    * - Single page: Upload as image
-   * - Multiple pages: Create video slideshow
-   */  async generateCampaignMedia(pageImages: string[]): Promise<{
+   * - Multiple pages: Create video slideshow with optional audio
+   */
+  async generateCampaignMedia(
+    pageImages: string[],
+    audioUrl?: string,
+    audioDuration?: number
+  ): Promise<{
     mediaUrl: string;
     mediaType: "image" | "video";
   }> {
@@ -72,8 +80,24 @@ class VideoService {
       };
     } else {
       console.log('[VideoService] Multiple pages detected - creating video slideshow');
-      // Multiple pages - create video
-      const result = await this.createSlideshow(pageImages);
+      // Multiple pages - create video with optional audio
+      const options: VideoGenerationOptions = {};
+      
+      if (audioUrl && audioDuration) {
+        console.log(`[VideoService] Adding audio: ${audioUrl}, duration: ${audioDuration}s`);
+        options.audioUrl = audioUrl;
+        options.audioDuration = audioDuration;
+        
+        // Calculate slide timing based on audio duration
+        const { slideDuration, slideTimings } = this.calculateSlideTiming(audioDuration, pageImages.length);
+        options.duration = slideDuration;
+        options.slideTimings = slideTimings;
+        
+        console.log(`[VideoService] Calculated slide duration: ${slideDuration}s`);
+        console.log(`[VideoService] Slide timings:`, slideTimings);
+      }
+      
+      const result = await this.createSlideshow(pageImages, options);
       if (!result.success || !result.data) {
         throw new Error(result.error ?? "Failed to create video");
       }
@@ -172,6 +196,15 @@ class VideoService {
       if (options.outputName) {
         formData.append("outputName", options.outputName);
       }
+      if (options.audioUrl) {
+        formData.append("audioUrl", options.audioUrl);
+      }
+      if (options.audioDuration) {
+        formData.append("audioDuration", options.audioDuration.toString());
+      }
+      if (options.slideTimings) {
+        formData.append("slideTimings", JSON.stringify(options.slideTimings));
+      }
         console.log(`📤 Sending FormData with ${imageDataUrls.length} images to backend`);
       console.log(`   - Duration: ${options.duration ?? 3}s per image`);
       console.log(`   - Transition: ${options.transition ?? options.transitionEffect ?? "fade"}`);
@@ -241,6 +274,56 @@ class VideoService {
         success: false,
         error: (error as Error).message ?? "Failed to create slideshow video",      };
     }
+  }
+
+  /**
+   * Calculate optimal slide timing based on audio duration and number of slides
+   */
+  calculateSlideTiming(audioDuration: number, slideCount: number): {
+    slideDuration: number;
+    totalDuration: number;
+    slideTimings: number[];
+  } {
+    if (slideCount === 0) {
+      return {
+        slideDuration: 0,
+        totalDuration: 0,
+        slideTimings: [],
+      };
+    }
+
+    // Minimum slide duration is 2 seconds, maximum is 8 seconds
+    const minSlideDuration = 2;
+    const maxSlideDuration = 8;
+    
+    let slideDuration = audioDuration / slideCount;
+    
+    // If slides would be too short, we'll need to repeat the sequence
+    if (slideDuration < minSlideDuration) {
+      slideDuration = minSlideDuration;
+    } else if (slideDuration > maxSlideDuration) {
+      // If slides would be too long, cap at max duration
+      slideDuration = maxSlideDuration;
+    }
+
+    const totalVideoDuration = Math.max(audioDuration, slideCount * slideDuration);
+    
+    // Calculate when each slide should appear
+    const slideTimings: number[] = [];
+    let currentTime = 0;
+    
+    while (currentTime < audioDuration) {
+      for (let i = 0; i < slideCount && currentTime < audioDuration; i++) {
+        slideTimings.push(currentTime);
+        currentTime += slideDuration;
+      }
+    }
+
+    return {
+      slideDuration,
+      totalDuration: totalVideoDuration,
+      slideTimings,
+    };
   }
 
   /**

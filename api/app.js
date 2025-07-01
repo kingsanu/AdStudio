@@ -36,6 +36,7 @@ const campaignRoutes = require("./routes/campaigns");
 const couponCampaignRoutes = require("./routes/couponCampaigns");
 const outletRoutes = require("./routes/outlets");
 const fontRoutes = require("./routes/fonts");
+const audioRoutes = require("./routes/audio");
 
 const app = express();
 // Increase JSON body size limit
@@ -78,6 +79,7 @@ app.use("/api", campaignRoutes);
 app.use("/api", couponCampaignRoutes);
 app.use("/api", outletRoutes);
 app.use("/api/fonts", fontRoutes);
+app.use("/api/audio", audioRoutes);
 
 // Get port from environment variables or use 4000 as default
 const PORT = process.env.PORT || 4000;

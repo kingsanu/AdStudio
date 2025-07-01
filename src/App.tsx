@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
+import { TemplateProvider } from "./contexts/TemplateContext";
 import PhoneAuth from "./pages/auth/PhoneAuth";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Dashboard from "./pages/Editor/Dashboard";
@@ -28,7 +29,8 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <Routes>
+        <TemplateProvider>
+          <Routes>
           {/* Home route */}
           <Route path="/" element={<Home />} />
           {/* Auth routes */}
@@ -165,6 +167,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster />
+        </TemplateProvider>
       </AuthProvider>
     </Router>
   );

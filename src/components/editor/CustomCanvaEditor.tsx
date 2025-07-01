@@ -23,6 +23,7 @@ export type CustomCanvaEditorProps = {
   };
   saving?: boolean;
   config: EditorConfig;
+  designId?: string | null; // The ID of the design being edited (null for new designs)
   onChanges: (changes: unknown) => void;
   onDesignNameChanges?: (name: string) => void;
   isTextTemplate?: boolean;
@@ -31,15 +32,16 @@ export type CustomCanvaEditorProps = {
   isLiveMenu?: boolean;
   isCoupon?: boolean;
   isInCouponTemplateMode?: boolean;
-  onShare?: () => void;
-  onSaveAsTemplate?: () => void;
-  onDownload?: () => void;
-  onBulkGenerate?: () => void;
+  onShare?: (editorContext?: { query: any; actions: any; getState: any }) => void;
+  onSaveAsTemplate?: (editorContext?: { query: any; actions: any; getState: any }) => void;
+  onDownload?: (editorContext?: { query: any; actions: any; getState: any }) => void;
+  onBulkGenerate?: (editorContext?: { query: any; actions: any; getState: any }) => void;
 };
 
 const CustomCanvaEditor: FC<PropsWithChildren<CustomCanvaEditorProps>> = ({
   data,
   config,
+  designId = null, // Default to null for new designs (temporarily unused)
   onChanges,
   onDesignNameChanges: _onDesignNameChanges, // Rename to avoid unused variable warning
   isAdmin = false,
@@ -48,20 +50,30 @@ const CustomCanvaEditor: FC<PropsWithChildren<CustomCanvaEditorProps>> = ({
   isCoupon = false,
   isInCouponTemplateMode = false,
   onShare,
-  onSaveAsTemplate: _onSaveAsTemplate, // Rename to avoid unused variable warning
   onDownload,
   onBulkGenerate,
 }) => {
   const version = "1.0.69";
-  const { getState, actions, query } = useEditorStore({ isAdmin });
+  const { getState, actions, query } = useEditorStore({
+    isAdmin,
+  });
   const [viewPortHeight, setViewPortHeight] = useState<number>();
   const [showPreview, setShowPreview] = useState(false);
 
-  // Determine editor type based on props
-  let editorType: "design" | "coupon" | "template" = "design";
-  if (isCoupon) {
-    editorType = "coupon";
-  }
+  // Determine editor type
+  const editorType = isCoupon ? "coupon" : "design";
+
+  // TODO: Implement designId support properly when CustomCanvaEditor is refactored
+  console.log("🆔 CustomCanvaEditor designId prop:", designId);
+
+  // Data binding - synchronize data with the editor
+  useEffect(() => {
+    if (data?.editorConfig) {
+      // TODO: Load editor data properly - loadEditorData method doesn't exist
+      // actions.loadEditorData(data.editorConfig);
+      console.log("📝 Editor data available but loading method not implemented");
+    }
+  }, [actions, data?.editorConfig]);
   // Set up a callback to handle changes
   useEffect(() => {
     const handleChanges = () => {
@@ -116,9 +128,10 @@ const CustomCanvaEditor: FC<PropsWithChildren<CustomCanvaEditorProps>> = ({
           isLiveMenu={isLiveMenu}
           isCoupon={isCoupon}
           isInCouponTemplateMode={isInCouponTemplateMode}
-          onShare={onShare}
-          onDownload={onDownload}
-          onBulkGenerate={onBulkGenerate}
+          onShare={() => onShare?.({ query, actions, getState })}
+          onDownload={() => onDownload?.({ query, actions, getState })}
+          onBulkGenerate={() => onBulkGenerate?.({ query, actions, getState })}
+          editorContext={{ query, actions, getState, config: { ...config, isAdmin, type: editorType } }}
         />
 
         {/* Main Content Area */}

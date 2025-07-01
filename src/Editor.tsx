@@ -136,14 +136,15 @@ const Editor = () => {
       const template = await templateService.getTemplateById(templateId);
 
       if (template) {
-        // Check if this is another user's template
+        console.log("📋 Loading template:", template.title, "ID:", templateId);
+        
+        // When loading any template from dashboard (for "start designing"), 
+        // we're creating a new design based on the template (designId will be null)
+        console.log("🆕 Creating new design based on template - designId will be null until first save");
+        
+        // Check if it's another user's template  
         const currentUserId = localStorage.getItem("auth_token") || "";
         const isOtherUsersTemplate = template.userId !== currentUserId;
-
-        if (isOtherUsersTemplate) {
-          // Clear template ID from localStorage to ensure we create a new copy
-          localStorage.removeItem("template_id");
-        }
 
         // If the template has a templateUrl, fetch the template data
         if (template.templateUrl) {
@@ -164,12 +165,26 @@ const Editor = () => {
             // This is the same format as the sample data
             setTemplateData(templateResponse.data);
 
-            // If it's another user's template, add "Copy of" to the name
+            // Set appropriate title based on ownership
             if (isOtherUsersTemplate) {
               setName(`Copy of ${template.title}` || "Untitled Design");
+              console.log("📝 Set title for other user's template:", `Copy of ${template.title}`);
             } else {
-              setName(template.title || "Untitled Design");
+              setName(`Copy of ${template.title}` || "Untitled Design");
+              console.log("📝 Set title for own template (creating copy):", `Copy of ${template.title}`);
             }
+            
+            // Notify that template loaded successfully
+            toast.success(`Template "${template.title}" loaded - creating new design`);
+            
+            // Notify CustomHeader that this is a new design based on template
+            setTimeout(() => {
+              if ((window as any).startNewDesign) {
+                console.log("🔄 Notifying CustomHeader about new design state");
+                // Don't call startNewDesign as it would reset the title we just set
+                // Instead just ensure the state is properly initialized
+              }
+            }, 100);
           } catch (error) {
             console.error("Error loading template JSON:", error);
             toast.error("Failed to load template data");
@@ -180,10 +195,20 @@ const Editor = () => {
           // If no templateUrl, use the template as is
           if (isOtherUsersTemplate) {
             setName(`Copy of ${template.title}` || "Untitled Design");
+            console.log("📝 Set title for other user's template (no URL):", `Copy of ${template.title}`);
           } else {
-            setName(template.title || "Untitled Design");
+            setName(`Copy of ${template.title}` || "Untitled Design");
+            console.log("📝 Set title for own template (no URL, creating copy):", `Copy of ${template.title}`);
           }
-          toast.success(`Template "${template.title}" loaded`);
+          toast.success(`Template "${template.title}" loaded - creating new design`);
+          
+          // Notify CustomHeader that this is a new design based on template
+          setTimeout(() => {
+            if ((window as any).startNewDesign) {
+              console.log("🔄 Notifying CustomHeader about new design state");
+              // Don't call startNewDesign as it would reset the title we just set
+            }
+          }, 100);
         }
       } else {
         toast.error("Template not found");
@@ -268,7 +293,7 @@ const Editor = () => {
         }}
         config={{
           apis: {
-            url: "https://adstudioserver.foodyqueen.com/api",
+            url: "http://localhost:4000/api",
             searchFonts: "/fonts",
             searchTemplates: "/templates",
             searchTexts: "/texts",
@@ -290,7 +315,7 @@ const Editor = () => {
             searchShape: "Search shapes",
             searchFrame: "Search frames",
           },
-          editorAssetsUrl: "https://adstudioserver.foodyqueen.com/editor",
+          editorAssetsUrl: "http://localhost:4000/editor",
           imageKeywordSuggestions: "animal,sport,love,scene,dog,cat,whale",
           templateKeywordSuggestions:
             "mother,sale,discount,fashion,model,deal,motivation,quote",

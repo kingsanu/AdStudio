@@ -2,7 +2,7 @@ import { useQuery, useInfiniteQuery, useQueryClient } from "@tanstack/react-quer
 import axios from "axios";
 import { FontDataApi, GetFontQuery } from "canva-editor/types";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "https://adstudioserver.foodyqueen.com";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 interface FontResponse {
   data: FontDataApi[];
@@ -101,7 +101,7 @@ export const useFontFamily = (family: string) => {
 
 // Hook for loading ALL fonts at once (no pagination) - uses backend caching
 export const useAllFonts = (keyword?: string, apiBaseUrl?: string) => {
-  const baseUrl = apiBaseUrl || import.meta.env.VITE_API_URL || "https://adstudioserver.foodyqueen.com";
+  const baseUrl = apiBaseUrl || import.meta.env.VITE_API_URL || "http://localhost:4000";
   
   return useQuery({
     queryKey: [...fontKeys.all, 'bulk', keyword || 'all', baseUrl],

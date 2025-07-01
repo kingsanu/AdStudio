@@ -19,8 +19,8 @@
           "rotate": 0,
           "color": "rgb(255, 255, 255)",
           "image": {
-            "url": "https://adstudioserver.foodyqueen.com/images/photos/mothers/001.jpg",
-            "thumb": "https://adstudioserver.foodyqueen.com/images/photos/mothers/001.jpg",
+            "url": "http://localhost:4000/images/photos/mothers/001.jpg",
+            "thumb": "http://localhost:4000/images/photos/mothers/001.jpg",
             "boxSize": {
               "width": 1640,
               "height": 1094.1875
@@ -64,8 +64,8 @@
               "y": -8.616990964281198
             },
             "rotate": 0,
-            "thumb": "https://adstudioserver.foodyqueen.com/images/photos/mothers/002.jpg",
-            "url": "https://adstudioserver.foodyqueen.com/images/photos/mothers/002.jpg"
+            "thumb": "http://localhost:4000/images/photos/mothers/002.jpg",
+            "url": "http://localhost:4000/images/photos/mothers/002.jpg"
           },
           "transparency": 1
         },
@@ -179,8 +179,8 @@
           "rotate": 0,
           "color": "rgb(253, 235, 235)",
           "image": {
-            "url": "https://adstudioserver.foodyqueen.com/images/photos/birthdays/003.jpg",
-            "thumb": "https://adstudioserver.foodyqueen.com/images/photos/birthdays/003.jpg",
+            "url": "http://localhost:4000/images/photos/birthdays/003.jpg",
+            "thumb": "http://localhost:4000/images/photos/birthdays/003.jpg",
             "boxSize": {
               "width": 1640,
               "height": 1640
@@ -230,8 +230,8 @@
               "y": 0
             },
             "rotate": 0,
-            "thumb": "https://adstudioserver.foodyqueen.com/images/photos/mothers/001.jpg",
-            "url": "https://adstudioserver.foodyqueen.com/images/photos/mothers/001.jpg"
+            "thumb": "http://localhost:4000/images/photos/mothers/001.jpg",
+            "url": "http://localhost:4000/images/photos/mothers/001.jpg"
           },
           "transparency": 1
         },
@@ -265,8 +265,8 @@
               "y": 0
             },
             "rotate": 0,
-            "thumb": "https://adstudioserver.foodyqueen.com/images/photos/mothers/002.jpg",
-            "url": "https://adstudioserver.foodyqueen.com/images/photos/mothers/002.jpg"
+            "thumb": "http://localhost:4000/images/photos/mothers/002.jpg",
+            "url": "http://localhost:4000/images/photos/mothers/002.jpg"
           },
           "transparency": 1
         },

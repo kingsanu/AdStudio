@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { toast } from "sonner";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import {
   Edit,
   Download,
@@ -31,85 +32,126 @@ import axios from "axios";
 export default function RecentWork() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [userTemplates, setUserTemplates] = useState<Template[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(1);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState<"recent" | "name" | "modified">(
     "recent"
   );
 
-  // Fetch user templates
-  const fetchUserTemplates = useCallback(
-    async (pageNum = 1, append = false) => {
-      if (!user?.userId) return;
+  const ITEMS_PER_PAGE = 10;
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-      if (pageNum === 1) {
-        setIsLoading(true);
+  // Fetch user templates using React Query's useInfiniteQuery
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+    refetch,
+  } = useInfiniteQuery({
+    queryKey: ["userTemplates", user?.userId, sortBy],
+    queryFn: async ({ pageParam = 0 }: { pageParam: number }) => {
+      if (!user?.userId) {
+        throw new Error("User ID is required");
+      }
+
+      console.log(
+        `[RecentWork] Loading page ${pageParam} with sortBy: ${sortBy}`
+      );
+
+      let apiUrl = "http://localhost:4000/api/templates";
+      const params = new URLSearchParams();
+      
+      params.append("ps", ITEMS_PER_PAGE.toString());
+      params.append("pi", pageParam.toString());
+      params.append("userId", user.userId);
+      params.append("onlyMine", "true");
+
+      // Add sorting
+      if (sortBy === "recent") {
+        params.append("sort", "createdAt");
+        params.append("order", "desc");
+      } else if (sortBy === "modified") {
+        params.append("sort", "updatedAt");
+        params.append("order", "desc");
+      } else if (sortBy === "name") {
+        params.append("sort", "title");
+        params.append("order", "asc");
+      }
+
+      apiUrl += `?${params.toString()}`;
+
+      const response = await axios.get(apiUrl);
+      const templates = response.data.data ?? response.data ?? [];
+      const paginationInfo = response.data.pagination;
+
+      console.log(
+        `[RecentWork] Loaded ${templates.length} templates for page ${pageParam}`
+      );
+
+      // Determine if there are more templates to load
+      let hasMoreTemplates = false;
+      if (paginationInfo) {
+        hasMoreTemplates = paginationInfo.hasMore;
       } else {
-        setLoadingMore(true);
+        // Fallback if pagination info is not available
+        hasMoreTemplates = templates.length === ITEMS_PER_PAGE;
       }
 
-      try {
-        let apiUrl = "https://adstudioserver.foodyqueen.com/api/templates";
-        const params = new URLSearchParams();
-        params.append("ps", "12"); // page size
-        params.append("pi", (pageNum - 1).toString()); // page index (0-based)
-        params.append("userId", user.userId);
-        params.append("onlyMine", "true");
+      console.log(
+        `[RecentWork] Has more templates: ${hasMoreTemplates}`
+      );
 
-        // Add sorting
-        if (sortBy === "recent") {
-          params.append("sort", "createdAt");
-          params.append("order", "desc");
-        } else if (sortBy === "modified") {
-          params.append("sort", "updatedAt");
-          params.append("order", "desc");
-        } else if (sortBy === "name") {
-          params.append("sort", "title");
-          params.append("order", "asc");
-        }
-
-        apiUrl += `?${params.toString()}`;
-
-        const response = await axios.get(apiUrl);
-        const templates = response.data.data ?? response.data ?? [];
-
-        if (templates.length === 0) {
-          setHasMore(false);
-        } else {
-          if (append) {
-            setUserTemplates((prev) => [...prev, ...templates]);
-          } else {
-            setUserTemplates(templates);
-          }
-          setPage(pageNum);
-        }
-      } catch (error) {
-        console.error("Error fetching user templates:", error);
-        toast.error("Failed to load your designs");
-      } finally {
-        setIsLoading(false);
-        setLoadingMore(false);
-      }
+      return {
+        templates,
+        nextPage: hasMoreTemplates ? pageParam + 1 : undefined,
+        hasMore: hasMoreTemplates,
+      };
     },
-    [user?.userId, sortBy]
-  );
+    initialPageParam: 0,
+    getNextPageParam: (lastPage: any) => lastPage.nextPage,
+    enabled: !!user?.userId, // Only run query when user is available
+  });
 
-  useEffect(() => {
-    fetchUserTemplates(1, false);
-  }, [fetchUserTemplates]);
+  // Flatten all pages into a single array of templates
+  const userTemplates = data?.pages.flatMap((page: any) => page.templates) ?? [];
+  
+  // Get total count from the first page's pagination info if available
+  const firstPageResponse = data?.pages[0];
+  const totalCount = firstPageResponse ? userTemplates.length : 0;
 
   const handleLoadMore = () => {
-    if (!loadingMore && hasMore) {
-      fetchUserTemplates(page + 1, true);
+    if (!isFetchingNextPage && hasNextPage) {
+      fetchNextPage();
     }
   };
 
+  // Infinite scroll effect
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const threshold = 100; // Load more when 100px from bottom
+
+      if (
+        scrollHeight - scrollTop - clientHeight < threshold &&
+        hasNextPage &&
+        !isFetchingNextPage
+      ) {
+        fetchNextPage();
+      }
+    };
+
+    container.addEventListener("scroll", handleScroll);
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
   const handleEditTemplate = (templateId: string) => {
-    navigate(`/editor?template=${templateId}`);
+    // Add edit=true parameter to indicate editing existing design
+    navigate(`/editor?template=${templateId}&edit=true`);
   };
 
   const handleDownloadTemplate = (template: Template) => {
@@ -123,7 +165,7 @@ export default function RecentWork() {
         // Implement delete API call
         console.log("Deleting template:", templateId);
         toast.success("Design deleted successfully");
-        fetchUserTemplates(1, false); // Refresh the list
+        refetch(); // Refresh the list using React Query
       } catch (error) {
         console.error("Delete error:", error);
         toast.error("Failed to delete design");
@@ -136,11 +178,12 @@ export default function RecentWork() {
   };
 
   return (
-    <SharedDashboardLayout
-      title="Recent Work"
-      description="View and manage your recent designs and templates"
-      showSearch={false}
-    >
+    <div ref={scrollContainerRef} className="h-screen overflow-y-auto">
+      <SharedDashboardLayout
+        title="Recent Work"
+        description="View and manage your recent designs and templates"
+        showSearch={false}
+      >
       {/* Enhanced Hero Section */}
       <motion.div
         className="relative overflow-hidden mb-8"
@@ -188,7 +231,7 @@ export default function RecentWork() {
                       color: COLORS.text.secondary,
                     }}
                   >
-                    {userTemplates.length} designs created and counting
+                    {totalCount} designs created and counting
                   </p>
                 </div>
               </div>
@@ -538,7 +581,20 @@ export default function RecentWork() {
               </div>
             )}
 
-            {hasMore && (
+            {/* Loading indicator for fetching next page */}
+            {isFetchingNextPage && (
+              <motion.div
+                className="text-center py-8"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="h-6 w-6 mx-auto animate-spin rounded-full border-2 border-solid border-blue-600 border-r-transparent"></div>
+                <p className="text-sm text-gray-500 mt-2">Loading more designs...</p>
+              </motion.div>
+            )}
+
+            {hasNextPage && (
               <motion.div
                 className="text-center mt-12"
                 initial={{ opacity: 0, y: 20 }}
@@ -552,7 +608,7 @@ export default function RecentWork() {
                   <Button
                     variant="outline"
                     onClick={handleLoadMore}
-                    disabled={loadingMore}
+                    disabled={isFetchingNextPage}
                     className="min-w-32 cursor-pointer"
                     style={{
                       borderColor: COLORS.border.default,
@@ -561,7 +617,7 @@ export default function RecentWork() {
                       padding: "12px 24px",
                     }}
                   >
-                    {loadingMore ? (
+                    {isFetchingNextPage ? (
                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-solid border-blue-600 border-r-transparent"></div>
                     ) : (
                       "Load More Designs"
@@ -574,5 +630,6 @@ export default function RecentWork() {
         )}
       </motion.div>
     </SharedDashboardLayout>
+    </div>
   );
 }

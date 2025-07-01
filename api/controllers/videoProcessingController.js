@@ -48,6 +48,9 @@ const createSlideshowWithFluentFFmpeg = async (images, options = {}) => {
     duration = 3,
     transitionDuration = 0.5,
     transitionEffect = "fade",
+    audioUrl,
+    audioDuration,
+    slideTimings,
   } = options;
 
   // Ensure output directory exists
@@ -111,7 +114,10 @@ const createSlideshowWithFluentFFmpeg = async (images, options = {}) => {
         outputPath,
         duration,
         transitionDuration,
-        tempDir
+        tempDir,
+        audioUrl,
+        audioDuration,
+        slideTimings,
       });
     }
 
@@ -120,7 +126,10 @@ const createSlideshowWithFluentFFmpeg = async (images, options = {}) => {
       outputPath,
       duration,
       transitionDuration,
-      tempDir
+      tempDir,
+      audioUrl,
+      audioDuration,
+      slideTimings,
     });
 
   } catch (error) {
@@ -138,7 +147,7 @@ const createSlideshowWithFluentFFmpeg = async (images, options = {}) => {
 
 // Create slideshow using crossfade transitions (works well for fewer images)
 const createSlideshowWithCrossfade = async (images, options) => {
-  const { outputPath, duration, transitionDuration, tempDir } = options;
+  const { outputPath, duration, transitionDuration, tempDir, audioUrl, audioDuration, slideTimings } = options;
   
   return new Promise((resolve, reject) => {
     console.log("Creating slideshow with crossfade transitions");
@@ -184,17 +193,34 @@ const createSlideshowWithCrossfade = async (images, options) => {
       command.input(image).inputOptions(["-loop 1", `-t ${duration + transitionDuration}`]);
     });
     
+    // Add audio input if provided
+    if (audioUrl) {
+      command.input(audioUrl);
+    }
+    
+    const outputOptions = [
+      "-map [outv]",
+      "-c:v libx264",
+      "-pix_fmt yuv420p",
+      "-preset medium",
+      "-crf 23",
+      "-r 30",
+      `-t ${audioDuration || totalDuration}`
+    ];
+    
+    // Add audio mapping and options if audio is provided
+    if (audioUrl) {
+      outputOptions.push(
+        `-map ${images.length}:a`,
+        "-c:a aac",
+        "-b:a 128k",
+        "-shortest" // Ensure video and audio end at the same time
+      );
+    }
+    
     command
       .complexFilter(filterComplex)
-      .outputOptions([
-        "-map [outv]",
-        "-c:v libx264",
-        "-pix_fmt yuv420p",
-        "-preset medium",
-        "-crf 23",
-        "-r 30",
-        `-t ${totalDuration}`
-      ])
+      .outputOptions(outputOptions)
       .output(outputPath)
       .on("start", (commandLine) => {
         console.log("Crossfade slideshow FFmpeg started:", commandLine);
@@ -220,7 +246,7 @@ const createSlideshowWithCrossfade = async (images, options) => {
 
 // Create slideshow by creating segments and concatenating (more reliable for many images)
 const createSlideshowWithSegments = async (images, options) => {
-  const { outputPath, duration, tempDir } = options;
+  const { outputPath, duration, tempDir, audioUrl, audioDuration, slideTimings } = options;
   
   console.log("Creating slideshow with individual segments");
   
@@ -274,15 +300,33 @@ const createSlideshowWithSegments = async (images, options) => {
   const totalDuration = images.length * duration;
   
   return new Promise((resolve, reject) => {
-    ffmpeg()
+    const command = ffmpeg()
       .input(concatFilePath)
-      .inputOptions(["-f concat", "-safe 0"])
-      .outputOptions([
-        "-c:v libx264", // Re-encode to ensure compatibility
-        "-pix_fmt yuv420p",
-        "-preset medium",
-        "-crf 23"
-      ])
+      .inputOptions(["-f concat", "-safe 0"]);
+    
+    // Add audio input if provided
+    if (audioUrl) {
+      command.input(audioUrl);
+    }
+    
+    const outputOptions = [
+      "-c:v libx264", // Re-encode to ensure compatibility
+      "-pix_fmt yuv420p",
+      "-preset medium",
+      "-crf 23"
+    ];
+    
+    // Add audio options if audio is provided
+    if (audioUrl) {
+      outputOptions.push(
+        "-c:a aac",
+        "-b:a 128k",
+        "-shortest" // Ensure video and audio end at the same time
+      );
+    }
+    
+    command
+      .outputOptions(outputOptions)
       .output(outputPath)
       .on("start", (commandLine) => {
         console.log("Final concatenation FFmpeg started:", commandLine);
@@ -627,7 +671,7 @@ const slideshowController = {
         if (CLOUD_STORAGE.BASE_URL) {
           cloudUrl = `${CLOUD_STORAGE.BASE_URL}/editor/videos/${fileName}`;
         } else {
-          cloudUrl = `https://adstudioserver.foodyqueen.com/api/media/${fileName}`;
+          cloudUrl = `http://localhost:4000/api/media/${fileName}`;
         }
 
         console.log("Using local fallback URL:", cloudUrl);

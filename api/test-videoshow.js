@@ -65,7 +65,7 @@ async function testVideoshowEndpoint() {
     
     // Make request to the endpoint
     const response = await axios.post(
-      'https://adstudioserver.foodyqueen.com/api/video-processing/create-videoshow-slideshow',
+      'http://localhost:4000/api/video-processing/create-videoshow-slideshow',
       formData,
       {
         headers: {
@@ -101,6 +101,6 @@ try {
 } catch (err) {
   console.log('⚠️  Canvas not available, skipping image generation test');
   console.log('You can manually test the endpoint with your own images');
-  console.log('Endpoint: POST https://adstudioserver.foodyqueen.com/api/video-processing/create-videoshow-slideshow');
+  console.log('Endpoint: POST http://localhost:4000/api/video-processing/create-videoshow-slideshow');
   console.log('Required fields: images (file uploads), duration (optional), transition (optional)');
 }

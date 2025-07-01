@@ -36,7 +36,7 @@ async function testAlternativeEndpoint() {
     
     // Make request to the alternative endpoint
     const response = await axios.post(
-      'https://adstudioserver.foodyqueen.com/api/video-processing/create-alternative-slideshow',
+      'http://localhost:4000/api/video-processing/create-alternative-slideshow',
       formData,
       {
         headers: {

@@ -68,6 +68,12 @@ export default function Dashboard() {
   const [isLoadingUserTemplates, setIsLoadingUserTemplates] = useState(true);
   const [showCustomSizeDialog, setShowCustomSizeDialog] = useState(false);
 
+  // State for actual counts
+  const [totalUserTemplatesCount, setTotalUserTemplatesCount] = useState(0);
+  const [totalWhatsappCampaignsCount, setTotalWhatsappCampaignsCount] = useState(0);
+  const [totalCouponCampaignsCount, setTotalCouponCampaignsCount] = useState(0);
+  const [isLoadingCounts, setIsLoadingCounts] = useState(true);
+
   const templatesScrollRef = useRef<HTMLDivElement>(null);
   const lastPublicTemplateRef = useRef<HTMLDivElement>(null);
   const lastUserTemplateRef = useRef<HTMLDivElement>(null);
@@ -280,10 +286,10 @@ export default function Dashboard() {
     setIsLoadingTemplates(true);
 
     try {
-      let apiUrl = "https://adstudioserver.foodyqueen.com/api/templates";
+      let apiUrl = "http://localhost:4000/api/templates";
       const params = new URLSearchParams();
 
-      params.append("ps", "8"); // page size
+      params.append("ps", "18"); // page size
       params.append("pi", "0"); // page index (0-based)
       params.append("isPublic", "true");
 
@@ -308,12 +314,13 @@ export default function Dashboard() {
     setIsLoadingUserTemplates(true);
 
     try {
-      let apiUrl = "https://adstudioserver.foodyqueen.com/api/templates";
+      let apiUrl = "http://localhost:4000/api/templates";
       const params = new URLSearchParams();
 
       params.append("ps", "8");
       params.append("pi", "0");
       params.append("userId", user.userId);
+      params.append("onlyMine", "true");
 
       apiUrl += `?${params.toString()}`;
 
@@ -358,6 +365,68 @@ export default function Dashboard() {
       setIsLoadingCoupons(false);
     }
   }, [user?.userId]);
+  // Fetch actual counts for statistics
+  const fetchCounts = useCallback(async () => {
+    if (!user?.userId) return;
+
+    setIsLoadingCounts(true);
+
+    try {
+      // Fetch user templates count
+      const userTemplatesCountResponse = await axios.get(
+        "http://localhost:4000/api/templates",
+        {
+          params: {
+            userId: user.userId,
+            onlyMine: "true",
+            ps: 1, // We only need the pagination info, not the actual data
+            pi: 0,
+          },
+        }
+      );
+      setTotalUserTemplatesCount(
+        userTemplatesCountResponse.data.pagination?.total || 0
+      );
+
+      // Fetch WhatsApp campaigns count
+      try {
+        const whatsappCountResponse = await campaignService.getCampaigns({
+          userId: user.userId,
+          limit: 1000, // Set a high limit to get all campaigns for accurate count
+        });
+        // Check if the response has a total count
+        setTotalWhatsappCampaignsCount(
+          whatsappCountResponse.pagination?.total || whatsappCountResponse.data?.length || 0
+        );
+      } catch (error) {
+        console.error("Error fetching WhatsApp campaigns count:", error);
+        setTotalWhatsappCampaignsCount(0);
+      }
+
+      // Fetch coupon campaigns count
+      try {
+        const couponCountResponse = await couponCampaignService.getCouponCampaigns({
+          userId: user.userId,
+        });
+        if (couponCountResponse.success) {
+          setTotalCouponCampaignsCount(couponCountResponse.data?.length || 0);
+        } else {
+          setTotalCouponCampaignsCount(0);
+        }
+      } catch (error) {
+        console.error("Error fetching coupon campaigns count:", error);
+        setTotalCouponCampaignsCount(0);
+      }
+    } catch (error) {
+      console.error("Error fetching counts:", error);
+      setTotalUserTemplatesCount(0);
+      setTotalWhatsappCampaignsCount(0);
+      setTotalCouponCampaignsCount(0);
+    } finally {
+      setIsLoadingCounts(false);
+    }
+  }, [user?.userId]);
+
   // Helper function to get campaign progress based on status
   const getCampaignProgress = (status: string) => {
     switch (status) {
@@ -415,8 +484,9 @@ export default function Dashboard() {
     if (user?.userId) {
       fetchUserTemplates();
       fetchCampaigns();
+      fetchCounts();
     }
-  }, [fetchPublicTemplates, fetchUserTemplates, fetchCampaigns, user?.userId]);
+  }, [fetchPublicTemplates, fetchUserTemplates, fetchCampaigns, fetchCounts, user?.userId]);
 
   // Scroll templates horizontally with mouse wheel
   useEffect(() => {
@@ -541,21 +611,21 @@ export default function Dashboard() {
             >
               <StatsCard
                 title="Total Designs"
-                value={userTemplates.length}
+                value={isLoadingCounts ? 0 : totalUserTemplatesCount}
                 icon={TrendingUp}
                 gradient={COLORS.gradients.cool}
               />
 
               <StatsCard
                 title="WhatsApp Campaigns"
-                value={whatsappCampaigns.length}
+                value={isLoadingCounts ? 0 : totalWhatsappCampaignsCount}
                 icon={MessageSquare}
                 gradient={COLORS.gradients.warm}
               />
 
               <StatsCard
                 title="Coupon Campaigns"
-                value={couponCampaigns.length}
+                value={isLoadingCounts ? 0 : totalCouponCampaignsCount}
                 icon={Tag}
                 gradient={COLORS.gradients.primary}
                 onClick={() => navigate("/coupon-campaigns")}
@@ -730,14 +800,14 @@ export default function Dashboard() {
                 </motion.div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-                  {publicTemplates.slice(0, 10).map((template, index) => (
+                  {publicTemplates.slice(0, 8).map((template, index) => (
                     <TemplateCard
                       key={template._id}
                       title={template.title}
                       thumbnailUrl={template.thumbnailUrl}
                       type="template"
                       onClick={() =>
-                        navigate(`/editor/template/${template._id}`)
+                        navigate(`/editor?template=${template._id}`)
                       }
                       ref={index === 5 ? lastPublicTemplateRef : undefined}
                     />
@@ -929,7 +999,7 @@ export default function Dashboard() {
                               transition: TRANSITIONS.default,
                             }}
                             onClick={() =>
-                              navigate(`/editor/template/${template._id}`)
+                              navigate(`/editor?template=${template._id}&edit=true`)
                             }
                             ref={index === 5 ? lastUserTemplateRef : null}
                           >

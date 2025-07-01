@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 
-const API_BASE_URL = "https://adstudioserver.foodyqueen.com/api";
+const API_BASE_URL = "http://localhost:4000/api";
 
 export type WhatsAppConnectionState =
   | "checking"

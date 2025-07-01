@@ -39,6 +39,7 @@ export type EditorProps = {
   };
   saving?: boolean;
   config: EditorConfig;
+  designId?: string | null; // ID of the design being edited (null for new designs)
   onChanges: (changes: unknown) => void;
   onDesignNameChanges?: (name: string) => void;
   isTextTemplate?: boolean;
@@ -47,6 +48,7 @@ export type EditorProps = {
 const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
   data,
   config,
+  designId: initialDesignId = null, // Accept designId as prop with default null
   onChanges,
   isTextTemplate = false,
 }) => {
@@ -54,6 +56,18 @@ const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
   const { getState, actions, query } = useEditorStore({
     isAdmin: config.isAdmin,
   });
+  
+  // Use the provided designId or default to null for new designs
+  const [designId, setDesignId] = useState<string | null>(initialDesignId);
+  
+  // Update designId if the prop changes (e.g., after first save)
+  useEffect(() => {
+    if (initialDesignId !== designId) {
+      console.log("🔄 Updating designId from prop:", initialDesignId);
+      setDesignId(initialDesignId);
+    }
+  }, [initialDesignId, designId]);
+  
   const [viewPortHeight, setViewPortHeight] = useState<number>();
   const [showPreview, setShowPreview] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
@@ -281,7 +295,7 @@ const CanvaEditor: FC<PropsWithChildren<EditorProps>> = ({
   }, []);
 
   return (
-    <EditorContext.Provider value={{ config, getState, actions, query }}>
+    <EditorContext.Provider value={{ config, getState, actions, query, designId, setDesignId }}>
       <AnimationProvider>
         <TransitionProvider
           animationState={animationState}

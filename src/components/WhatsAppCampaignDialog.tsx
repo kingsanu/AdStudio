@@ -39,6 +39,7 @@ import {
   WhatsAppConnectionState,
 } from "@/services/whatsappService";
 import { videoService } from "@/services/videoService";
+import { audioService } from "@/services/audioService";
 import {
   Users,
   MessageSquare,
@@ -57,6 +58,9 @@ import {
   RefreshCw,
   Loader2,
   Camera,
+  Mic,
+  Volume2,
+  Pause,
 } from "lucide-react";
 import MultipleSelector from "./ui/multiselect";
 import { UPLOAD_IMAGE_ENDPOINT } from "@/constants";
@@ -95,6 +99,17 @@ export default function WhatsAppCampaignDialog({
   const [uploadingImage, setUploadingImage] = useState(false);
   const [mediaGenerated, setMediaGenerated] = useState(false);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const qrRefreshCleanupRef = useRef<(() => void) | null>(null);
+  const videoGenerationRequestRef = useRef<string | null>(null); // Track current video generation
+
+  // Voiceover state
+  const [voiceoverScript, setVoiceoverScript] = useState<string>("");
+  const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string>("");
+  const [audioDuration, setAudioDuration] = useState<number>(0);
+  const [selectedVoice, setSelectedVoice] = useState<string>("aria");
+  const [audioGenerationProgress, setAudioGenerationProgress] = useState(0);
+  const [processedAudioUrls, setProcessedAudioUrls] = useState<Set<string>>(new Set());
 
   // WhatsApp connection state
   const [whatsappSettings, setWhatsappSettings] =
@@ -129,6 +144,8 @@ export default function WhatsAppCampaignDialog({
     customerFilters: {
       segments: [],
     },
+    audioUrl: "",
+    audioDuration: 0,
   });
 
   // Load WhatsApp settings when dialog opens, check existing connection first
@@ -164,6 +181,12 @@ export default function WhatsAppCampaignDialog({
         clearInterval(progressIntervalRef.current);
         progressIntervalRef.current = null;
       }
+      
+      // Clean up QR refresh cycle
+      if (qrRefreshCleanupRef.current) {
+        qrRefreshCleanupRef.current();
+        qrRefreshCleanupRef.current = null;
+      }
     }
   }, [open]);
 
@@ -190,9 +213,28 @@ export default function WhatsAppCampaignDialog({
     setIsGeneratingMedia(false);
     setMediaGenerationProgress(0);
     setMediaGenerated(false);
+    
+  // Reset voiceover states
+  setVoiceoverScript("");
+  setIsGeneratingAudio(false);
+  setAudioUrl("");
+  setAudioDuration(0);
+  setSelectedVoice("aria");
+  setAudioGenerationProgress(0);
+  setProcessedAudioUrls(new Set()); // Reset processed audio URLs
+    
     if (progressIntervalRef.current) {
       clearInterval(progressIntervalRef.current);
       progressIntervalRef.current = null;
+    }
+    
+    // Clear video generation tracking
+    videoGenerationRequestRef.current = null;
+    
+    // Clean up QR refresh cycle
+    if (qrRefreshCleanupRef.current) {
+      qrRefreshCleanupRef.current();
+      qrRefreshCleanupRef.current = null;
     }
     setFormData({
       campaignName: "",
@@ -206,6 +248,8 @@ export default function WhatsAppCampaignDialog({
       customerFilters: {
         segments: [],
       },
+      audioUrl: "",
+      audioDuration: 0,
     });
   };
 
@@ -271,20 +315,20 @@ export default function WhatsAppCampaignDialog({
     return `session_${outletId}_${timestamp}`;
   };
 
-  // Start 30-second QR retry timer (increased from 20 to align with backend improvements)
+  // Start 20-second QR retry timer (reduced for faster response)
   const startQRRetryTimer = (sessionId: string) => {
     setIsWaitingForQR(true);
-    setQrRetryTimer(30);
+    setQrRetryTimer(20);
 
-    console.log("QR not ready, starting 30-second retry timer...");
-    toast.info("QR code is being generated, retrying in 30 seconds...");
+    console.log("QR not ready, starting 20-second retry timer...");
+    toast.info("QR code is being generated, retrying in 20 seconds...");
 
     const retryInterval = setInterval(() => {
       setQrRetryTimer((prev) => {
         if (prev <= 1) {
           clearInterval(retryInterval);
           setIsWaitingForQR(false);
-          console.log("Retrying QR code fetch after 30 seconds...");
+          console.log("Retrying QR code fetch after 20 seconds...");
           fetchQRCode(sessionId);
           return 0;
         }
@@ -574,7 +618,7 @@ export default function WhatsAppCampaignDialog({
     try {
       // Use our new backend API endpoint for custom session IDs
       const response = await axios.post(
-        `https://adstudioserver.foodyqueen.com/api/whatsapp-start-custom/${outletId}`,
+        `http://localhost:4000/api/whatsapp-start-custom/${outletId}`,
         { sessionId },
         { timeout: 30000 }
       );
@@ -631,7 +675,7 @@ export default function WhatsAppCampaignDialog({
     try {
       console.log("Fetching QR code for session:", sessionId);
       const response = await axios.get(
-        `https://adstudioserver.foodyqueen.com/api/whatsapp-qr/${sessionId}`,
+        `http://localhost:4000/api/whatsapp-qr/${sessionId}`,
         {
           timeout: 60000, // Increased timeout to 60 seconds to match backend improvements
         }
@@ -659,8 +703,8 @@ export default function WhatsAppCampaignDialog({
           // Now that QR code is loaded, start status polling
           startConnectionPolling();
 
-          // Start QR refresh cycle every 45 seconds
-          startQRRefreshCycle(sessionId);
+          // Start QR refresh cycle and store cleanup function
+          qrRefreshCleanupRef.current = startQRRefreshCycle(sessionId);
         } else if (response.data.qrReady === false) {
           // QR is not ready yet - this is normal, not an error
           const message = response.data.message || "QR code not ready yet";
@@ -720,7 +764,7 @@ export default function WhatsAppCampaignDialog({
     try {
       console.log("Refreshing QR code for session:", sessionId);
       const response = await axios.get(
-        `https://adstudioserver.foodyqueen.com/api/whatsapp-qr/${sessionId}`,
+        `http://localhost:4000/api/whatsapp-qr/${sessionId}`,
         {
           timeout: 60000, // Increased timeout to 60 seconds to match backend improvements
         }
@@ -768,30 +812,46 @@ export default function WhatsAppCampaignDialog({
 
   // Start QR code refresh cycle
   const startQRRefreshCycle = (sessionId: string) => {
-    const refreshInterval = setInterval(async () => {
-      if (connectionStatus === "connected") {
-        clearInterval(refreshInterval);
-        return;
-      }
-
-      setQrRefreshTimer(45);
-
-      // Countdown for next refresh
-      const countdownInterval = setInterval(() => {
+    let countdownInterval: NodeJS.Timeout;
+    
+    const startRefreshCycle = () => {
+      // Set initial countdown
+      setQrRefreshTimer(30);
+      
+      // Start the countdown immediately
+      countdownInterval = setInterval(() => {
         setQrRefreshTimer((prev) => {
           if (prev <= 1) {
+            // Time to refresh
             clearInterval(countdownInterval);
-            // Refresh QR code only (don't restart polling)
             refreshQRCodeOnly(sessionId);
+            
+            // Check if still not connected, then restart the cycle
+            if (connectionStatus !== "connected") {
+              setTimeout(() => {
+                startRefreshCycle(); // Restart the cycle
+              }, 1000);
+            }
             return 0;
           }
           return prev - 1;
         });
       }, 1000);
-    }, 45000); // Refresh every 45 seconds
+    };
+    
+    // Start the first cycle
+    startRefreshCycle();
+    
+    // Store intervals for cleanup if needed
+    const cleanup = () => {
+      if (countdownInterval) clearInterval(countdownInterval);
+    };
+    
+    // Return cleanup function
+    return cleanup;
   };
 
-  // Start connection status polling every 5 seconds
+  // Start connection status polling every 3 seconds
   const startConnectionPolling = () => {
     // Prevent multiple polling intervals
     if (isPollingActive) {
@@ -832,13 +892,125 @@ export default function WhatsAppCampaignDialog({
         setIsPollingActive(false);
         clearInterval(pollInterval);
       }
-    }, 5000); // Poll every 5 seconds
+    }, 3000); // Poll every 3 seconds (reduced from 5)
   };
 
   // Manual option to create a new session
   const handleCreateNewSessionManual = () => {
     handleCreateNewSession();
   };
+
+  // Generate audio from script using Eleven Labs
+  const generateAudioFromScript = async () => {
+    if (!voiceoverScript.trim()) {
+      toast.error("Please enter a script for the voiceover");
+      return;
+    }
+
+    try {
+      setIsGeneratingAudio(true);
+      setAudioGenerationProgress(0);
+
+      toast.info("Generating voiceover audio...");
+
+      const result = await audioService.generateAudio({
+        text: voiceoverScript,
+        voice: selectedVoice,
+      });
+
+      setAudioGenerationProgress(50);
+
+      if (result.success && result.data) {
+        setAudioUrl(result.data.audioUrl);
+        setAudioDuration(result.data.duration);
+        
+        // Update form data
+        setFormData(prev => ({
+          ...prev,
+          audioUrl: result.data!.audioUrl,
+          audioDuration: result.data!.duration,
+        }));
+
+        setAudioGenerationProgress(100);
+        toast.success("Voiceover generated successfully!");
+        
+        // Automatically proceed to next step after audio generation
+        // setTimeout(() => {
+        //   setStep(4);
+        // }, 1000);
+      } else {
+        throw new Error(result.error || "Failed to generate audio");
+      }
+    } catch (error) {
+      console.error("Error generating audio:", error);
+      toast.error("Failed to generate voiceover audio");
+    } finally {
+      setIsGeneratingAudio(false);
+      setAudioGenerationProgress(0);
+    }
+  };
+
+  // Regenerate media with audio when voiceover is added
+  const regenerateMediaWithAudio = useCallback(async () => {
+    if (!audioUrl || !audioDuration || pageImages.length <= 1) {
+      return; // No need to regenerate for single image or no audio
+    }
+
+    // Prevent duplicate requests using a unique identifier
+    const requestId = `${audioUrl}-${pageImages.length}-${Date.now()}`;
+    
+    // Check if we're already processing this or a similar request
+    if (videoGenerationRequestRef.current === requestId || isGeneratingMedia) {
+      console.log('[WhatsAppCampaignDialog] Already processing video generation, skipping:', requestId);
+      return;
+    }
+
+    try {
+      videoGenerationRequestRef.current = requestId;
+      setIsGeneratingMedia(true);
+      setMediaGenerationProgress(0);
+
+      console.log('[WhatsAppCampaignDialog] Regenerating media with audio, request:', requestId);
+      
+      const result = await videoService.generateCampaignMedia(
+        pageImages,
+        audioUrl,
+        audioDuration
+      );
+
+      setMediaGenerationProgress(80);
+
+      // Update form data with the new media URL
+      setFormData((prev) => ({
+        ...prev,
+        imageUrl: result.mediaUrl,
+      }));
+
+      setMediaGenerationProgress(100);
+      setMediaGenerated(true);
+
+      // toast.success("Video updated with voiceover!");
+    } catch (error) {
+      console.error("Error regenerating media with audio:", error);
+      toast.error("Failed to add voiceover to video");
+    } finally {
+      setIsGeneratingMedia(false);
+      videoGenerationRequestRef.current = null; // Clear the request
+    }
+  }, [pageImages, audioUrl, audioDuration, isGeneratingMedia]);
+
+  // Trigger media regeneration when audio is added (with debounce)
+  useEffect(() => {
+    if (audioUrl && audioDuration && pageImages.length > 1 && !isGeneratingMedia) {
+      // Use a small delay to debounce multiple rapid calls
+      const timer = setTimeout(() => {
+        console.log('[WhatsAppCampaignDialog] Audio detected, triggering regeneration');
+        regenerateMediaWithAudio();
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [audioUrl, audioDuration, pageImages.length]); // Only essential dependencies
 
   const handleNext = async () => {
     if (step === 1) {
@@ -859,8 +1031,24 @@ export default function WhatsAppCampaignDialog({
         toast.error("Please select at least one customer");
         return;
       }
-      setStep(3);
+      
+      // Check if we have multiple pages - if so, go to voiceover step, otherwise skip to message
+      if (pageImages.length > 1 || pages.length > 1) {
+        setStep(3); // Go to voiceover/script step
+      } else {
+        setStep(4); // Skip voiceover for single image, go directly to message
+      }
     } else if (step === 3) {
+      // Voiceover step - generate audio if script is provided
+      if (voiceoverScript.trim()) {
+        if (!audioUrl) {
+          // Generate audio from script
+          await generateAudioFromScript();
+          return; // Don't proceed to next step yet
+        }
+      }
+      setStep(4); // Go to message step
+    } else if (step === 4) {
       if (!formData.message.trim()) {
         toast.error("Please enter a message");
         return;
@@ -893,12 +1081,14 @@ export default function WhatsAppCampaignDialog({
       const campaignData: CreateCampaignData = {
         ...formData,
         targetCustomers,
+        audioUrl: audioUrl || undefined,
+        audioDuration: audioDuration || undefined,
       };
 
       const response = await campaignService.createCampaign(campaignData);
 
       if (response.success) {
-        toast.success("Campaign created successfully!");
+        // toast.success("Campaign created successfully!");
         onSuccess(response.data?._id);
         handleClose();
       }
@@ -962,7 +1152,7 @@ export default function WhatsAppCampaignDialog({
     // we need to load more data first
     if (numberOfCustomersToSelect > availableCustomers.length && hasNextPage && !isFetchingNextPage) {
       // Show info message to user
-      toast.info(`Loading more customers to reach ${numberOfCustomersToSelect} selections...`);
+      // toast.info(`Loading more customers to reach ${numberOfCustomersToSelect} selections...`);
       
       // Try to fetch more pages until we have enough customers
       const loadMoreCustomers = async () => {
@@ -1030,10 +1220,13 @@ export default function WhatsAppCampaignDialog({
   // Generate media immediately when dialog opens to minimize user wait time
   const generateMediaImmediately = useCallback(async () => {
     // Prevent multiple simultaneous calls
-    if (isGeneratingMedia || mediaGenerated || formData.imageUrl) {
+    if (isGeneratingMedia || mediaGenerated || formData.imageUrl || videoGenerationRequestRef.current) {
       console.log('[WhatsAppCampaignDialog] Media generation already in progress or completed, skipping');
       return;
     }
+
+    const requestId = `immediate-${Date.now()}`;
+    videoGenerationRequestRef.current = requestId;
 
     console.log('[WhatsAppCampaignDialog] Starting immediate media generation on dialog open');
     
@@ -1089,7 +1282,7 @@ export default function WhatsAppCampaignDialog({
         console.log(`  Page ${index + 1}: ${preview}... (${dataUrl.length} chars)`);
       });
       
-      // Generate media from captured images
+      // Generate media from captured images (no audio for immediate generation)
       const result = await videoService.generateCampaignMedia(capturedImages);
 
       // Update progress
@@ -1104,10 +1297,10 @@ export default function WhatsAppCampaignDialog({
       setMediaGenerated(true);
 
       if (result.mediaType === "video") {
-        toast.success("Campaign Video Generated", {
-          description: `Video created successfully from ${capturedImages.length} pages!`,
-          duration: 4000,
-        });
+        // toast.success("Campaign Video Generated", {
+        //   description: `Video created successfully from ${capturedImages.length} pages!`,
+        //   duration: 4000,
+        // });
       } else {
         toast.success("Campaign Image Generated", {
           description: `Image slideshow created successfully from ${capturedImages.length} pages!`,
@@ -1121,6 +1314,7 @@ export default function WhatsAppCampaignDialog({
       console.log("[WhatsAppCampaignDialog] Will retry media generation when user reaches step 3");
     } finally {
       setIsGeneratingMedia(false);
+      videoGenerationRequestRef.current = null; // Clear the request
     }
   }, [pages, actions, isGeneratingMedia, mediaGenerated, formData.imageUrl]);
 
@@ -1205,7 +1399,11 @@ export default function WhatsAppCampaignDialog({
         console.log(`  Image ${index + 1}: ${mimeType}, ~${imageSize}KB, preview: ${preview}...`);
       });
       
-      const result = await videoService.generateCampaignMedia(imagesToUse);
+      const result = await videoService.generateCampaignMedia(
+        imagesToUse,
+        audioUrl || undefined,
+        audioDuration || undefined
+      );
 
       // Update progress
       setMediaGenerationProgress(80);
@@ -1241,6 +1439,17 @@ export default function WhatsAppCampaignDialog({
     }
   }, [open, pages, mediaGenerated, isGeneratingMedia, formData.imageUrl, generateMediaImmediately]);
 
+  // Cleanup QR refresh cycle when connected
+  useEffect(() => {
+    if (connectionStatus === "connected") {
+      // Clean up QR refresh cycle when connected
+      if (qrRefreshCleanupRef.current) {
+        qrRefreshCleanupRef.current();
+        qrRefreshCleanupRef.current = null;
+      }
+    }
+  }, [connectionStatus]);
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
@@ -1249,13 +1458,15 @@ export default function WhatsAppCampaignDialog({
             <MessageSquare className="h-5 w-5 text-green-600" />
             {step === 1 && "Campaign Details"}
             {step === 2 && "Select Customers"}
-            {step === 3 && "Campaign Message"}
+            {step === 3 && "Add Voiceover (Optional)"}
+            {step === 4 && "Campaign Message"}
           </DialogTitle>
           <DialogDescription>
             {step === 1 && "Set up your WhatsApp campaign basic information"}
             {step === 2 &&
               "Choose which customers to target with your campaign"}
-            {step === 3 && "Compose your message and review campaign details"}
+            {step === 3 && "Add voiceover to your video campaign (optional for enhanced engagement)"}
+            {step === 4 && "Compose your message and review campaign details"}
           </DialogDescription>
         </DialogHeader>
 
@@ -1298,7 +1509,7 @@ export default function WhatsAppCampaignDialog({
                 <Label>WhatsApp Connection Status</Label>
                 <div className="border rounded-lg p-4 space-y-3">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       {connectionStatus === "connected" ? (
                         <Wifi className="h-5 w-5 text-green-600" />
                       ) : isCreatingSession ? (
@@ -1338,45 +1549,16 @@ export default function WhatsAppCampaignDialog({
                       {connectionStatus !== "connected" &&
                         !isCreatingSession &&
                         !isWaitingForQR && (
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={handleCreateNewSessionManual}
-                              disabled={isCheckingConnection}
-                            >
-                              <QrCode className="h-4 w-4" />
-                              New Session
-                            </Button>
-                            {whatsappSettings && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={checkExistingWhatsAppSettings}
-                                disabled={isCheckingConnection}
-                              >
-                                <RefreshCw className="h-4 w-4" />
-                                Reconnect
-                              </Button>
-                            )}
-                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={whatsappSettings ? checkExistingWhatsAppSettings : handleCreateNewSessionManual}
+                            disabled={isCheckingConnection}
+                          >
+                            <QrCode className="h-4 w-4 mr-1" />
+                            {whatsappSettings ? "Reconnect" : "Connect"}
+                          </Button>
                         )}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={checkConnectionStatus}
-                        disabled={
-                          isCheckingConnection ||
-                          isCreatingSession ||
-                          isWaitingForQR
-                        }
-                      >
-                        <RefreshCw
-                          className={`h-4 w-4 ${
-                            isCheckingConnection ? "animate-spin" : ""
-                          }`}
-                        />
-                      </Button>
                     </div>
                   </div>
 
@@ -1409,14 +1591,25 @@ export default function WhatsAppCampaignDialog({
                       <div className="text-center">
                         <div className="flex items-center justify-between mb-3">
                           <p className="text-sm text-gray-600">
-                            Scan this QR code with your WhatsApp to connect:
+                            Scan this QR code with your WhatsApp to connect
                           </p>
-                          {qrRefreshTimer > 0 && (
-                            <div className="text-xs text-blue-600 flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              Refresh in {qrRefreshTimer}s
-                            </div>
-                          )}
+                          <div className="flex items-center gap-2">
+                            {qrRefreshTimer > 0 && (
+                              <div className="text-xs text-blue-600 flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                Auto-refresh in {qrRefreshTimer}s
+                              </div>
+                            )}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => refreshQRCodeOnly(currentSessionId)}
+                              disabled={!currentSessionId || isWaitingForQR}
+                            >
+                              <RefreshCw className="h-3 w-3 mr-1" />
+                              Refresh
+                            </Button>
+                          </div>
                         </div>
                         <div className="flex justify-center">
                           <div className="w-48 h-48 border rounded-lg bg-white p-2 flex items-center justify-center">
@@ -1433,7 +1626,7 @@ export default function WhatsAppCampaignDialog({
                                 onError={(e) => {
                                   console.error("QR code image failed to load");
                                   e.currentTarget.src =
-                                    "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5YTNhZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkVycm9yIGxvYWRpbmcgUVIgY29kZTwvdGV4dD48L3N2Zz4=";
+                                    "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5YTNhZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkVycm9yIGxvYWRpbmcgUFIgY29kZTwvdGV4dD48L3N2Zz4=";
                                 }}
                               />
                             ) : (
@@ -1444,19 +1637,8 @@ export default function WhatsAppCampaignDialog({
                           </div>
                         </div>
                         <p className="text-xs text-gray-500 mt-2">
-                          QR code refreshes automatically every 45 seconds
+                          QR code refreshes automatically every 30 seconds
                         </p>
-                        <div className="mt-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => refreshQRCodeOnly(currentSessionId)}
-                            disabled={!currentSessionId}
-                          >
-                            <RefreshCw className="h-3 w-3 mr-1" />
-                            Refresh QR
-                          </Button>
-                        </div>
                       </div>
                     </div>
                   )}
@@ -1688,8 +1870,210 @@ export default function WhatsAppCampaignDialog({
             </div>
           )}
 
-          {/* Step 3: Message Composition */}
+          {/* Step 3: Voiceover (Optional) */}
           {step === 3 && (
+            <div className="space-y-4">
+             
+
+              {(pageImages.length > 1 || pages.length > 1) && (
+                <>
+                  <div>
+                    <Label htmlFor="voiceoverScript">
+                      Voiceover Script (Optional)
+                    </Label>
+                    <Textarea
+                      id="voiceoverScript"
+                      value={voiceoverScript}
+                      onChange={(e) => setVoiceoverScript(e.target.value)}
+                      placeholder="Enter the script for your voiceover... (e.g., 'Welcome to our special offer! Get 50% off on all items this week only. Visit our store today!')"
+                      rows={4}
+                      disabled={isGeneratingAudio}
+                    />
+                    <p className="text-sm text-gray-500 mt-1">
+                      The voiceover will be automatically timed to match your slides. 
+                      Recommended: 2-3 sentences per slide for best results.
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="voiceSelection" className="text-lg font-semibold">
+                      🎭 Voice Selection - HYPER-EMOTIONAL for Maximum Impact
+                    </Label>
+                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-2 border-purple-200 dark:border-purple-800 rounded-lg p-4 mb-3">
+                      <div className="text-sm font-medium text-purple-800 dark:text-purple-200 mb-2">
+                        🚀 Advertising Voice Technology
+                      </div>
+                      <div className="text-xs text-purple-700 dark:text-purple-300 space-y-1">
+                        <div>✨ <strong>Maximum Emotional Impact:</strong> Ultra-low stability for dramatic variation</div>
+                        <div>🎯 <strong>Premium Quality:</strong> 95%+ similarity boost for crystal-clear audio</div>
+                        <div>🔥 <strong>Advertising Style:</strong> High style settings for compelling delivery</div>
+                        <div>💡 <strong>Pro Tip:</strong> Hindi voices work best for traditional/family brands, Indian English for modern/tech brands</div>
+                      </div>
+                    </div>
+                    <Select 
+                      value={selectedVoice} 
+                      onValueChange={setSelectedVoice}
+                      disabled={isGeneratingAudio}
+                      
+                    >
+                      <SelectTrigger className="!h-20 border-2 hover:border-purple-300 mt-10">
+                        <SelectValue placeholder="🎪 Select Your HYPER-EMOTIONAL Advertising Voice" className="!h-16"/>
+                      </SelectTrigger>
+                      <SelectContent className="max-h-96 overflow-y-auto">
+                        {audioService.getAvailableVoices().map((voice) => (
+                          <SelectItem key={voice.id} value={voice.id} className="!h-auto !py-3">
+                            <div className="flex flex-col gap-2 py-1 w-full">
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-lg">{voice.name}</span>
+                                <span className="text-xs px-2 py-1 rounded-full bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 border">
+                                  {voice.gender === "male" ? "♂️" : "♀️"} {voice.accent}
+                                </span>
+                              </div>
+                              <div className="text-sm text-gray-800 dark:text-gray-200 font-medium">
+                                {voice.description}
+                              </div>
+                              {/* <div className="text-sm font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                                {voice.emotionalTone}
+                              </div> */}
+                              {/* <div className="text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 rounded px-2 py-1">
+                                �️ Stability: {Math.round((1-voice.stability)*100)}% Emotional | 
+                                🎨 Style: {Math.round(voice.style*100)}% Dramatic | 
+                                📢 Boost: {voice.use_speaker_boost ? 'ON' : 'OFF'}
+                              </div> */}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* HYPER-EMOTIONAL Audio Generation Progress */}
+                  {isGeneratingAudio && (
+                    <div className="border-2 border-purple-200 rounded-lg p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="relative">
+                          <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
+                          <div className="absolute inset-0 h-6 w-6 animate-pulse rounded-full bg-purple-300 opacity-30"></div>
+                        </div>
+                        <div>
+                          <div className="font-bold text-purple-900 dark:text-purple-100 text-lg">
+                            🎭 Generating HYPER-EMOTIONAL Voiceover...
+                          </div>
+                          <div className="text-sm text-purple-700 dark:text-purple-300">
+                            ✨ Processing with maximum dramatic impact & emotional range
+                          </div>
+                          <div className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                            🎯 Voice: {selectedVoice} | 🔥 Ultra-low stability for emotion | 💎 Premium quality processing
+                          </div>
+                        </div>
+                      </div>
+                      <div className="w-full bg-gradient-to-r from-purple-200 to-pink-200 dark:from-purple-800 dark:to-pink-800 rounded-full h-3 overflow-hidden">
+                        <div
+                          className="bg-gradient-to-r from-purple-600 to-pink-600 h-3 rounded-full transition-all duration-500 animate-pulse"
+                          style={{ width: `${audioGenerationProgress}%` }}
+                        />
+                      </div>
+                      <div className="text-xs text-purple-600 dark:text-purple-400 mt-2 text-center font-semibold">
+                        {audioGenerationProgress < 30 ? "🎪 Enhancing text for maximum emotional impact..." :
+                         audioGenerationProgress < 70 ? "🎭 Applying HYPER-EMOTIONAL voice settings..." :
+                         "🔥 Finalizing ultra-dramatic audio delivery..."}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* HYPER-EMOTIONAL Generated Audio Preview */}
+                  {audioUrl && !isGeneratingAudio && (
+                    <div className="border-2 border-green-200 rounded-lg p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="relative">
+                          <Volume2 className="h-6 w-6 text-green-600" />
+                          <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-400 rounded-full animate-pulse"></div>
+                        </div>
+                        <div>
+                          <div className="font-bold text-green-900 dark:text-green-100 text-lg">
+                            🎉 HYPER-EMOTIONAL Voiceover Generated!
+                          </div>
+                          <div className="text-sm text-green-700 dark:text-green-300">
+                            🔥 Maximum emotional impact | ⚡ Duration: {audioDuration.toFixed(1)}s | 🎭 Voice: {selectedVoice}
+                          </div>
+                          <div className="text-xs text-green-600 dark:text-green-400 mt-1">
+                            ✨ Enhanced with emotional prefixes, strategic pauses & advertising emphasis
+                          </div>
+                        </div>
+                      </div>
+                      <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border">
+                        <audio controls className="w-full">
+                          <source src={audioUrl} type="audio/mpeg" />
+                          Your browser does not support the audio element.
+                        </audio>
+                      </div>
+                      <div className="mt-2 text-xs text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 rounded p-2">
+                        💡 <strong>Pro Tip:</strong> This voice will automatically sync with your video slides for maximum advertising impact!
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Generate HYPER-EMOTIONAL Audio Button */}
+                  {voiceoverScript.trim() && !audioUrl && !isGeneratingAudio && (
+                    <Button 
+                      onClick={generateAudioFromScript}
+                      className="w-full h-14 text-white font-bold text-lg shadow-lg"
+                      disabled={isGeneratingAudio || !voiceoverScript.trim()}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="relative">
+                          <Mic className="h-6 w-6" />
+                          <div className="absolute -top-1 -right-1 h-3 w-3 bg-yellow-400 rounded-full animate-pulse"></div>
+                        </div>
+                        <div className="text-left">
+                          <div>🎭 Generate HYPER-EMOTIONAL Voiceover</div>
+                        </div>
+                      </div>
+                    </Button>
+                  )}
+
+                  {/* Slide Timing Information */}
+                  {audioUrl && audioDuration > 0 && (
+                    <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                      <h4 className="font-medium mb-3 flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-blue-600" />
+                        Video Timing Preview
+                      </h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>Audio Duration:</span>
+                          <span className="font-medium">{audioDuration.toFixed(1)}s</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Number of Slides:</span>
+                          <span className="font-medium">{pageImages.length || pages.length}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Time per Slide:</span>
+                          <span className="font-medium">
+                            {((audioDuration) / (pageImages.length || pages.length)).toFixed(1)}s
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Skip Option for Single Page */}
+              {!(pageImages.length > 1 || pages.length > 1) && (
+                <div className="text-center py-8">
+                  <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Single page detected - proceeding with image campaign
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Step 4: Message Composition */}
+          {step === 4 && (
             <div className="space-y-4">
               <div>
                 <Label htmlFor="message">Campaign Message *</Label>
@@ -1860,10 +2244,18 @@ export default function WhatsAppCampaignDialog({
                       {formData.imageUrl
                         ? pageImages.length === 1
                           ? "Image"
-                          : "Video"
+                          : audioUrl ? "Video with Voiceover" : "Video"
                         : "Pending"}
                     </span>
                   </div>
+                  {audioUrl && (
+                    <div className="flex justify-between">
+                      <span>Voiceover Duration:</span>
+                      <span className="font-medium">
+                        {audioDuration.toFixed(1)}s
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -1883,13 +2275,13 @@ export default function WhatsAppCampaignDialog({
           <Button
             onClick={handleNext}
             disabled={isLoading || (isLoadingCustomers && customers.length === 0)}
-            className={step === 3 ? "bg-green-600 hover:bg-green-700" : ""}
+            className={step === 4 ? "bg-green-600 hover:bg-green-700" : ""}
           >
             {isLoading ? (
               "Creating..."
             ) : (isLoadingCustomers && customers.length === 0) ? (
               "Loading Customers..."
-            ) : step === 3 ? (
+            ) : step === 4 ? (
               <>
                 <Send className="mr-2 h-4 w-4" />
                 Create Campaign

@@ -51,7 +51,7 @@ export default function Templates() {
       }
 
       try {
-        let apiUrl = "https://adstudioserver.foodyqueen.com/api/templates";
+        let apiUrl = "http://localhost:4000/api/templates";
         const params = new URLSearchParams();
         params.append("ps", "12"); // page size
         params.append("pi", (pageNum - 1).toString()); // page index (0-based)

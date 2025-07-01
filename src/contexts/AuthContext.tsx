@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const cachedUserData = localStorage.getItem("s_data");
       const cachedTimestamp = localStorage.getItem("s_data_timestamp");
       const now = Date.now();
-      const ONE_DAY = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+      const ONE_DAY = 24 * 60 * 60 * 10000; // 24 hours in milliseconds
 
       // If we have cached data and it's recent and we're not forcing a refresh
       if (
@@ -134,7 +134,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             // Check if we need to refresh the data (older than 24 hours)
             const cachedTimestamp = localStorage.getItem("s_data_timestamp");
             const now = Date.now();
-            const ONE_DAY = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+            const ONE_DAY = 24 * 60 * 60 * 10000; // 24 hours in milliseconds
 
             if (!cachedTimestamp || now - parseInt(cachedTimestamp) > ONE_DAY) {
               console.log("Cached user data is old, refreshing from API");
@@ -247,6 +247,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const value = {
     user,
+    
     isAuthenticated: !!user,
     isLoading,
     userLoading,

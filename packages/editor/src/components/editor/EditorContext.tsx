@@ -37,6 +37,8 @@ export type EditorContext = {
   query: EditorQuery;
   actions: EditorActions;
   config: EditorConfig;
+  designId?: string | null; // Unique ID for this design instance - null for new designs
+  setDesignId?: (id: string | null) => void; // Function to update the design ID
 };
 
 export const EditorContext = createContext<EditorContext>({} as EditorContext);

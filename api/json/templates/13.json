@@ -40,8 +40,8 @@
             "h": { "i": 256, "j": 384 },
             "k": { "l": 0, "m": -55.5 },
             "n": 0,
-            "aj": "https://adstudioserver.foodyqueen.com/images/photos/christmas/002.jpg",
-            "y": "https://adstudioserver.foodyqueen.com/images/photos/christmas/006.jpg"
+            "aj": "http://localhost:4000/images/photos/christmas/002.jpg",
+            "y": "http://localhost:4000/images/photos/christmas/006.jpg"
           },
           "ag": 1
         },
@@ -180,8 +180,8 @@
             "h": { "i": 500, "j": 750 },
             "k": { "l": 0, "m": -125 },
             "n": 0,
-            "aj": "https://adstudioserver.foodyqueen.com/images/photos/animals/003.jpg",
-            "y": "https://adstudioserver.foodyqueen.com/images/photos/animals/003.jpg"
+            "aj": "http://localhost:4000/images/photos/animals/003.jpg",
+            "y": "http://localhost:4000/images/photos/animals/003.jpg"
           },
           "ag": 1
         },
@@ -206,8 +206,8 @@
             "h": { "i": 397.1896955503513, "j": 265 },
             "k": { "l": -70.59484777517565, "m": 0 },
             "n": 0,
-            "aj": "https://adstudioserver.foodyqueen.com/images/photos/christmas/002.jpg",
-            "y": "https://adstudioserver.foodyqueen.com/images/photos/christmas/009.jpg"
+            "aj": "http://localhost:4000/images/photos/christmas/002.jpg",
+            "y": "http://localhost:4000/images/photos/christmas/009.jpg"
           },
           "ag": 1
         },
@@ -232,8 +232,8 @@
             "h": { "i": 256, "j": 384 },
             "k": { "l": 0, "m": -59.5 },
             "n": 0,
-            "aj": "https://adstudioserver.foodyqueen.com/images/photos/christmas/002.jpg",
-            "y": "https://adstudioserver.foodyqueen.com/images/photos/christmas/002.jpg"
+            "aj": "http://localhost:4000/images/photos/christmas/002.jpg",
+            "y": "http://localhost:4000/images/photos/christmas/002.jpg"
           },
           "ag": 1
         },
@@ -258,8 +258,8 @@
             "h": { "i": 256, "j": 341.2 },
             "k": { "l": 0, "m": -38.099999999999994 },
             "n": 0,
-            "aj": "https://adstudioserver.foodyqueen.com/images/photos/christmas/005.jpg",
-            "y": "https://adstudioserver.foodyqueen.com/images/photos/christmas/005.jpg"
+            "aj": "http://localhost:4000/images/photos/christmas/005.jpg",
+            "y": "http://localhost:4000/images/photos/christmas/005.jpg"
           },
           "ag": 1
         },
@@ -284,8 +284,8 @@
             "h": { "i": 256, "j": 383.6 },
             "k": { "l": 0, "m": -59.30000000000001 },
             "n": 0,
-            "aj": "https://adstudioserver.foodyqueen.com/images/photos/birthdays/004.jpg",
-            "y": "https://adstudioserver.foodyqueen.com/images/photos/birthdays/004.jpg"
+            "aj": "http://localhost:4000/images/photos/birthdays/004.jpg",
+            "y": "http://localhost:4000/images/photos/birthdays/004.jpg"
           },
           "ag": 1
         },

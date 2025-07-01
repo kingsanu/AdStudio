@@ -27,7 +27,7 @@ export const uploadTemplate = async (...args: any[]): Promise<Response> => {
   const thumbnailBase64 = thumbnailImage.split(",")[1] || thumbnailImage;
 
   // Send the data to the local backend endpoint
-  return fetch("https://adstudioserver.foodyqueen.com/api/upload-template", {
+  return fetch("http://localhost:4000/api/upload-template", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

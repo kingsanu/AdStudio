@@ -173,7 +173,7 @@ export default function DashboardLayout({
         );
 
         // Fetch public templates
-        let publicApiUrl = "https://adstudioserver.foodyqueen.com/api/templates";
+        let publicApiUrl = "http://localhost:4000/api/templates";
         const publicParams = new URLSearchParams();
         publicParams.append("ps", "6");
         publicParams.append("pi", "0");
@@ -188,7 +188,7 @@ export default function DashboardLayout({
         // Fetch user templates
         let userSearchResults: Template[] = [];
         if (user?.userId) {
-          let userApiUrl = "https://adstudioserver.foodyqueen.com/api/templates";
+          let userApiUrl = "http://localhost:4000/api/templates";
           const userParams = new URLSearchParams();
           userParams.append("ps", "4");
           userParams.append("pi", "0");

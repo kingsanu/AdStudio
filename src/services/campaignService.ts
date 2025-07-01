@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "https://adstudioserver.foodyqueen.com/api";
+const API_BASE_URL = "http://localhost:4000/api";
 
 export interface CampaignTarget {
   customerId: string;
@@ -107,6 +107,8 @@ export interface CreateCampaignData {
     phoneNumber: string;
     name: string;
   }>;
+  audioUrl?: string;
+  audioDuration?: number;
 }
 
 export interface CampaignStatisticsOverview {

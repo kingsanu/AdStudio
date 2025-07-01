@@ -44,6 +44,8 @@ export type SyncMetadata = {
 export type SyncOptions = {
   force?: boolean;
   showNotification?: boolean;
+  templateId?: string | null;
+  userId?: string | null;
 };
 
 // Initialize IndexedDB
@@ -141,15 +143,25 @@ export const saveChangesLocally = async (
     // Generate preview image if possible
     let previewImage = "";
     if (pageContentElement) {
+      console.log("🖼️ Attempting to generate preview image...");
+      console.log("🖼️ Page element dimensions:", {
+        width: pageContentElement.clientWidth,
+        height: pageContentElement.clientHeight
+      });
       try {
         previewImage = await domToPng(pageContentElement, {
           width: pageContentElement.clientWidth,
           height: pageContentElement.clientHeight,
         });
+        console.log("✅ Preview image generated successfully, size:", previewImage.length);
       } catch (error) {
-        console.warn("Could not generate preview image:", error);
+        console.warn("⚠️ Could not generate preview image:", error);
       }
+    } else {
+      console.warn("⚠️ No page content element provided, skipping preview image generation");
     }
+    
+    console.log("🖼️ Final preview image:", previewImage ? "present" : "empty");
 
     // Save to localStorage for quick access
     localStorage.setItem(
@@ -201,6 +213,16 @@ export const syncChangesToServer = async (
   options: SyncOptions = {}
 ): Promise<Date | null> => {
   const { force = false, showNotification = true } = options;
+
+  // Check if a manual save is in progress with a different user ID
+  const manualSaveInProgress = localStorage.getItem("manual_save_in_progress");
+  const manualSaveUserId = localStorage.getItem("manual_save_user_id");
+  const currentUserId = options.userId || Cookies.get("auth_token") || "anonymous";
+  
+  if (manualSaveInProgress === "true" && manualSaveUserId !== currentUserId && !force) {
+    console.log("🔄 Skipping auto-save because manual save is in progress with different user ID");
+    return null;
+  }
 
   // Get current metadata
   const metadata = await getSyncMetadata();
@@ -264,8 +286,10 @@ export const syncChangesToServer = async (
       return new Date();
     }
 
-    // Get user ID from cookies or use default
-    const userId = Cookies.get("auth_token") || "anonymous";
+    // Get user ID from options first, then fallback to cookies or use default
+    const userId = options.userId || Cookies.get("auth_token") || "anonymous";
+    console.log("👤 Sync service using user ID:", userId);
+    console.log("👤 User ID source:", options.userId ? "options" : (Cookies.get("auth_token") ? "cookie" : "anonymous"));
 
     // Check if we're working with a kiosk or live menu
     const kioskId = localStorage.getItem("kiosk_id");
@@ -329,8 +353,29 @@ export const syncChangesToServer = async (
       console.log(`Updated live menu with ID: ${liveMenuId}`);
     } else {
       // Handle regular template saving
-      // Check if we have a template ID in localStorage
-      let templateId = localStorage.getItem(LOCAL_STORAGE_KEYS.TEMPLATE_ID);
+      // CRITICAL: Only use templateId from editor context, NEVER fall back to localStorage
+      let templateId = null;
+      
+      if (options.hasOwnProperty('templateId')) {
+        // templateId was explicitly provided from editor context
+        templateId = options.templateId;
+        console.log("📋 Using templateId from editor context:", templateId);
+        
+        if (templateId === null || templateId === undefined) {
+          // This is a NEW design - ensure localStorage is completely cleared
+          localStorage.removeItem(LOCAL_STORAGE_KEYS.TEMPLATE_ID);
+          console.log("🆕 NEW DESIGN: Cleared localStorage template_id, will create new template");
+          templateId = null; // Ensure it's explicitly null
+        } else {
+          console.log("🔄 EXISTING DESIGN: Will update template", templateId);
+        }
+      } else {
+        // This should NEVER happen in the new implementation
+        console.error("❌ CRITICAL: No templateId provided in options - this indicates a bug!");
+        // Don't fall back to localStorage, force new template creation
+        templateId = null;
+        localStorage.removeItem(LOCAL_STORAGE_KEYS.TEMPLATE_ID);
+      }
 
       // Prepare data for API
       // Ensure the template name is consistent to help with filename consistency
@@ -404,12 +449,28 @@ export const syncChangesToServer = async (
       if (!templateId) {
         response = await axios.post(UPLOAD_TEMPLATE_ENDPOINT, apiData);
         console.log("Created new template");
+        console.log("🔍 New template response:", response.data);
+        console.log("🔍 Response structure:", {
+          data: !!response.data,
+          template: !!response.data?.template,
+          id: response.data?.template?.id,
+          _id: response.data?.template?._id,
+          responseId: response.data?.id,
+          responseTempId: response.data?._id
+        });
 
         // Store the template ID for future updates
-        if (response.data?.template?.id) {
-          const newTemplateId = response.data.template.id;
+        // Try different possible response structures
+        const newTemplateId = response.data?.template?.id || 
+                              response.data?.template?._id || 
+                              response.data?.id || 
+                              response.data?._id;
+                              
+        if (newTemplateId) {
           localStorage.setItem(LOCAL_STORAGE_KEYS.TEMPLATE_ID, newTemplateId);
           console.log(`Stored new template ID: ${newTemplateId}`);
+        } else {
+          console.error("❌ Could not find template ID in response:", response.data);
         }
       }
     }

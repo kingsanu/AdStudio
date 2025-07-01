@@ -94,22 +94,11 @@ const templateController = {
         isKiosk = false, // Default to non-kiosk templates
       } = req.body;
 
-      // Check if a template with the same name and user already exists
-      const existingTemplate = await Template.findOne({
-        title: templateName,
-        userId: userId,
-      });
-
-      // If template exists, use the update endpoint instead
-      if (existingTemplate) {
-        console.log(
-          `Template with name "${templateName}" already exists for user ${userId}, updating instead of creating new`
-        );
-
-        // Call updateTemplate with the existing template ID
-        req.params = { id: existingTemplate._id };
-        return templateController.updateTemplate(req, res);
-      }
+      // ALWAYS create a new template when using POST /upload-template
+      // The frontend will use PUT /upload-template/:id when it wants to update
+      console.log(
+        `Creating new template "${templateName}" for user ${userId}`
+      );
 
       // Generate consistent filenames based on user ID and template name
       // This ensures we overwrite the same files when updating, saving storage
@@ -142,45 +131,64 @@ const templateController = {
       const templatePath = path.join(tempDir, localTemplateFilename);
       fs.writeFileSync(templatePath, templateData);
 
-      // Save thumbnail file
-      const thumbnailBase64 = previewImage.replace(
-        /^data:image\/\w+;base64,/,
-        ""
-      );
-      const thumbnailBuffer = Buffer.from(thumbnailBase64, "base64");
-      const thumbnailPath = path.join(tempDir, localThumbnailFilename);
-      fs.writeFileSync(thumbnailPath, thumbnailBuffer);
-
       // Create form data for template upload
       const templateFormData = new FormData();
       templateFormData.append("stream", fs.createReadStream(templatePath));
       templateFormData.append("filename", cloudTemplateFilename);
       templateFormData.append("senitize", "false");
 
-      // Create form data for thumbnail upload
-      const thumbnailFormData = new FormData();
-      thumbnailFormData.append("stream", fs.createReadStream(thumbnailPath));
-      thumbnailFormData.append("filename", cloudThumbnailFilename);
-      thumbnailFormData.append("senitize", "false");
+      // Save thumbnail file (only if preview image is provided)
+      let thumbnailPath = null;
+      let thumbnailFormData = null;
+      
+      if (previewImage && previewImage.trim() !== "") {
+        console.log("📸 Processing preview image for new template...");
+        const thumbnailBase64 = previewImage.replace(
+          /^data:image\/\w+;base64,/,
+          ""
+        );
+        const thumbnailBuffer = Buffer.from(thumbnailBase64, "base64");
+        thumbnailPath = path.join(tempDir, localThumbnailFilename);
+        fs.writeFileSync(thumbnailPath, thumbnailBuffer);
 
-      // Upload files
-      const [templateUploadRes, thumbnailUploadRes] = await Promise.all([
+        // Create form data for thumbnail upload
+        thumbnailFormData = new FormData();
+        thumbnailFormData.append("stream", fs.createReadStream(thumbnailPath));
+        thumbnailFormData.append("filename", cloudThumbnailFilename);
+        thumbnailFormData.append("senitize", "false");
+      } else {
+        console.log("⚠️ No preview image provided for new template");
+      }
+
+      // Upload files (conditionally include thumbnail)
+      const uploadPromises = [
         axios.post(CLOUD_STORAGE_API, templateFormData, {
           headers: templateFormData.getHeaders(),
-        }),
-        axios.post(CLOUD_STORAGE_API, thumbnailFormData, {
-          headers: thumbnailFormData.getHeaders(),
-        }),
-      ]);
+        })
+      ];
+      
+      if (thumbnailFormData) {
+        uploadPromises.push(
+          axios.post(CLOUD_STORAGE_API, thumbnailFormData, {
+            headers: thumbnailFormData.getHeaders(),
+          })
+        );
+      }
+      
+      const uploadResults = await Promise.all(uploadPromises);
+      const templateUploadRes = uploadResults[0];
+      const thumbnailUploadRes = uploadResults[1] || null;
 
       // Clean up temporary files
       fs.unlinkSync(templatePath);
-      fs.unlinkSync(thumbnailPath);
+      if (thumbnailPath) {
+        fs.unlinkSync(thumbnailPath);
+      }
       console.log(templateUploadRes);
-      console.log(thumbnailUploadRes.data, "data");
+      console.log(thumbnailUploadRes?.data || "No thumbnail", "thumbnail data");
       // Get URLs from cloud storage responses
       const templateUrl = templateUploadRes.data;
-      const thumbnailUrl = thumbnailUploadRes.data;
+      const thumbnailUrl = thumbnailUploadRes?.data || "";
 
       // Create template metadata
       const template = new Template({
@@ -307,7 +315,9 @@ const templateController = {
       // Check if template exists
       const existingTemplate = await Template.findById(templateId);
       if (!existingTemplate) {
-        return res.status(404).json({ message: "Template not found" });
+        console.log(`Template ${templateId} not found, creating new template instead`);
+        // If template doesn't exist, create a new one
+        return templateController.saveTemplate(req, res);
       }
 
       const {

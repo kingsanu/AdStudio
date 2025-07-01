@@ -21,6 +21,7 @@ import CouponCampaignDialog from "@/components/editor/CouponCampaignDialog";
 import CouponVerifyDialog from "@/components/editor/CouponVerifyDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import Cookies from "js-cookie";
+import { ensureDesignSaved, getCurrentDesignData } from "@/utils/designSaveHelper";
 
 const NewEditor = () => {
   const navigate = useNavigate();
@@ -28,6 +29,7 @@ const NewEditor = () => {
   const { user } = useAuth();
   const [name, setName] = useState("Untitled Design");
   const [templateData, setTemplateData] = useState<unknown[]>(data);
+  const [designIdForEditor, setDesignIdForEditor] = useState<string | null>(null); // Track designId for this editor instance
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editorError, setEditorError] = useState(false);
@@ -1156,19 +1158,35 @@ const NewEditor = () => {
   );
 
   // Function to load a template by ID
-  const loadTemplate = async (templateId: string) => {
+  const loadTemplate = async (templateId: string, isEditMode: boolean = false) => {
     try {
       setLoading(true);
       const template = await templateService.getTemplateById(templateId);
 
       if (template) {
         // Check if this is another user's template
-        const currentUserId = localStorage.getItem("auth_token") || "";
+        const currentUserId = user?.userId || "";
         const isOtherUsersTemplate = template.userId !== currentUserId;
 
-        if (isOtherUsersTemplate) {
+        console.log("🔍 Template ownership check:", {
+          templateUserId: template.userId,
+          currentUserId,
+          isOtherUsersTemplate,
+          isEditMode
+        });
+
+        // In edit mode, we should never treat it as "other user's template"
+        // because we only allow editing your own templates
+        if (!isEditMode && isOtherUsersTemplate) {
           // Clear template ID from localStorage to ensure we create a new copy
           localStorage.removeItem("template_id");
+          console.log("🆕 Creating copy of other user's template");
+        } else if (isEditMode && isOtherUsersTemplate) {
+          // This shouldn't happen - can't edit other user's templates
+          console.warn("⚠️ Attempting to edit another user's template - this should not happen");
+          toast.error("Cannot edit another user's template");
+          navigate("/dashboard");
+          return;
         }
 
         // If the template has a templateUrl, fetch the template data
@@ -1180,21 +1198,26 @@ const NewEditor = () => {
 
             console.log("Template URL:", template.templateUrl);
             console.log("Extracted filename:", filename);
+        const encodedUrl = encodeURIComponent(template.templateUrl);
 
-            // Use the GET_TEMPLATE_ENDPOINT to fetch the template data
             const templateResponse = await axios.get(
-              `${GET_TEMPLATE_ENDPOINT}/${filename}`
+              `${GET_TEMPLATE_PATH_ENDPOINT}/${encodedUrl}`
             );
+         
             console.log(templateResponse.data);
             // Simply use the template data directly as is
             // This is the same format as the sample data
             setTemplateData(templateResponse.data);
 
-            // If it's another user's template, add "Copy of" to the name
-            if (isOtherUsersTemplate) {
-              setName(`Copy of ${template.title}` || "Untitled Design");
-            } else {
+            // Set appropriate title based on edit mode and ownership
+            if (isEditMode) {
+              // Keep original name when editing
               setName(template.title || "Untitled Design");
+              console.log("✏️ Edit mode: Keeping original title:", template.title);
+            } else {
+              // Create copy when starting from template
+              setName(`Copy of ${template.title}` || "Untitled Design");
+              console.log("🆕 Copy mode: Creating copy with title:", `Copy of ${template.title}`);
             }
           } catch (error) {
             console.error("Error loading template JSON:", error);
@@ -1204,12 +1227,15 @@ const NewEditor = () => {
           }
         } else {
           // If no templateUrl, use the template as is
-          if (isOtherUsersTemplate) {
-            setName(`Copy of ${template.title}` || "Untitled Design");
-          } else {
+          if (isEditMode) {
+            // Keep original name when editing
             setName(template.title || "Untitled Design");
+            console.log("✏️ Edit mode (no URL): Keeping original title:", template.title);
+          } else {
+            // Create copy when starting from template  
+            setName(`Copy of ${template.title}` || "Untitled Design");
+            console.log("🆕 Copy mode (no URL): Creating copy with title:", `Copy of ${template.title}`);
           }
-          // toast.success(`Template "${template.title}" loaded`);
         }
       } else {
         toast.error("Template not found");
@@ -1226,6 +1252,7 @@ const NewEditor = () => {
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const templateId = searchParams.get("template");
+    const editParam = searchParams.get("edit"); // New parameter to indicate editing existing design
     const width = searchParams.get("width");
     const height = searchParams.get("height");
     const bgColor = searchParams.get("bgColor");
@@ -1233,6 +1260,22 @@ const NewEditor = () => {
     const kioskId = searchParams.get("kioskId");
     const liveMenuParam = searchParams.get("isLiveMenu");
     const liveMenuId = searchParams.get("liveMenuId");
+
+    console.log("🔍 URL Parameters:", { templateId, editParam, width, height });
+
+    // Determine if this is an edit operation
+    const isEditingExistingDesign = editParam === "true";
+    
+    // Store the designId for editing or null for new designs
+    if (isEditingExistingDesign && templateId) {
+      // This is editing an existing design - set designId to templateId
+      setDesignIdForEditor(templateId);
+      console.log("✏️ EDITING existing design with ID:", templateId);
+    } else {
+      // This is creating a new design - set designId to null
+      setDesignIdForEditor(null);
+      console.log("🆕 Creating NEW design (designId will be null)");
+    }
 
     // Check if this is a kiosk template
     setIsKiosk(kioskParam === "true");
@@ -1266,7 +1309,7 @@ const NewEditor = () => {
       // Load live menu data
       loadLiveMenuData(liveMenuId);
     } else if (templateId) {
-      loadTemplate(templateId);
+      loadTemplate(templateId, isEditingExistingDesign);
     } else if (width && height) {
       createEmptyTemplate(
         parseInt(width),
@@ -1344,10 +1387,78 @@ const NewEditor = () => {
   };
 
   // Handle bulk generate from editor header
-  const handleBulkGenerateFromEditor = () => {
+  const handleBulkGenerateFromEditor = async (editorContext?: { query: any; actions: any; getState: any }) => {
+    if (!editorContext) {
+      toast.error("Editor context not available");
+      return;
+    }
+
+    // Ensure design is saved before bulk generate
+    const saved = await ensureDesignSaved(
+      editorContext.query,
+      name || "Untitled Design",
+      editorContext, // Pass the editor context
+      user, // Pass user object for correct user ID
+      "bulk generate"
+    );
+
+    if (!saved) {
+      return; // Don't proceed if save failed
+    }
+
     if (isInCouponTemplateMode && couponCampaignData) {
       setShowCouponVerifyDialog(true);
     }
+  };
+
+  // Handle download from editor header
+  const handleDownloadFromEditor = async (editorContext?: { query: any; actions: any; getState: any }) => {
+    if (!editorContext) {
+      toast.error("Editor context not available");
+      return;
+    }
+
+    // Ensure design is saved before download
+    const saved = await ensureDesignSaved(
+      editorContext.query,
+      name || "Untitled Design",
+      editorContext, // Pass the editor context
+      user, // Pass user object for correct user ID
+      "download"
+    );
+
+    if (!saved) {
+      return; // Don't proceed if save failed
+    }
+
+    // Proceed with download
+    if (editorContext.actions.fireDownloadPNGCmd) {
+      editorContext.actions.fireDownloadPNGCmd(0); // 0 = all pages
+    }
+  };
+
+  // Handle share from editor header
+  const handleShareFromEditor = async (editorContext?: { query: any; actions: any; getState: any }) => {
+    if (!editorContext) {
+      toast.error("Editor context not available");
+      return;
+    }
+
+    // Ensure design is saved before sharing
+    const saved = await ensureDesignSaved(
+      editorContext.query,
+      name || "Untitled Design",
+      editorContext, // Pass the editor context
+      user, // Pass user object for correct user ID
+      "WhatsApp campaign"
+    );
+
+    if (!saved) {
+      return; // Don't proceed if save failed
+    }
+
+    // Show campaign dialog
+    setShowCampaignDialog(true);
   };
 
   // Handle coupon verify dialog success
@@ -1438,7 +1549,7 @@ const NewEditor = () => {
         }}
         config={{
           apis: {
-            url: "https://adstudioserver.foodyqueen.com/api",
+            url: "http://localhost:4000/api",
             searchFonts: "/fonts",
             searchTemplates: "/templates",
             searchTexts: "/texts",
@@ -1460,14 +1571,17 @@ const NewEditor = () => {
             searchShape: "Search shapes",
             searchFrame: "Search frames",
           },
-          editorAssetsUrl: "https://adstudioserver.foodyqueen.com/editor",
+          editorAssetsUrl: "http://localhost:4000/editor",
           imageKeywordSuggestions: "animal,sport,love,scene,dog,cat,whale",
           templateKeywordSuggestions:
             "mother,sale,discount,fashion,model,deal,motivation,quote",
         }}
+        designId={designIdForEditor} // Pass the design ID to determine edit vs new
         saving={saving}
         onChanges={handleOnChanges}
         onDesignNameChanges={handleOnDesignNameChanges}
+        onDownload={handleDownloadFromEditor}
+        onShare={handleShareFromEditor}
         isAdmin={isAdmin}
         isKiosk={isKiosk}
         isLiveMenu={isLiveMenu}

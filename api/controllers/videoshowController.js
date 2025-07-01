@@ -7,9 +7,21 @@ const FormData = require('form-data');
 const axios = require('axios');
 const { CLOUD_STORAGE, EXTERNAL_APIS } = require('../config/constants');
 
-// Configure fluent-ffmpeg paths for videoshow
-const ffmpegPath = require('ffmpeg-static');
-const ffprobePath = require('@ffprobe-installer/ffprobe').path;
+// Configure fluent-ffmpeg paths - use environment variables if available
+const ffmpegPath = process.env.FFMPEG_PATH || require('ffmpeg-static');
+const ffprobePath = process.env.FFPROBE_PATH || require('@ffprobe-installer/ffprobe').path;
+
+console.log('🔧 FFmpeg Configuration:');
+console.log('  FFmpeg path:', ffmpegPath);
+console.log('  FFprobe path:', ffprobePath);
+
+// Verify FFmpeg exists
+if (!fs.existsSync(ffmpegPath)) {
+  console.error('❌ FFmpeg not found at:', ffmpegPath);
+  console.error('Please check your FFMPEG_PATH environment variable');
+} else {
+  console.log('✅ FFmpeg found at:', ffmpegPath);
+}
 
 // Access fluent-ffmpeg through videoshow and set paths
 const ffmpeg = videoshow.ffmpeg;
@@ -33,7 +45,8 @@ function calculateMD5(filePath) {
  * Enhanced Video Controller using videoshow library
  * Includes safeguards to prevent concurrent processing loops
  */
-const videoshowController = {  createSlideshowVideo: async (req, res) => {
+const videoshowController = {
+  createSlideshowVideo: async (req, res) => {
     const requestId = uuidv4();
     
     // Check if we're already processing too many requests
@@ -84,7 +97,9 @@ const videoshowController = {  createSlideshowVideo: async (req, res) => {
           message: 'No images provided',
           error: 'At least one image is required'
         });
-      }      // Process and validate images with enhanced logging
+      }
+
+      // Process and validate images with enhanced logging
       const imagePaths = [];
       const imageHashes = [];
       console.log("🔍 PROCESSING AND VALIDATING IMAGES:");
@@ -120,7 +135,9 @@ const videoshowController = {  createSlideshowVideo: async (req, res) => {
         console.log(`    - Status: ✅ VALID IMAGE ADDED TO PROCESSING LIST`);
         imagePaths.push(filePath);
         imageHashes.push(md5Hash);
-      }      console.log(`\n📊 FINAL IMAGE PROCESSING SUMMARY:`);
+      }
+
+      console.log(`\n📊 FINAL IMAGE PROCESSING SUMMARY:`);
       console.log(`   - Total files received: ${req.files.length}`);
       console.log(`   - Valid images for processing: ${imagePaths.length}`);
       
@@ -161,12 +178,35 @@ const videoshowController = {  createSlideshowVideo: async (req, res) => {
       });
 
       // Parse options from request
-      const duration = parseFloat(req.body.duration) || 2; // seconds per image
+      let duration = parseFloat(req.body.duration) || 2; // FIXED: Changed const to let
       const transition = req.body.transition || 'fade';
-      const outputName = req.body.outputName || `slideshow_${uuidv4()}`;      // Configure videoshow options - optimized configuration
+      const outputName = req.body.outputName || `slideshow_${uuidv4()}`;
+      const audioUrl = req.body.audioUrl;
+      const audioDuration = parseFloat(req.body.audioDuration) || 0;
+      const slideTimings = req.body.slideTimings ? JSON.parse(req.body.slideTimings) : null;
+      
+      // 🔍 AUDIO DEBUG - Enhanced logging
+      console.log("🔍 AUDIO DEBUG:");
+      console.log("  audioUrl:", audioUrl);
+      console.log("  audioUrl type:", typeof audioUrl);
+      console.log("  audioUrl length:", audioUrl ? audioUrl.length : 'N/A');
+      console.log("  audioDuration:", audioDuration);
+      console.log("  audioDuration type:", typeof audioDuration);
+      console.log("  slideTimings:", slideTimings);
+      
+      // Adjust video duration based on audio if provided
+      if (audioUrl && audioDuration > 0) {
+        const calculatedDuration = audioDuration / imagePaths.length;
+        // Use calculated duration but keep within reasonable bounds (2-8 seconds per slide)
+        const adjustedDuration = Math.max(2, Math.min(8, calculatedDuration));
+        duration = adjustedDuration; // FIXED: Now this works because duration is let
+        console.log(`🎵 Adjusted slide duration to ${duration}s based on audio length (${audioDuration}s ÷ ${imagePaths.length} slides)`);
+      }
+      
+      // Configure videoshow options - optimized configuration
       const options = {
         fps: 30,
-        loop: duration, // duration in seconds for EACH image
+        loop: duration, // Use adjusted duration in seconds for EACH image
         transition: transition === 'fade', // Re-enable transitions
         transitionDuration: 0.5, // Shorter transition for better effect
         videoBitrate: 1024,
@@ -175,10 +215,13 @@ const videoshowController = {  createSlideshowVideo: async (req, res) => {
         format: 'mp4',
         pixelFormat: 'yuv420p',
       };
-
+      
       console.log("Creating video with options:", options);
       console.log(`Each of the ${imagePaths.length} images will be shown for ${duration} seconds`);
-      console.log("Expected total duration:", imagePaths.length * duration, "seconds");
+      console.log("Expected total video duration:", imagePaths.length * duration, "seconds");
+      if (audioUrl) {
+        console.log(`Audio duration: ${audioDuration}s - will be added in post-processing`);
+      }
       
       // Debug: log all image paths
       console.log("All image paths to be processed:");
@@ -196,22 +239,48 @@ const videoshowController = {  createSlideshowVideo: async (req, res) => {
       console.log("Output path:", outputPath);
 
       // Create video using videoshow
-      const videoInfo = await createVideoWithVideoshow(imagePaths, outputPath, options, requestId);      // Upload to cloud storage or serve locally
+      const videoInfo = await createVideoWithVideoshow(imagePaths, outputPath, options, requestId);
+      
+      // Post-process with audio if provided
+      let finalOutputPath = outputPath;
+      if (audioUrl && audioDuration) {
+        try {
+          console.log('🎵 Adding audio track to video...');
+          finalOutputPath = await addAudioToVideo(outputPath, audioUrl, audioDuration, requestId);
+          console.log('✅ Audio successfully integrated');
+        } catch (audioError) {
+          console.error('❌ Audio integration failed:', audioError.message);
+          console.log('📹 Proceeding with video-only slideshow');
+          // Continue with original video without audio
+          finalOutputPath = outputPath;
+        }
+      }
+
+      // Upload to cloud storage or serve locally
       let finalUrl = null;
       let shouldCleanupOutput = false;
       
       try {
         console.log("📤 Attempting to upload to cloud storage...");
-        finalUrl = await uploadToCloud(outputPath, `${outputName}.mp4`);
+        finalUrl = await uploadToCloud(finalOutputPath, `${outputName}.mp4`);
         console.log(`✅ Video uploaded to cloud: ${finalUrl}`);
         shouldCleanupOutput = true; // Only cleanup if successfully uploaded
       } catch (uploadError) {
         console.error("❌ Cloud upload failed:", uploadError.message);
         // Fallback to local serving
-        finalUrl = `http://localhost:${process.env.PORT || 4000}/temp/output/${path.basename(outputPath)}`;
+        finalUrl = `http://localhost:${process.env.PORT || 4000}/temp/output/${path.basename(finalOutputPath)}`;
         console.log("Using local fallback URL:", finalUrl);
         shouldCleanupOutput = false; // Keep file for local serving
-      }      // 🚫 CLEANUP DISABLED FOR DEBUGGING - Keep input files for inspection
+      }
+      
+      // Ensure finalUrl is not empty
+      if (!finalUrl) {
+        finalUrl = `http://localhost:${process.env.PORT || 4000}/temp/output/${path.basename(finalOutputPath)}`;
+        console.log("Final URL was empty, using local fallback:", finalUrl);
+        shouldCleanupOutput = false;
+      }
+
+      // 🚫 CLEANUP DISABLED FOR DEBUGGING - Keep input files for inspection
       console.log("🔍 DEBUGGING MODE: Input files preserved for inspection:");
       for (let i = 0; i < imagePaths.length; i++) {
         const imagePath = imagePaths[i];
@@ -221,36 +290,16 @@ const videoshowController = {  createSlideshowVideo: async (req, res) => {
           console.log(`📁 Preserved: ${imagePath} (${stats.size} bytes, MD5: ${hash})`);
         }
       }
-      // Uncomment below to re-enable cleanup:
-      /*
-      for (const imagePath of imagePaths) {
-        try {
-          if (fs.existsSync(imagePath)) {
-            fs.unlinkSync(imagePath);
-            console.log(`Cleaned up input file: ${imagePath}`);
-          }
-        } catch (cleanupError) {
-          console.warn(`Warning: Could not clean up ${imagePath}:`, cleanupError.message);
-        }
-      }
-      */      // 🚫 OUTPUT FILE CLEANUP DISABLED FOR DEBUGGING
+
+      // 🚫 OUTPUT FILE CLEANUP DISABLED FOR DEBUGGING
       if (shouldCleanupOutput) {
         console.log("🔍 DEBUGGING MODE: Output file preserved for inspection:");
-        console.log(`📁 Output file kept: ${outputPath}`);
-        // Uncomment below to re-enable cleanup:
-        /*
-        try {
-          if (fs.existsSync(outputPath)) {
-            fs.unlinkSync(outputPath);
-            console.log(`Cleaned up output file: ${outputPath}`);
-          }
-        } catch (cleanupError) {
-          console.warn(`Warning: Could not clean up output file:`, cleanupError.message);
-        }
-        */
+        console.log(`📁 Output file kept: ${finalOutputPath}`);
       } else {
-        console.log(`📁 Keeping output file locally: ${outputPath}`);
-      }// Send response
+        console.log(`📁 Keeping output file locally: ${finalOutputPath}`);
+      }
+
+      // Send response
       const response = {
         message: "Video slideshow created successfully",
         success: true,
@@ -260,10 +309,12 @@ const videoshowController = {  createSlideshowVideo: async (req, res) => {
         cloudUrl: finalUrl,
         duration: videoInfo.duration,
         imagesProcessed: imagePaths.length,
-        isLocal: !shouldCleanupOutput // Indicates if video is served locally
+        isLocal: !shouldCleanupOutput, // Indicates if video is served locally
+        audioProcessed: audioUrl && audioDuration > 0 && finalOutputPath !== outputPath
       };
 
       console.log(`✅ Request ${requestId} completed successfully`);
+      console.log(`🎵 Audio was ${response.audioProcessed ? 'successfully added' : 'not processed'}`);
       res.json(response);
 
     } catch (error) {
@@ -346,6 +397,172 @@ function createVideoWithVideoshow(imagePaths, outputPath, options, requestId) {
         });
       });
   });
+}
+
+/**
+ * Add audio track to existing video using FFmpeg
+ */
+async function addAudioToVideo(videoPath, audioUrl, audioDuration, requestId) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      console.log(`🎵 Adding audio to video for request ${requestId}`);
+      
+      // Validate inputs
+      if (!audioUrl) {
+        console.log('⚠️ No audio URL provided, skipping audio addition');
+        return resolve(videoPath);
+      }
+      
+      if (!fs.existsSync(videoPath)) {
+        throw new Error(`Video file not found: ${videoPath}`);
+      }
+      
+      // Download audio if it's a URL (improved error handling)
+      let localAudioPath = audioUrl;
+      if (audioUrl.startsWith('http')) {
+        console.log('📥 Downloading audio file...');
+        
+        try {
+          const audioResponse = await axios.get(audioUrl, { 
+            responseType: 'stream',
+            timeout: 30000 // 30 second timeout
+          });
+          
+          const audioFilename = `temp_audio_${requestId}.mp3`;
+          localAudioPath = path.join(__dirname, '..', 'temp', audioFilename);
+          
+          // Ensure temp directory exists
+          const tempDir = path.dirname(localAudioPath);
+          if (!fs.existsSync(tempDir)) {
+            fs.mkdirSync(tempDir, { recursive: true });
+          }
+          
+          const writer = fs.createWriteStream(localAudioPath);
+          audioResponse.data.pipe(writer);
+          
+          await new Promise((resolve, reject) => {
+            writer.on('finish', resolve);
+            writer.on('error', reject);
+          });
+          
+          console.log(`✅ Audio downloaded to: ${localAudioPath}`);
+        } catch (downloadError) {
+          console.error('❌ Failed to download audio:', downloadError.message);
+          throw new Error(`Audio download failed: ${downloadError.message}`);
+        }
+      }
+      
+      // Verify audio file exists
+      if (!fs.existsSync(localAudioPath)) {
+        throw new Error(`Audio file not found: ${localAudioPath}`);
+      }
+      
+      // Create output path for video with audio
+      const outputDir = path.dirname(videoPath);
+      const baseName = path.basename(videoPath, '.mp4');
+      const outputWithAudio = path.join(outputDir, `${baseName}_with_audio.mp4`);
+      
+      console.log(`🔧 Combining video and audio:`);
+      console.log(`   Video: ${videoPath}`);
+      console.log(`   Audio: ${localAudioPath}`);
+      console.log(`   Output: ${outputWithAudio}`);
+      
+      // Configure FFmpeg properly - use the same paths as configured at module level
+      const ffmpeg = require('fluent-ffmpeg');
+      const currentFfmpegPath = process.env.FFMPEG_PATH || require('ffmpeg-static');
+      const currentFfprobePath = process.env.FFPROBE_PATH || require('@ffprobe-installer/ffprobe').path;
+      
+      console.log('🔧 Audio processing FFmpeg paths:');
+      console.log('  FFmpeg:', currentFfmpegPath);
+      console.log('  FFprobe:', currentFfprobePath);
+      
+      ffmpeg.setFfmpegPath(currentFfmpegPath);
+      ffmpeg.setFfprobePath(currentFfprobePath);
+      
+      // Use FFmpeg to combine video and audio
+      ffmpeg(videoPath)
+        .input(localAudioPath)
+        .outputOptions([
+          '-c:v copy', // Copy video stream without re-encoding
+          '-c:a aac',  // Encode audio as AAC
+          '-b:a 128k', // Audio bitrate
+          '-map 0:v:0', // Map video from first input
+          '-map 1:a:0', // Map audio from second input
+          '-shortest'   // End when shortest stream ends
+        ])
+        .output(outputWithAudio)
+        .on('start', (commandLine) => {
+          console.log(`🎬 FFmpeg audio merge started: ${commandLine}`);
+        })
+        .on('progress', (progress) => {
+          if (progress.percent) {
+            console.log(`🎵 Audio merge progress: ${Math.round(progress.percent)}%`);
+          }
+        })
+        .on('end', () => {
+          console.log(`✅ Audio successfully added to video`);
+          
+          // Verify output file was created
+          if (!fs.existsSync(outputWithAudio)) {
+            throw new Error('Output video with audio was not created');
+          }
+          
+          const outputStats = fs.statSync(outputWithAudio);
+          console.log(`🎬 Final video with audio: ${outputStats.size} bytes`);
+          
+          // Clean up temporary files
+          cleanupTempFiles(localAudioPath, audioUrl);
+          
+          resolve(outputWithAudio);
+        })
+        .on('error', (err) => {
+          console.error(`❌ Error adding audio to video:`, err);
+          
+          // Clean up on error
+          cleanupTempFiles(localAudioPath, audioUrl);
+          if (fs.existsSync(outputWithAudio)) {
+            try {
+              fs.unlinkSync(outputWithAudio);
+            } catch (e) {
+              console.warn('Could not clean up failed output file:', e.message);
+            }
+          }
+          
+          // Don't silently fall back - report the error
+          throw new Error(`Audio processing failed: ${err.message}`);
+        })
+        .run();
+        
+    } catch (error) {
+      console.error(`❌ Error in addAudioToVideo:`, error.message);
+      
+      // Clean up any temp files
+      if (localAudioPath && localAudioPath !== audioUrl && fs.existsSync(localAudioPath)) {
+        try {
+          fs.unlinkSync(localAudioPath);
+        } catch (e) {
+          console.warn('Could not clean up temp audio file:', e.message);
+        }
+      }
+      
+      // Re-throw the error instead of silently falling back
+      throw error;
+    }
+  });
+}
+
+/**
+ * Helper function for cleanup
+ */
+function cleanupTempFiles(localAudioPath, originalAudioUrl) {
+  try {
+    if (localAudioPath !== originalAudioUrl && fs.existsSync(localAudioPath)) {
+      fs.unlinkSync(localAudioPath);
+      console.log('🧹 Cleaned up temporary audio file');
+    }
+  } catch (cleanupError) {
+    console.warn('⚠️ Could not clean up temporary audio file:', cleanupError.message);
+  }
 }
 
 /**
