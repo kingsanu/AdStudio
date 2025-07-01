@@ -12,9 +12,6 @@ COPY tsconfig.json ./
 COPY tsconfig.node.json ./
 COPY vite.config.mjs ./
 COPY postcss.config.mjs ./
-COPY tailwind.config.js ./
-COPY tailwind.config.cjs ./
-COPY .npmrc ./
 
 RUN npm ci
 RUN npm run build
