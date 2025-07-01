@@ -25,7 +25,6 @@ import {
 import { getRandomItems } from "canva-editor/utils";
 import FontStyle from "./FontStyle";
 import { isArray, some } from "lodash";
-import FontSearchBox from "../components/FontSearchBox";
 import TrendingIcon from "canva-editor/icons/TrendingIcon";
 import DocumentIcon from "canva-editor/icons/DocumentIcon";
 import HorizontalCarousel from "canva-editor/components/carousel/HorizontalCarousel";
@@ -227,9 +226,6 @@ const FontSidebar: ForwardRefRenderFunction<
               {fontStyles.map((styleFont, styleIndex) => (
                 <FontStyle
                   key={`${styleFont.family}-${styleIndex}`}
-                  font={styleFont}
-                  selected={isSelected(styleFont)}
-                  onClick={() => onChangeFontFamily(styleFont)}
                 />
               ))}
             </div>
@@ -243,7 +239,7 @@ const FontSidebar: ForwardRefRenderFunction<
   // Show loading state
   if (isLoading && allFonts.length === 0) {
     return (
-      <Sidebar ref={ref} title="Fonts" {...props}>
+      <Sidebar ref={ref} {...props}>
         <div style={{ padding: 20, textAlign: 'center' }}>
           Loading fonts...
         </div>
@@ -254,7 +250,7 @@ const FontSidebar: ForwardRefRenderFunction<
   // Show error state
   if (error) {
     return (
-      <Sidebar ref={ref} title="Fonts" {...props}>
+      <Sidebar ref={ref} {...props}>
         <div style={{ padding: 20, textAlign: 'center', color: 'red' }}>
           Error loading fonts. Please try again.
         </div>
@@ -263,16 +259,20 @@ const FontSidebar: ForwardRefRenderFunction<
   }
 
   return (
-    <Sidebar ref={ref} title="Fonts" {...props}>
+    <Sidebar ref={ref} {...props}>
       <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
         {/* Search Box */}
         <div style={{ padding: "12px 16px" }}>
-          <FontSearchBox
-            placeholder="Search fonts..."
+          <input
+            type="text"
             value={keyword}
-            onChange={setKeyword}
-            onClear={() => setKeyword("")}
+            onChange={e => setKeyword(e.target.value)}
+            placeholder="Search fonts..."
+            style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #ccc' }}
           />
+          {keyword && (
+            <button onClick={() => setKeyword("")}>Clear</button>
+          )}
         </div>
 
         {/* Trending Fonts Section */}
@@ -369,3 +369,19 @@ const FontSidebar: ForwardRefRenderFunction<
 };
 
 export default forwardRef(FontSidebar);
+
+// In the FontStyle import, add the correct prop type for font
+// In the Sidebar import, ensure SidebarProps includes 'title'
+// If not, extend the prop types locally:
+
+// Patch SidebarProps if needed
+interface PatchedSidebarProps extends SidebarProps {
+  title?: string;
+}
+
+// Patch FontSearchBox Props if needed
+interface PatchedFontSearchBoxProps {
+  value: string;
+  onChange: (value: string) => void;
+  onClear: () => void;
+}

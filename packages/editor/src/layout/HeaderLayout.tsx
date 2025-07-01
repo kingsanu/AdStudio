@@ -55,7 +55,7 @@ const HeaderLayout: ForwardRefRenderFunction<
   // Set up sync service
   const { syncStatus, lastSavedAt, isUserTyping, saveNow } = useSyncService({
     autoSaveInterval: 2000, // 2 seconds
-    getDesignData: () => query.serialize(),
+    getDesignData: () => query.serialize() as any,
     getDesignName: () => name,
     getPageContentElement: () => pageContentRef.current,
   });

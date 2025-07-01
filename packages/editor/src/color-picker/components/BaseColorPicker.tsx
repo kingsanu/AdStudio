@@ -56,7 +56,7 @@ export const BaseColorPicker = ({
     };
     const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
         const text = e.clipboardData.getData('text');
-        const hexValue = `${text.replaceAll(/([^a-fA-F0-9])/g, '')}`.slice(0, 6);
+        const hexValue = `${text.replace(/([^a-fA-F0-9])/g, '')}`.slice(0, 6);
         updateValue(hexValue);
         (e.target as HTMLInputElement).value = `#${hexValue}`;
         e.preventDefault();
@@ -81,7 +81,7 @@ export const BaseColorPicker = ({
 
     const handleInputAlphaPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
         const text = e.clipboardData.getData('text');
-        const alphaStr = text.replaceAll(/([^0-9])/g, '');
+        const alphaStr = text.replace(/([^0-9])/g, '');
         const v = Math.max(0, Math.min(100, parseInt(alphaStr, 10)));
         (e.target as HTMLInputElement).value = v.toString();
         updateHsva({ ...hsva, a: v * 0.01 });

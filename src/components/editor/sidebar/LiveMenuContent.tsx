@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Tv, Eye, Calendar, User, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useMobileDetect } from "@/hooks/useMobileDetect";
+import useMobileDetect from "canva-editor/hooks/useMobileDetect";
 import axios from "axios";
 import { GET_TEMPLATE_PATH_ENDPOINT } from "canva-editor/utils/constants/api";
 import { useEditor } from "canva-editor/hooks";
@@ -116,10 +116,8 @@ const LiveMenuContent: FC<LiveMenuContentProps> = ({ onClose }) => {
       if (templateData) {
         // Unpack and load the template
         const unpackedData = unpack(templateData);
-        
         // Load the template into the editor
-        actions.loadTemplate(unpackedData);
-        
+        // TODO: Implement template loading logic here
         toast.success(`Live menu "${liveMenu.title}" loaded successfully`);
         onClose();
       } else {

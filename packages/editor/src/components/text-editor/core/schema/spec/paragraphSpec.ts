@@ -28,7 +28,7 @@ const getAttrs = (dom: HTMLElement) => {
         textTransform,
         lineHeight,
         letterSpacing: parseInt(letterSpacing),
-        fontFamily: fontFamily.replaceAll('"', ''),
+        fontFamily: fontFamily.replace(/"/g, ''),
         fontSize,
         color,
         indent,

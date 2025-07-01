@@ -127,15 +127,15 @@ const CustomEditor: FC<PropsWithChildren<CustomEditorProps>> = ({
 
   // Handle undo
   const handleUndo = () => {
-    if (actions && actions.undo) {
-      actions.undo();
+    if (actions && actions.history && actions.history.undo) {
+      actions.history.undo();
     }
   };
 
   // Handle redo
   const handleRedo = () => {
-    if (actions && actions.redo) {
-      actions.redo();
+    if (actions && actions.history && actions.history.redo) {
+      actions.history.redo();
     }
   };
 
