@@ -26,6 +26,9 @@ export default defineConfig({
       ignored: ["**/node_modules/**", "**/dist/**"],
     },
   },
+  preview: {
+    allowedHosts: ["adstudio.foodyqueen.com"],
+  },
   // Optimize dependencies for faster dev server startup
   optimizeDeps: {
     include: [
