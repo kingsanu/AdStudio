@@ -664,7 +664,7 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
                       css={{
                         width: "100%",
                         height: "100%",
-                        objectFit: "cover",
+                        objectFit: "contain",
                       }}
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = item.img;
@@ -764,7 +764,7 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
                       left: 0,
                       width: "100%",
                       height: "100%",
-                      objectFit: "cover",
+                      objectFit: "contain",
                     }}
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = item.img;

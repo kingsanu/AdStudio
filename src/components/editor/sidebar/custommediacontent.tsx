@@ -330,7 +330,7 @@ const CustomMediaContent: FC<CustomMediaContentProps> = ({ onClose }) => {
                   <img 
                     src={item.url || item.img} 
                     alt={item.name || item.desc || title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
                 </div>
               ))}
@@ -376,7 +376,7 @@ const CustomMediaContent: FC<CustomMediaContentProps> = ({ onClose }) => {
                     <img 
                       src={item.url || item.img} 
                       alt={item.name || item.desc || title}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                     />
                   </div>
                 ))}

@@ -101,7 +101,7 @@ export const useFontFamily = (family: string) => {
 
 // Hook for loading ALL fonts at once (no pagination) - uses backend caching
 export const useAllFonts = (keyword?: string, apiBaseUrl?: string) => {
-  const baseUrl = apiBaseUrl || import.meta.env.VITE_API_URL || "https://adstudioserver.foodyqueen.com";
+  const baseUrl =  import.meta.env.VITE_API_URL || "https://adstudioserver.foodyqueen.com";
   
   return useQuery({
     queryKey: [...fontKeys.all, 'bulk', keyword || 'all', baseUrl],
