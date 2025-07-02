@@ -24,10 +24,16 @@ export default defineConfig((configEnv) => ({
     }),
   ],
   server: {
-    allowedHosts: ["adstudio.foodyqueen.com"],
+    host: true, // Allow external connections
+    allowedHosts: "all", // Allow all hosts
+    hmr: {
+      overlay: true,
+      host: 'localhost',
+    },
   },
   preview: {
-    allowedHosts: ["adstudio.foodyqueen.com"],
+    host: true, // Allow external connections
+    allowedHosts: "all", // Allow all hosts
   },
   optimizeDeps: {
     include: ['esm-dep'],

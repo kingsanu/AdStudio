@@ -15,10 +15,12 @@ export default defineConfig({
     tsconfigPaths(), // This helps with path resolution from tsconfig.json
   ],
   server: {
-    allowedHosts: ["adstudio.foodyqueen.com"],
+    host: true, // Allow external connections
+    allowedHosts: "all", // Allow all hosts
     // Enable HMR
     hmr: {
       overlay: true, // Show error overlay
+      host: 'localhost', // Specify HMR host
     },
     // Watch for changes in packages directory
     watch: {
@@ -27,7 +29,8 @@ export default defineConfig({
     },
   },
   preview: {
-    allowedHosts: ["adstudio.foodyqueen.com"],
+    host: true, // Allow external connections
+    allowedHosts: "all", // Allow all hosts
   },
   // Optimize dependencies for faster dev server startup
   optimizeDeps: {
