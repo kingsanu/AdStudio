@@ -186,7 +186,7 @@ export default function WhatsAppConnectionDialog({
   // Generate unique session ID with timestamp
   const generateUniqueSessionId = () => {
     const timestamp = Date.now();
-    return `session_${userId}_${timestamp}`;
+    return `session_${Math.random().toString(36).substring(2)}}_${timestamp}`;
   };
 
   // Start 30-second QR retry timer
