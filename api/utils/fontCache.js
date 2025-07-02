@@ -152,6 +152,16 @@ class FontCache {
     return this.get('fonts:draft');
   }
 
+  // Cache all fonts (for bulk loading)
+  setAllFonts(data) {
+    const key = 'fonts:all';
+    this.set(key, data, this.cachePatterns.FONT_LIST.ttl);
+  }
+
+  getAllFonts() {
+    return this.get('fonts:all');
+  }
+
   // Invalidate all font caches (call when fonts are updated)
   invalidateFonts() {
     let deletedCount = 0;
