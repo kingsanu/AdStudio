@@ -246,7 +246,7 @@ export const updateDownloadStats = async (templateId?: string | null): Promise<b
     console.log("📊 Updating download stats for template:", templateId);
 
     // Update download count and timestamp on server
-    const response = await fetch(`http://localhost:4000/api/templates/${templateId}/download`, {
+    const response = await fetch(`https://adstudioserver.foodyqueen.com/api/templates/${templateId}/download`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

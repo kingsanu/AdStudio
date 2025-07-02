@@ -60,7 +60,7 @@ export default function RecentWork() {
         `[RecentWork] Loading page ${pageParam} with sortBy: ${sortBy}`
       );
 
-      let apiUrl = "http://localhost:4000/api/templates";
+      let apiUrl = "https://adstudioserver.foodyqueen.com/api/templates";
       const params = new URLSearchParams();
       
       params.append("ps", ITEMS_PER_PAGE.toString());

@@ -238,7 +238,7 @@ router.post('/generate', async (req, res) => {
     console.log(`[Audio API] Audio saved to: ${audioPath}`);
 
     // Return audio URL and duration
-    const audioUrl = `http://localhost:4000/temp/${audioFilename}`;
+    const audioUrl = `https://adstudioserver.foodyqueen.com/temp/${audioFilename}`;
     
     res.json({
       success: true,

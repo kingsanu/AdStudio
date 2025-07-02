@@ -42,7 +42,7 @@ async function testWithExistingImages() {
     
     // Make request to the endpoint
     const response = await axios.post(
-      'http://localhost:4000/api/video-processing/create-videoshow-slideshow',
+      'https://adstudioserver.foodyqueen.com/api/video-processing/create-videoshow-slideshow',
       formData,
       {
         headers: {

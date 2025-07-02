@@ -671,7 +671,7 @@ const slideshowController = {
         if (CLOUD_STORAGE.BASE_URL) {
           cloudUrl = `${CLOUD_STORAGE.BASE_URL}/editor/videos/${fileName}`;
         } else {
-          cloudUrl = `http://localhost:4000/api/media/${fileName}`;
+          cloudUrl = `https://adstudioserver.foodyqueen.com/api/media/${fileName}`;
         }
 
         console.log("Using local fallback URL:", cloudUrl);

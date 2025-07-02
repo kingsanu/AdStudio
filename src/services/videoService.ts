@@ -36,7 +36,7 @@ class VideoService {
 
 constructor() {
   // For Vite apps, use import.meta.env with VITE_ prefix
-  this.baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000/api";
+  this.baseUrl = import.meta.env.VITE_API_BASE_URL || "https://adstudioserver.foodyqueen.com/api";
 }
   /**
    * Automatically generate media based on page count

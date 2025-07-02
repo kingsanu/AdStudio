@@ -286,7 +286,7 @@ export default function Dashboard() {
     setIsLoadingTemplates(true);
 
     try {
-      let apiUrl = "http://localhost:4000/api/templates";
+      let apiUrl = "https://adstudioserver.foodyqueen.com/api/templates";
       const params = new URLSearchParams();
 
       params.append("ps", "18"); // page size
@@ -314,7 +314,7 @@ export default function Dashboard() {
     setIsLoadingUserTemplates(true);
 
     try {
-      let apiUrl = "http://localhost:4000/api/templates";
+      let apiUrl = "https://adstudioserver.foodyqueen.com/api/templates";
       const params = new URLSearchParams();
 
       params.append("ps", "8");
@@ -374,7 +374,7 @@ export default function Dashboard() {
     try {
       // Fetch user templates count
       const userTemplatesCountResponse = await axios.get(
-        "http://localhost:4000/api/templates",
+        "https://adstudioserver.foodyqueen.com/api/templates",
         {
           params: {
             userId: user.userId,

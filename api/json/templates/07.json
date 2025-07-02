@@ -58,8 +58,8 @@
               "y": -64
             },
             "rotate": 0,
-            "thumb": "http://localhost:4000/images/photos/models/004.jpg",
-            "url": "http://localhost:4000/images/photos/models/004.jpg"
+            "thumb": "https://adstudioserver.foodyqueen.com/images/photos/models/004.jpg",
+            "url": "https://adstudioserver.foodyqueen.com/images/photos/models/004.jpg"
           },
           "transparency": 1
         },
@@ -95,8 +95,8 @@
               "y": -64
             },
             "rotate": 0,
-            "thumb": "http://localhost:4000/images/photos/models/002.jpg",
-            "url": "http://localhost:4000/images/photos/models/006.jpg"
+            "thumb": "https://adstudioserver.foodyqueen.com/images/photos/models/002.jpg",
+            "url": "https://adstudioserver.foodyqueen.com/images/photos/models/006.jpg"
           },
           "transparency": 1
         },
@@ -130,8 +130,8 @@
               "y": -7.493939669847889
             },
             "rotate": 0,
-            "thumb": "http://localhost:4000/images/photos/models/002.jpg",
-            "url": "http://localhost:4000/images/photos/models/007.jpg"
+            "thumb": "https://adstudioserver.foodyqueen.com/images/photos/models/002.jpg",
+            "url": "https://adstudioserver.foodyqueen.com/images/photos/models/007.jpg"
           },
           "transparency": 1
         },
@@ -165,8 +165,8 @@
               "y": -95.78465893571057
             },
             "rotate": 0,
-            "thumb": "http://localhost:4000/images/photos/models/002.jpg",
-            "url": "http://localhost:4000/images/photos/models/002.jpg"
+            "thumb": "https://adstudioserver.foodyqueen.com/images/photos/models/002.jpg",
+            "url": "https://adstudioserver.foodyqueen.com/images/photos/models/002.jpg"
           },
           "transparency": 1
         },

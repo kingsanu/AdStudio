@@ -618,7 +618,7 @@ export default function WhatsAppCampaignDialog({
     try {
       // Use our new backend API endpoint for custom session IDs
       const response = await axios.post(
-        `http://localhost:4000/api/whatsapp-start-custom/${outletId}`,
+        `https://adstudioserver.foodyqueen.com/api/whatsapp-start-custom/${outletId}`,
         { sessionId },
         { timeout: 30000 }
       );
@@ -675,7 +675,7 @@ export default function WhatsAppCampaignDialog({
     try {
       console.log("Fetching QR code for session:", sessionId);
       const response = await axios.get(
-        `http://localhost:4000/api/whatsapp-qr/${sessionId}`,
+        `https://adstudioserver.foodyqueen.com/api/whatsapp-qr/${sessionId}`,
         {
           timeout: 60000, // Increased timeout to 60 seconds to match backend improvements
         }
@@ -764,7 +764,7 @@ export default function WhatsAppCampaignDialog({
     try {
       console.log("Refreshing QR code for session:", sessionId);
       const response = await axios.get(
-        `http://localhost:4000/api/whatsapp-qr/${sessionId}`,
+        `https://adstudioserver.foodyqueen.com/api/whatsapp-qr/${sessionId}`,
         {
           timeout: 60000, // Increased timeout to 60 seconds to match backend improvements
         }

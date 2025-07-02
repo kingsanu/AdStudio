@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:4000/api";
+const API_BASE_URL = "https://adstudioserver.foodyqueen.com/api";
 
 export interface Customer {
   _id: string;

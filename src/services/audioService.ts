@@ -38,7 +38,7 @@ class AudioService {
   private readonly baseUrl: string;
 
   constructor() {
-    this.baseUrl = "http://localhost:4000/api";
+    this.baseUrl = "https://adstudioserver.foodyqueen.com/api";
   }
 
   // Available voice options for Eleven Labs with MAXIMUM emotional impact

@@ -6,7 +6,7 @@ import {
   FavoriteTemplateWithDetails,
 } from "@/models/FavoriteTemplate";
 
-const API_BASE_URL = "http://localhost:4000";
+const API_BASE_URL = "https://adstudioserver.foodyqueen.com";
 
 export interface TextTemplate {
   _id: string;
