@@ -1,5 +1,20 @@
 
+[phases.setup]
+nixPkgs = ['nodejs_22', 'yarn', 'nginx']
+
+[phases.install]
+cmds = ['yarn install --frozen-lockfile']
+
+[phases.build]
+cmds = [
+    'yarn build',
+    'cp dist/* /usr/share/nginx/html/ -r',
+    'cp nginx.conf /etc/nginx/conf.d/default.conf'
+]
+
+[start]
+cmd = 'nginx -g "daemon off;"'
+
 [variables]
 NODE_ENV = 'production'
-HOST = '0.0.0.0'
-PORT = '4173'
+PORT = '80'
