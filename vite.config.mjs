@@ -15,12 +15,14 @@ export default defineConfig({
     tsconfigPaths(), // This helps with path resolution from tsconfig.json
   ],
   server: {
-    host: true, // Allow external connections
-    allowedHosts: "all", // Allow all hosts
+    host: "0.0.0.0", // Bind to all interfaces for Docker/Coolify
+    port: 5173,
+    allowedHosts: "all", // Allow all hosts for reverse proxy
     // Enable HMR
     hmr: {
       overlay: true, // Show error overlay
       host: 'localhost', // Specify HMR host
+      port: 5173,
     },
     // Watch for changes in packages directory
     watch: {
@@ -29,8 +31,9 @@ export default defineConfig({
     },
   },
   preview: {
-    host: true, // Allow external connections
-    allowedHosts: "all", // Allow all hosts
+    host: "0.0.0.0", // Bind to all interfaces for Docker/Coolify
+    port: 4173,
+    allowedHosts: "all", // Allow all hosts for reverse proxy
   },
   // Optimize dependencies for faster dev server startup
   optimizeDeps: {
