@@ -17,8 +17,10 @@ export default defineConfig({
   server: {
     host: "0.0.0.0", // Bind to all interfaces for Docker/Coolify
     port: 5173,
-    allowedHosts: "all", // Allow all hosts for reverse proxy
-    // Enable HMR
+allowedHosts: [
+      '.foodyqueen.com', // Add the domain or subdomain here. Use a dot prefix for subdomains.
+      'localhost', // Ensure localhost is included if you're developing locally
+    ],    // Enable HMR
     hmr: {
       overlay: true, // Show error overlay
       host: 'localhost', // Specify HMR host
@@ -33,8 +35,10 @@ export default defineConfig({
   preview: {
     host: "0.0.0.0", // Bind to all interfaces for Docker/Coolify
     port: 4173,
-    allowedHosts: "all", // Allow all hosts for reverse proxy
-  },
+allowedHosts: [
+      '.foodyqueen.com', // Add the domain or subdomain here. Use a dot prefix for subdomains.
+      'localhost', // Ensure localhost is included if you're developing locally
+    ],  },
   // Optimize dependencies for faster dev server startup
   optimizeDeps: {
     include: [
