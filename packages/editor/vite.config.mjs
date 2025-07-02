@@ -23,6 +23,12 @@ export default defineConfig((configEnv) => ({
       linters: [new EsLinter({ configEnv })],
     }),
   ],
+  server: {
+    allowedHosts: ["adstudio.foodyqueen.com"],
+  },
+  preview: {
+    allowedHosts: ["adstudio.foodyqueen.com"],
+  },
   optimizeDeps: {
     include: ['esm-dep'],
   },
