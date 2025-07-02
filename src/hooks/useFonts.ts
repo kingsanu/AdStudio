@@ -99,26 +99,143 @@ export const useFontFamily = (family: string) => {
   });
 };
 
-// Hook for loading ALL fonts at once (no pagination) - uses backend caching
-export const useAllFonts = (keyword?: string, apiBaseUrl?: string) => {
-  const baseUrl =  import.meta.env.VITE_API_URL || "https://adstudioserver.foodyqueen.com";
-  
-  return useQuery({
-    queryKey: [...fontKeys.all, 'bulk', keyword || 'all', baseUrl],
-    queryFn: async () => {
-      const params = new URLSearchParams();
+// Helper function to load font files into the browser
+const loadFontFile = async (fontName: string, fontUrl?: string): Promise<boolean> => {
+  try {
+    // Check if font is already loaded
+    if (document.fonts.check(`16px "${fontName}"`)) {
+      return true;
+    }
+
+    // If we have a font URL, load it
+    if (fontUrl) {
+      const fontFace = new FontFace(fontName, `url(${fontUrl})`);
+      await fontFace.load();
+      document.fonts.add(fontFace);
+      return true;
+    }
+
+    // Try to load from Google Fonts as fallback
+    const googleFontUrl = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName.replace(/\s+/g, '+'))}:wght@400&display=swap`;
+
+    // Create link element to load Google Font
+    const link = document.createElement('link');
+    link.href = googleFontUrl;
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+
+    // Add to document head
+    document.head.appendChild(link);
+
+    // Wait for font to load
+    await new Promise((resolve) => {
+      const checkFont = () => {
+        if (document.fonts.check(`16px "${fontName}"`)) {
+          resolve(true);
+        } else {
+          setTimeout(checkFont, 100);
+        }
+      };
+      checkFont();
+      // Timeout after 3 seconds
+      setTimeout(() => resolve(false), 3000);
+    });
+
+    return document.fonts.check(`16px "${fontName}"`);
+  } catch (error) {
+    console.warn(`Failed to load font file for ${fontName}:`, error);
+    return false;
+  }
+};
+
+// Hook for lazy loading fonts on demand (only when needed for preview)
+export const useLazyFontLoad = () => {
+  const queryClient = useQueryClient();
+  const baseUrl = import.meta.env.VITE_API_URL || "https://adstudioserver.foodyqueen.com";
+
+  const loadFontFamily = async (family: string): Promise<FontDataApi | null> => {
+    // Check if already cached
+    const cached = queryClient.getQueryData(fontKeys.family(family));
+    if (cached) {
+      // Still try to load the font file for preview
+      await loadFontFile(family);
+      return cached as FontDataApi;
+    }
+
+    try {
+      const response = await axios.get<FontDataApi>(
+        `${baseUrl}/api/fonts/family/${encodeURIComponent(family)}`
+      );
+
+      // Cache the result
+      queryClient.setQueryData(fontKeys.family(family), response.data);
+
+      // Load the font files for preview (try the first style)
+      if (response.data.styles && response.data.styles.length > 0) {
+        await loadFontFile(family, response.data.styles[0].url);
+      } else {
+        await loadFontFile(family);
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to load font family: ${family}`, error);
+      return null;
+    }
+  };
+
+  return { loadFontFamily };
+};
+
+// Hook for loading fonts with virtual scrolling and better performance
+export const useVirtualizedFonts = (keyword?: string, pageSize: number = 50) => {
+  const baseUrl = import.meta.env.VITE_API_URL || "https://adstudioserver.foodyqueen.com";
+
+  return useInfiniteQuery({
+    queryKey: [...fontKeys.all, 'virtualized', keyword || 'all', pageSize],
+    queryFn: async ({ pageParam = 0 }) => {
+      const params = new URLSearchParams({
+        ps: pageSize.toString(),
+        pi: pageParam.toString(),
+      });
+
       if (keyword) {
         params.append('kw', keyword);
       }
-      
-      const response = await axios.get<FontDataApi[]>(
-        `${baseUrl}/api/fonts/all${params.toString() ? `?${params.toString()}` : ''}`
+
+      const response = await axios.get<FontResponse>(
+        `${baseUrl}/api/fonts?${params.toString()}`
       );
       return response.data;
     },
-    enabled: !!baseUrl, // Only run if we have a valid API URL
-    staleTime: 1000 * 60 * 60 * 24, // 24 hours - all fonts cached on backend for 3 days
-    gcTime: 1000 * 60 * 60 * 24 * 2, // 2 days garbage collection time
+    getNextPageParam: (lastPage) => {
+      return lastPage.pagination.hasMore
+        ? lastPage.pagination.page + 1
+        : undefined;
+    },
+    initialPageParam: 0,
+    enabled: !!baseUrl,
+    staleTime: 1000 * 60 * 15, // 15 minutes
+    gcTime: 1000 * 60 * 60, // 1 hour
+    retry: 2,
+  });
+};
+
+// Hook for loading popular/essential fonts only (for quick preview)
+export const usePopularFonts = (limit: number = 20) => {
+  const baseUrl = import.meta.env.VITE_API_URL || "https://adstudioserver.foodyqueen.com";
+
+  return useQuery({
+    queryKey: [...fontKeys.all, 'popular', limit],
+    queryFn: async () => {
+      const response = await axios.get<FontResponse>(
+        `${baseUrl}/api/fonts?ps=${limit}&pi=0&popular=true`
+      );
+      return response.data.data;
+    },
+    enabled: !!baseUrl,
+    staleTime: 1000 * 60 * 60 * 2, // 2 hours - popular fonts change less frequently
+    gcTime: 1000 * 60 * 60 * 4, // 4 hours
     retry: 2,
   });
 };

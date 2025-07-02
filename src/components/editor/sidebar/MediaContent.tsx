@@ -11,6 +11,8 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import MediaUploadForm from "./MediaUploadForm";
+import { cloneDeep } from "lodash";
+import { RootLayerProps } from "canva-editor/layers/RootLayer";
 
 // Constants for infinite loading
 const PAGE_SIZE = 20;
@@ -380,8 +382,45 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
     };
   }, [handleScroll]);
 
+  // Handle setting image as background (adapted from LayerContextMenu.tsx)
+  const handleSetAsBackground = async (imageUrl: string, naturalWidth: number, naturalHeight: number) => {
+    try {
+      const ratio = state.pageSize.width / state.pageSize.height;
+      const imageRatio = naturalWidth / naturalHeight;
+
+      const background = {
+        url: imageUrl,
+        thumb: imageUrl,
+        boxSize: { width: naturalWidth, height: naturalHeight },
+        position: { x: 0, y: 0 },
+        rotate: 0,
+      };
+
+      if (ratio > imageRatio) {
+        background.boxSize.width = state.pageSize.width;
+        background.boxSize.height = state.pageSize.width / imageRatio;
+        background.position.y = (background.boxSize.height - state.pageSize.height) / -2;
+        background.position.x = 0;
+      } else {
+        background.boxSize.height = state.pageSize.height;
+        background.boxSize.width = state.pageSize.height * imageRatio;
+        background.position.x = (background.boxSize.width - state.pageSize.width) / -2;
+        background.position.y = 0;
+      }
+
+      actions.setProp<RootLayerProps>(state.activePage, 'ROOT', {
+        image: background,
+      });
+
+      return true;
+    } catch (error) {
+      console.error("Error setting background:", error);
+      return false;
+    }
+  };
+
   // Handle adding media to canvas with enhanced functionality
-  const handleAddMedia = async (item: MediaItem) => {
+  const handleAddMedia = async (item: MediaItem, section?: MediaSection) => {
     try {
       // Show loading toast
       toast.loading("Adding media to canvas...");
@@ -408,24 +447,35 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
           reject(new Error("Failed to load image"));
         };
 
-        img.onload = () => {
+        img.onload = async () => {
           try {
-            // Calculate position for the center of the canvas
-            const position = getPositionWhenLayerCenter(state.pageSize, {
-              width: img.naturalWidth,
-              height: img.naturalHeight,
-            });
-
-            // Add as image layer
-            actions.addImageLayer(
-              { thumb: imageUrl, url: imageUrl, position },
-              {
+            // Check if this is a background image
+            if (section === "backgrounds") {
+              // Set as background instead of adding as layer
+              const success = await handleSetAsBackground(imageUrl, img.naturalWidth, img.naturalHeight);
+              if (success) {
+                resolve();
+              } else {
+                reject(new Error("Failed to set as background"));
+              }
+            } else {
+              // Calculate position for the center of the canvas
+              const position = getPositionWhenLayerCenter(state.pageSize, {
                 width: img.naturalWidth,
                 height: img.naturalHeight,
-              }
-            );
+              });
 
-            resolve();
+              // Add as image layer
+              actions.addImageLayer(
+                { thumb: imageUrl, url: imageUrl, position },
+                {
+                  width: img.naturalWidth,
+                  height: img.naturalHeight,
+                }
+              );
+
+              resolve();
+            }
           } catch (error) {
             reject(error);
           }
@@ -441,7 +491,11 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
 
       // Dismiss loading toast and show success
       toast.dismiss();
-      toast.success(`Added ${item.name || "media"} to canvas`);
+      if (section === "backgrounds") {
+        toast.success(`Set ${item.name || "image"} as background`);
+      } else {
+        toast.success(`Added ${item.name || "media"} to canvas`);
+      }
 
       // Close sidebar on mobile
       if (isMobile) {
@@ -633,10 +687,10 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
                   key={item._id}
                   onDrop={async (pos) => {
                     if (pos) {
-                      await handleAddMedia(item);
+                      await handleAddMedia(item, section);
                     }
                   }}
-                  onClick={() => handleAddMedia(item)}
+                  onClick={() => handleAddMedia(item, section)}
                 >
                   <div
                     css={{
@@ -731,10 +785,10 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
                 key={item._id}
                 onDrop={async (pos) => {
                   if (pos) {
-                    await handleAddMedia(item);
+                    await handleAddMedia(item, expandedView.section);
                   }
                 }}
-                onClick={() => handleAddMedia(item)}
+                onClick={() => handleAddMedia(item, expandedView.section)}
               >
                 <div
                   css={{

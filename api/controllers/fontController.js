@@ -83,10 +83,10 @@ const getAllFonts = async (req, res) => {
  */
 const getFonts = async (req, res) => {
   try {
-    const { ps = 30, pi = 0, kw = "" } = req.query;
+    const { ps = 30, pi = 0, kw = "", popular = false } = req.query;
 
     // Check cache first
-    const cacheQuery = { ps, pi, kw };
+    const cacheQuery = { ps, pi, kw, popular };
     const cachedResult = fontCache.getFontList(cacheQuery);
     if (cachedResult) {
       console.log(`[FontController] Serving fonts from cache for query:`, cacheQuery);
@@ -104,9 +104,25 @@ const getFonts = async (req, res) => {
     }
 
     console.log(`[FontController] Fetching fonts from database for query:`, cacheQuery);
+
+    // Define popular font families for quick loading
+    const popularFontFamilies = [
+      'Arial', 'Helvetica', 'Times New Roman', 'Georgia', 'Verdana',
+      'Trebuchet MS', 'Comic Sans MS', 'Impact', 'Lucida Console',
+      'Tahoma', 'Courier New', 'Palatino', 'Garamond', 'Bookman',
+      'Avant Garde', 'Calibri', 'Cambria', 'Candara', 'Century Gothic',
+      'Franklin Gothic Medium'
+    ];
+
+    let sortCriteria = "family";
+    if (popular === "true" || popular === true) {
+      // For popular fonts, prioritize the popular families first
+      query.family = { $in: popularFontFamilies };
+    }
+
     const fonts = await Font.find(query)
       .select("family styles")
-      .sort("family")
+      .sort(sortCriteria)
       .lean(); // Use lean() for better performance
 
     // Transform data to match the expected format from fonts.json
