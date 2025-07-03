@@ -78,17 +78,30 @@ const FontPreview: React.FC<{
   text: string;
   usePreviewImage?: boolean;
 }> = ({ font, text, usePreviewImage = true }) => {
-  // Use preview image if available and enabled
-  if (usePreviewImage && font.img) {
+  const [imageError, setImageError] = useState(false);
+  
+  // Debug logging
+  console.log("FontPreview render:", {
+    fontFamily: font.family,
+    fontName: font.name,
+    hasImg: !!font.img,
+    imgUrl: font.img,
+    usePreviewImage,
+    imageError
+  });
+  
+  // Use preview image if available, enabled, and not errored
+  if (usePreviewImage && font.img && !imageError) {
     return (
       <FontPreviewImage
         src={font.img}
         alt={`${font.family} font preview`}
-        onError={(e) => {
-          // Fallback to text if image fails to load
-          const target = e.target as HTMLImageElement;
-          target.style.display = 'none';
-          target.nextElementSibling?.setAttribute('style', 'display: inline');
+        onError={() => {
+          console.log(`Font preview image failed to load: ${font.img}`);
+          setImageError(true);
+        }}
+        onLoad={() => {
+          console.log(`Font preview image loaded successfully: ${font.img}`);
         }}
       />
     );
@@ -99,7 +112,6 @@ const FontPreview: React.FC<{
     <FontDisplay
       css={{
         fontFamily: `'${font.name}'`,
-        display: font.img && usePreviewImage ? 'none' : 'inline',
       }}
       fontStyle={font.style}
     >
@@ -124,7 +136,11 @@ const LoadingItem = styled("div")`
 
 // Flatten fonts from API format to component format
 const flatFonts = (fonts: FontDataApi[]): FontData[] => {
-  return fonts.reduce((acc: FontData[], font: FontDataApi) => {
+  console.log("flatFonts input:", fonts.slice(0, 3)); // Log first 3 fonts for debugging
+  
+  const result = fonts.reduce((acc: FontData[], font: FontDataApi) => {
+    console.log(`Processing font: ${font.family}, img: ${font.img}`); // Debug each font
+    
     return acc.concat(
       font.styles.map((s) => ({
         family: font.family,
@@ -135,6 +151,9 @@ const flatFonts = (fonts: FontDataApi[]): FontData[] => {
       }))
     );
   }, []);
+  
+  console.log("flatFonts result sample:", result.slice(0, 3)); // Log first 3 results
+  return result;
 };
 
 interface VirtualizedFontItemProps {

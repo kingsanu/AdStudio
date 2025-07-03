@@ -57,6 +57,7 @@ async function importFonts() {
         // Prepare font documents
         const fontDocuments = batch.map((fontData) => ({
           family: fontData.family,
+          img: fontData.img, // Include preview image if available
           styles: fontData.styles || [],
           isActive: true,
           createdAt: new Date(),
@@ -90,10 +91,10 @@ async function importFonts() {
     console.log(`Total fonts in database: ${totalFonts}`);
 
     // Show some sample fonts
-    const sampleFonts = await Font.find().limit(5).select("family styles");
+    const sampleFonts = await Font.find().limit(5).select("family styles img");
     console.log("\nSample imported fonts:");
     sampleFonts.forEach((font) => {
-      console.log(`- ${font.family} (${font.styles.length} styles)`);
+      console.log(`- ${font.family} (${font.styles.length} styles)${font.img ? ' [has preview image]' : ''}`);
     });
 
     console.log("\nFont import completed successfully!");

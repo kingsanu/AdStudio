@@ -48,13 +48,14 @@ const getAllFonts = async (req, res) => {
 
     console.log(`[FontController] Fetching all fonts from database`);
     const fonts = await Font.find({ isActive: true })
-      .select("family styles")
+      .select("family styles img")
       .sort("family")
       .lean(); // Use lean() for better performance
 
     // Transform data to match the expected format
     const transformedFonts = fonts.map((font) => ({
       family: font.family,
+      img: font.img, // Include preview image
       styles: font.styles.map((style) => ({
         name: style.name,
         style: style.style,
@@ -121,13 +122,14 @@ const getFonts = async (req, res) => {
     }
 
     const fonts = await Font.find(query)
-      .select("family styles")
+      .select("family styles img")
       .sort(sortCriteria)
       .lean(); // Use lean() for better performance
 
     // Transform data to match the expected format from fonts.json
     const transformedFonts = fonts.map((font) => ({
       family: font.family,
+      img: font.img, // Include preview image
       styles: font.styles.map((style) => ({
         name: style.name,
         style: style.style,
@@ -174,6 +176,7 @@ const getFontByFamily = async (req, res) => {
 
     const transformedFont = {
       family: font.family,
+      img: font.img, // Include preview image
       styles: font.styles.map((style) => ({
         name: style.name,
         style: style.style,
