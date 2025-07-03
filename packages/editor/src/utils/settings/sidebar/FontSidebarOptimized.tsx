@@ -167,11 +167,12 @@ interface VirtualizedFontItemProps {
     setOpeningItems: React.Dispatch<React.SetStateAction<number[]>>;
     loadFontFamily: (family: string) => Promise<FontDataApi | null>;
     loadGoogleFont: (family: string) => void;
+    loadCustomFont: (font: FontData) => void;
   };
 }
 
 const VirtualizedFontItem: React.FC<VirtualizedFontItemProps> = ({ index, style, data }) => {
-  const { fonts, selected, onChangeFontFamily, openingItems, setOpeningItems, loadFontFamily, loadGoogleFont } = data;
+  const { fonts, selected, onChangeFontFamily, openingItems, setOpeningItems, loadFontFamily, loadGoogleFont, loadCustomFont } = data;
   const font = fonts[index];
   const [isInView, setIsInView] = useState(false);
   const itemRef = useRef<HTMLDivElement>(null);
@@ -188,7 +189,16 @@ const VirtualizedFontItem: React.FC<VirtualizedFontItemProps> = ({ index, style,
             setIsInView(true);
             // Only load font via Google Fonts if no preview image is available
             if (!font.img) {
-              loadGoogleFont(font.family);
+              // Check if it's a Google Font or custom font by URL
+              if (font.url && (font.url.includes('fonts.gstatic.com') || font.url.includes('fonts.googleapis.com'))) {
+                loadGoogleFont(font.family);
+              } else if (font.url) {
+                // Load custom font using @font-face
+                loadCustomFont(font);
+              } else {
+                // Fallback to Google Fonts
+                loadGoogleFont(font.family);
+              }
             }
           }
         });
@@ -209,7 +219,7 @@ const VirtualizedFontItem: React.FC<VirtualizedFontItemProps> = ({ index, style,
         observer.unobserve(itemRef.current);
       }
     };
-  }, [font?.family, font?.img, isInView, font, loadGoogleFont]);
+  }, [font?.family, font?.img, isInView, font, loadGoogleFont, loadCustomFont]);
 
   // Render loading state if no font
   if (!font) {
@@ -402,16 +412,48 @@ const FontSidebarOptimized: ForwardRefRenderFunction<HTMLDivElement, FontSidebar
     console.log("Loaded Google Font:", fontFamily);
   }, []);
 
+  // Helper function to load custom fonts via CSS @font-face
+  const loadCustomFont = useCallback((font: FontData) => {
+    const fontFaceId = `custom-font-${font.family.replace(/\s+/g, '-')}`;
+    
+    // Check if already loaded
+    if (document.getElementById(fontFaceId)) {
+      return;
+    }
+
+    // Create @font-face CSS for custom fonts
+    const style = document.createElement('style');
+    style.id = fontFaceId;
+    style.textContent = `
+      @font-face {
+        font-family: '${font.name}';
+        src: url('${font.url}') format('${font.url.includes('.woff2') ? 'woff2' : font.url.includes('.woff') ? 'woff' : 'truetype'}');
+        font-weight: ${font.style === 'regular' ? 'normal' : font.style};
+        font-style: normal;
+        font-display: swap;
+      }
+    `;
+    
+    document.head.appendChild(style);
+    console.log("Loaded Custom Font:", font.name, font.url);
+  }, []);
+
   // Preload popular fonts when sidebar opens
   useEffect(() => {
     if (props.open && popularFonts.length > 0) {
       // Preload first few popular fonts for immediate preview (only those without preview images)
       const fontsToPreload = popularFonts.slice(0, 8).filter(font => !font.img);
       fontsToPreload.forEach((font) => {
-        loadGoogleFont(font.family);
+        if (font.url && (font.url.includes('fonts.gstatic.com') || font.url.includes('fonts.googleapis.com'))) {
+          loadGoogleFont(font.family);
+        } else if (font.url) {
+          loadCustomFont(font);
+        } else {
+          loadGoogleFont(font.family);
+        }
       });
     }
-  }, [props.open, popularFonts, loadGoogleFont]);
+  }, [props.open, popularFonts, loadGoogleFont, loadCustomFont]);
 
 
 
@@ -429,8 +471,15 @@ const FontSidebarOptimized: ForwardRefRenderFunction<HTMLDivElement, FontSidebar
             {popularFonts.map((font, idx) => (
               <div key={`popular-${idx}`} className="carousel-item">
                 <OutlineButton onClick={() => {
+                  // Load appropriate font type
                   if (!font.img) {
-                    loadGoogleFont(font.family);
+                    if (font.url && (font.url.includes('fonts.gstatic.com') || font.url.includes('fonts.googleapis.com'))) {
+                      loadGoogleFont(font.family);
+                    } else if (font.url) {
+                      loadCustomFont(font);
+                    } else {
+                      loadGoogleFont(font.family);
+                    }
                   }
                   onChangeFontFamily(font);
                 }}>
@@ -517,6 +566,7 @@ const FontSidebarOptimized: ForwardRefRenderFunction<HTMLDivElement, FontSidebar
                     setOpeningItems,
                     loadFontFamily,
                     loadGoogleFont,
+                    loadCustomFont,
                   }}
                 >
                   {VirtualizedFontItem}
