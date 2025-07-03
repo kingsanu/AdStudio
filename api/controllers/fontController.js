@@ -59,7 +59,7 @@ const getAllFonts = async (req, res) => {
       styles: font.styles.map((style) => ({
         name: style.name,
         style: style.style,
-        url: style.url,
+        url: `/api/proxy-font/${encodeURIComponent(style.url)}`, // Proxy the font URL
       })),
     }));
 
@@ -133,7 +133,7 @@ const getFonts = async (req, res) => {
       styles: font.styles.map((style) => ({
         name: style.name,
         style: style.style,
-        url: style.url,
+        url: `/api/proxy-font/${encodeURIComponent(style.url)}`, // Proxy the font URL
       })),
     }));
 
@@ -180,7 +180,7 @@ const getFontByFamily = async (req, res) => {
       styles: font.styles.map((style) => ({
         name: style.name,
         style: style.style,
-        url: style.url,
+        url: `/api/proxy-font/${encodeURIComponent(style.url)}`, // Proxy the font URL
       })),
     };
 
