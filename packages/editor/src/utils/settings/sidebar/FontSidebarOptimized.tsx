@@ -79,6 +79,7 @@ const FontPreview: React.FC<{
   usePreviewImage?: boolean;
 }> = ({ font, text, usePreviewImage = true }) => {
   const [imageError, setImageError] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   
   // Debug logging
   console.log("FontPreview render:", {
@@ -87,7 +88,8 @@ const FontPreview: React.FC<{
     hasImg: !!font.img,
     imgUrl: font.img,
     usePreviewImage,
-    imageError
+    imageError,
+    imageLoaded
   });
   
   // Use preview image if available, enabled, and not errored
@@ -102,16 +104,19 @@ const FontPreview: React.FC<{
         }}
         onLoad={() => {
           console.log(`Font preview image loaded successfully: ${font.img}`);
+          setImageLoaded(true);
         }}
       />
     );
   }
   
-  // Fallback to text preview
+  // Fallback to text preview with proper font loading
   return (
     <FontDisplay
       css={{
-        fontFamily: `'${font.name}'`,
+        fontFamily: `'${font.name}', '${font.family}', sans-serif`,
+        fontWeight: font.style === 'bold' ? 'bold' : 'normal',
+        fontStyle: font.style === 'italic' ? 'italic' : 'normal',
       }}
       fontStyle={font.style}
     >
@@ -175,9 +180,10 @@ const VirtualizedFontItem: React.FC<VirtualizedFontItemProps> = ({ index, style,
   const { fonts, selected, onChangeFontFamily, openingItems, setOpeningItems, loadFontFamily, loadGoogleFont, loadCustomFont } = data;
   const font = fonts[index];
   const [isInView, setIsInView] = useState(false);
+  const [fontLoaded, setFontLoaded] = useState(false);
   const itemRef = useRef<HTMLDivElement>(null);
 
-  // Always call useEffect, but handle the font loading conditionally inside
+  // Font loading effect
   useEffect(() => {
     // Early return if no font to avoid hooks ordering issues
     if (!font) return;
@@ -187,8 +193,8 @@ const VirtualizedFontItem: React.FC<VirtualizedFontItemProps> = ({ index, style,
         entries.forEach((entry) => {
           if (entry.isIntersecting && !isInView) {
             setIsInView(true);
-            // Only load font via Google Fonts if no preview image is available
-            if (!font.img) {
+            // Load font for preview if no preview image is available
+            if (!font.img && !fontLoaded) {
               // Check if it's a Google Font or custom font by URL
               if (font.url && (font.url.includes('fonts.gstatic.com') || font.url.includes('fonts.googleapis.com'))) {
                 loadGoogleFont(font.family);
@@ -199,6 +205,7 @@ const VirtualizedFontItem: React.FC<VirtualizedFontItemProps> = ({ index, style,
                 // Fallback to Google Fonts
                 loadGoogleFont(font.family);
               }
+              setFontLoaded(true);
             }
           }
         });
@@ -219,7 +226,7 @@ const VirtualizedFontItem: React.FC<VirtualizedFontItemProps> = ({ index, style,
         observer.unobserve(itemRef.current);
       }
     };
-  }, [font?.family, font?.img, isInView, font, loadGoogleFont, loadCustomFont]);
+  }, [font?.family, font?.img, isInView, fontLoaded, font, loadGoogleFont, loadCustomFont]);
 
   // Render loading state if no font
   if (!font) {
@@ -229,10 +236,6 @@ const VirtualizedFontItem: React.FC<VirtualizedFontItemProps> = ({ index, style,
       </div>
     );
   }
-
-
-
-
 
   const handleToggleChildren = (openingItems: number[], index: number) => {
     const currentIndex = openingItems.indexOf(index);
@@ -309,7 +312,7 @@ const VirtualizedFontItem: React.FC<VirtualizedFontItemProps> = ({ index, style,
         font.styles?.length > 1 &&
         font.styles.map((fontStyle, subIdx) => (
           <ListItem
-            css={{ marginLeft: 16,background:"white",zIndex:10, position:'relative', }}
+            css={{ marginLeft: 16, background:"white", zIndex:10, position:'relative' }}
             key={subIdx + "-" + fontStyle.name}
             onClick={() => onChangeFontFamily(fontStyle)}
           >
@@ -340,6 +343,7 @@ const FontSidebarOptimized: ForwardRefRenderFunction<HTMLDivElement, FontSidebar
 
   const [keyword, setKeyword] = useState("");
   const [openingItems, setOpeningItems] = useState<number[]>([]);
+  const [loadedFonts, setLoadedFonts] = useState<Set<string>>(new Set());
 
   // Load popular fonts first for quick preview
   const { data: popularFontsData, isLoading: popularLoading, error: popularError } = usePopularFonts(20);
@@ -391,35 +395,54 @@ const FontSidebarOptimized: ForwardRefRenderFunction<HTMLDivElement, FontSidebar
     }
   }, [fontList, actions]);
 
-  // Helper function to load Google Fonts (shared)
+  // Helper function to load Google Fonts (shared and improved)
   const loadGoogleFont = useCallback((fontFamily: string) => {
-    const fontName = fontFamily.replace(/\s+/g, '+');
-    const linkId = `google-font-${fontName}`;
+    const normalizedFamily = fontFamily.replace(/\s+/g, '+');
+    const linkId = `google-font-${normalizedFamily}`;
 
     // Check if already loaded
-    if (document.getElementById(linkId)) {
+    if (loadedFonts.has(fontFamily) || document.getElementById(linkId)) {
       return;
     }
 
-    // Create Google Fonts link
+    // Create Google Fonts link with multiple weights and styles
     const link = document.createElement('link');
     link.id = linkId;
-    link.href = `https://fonts.googleapis.com/css2?family=${fontName}:wght@400;500;600;700&display=swap`;
+    link.href = `https://fonts.googleapis.com/css2?family=${normalizedFamily}:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap`;
     link.rel = 'stylesheet';
     link.type = 'text/css';
 
-    document.head.appendChild(link);
-    console.log("Loaded Google Font:", fontFamily);
-  }, []);
+    // Add load event listener
+    link.onload = () => {
+      console.log("Google Font loaded successfully:", fontFamily);
+      setLoadedFonts(prev => new Set(prev).add(fontFamily));
+    };
 
-  // Helper function to load custom fonts via CSS @font-face
+    link.onerror = () => {
+      console.error("Failed to load Google Font:", fontFamily);
+    };
+
+    document.head.appendChild(link);
+    console.log("Loading Google Font:", fontFamily);
+  }, [loadedFonts]);
+
+  // Helper function to load custom fonts via CSS @font-face (improved)
   const loadCustomFont = useCallback((font: FontData) => {
-    const fontFaceId = `custom-font-${font.family.replace(/\s+/g, '-')}`;
+    const fontFaceId = `custom-font-${font.family.replace(/\s+/g, '-').toLowerCase()}`;
     
     // Check if already loaded
-    if (document.getElementById(fontFaceId)) {
+    if (loadedFonts.has(font.family) || document.getElementById(fontFaceId)) {
       return;
     }
+
+    // Determine font format from URL
+    const getFormat = (url: string) => {
+      if (url.includes('.woff2')) return 'woff2';
+      if (url.includes('.woff')) return 'woff';
+      if (url.includes('.ttf')) return 'truetype';
+      if (url.includes('.otf')) return 'opentype';
+      return 'truetype'; // fallback
+    };
 
     // Create @font-face CSS for custom fonts
     const style = document.createElement('style');
@@ -427,16 +450,17 @@ const FontSidebarOptimized: ForwardRefRenderFunction<HTMLDivElement, FontSidebar
     style.textContent = `
       @font-face {
         font-family: '${font.name}';
-        src: url('${font.url}') format('${font.url.includes('.woff2') ? 'woff2' : font.url.includes('.woff') ? 'woff' : 'truetype'}');
-        font-weight: ${font.style === 'regular' ? 'normal' : font.style};
-        font-style: normal;
+        src: url('${font.url}') format('${getFormat(font.url)}');
+        font-weight: ${font.style === 'bold' ? 'bold' : 'normal'};
+        font-style: ${font.style === 'italic' ? 'italic' : 'normal'};
         font-display: swap;
       }
     `;
     
     document.head.appendChild(style);
+    setLoadedFonts(prev => new Set(prev).add(font.family));
     console.log("Loaded Custom Font:", font.name, font.url);
-  }, []);
+  }, [loadedFonts]);
 
   // Preload popular fonts when sidebar opens
   useEffect(() => {
@@ -455,10 +479,22 @@ const FontSidebarOptimized: ForwardRefRenderFunction<HTMLDivElement, FontSidebar
     }
   }, [props.open, popularFonts, loadGoogleFont, loadCustomFont]);
 
-
-
   const handleSearch = (searchKeyword: string) => {
     setKeyword(searchKeyword);
+  };
+
+  const handleFontSelect = (font: FontData) => {
+    // Ensure font is loaded before selecting
+    if (!font.img && !loadedFonts.has(font.family)) {
+      if (font.url && (font.url.includes('fonts.gstatic.com') || font.url.includes('fonts.googleapis.com'))) {
+        loadGoogleFont(font.family);
+      } else if (font.url) {
+        loadCustomFont(font);
+      } else {
+        loadGoogleFont(font.family);
+      }
+    }
+    onChangeFontFamily(font);
   };
 
   const renderHeader = () => (
@@ -470,19 +506,7 @@ const FontSidebarOptimized: ForwardRefRenderFunction<HTMLDivElement, FontSidebar
           <HorizontalCarousel>
             {popularFonts.map((font, idx) => (
               <div key={`popular-${idx}`} className="carousel-item">
-                <OutlineButton onClick={() => {
-                  // Load appropriate font type
-                  if (!font.img) {
-                    if (font.url && (font.url.includes('fonts.gstatic.com') || font.url.includes('fonts.googleapis.com'))) {
-                      loadGoogleFont(font.family);
-                    } else if (font.url) {
-                      loadCustomFont(font);
-                    } else {
-                      loadGoogleFont(font.family);
-                    }
-                  }
-                  onChangeFontFamily(font);
-                }}>
+                <OutlineButton onClick={() => handleFontSelect(font)}>
                   <FontPreview 
                     font={font}
                     text={font.family}
@@ -521,7 +545,7 @@ const FontSidebarOptimized: ForwardRefRenderFunction<HTMLDivElement, FontSidebar
               <span>Document fonts</span>
             </div>
             {usedFonts.slice(0, 5).map((font, idx) => (
-              <ListItem key={`used-${idx}`} onClick={() => onChangeFontFamily(font)}>
+              <ListItem key={`used-${idx}`} onClick={() => handleFontSelect(font)}>
                 <span></span>
                 <FontPreview 
                   font={font}
@@ -561,7 +585,7 @@ const FontSidebarOptimized: ForwardRefRenderFunction<HTMLDivElement, FontSidebar
                   itemData={{
                     fonts: fontList,
                     selected,
-                    onChangeFontFamily,
+                    onChangeFontFamily: handleFontSelect,
                     openingItems,
                     setOpeningItems,
                     loadFontFamily,

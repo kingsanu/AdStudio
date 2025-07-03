@@ -8,7 +8,7 @@ import React, {
   useState,
 } from "react";
 import { Tooltip as ReactTooltip } from "canva-editor/tooltip";
-import FontSidebar from "./sidebar/FontSidebar";
+import FontSidebar from "./sidebar/FontSidebarOptimized";
 import TextEffectSidebar from "./sidebar/TextEffectSidebar";
 import ColorSidebar from "./sidebar/ColorSidebar";
 import { filter, isEqual, throttle, uniq, uniqBy } from "lodash";
@@ -782,24 +782,18 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
     // Remove duplicates
     return [...new Set(fontStyles)];
   }, []);
-
-  const applyFont = (font: FontData) => {
-    // Remove unnecessary console.log
+ const applyFont = (font: FontData) => {
     actions.history.new();
     if (editingLayer) {
+
       const editor = textEditor?.editor;
       if (editor) {
         setFontFamily(font.name)(editor.state, editor.dispatch);
-        // Make sure font is valid before processing styles
-        const validFont = {
-          ...font,
-          style: font.style || "regular", // Ensure style has a default value
-        };
-        const styles = fontStyles([validFont]);
-        if (!styles.includes("Bold")) {
+        const styles = fontStyles([font]);
+        if (!styles.includes('Bold')) {
           unsetBoldOfBlock(editor.state, editor.dispatch);
         }
-        if (!styles.includes("Italic")) {
+        if (!styles.includes('Italic')) {
           unsetItalicOfBlock(editor.state, editor.dispatch);
         }
         editor.focus();
@@ -812,16 +806,11 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
             hiddenEditor.dispatch
           );
           setFontFamily(font.name)(hiddenEditor.state, hiddenEditor.dispatch);
-          // Make sure font is valid before processing styles
-          const validFont = {
-            ...font,
-            style: font.style || "regular", // Ensure style has a default value
-          };
-          const styles = fontStyles([validFont]);
-          if (!styles.includes("Bold")) {
+          const styles = fontStyles([font]);
+          if (!styles.includes('Bold')) {
             unsetBoldOfBlock(hiddenEditor.state, hiddenEditor.dispatch);
           }
-          if (!styles.includes("Italic")) {
+          if (!styles.includes('Italic')) {
             unsetItalicOfBlock(hiddenEditor.state, hiddenEditor.dispatch);
           }
         }
@@ -832,22 +821,82 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         if (editor) {
           selectAll(editor.state, editor.dispatch);
           setFontFamily(font.name)(editor.state, editor.dispatch);
-          // Make sure font is valid before processing styles
-          const validFont = {
-            ...font,
-            style: font.style || "regular", // Ensure style has a default value
-          };
-          const styles = fontStyles([validFont]);
-          if (!styles.includes("Bold")) {
+          const styles = fontStyles([font]);
+          if (!styles.includes('Bold')) {
             unsetBoldOfBlock(editor.state, editor.dispatch);
           }
-          if (!styles.includes("Italic")) {
+          if (!styles.includes('Italic')) {
             unsetItalicOfBlock(editor.state, editor.dispatch);
           }
         }
       });
     }
   };
+  // const applyFont = (font: FontData) => {
+  //   // Remove unnecessary console.log
+  //   actions.history.new();
+  //   if (editingLayer) {
+  //     const editor = textEditor?.editor;
+  //     if (editor) {
+  //       setFontFamily(font.name)(editor.state, editor.dispatch);
+  //       // Make sure font is valid before processing styles
+  //       const validFont = {
+  //         ...font,
+  //         style: font.style || "regular", // Ensure style has a default value
+  //       };
+  //       const styles = fontStyles([validFont]);
+  //       if (!styles.includes("Bold")) {
+  //         unsetBoldOfBlock(editor.state, editor.dispatch);
+  //       }
+  //       if (!styles.includes("Italic")) {
+  //         unsetItalicOfBlock(editor.state, editor.dispatch);
+  //       }
+  //       editor.focus();
+
+  //       if (editingLayer.data.editor) {
+  //         const hiddenEditor = editingLayer.data.editor;
+  //         const { $from, $to } = editor.state.selection;
+  //         selectText({ from: $from.pos, to: $to.pos })(
+  //           hiddenEditor.state,
+  //           hiddenEditor.dispatch
+  //         );
+  //         setFontFamily(font.name)(hiddenEditor.state, hiddenEditor.dispatch);
+  //         // Make sure font is valid before processing styles
+  //         const validFont = {
+  //           ...font,
+  //           style: font.style || "regular", // Ensure style has a default value
+  //         };
+  //         const styles = fontStyles([validFont]);
+  //         if (!styles.includes("Bold")) {
+  //           unsetBoldOfBlock(hiddenEditor.state, hiddenEditor.dispatch);
+  //         }
+  //         if (!styles.includes("Italic")) {
+  //           unsetItalicOfBlock(hiddenEditor.state, hiddenEditor.dispatch);
+  //         }
+  //       }
+  //     }
+  //   } else {
+  //     layers.forEach((layer) => {
+  //       const editor = layer.data.editor;
+  //       if (editor) {
+  //         selectAll(editor.state, editor.dispatch);
+  //         setFontFamily(font.name)(editor.state, editor.dispatch);
+  //         // Make sure font is valid before processing styles
+  //         const validFont = {
+  //           ...font,
+  //           style: font.style || "regular", // Ensure style has a default value
+  //         };
+  //         const styles = fontStyles([validFont]);
+  //         if (!styles.includes("Bold")) {
+  //           unsetBoldOfBlock(editor.state, editor.dispatch);
+  //         }
+  //         if (!styles.includes("Italic")) {
+  //           unsetItalicOfBlock(editor.state, editor.dispatch);
+  //         }
+  //       }
+  //     });
+  //   }
+  // };
   const changeFontSize = (number: number) => {
     layers.forEach((layer) => {
       const editor = layer.data.editor;

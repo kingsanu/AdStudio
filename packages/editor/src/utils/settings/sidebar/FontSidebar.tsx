@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react-hooks/rules-of-hooks */
 import {
   forwardRef,
   ForwardRefRenderFunction,
@@ -8,33 +6,33 @@ import {
   useMemo,
   useRef,
   useState,
-} from "react";
-import Sidebar, { SidebarProps } from "./Sidebar";
-import { FontData, FontDataApi, GetFontQuery } from "canva-editor/types";
-import { useUsedFont } from "canva-editor/hooks/useUsedFont";
-import { useEditor } from "canva-editor/hooks";
-import CheckIcon from "canva-editor/icons/CheckIcon";
-import ArrowRightIcon from "canva-editor/icons/ArrowRightIcon";
-import ArrowDownIcon from "canva-editor/icons/ArrowDownIcon";
-import styled from "@emotion/styled";
+} from 'react';
+import Sidebar, { SidebarProps } from './Sidebar';
+import { FontData, FontDataApi, GetFontQuery } from 'canva-editor/types';
+import { useUsedFont } from 'canva-editor/hooks/useUsedFont';
+import { useEditor } from 'canva-editor/hooks';
+import CheckIcon from 'canva-editor/icons/CheckIcon';
+import ArrowRightIcon from 'canva-editor/icons/ArrowRightIcon';
+import ArrowDownIcon from 'canva-editor/icons/ArrowDownIcon';
+import styled from '@emotion/styled';
 import {
   groupFontsByFamily,
   handleFontStyle,
   handleFontStyleName,
-} from "canva-editor/utils/fontHelper";
-import { getRandomItems } from "canva-editor/utils";
-import FontStyle from "./FontStyle";
-import { isArray, some } from "lodash";
-import FontSearchBox from "../components/FontSearchBox";
-import TrendingIcon from "canva-editor/icons/TrendingIcon";
-import DocumentIcon from "canva-editor/icons/DocumentIcon";
-import HorizontalCarousel from "canva-editor/components/carousel/HorizontalCarousel";
-import OutlineButton from "canva-editor/components/button/OutlineButton";
-import axios from "axios";
-import useMobileDetect from "canva-editor/hooks/useMobileDetect";
-import CloseIcon from "canva-editor/icons/CloseIcon";
+} from 'canva-editor/utils/fontHelper';
+import { getRandomItems } from 'canva-editor/utils';
+import FontStyle from './FontStyle';
+import { isArray, some } from 'lodash';
+import FontSearchBox from '../components/FontSearchBox';
+import TrendingIcon from 'canva-editor/icons/TrendingIcon';
+import DocumentIcon from 'canva-editor/icons/DocumentIcon';
+import HorizontalCarousel from 'canva-editor/components/carousel/HorizontalCarousel';
+import OutlineButton from 'canva-editor/components/button/OutlineButton';
+import axios from 'axios';
+import useMobileDetect from 'canva-editor/hooks/useMobileDetect';
+import CloseIcon from 'canva-editor/icons/CloseIcon';
 
-const ListItem = styled("div")`
+const ListItem = styled('div')`
   height: 40px;
   display: flex;
   align-items: center;
@@ -58,7 +56,7 @@ const ListItem = styled("div")`
   }
 `;
 
-const FontDisplay = styled("span")<{ fontStyle: string }>(
+const FontDisplay = styled('span')<{ fontStyle: string }>(
   ({ fontStyle }) => `
     text-transform: capitalize;
     ${handleFontStyle(fontStyle)};
@@ -99,46 +97,37 @@ const FontSidebar: ForwardRefRenderFunction<
     ),
   }));
   const [isLoading, setIsLoading] = useState(false);
-  const [keyword, setKeyword] = useState("");
+  const [keyword, setKeyword] = useState('');
   const [offset, setOffset] = useState(0);
   const [openingRecentItems, setOpeningRecentItems] = useState<number[]>([]);
   const [openingItems, setOpeningItems] = useState<number[]>([]);
   const [randomFonts, setRandomFonts] = useState<FontData[] | null>(null);
-  const getFonts = useCallback(
-    (query: GetFontQuery) => {
-      const buildParams = (data: Record<string, string | string[]>) => {
-        const params = new URLSearchParams();
+  const getFonts = useCallback((query: GetFontQuery) => {
+    const buildParams = (data: Record<string, string | string[]>) => {
+      const params = new URLSearchParams();
 
-        Object.entries(data).forEach(([key, value]) => {
-          if (isArray(value)) {
-            value.forEach((v) => params.append(key, v));
-          } else {
-            params.append(key, value);
-          }
-        });
+      Object.entries(data).forEach(([key, value]) => {
+        if (isArray(value)) {
+          value.forEach((v) => params.append(key, v));
+        } else {
+          params.append(key, value);
+        }
+      });
 
-        return params;
-      };
-      return axios
-        .get<{
-          data: FontDataApi[];
-          pagination: {
-            total: number;
-            page: number;
-            pageSize: number;
-            hasMore: boolean;
-          };
-        }>(`${config.apis.url}${config.apis.searchFonts}?${buildParams(query)}`)
-        .then((res) => res.data.data);
-    },
-    [config.apis.url, config.apis.searchFonts]
-  );
+      return params;
+    };
+    return axios
+      .get<FontDataApi[]>(
+        `${config.apis.url}${config.apis.searchFonts}?${buildParams(query)}`
+      )
+      .then((res) => res.data.data);
+  }, []);
 
   const loadFontList = useCallback(
     async (offset = 0) => {
       dataRef.current = true;
       setIsLoading(true);
-      const res = await getFonts({ ps: 30 + "", pi: offset + "", kw: keyword });
+      const res = await getFonts({ ps: 30 + '', pi: offset + '', kw: keyword });
       if (offset) {
         actions.appendFontList(flatFonts(res));
       } else {
@@ -149,7 +138,7 @@ const FontSidebar: ForwardRefRenderFunction<
         dataRef.current = false;
       }
     },
-    [getFonts, actions, keyword]
+    [getFonts, actions, setIsLoading, keyword]
   );
 
   useEffect(() => {
@@ -160,7 +149,7 @@ const FontSidebar: ForwardRefRenderFunction<
     if (!randomFonts && fontList.length) {
       setRandomFonts(getRandomItems(fontList));
     }
-  }, [fontList, randomFonts]);
+  }, [fontList]);
 
   useEffect(() => {
     const handleLoadMore = async (e: Event) => {
@@ -169,18 +158,14 @@ const FontSidebar: ForwardRefRenderFunction<
         node.scrollHeight - node.scrollTop - 80 <= node.clientHeight &&
         !dataRef.current
       ) {
-        setOffset((prevOffset) => {
-          const newOffset = prevOffset + 1;
-          loadFontList(newOffset);
-          return newOffset;
-        });
+        setOffset(offset + 1);
+        await loadFontList(offset + 1);
       }
     };
 
-    const currentScrollRef = scrollRef.current;
-    currentScrollRef?.addEventListener("scroll", handleLoadMore);
+    scrollRef.current?.addEventListener('scroll', handleLoadMore);
     return () => {
-      currentScrollRef?.removeEventListener("scroll", handleLoadMore);
+      scrollRef.current?.removeEventListener('scroll', handleLoadMore);
     };
   }, [loadFontList]);
 
@@ -208,20 +193,20 @@ const FontSidebar: ForwardRefRenderFunction<
     isMobile && (
       <div
         css={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           flexShrink: 0,
           height: 48,
-          borderBottom: "1px solid rgba(57,76,96,.15)",
-          padding: "0 20px",
+          borderBottom: '1px solid rgba(57,76,96,.15)',
+          padding: '0 20px',
         }}
       >
         <p
           css={{
-            lineHeight: "48px",
+            lineHeight: '48px',
             fontWeight: 600,
-            color: "#181C32",
+            color: '#181C32',
             flexGrow: 1,
           }}
         >
@@ -233,10 +218,10 @@ const FontSidebar: ForwardRefRenderFunction<
             flexShrink: 0,
             width: 32,
             height: 32,
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
           onClick={() => {
             actions.setSidebar();
@@ -252,21 +237,21 @@ const FontSidebar: ForwardRefRenderFunction<
       <FontStyle />
       <div
         css={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          overflowY: "auto",
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          overflowY: 'auto',
         }}
       >
         {renderHeader()}
-        <div css={{ padding: "16px 16px 0" }}>
+        <div css={{ padding: '16px 16px 0' }}>
           <FontSearchBox onSearch={handleSearch} />
           <div css={{ marginTop: 8 }}>
             {randomFonts && (
               <HorizontalCarousel>
                 {randomFonts.map((font, idx) => (
-                  <div key={`rdf-` + idx} className="carousel-item">
+                  <div key={`rdf-` + idx} className='carousel-item'>
                     <OutlineButton onClick={() => onChangeFontFamily(font)}>
                       <FontDisplay
                         css={{
@@ -283,21 +268,21 @@ const FontSidebar: ForwardRefRenderFunction<
             )}
           </div>
         </div>
-        <div ref={scrollRef} css={{ flexGrow: 1, overflowY: "auto" }}>
+        <div ref={scrollRef} css={{ flexGrow: 1, overflowY: 'auto' }}>
           <div
             css={{
-              padding: "16px 16px 8px 8px",
+              padding: '16px 16px 8px 8px',
               fontWeight: 700,
-              display: "flex",
+              display: 'flex',
               columnGap: 8,
-              alignItems: "center",
+              alignItems: 'center',
             }}
           >
             <DocumentIcon css={{ width: 24 }} />
             <span>Document fonts</span>
           </div>
           {usedFonts.map((font, idx) => (
-            <div key={idx + "-" + font.family}>
+            <div key={idx + '-' + font.family}>
               <ListItem onClick={() => onChangeFontFamily(font)}>
                 <span>
                   {font.styles && font.styles?.length > 1 && (
@@ -334,7 +319,7 @@ const FontSidebar: ForwardRefRenderFunction<
                 font.styles.map((fontStyle, subIdx) => (
                   <ListItem
                     css={{ marginLeft: 16 }}
-                    key={subIdx + "-" + fontStyle.name}
+                    key={subIdx + '-' + fontStyle.name}
                     onClick={() => onChangeFontFamily(fontStyle)}
                   >
                     <span></span>
@@ -351,12 +336,12 @@ const FontSidebar: ForwardRefRenderFunction<
                 ))}
             </div>
           ))}
-          <div css={{ borderTop: "1px solid rgba(217, 219, 228, 0.6)" }}>
+          <div css={{ borderTop: '1px solid rgba(217, 219, 228, 0.6)' }}>
             <div
               css={{
-                padding: "16px 16px 8px 8px",
+                padding: '16px 16px 8px 8px',
                 fontWeight: 700,
-                display: "flex",
+                display: 'flex',
                 columnGap: 8,
               }}
             >
@@ -364,7 +349,7 @@ const FontSidebar: ForwardRefRenderFunction<
               <span>Popular fonts</span>
             </div>
             {fontList.map((font, idx) => (
-              <div key={idx + "-" + font.name}>
+              <div key={idx + '-' + font.name}>
                 <ListItem onClick={() => onChangeFontFamily(font)}>
                   <span>
                     {font.styles && font.styles?.length > 1 && (
@@ -406,7 +391,7 @@ const FontSidebar: ForwardRefRenderFunction<
                   font.styles.map((fontStyle, subIdx) => (
                     <ListItem
                       css={{ marginLeft: 16 }}
-                      key={subIdx + "-" + fontStyle.name}
+                      key={subIdx + '-' + fontStyle.name}
                       onClick={() => onChangeFontFamily(fontStyle)}
                     >
                       <span></span>
