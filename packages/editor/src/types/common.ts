@@ -21,6 +21,7 @@ export type FontStyle = {
 export type FontDataApi = {
   family: string;
   styles: FontStyle[];
+  img?: string; // Preview image URL
 };
 
 export type FontData = {
@@ -30,6 +31,7 @@ export type FontData = {
   style: string;
   url: string;
   styles?: FontData[];
+  img?: string; // Preview image URL
 
   // Minified format properties (optional)
   x?: string; // family

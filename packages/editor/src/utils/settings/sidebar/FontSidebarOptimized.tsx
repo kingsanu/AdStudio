@@ -65,6 +65,49 @@ const FontDisplay = styled("span")<{ fontStyle: string }>(
 `
 );
 
+const FontPreviewImage = styled("img")`
+  height: 24px;
+  max-width: 150px;
+  object-fit: contain;
+  object-position: left center;
+`;
+
+// Component to render font preview (either image or text)
+const FontPreview: React.FC<{
+  font: FontData;
+  text: string;
+  usePreviewImage?: boolean;
+}> = ({ font, text, usePreviewImage = true }) => {
+  // Use preview image if available and enabled
+  if (usePreviewImage && font.img) {
+    return (
+      <FontPreviewImage
+        src={font.img}
+        alt={`${font.family} font preview`}
+        onError={(e) => {
+          // Fallback to text if image fails to load
+          const target = e.target as HTMLImageElement;
+          target.style.display = 'none';
+          target.nextElementSibling?.setAttribute('style', 'display: inline');
+        }}
+      />
+    );
+  }
+  
+  // Fallback to text preview
+  return (
+    <FontDisplay
+      css={{
+        fontFamily: `'${font.name}'`,
+        display: font.img && usePreviewImage ? 'none' : 'inline',
+      }}
+      fontStyle={font.style}
+    >
+      {text}
+    </FontDisplay>
+  );
+};
+
 const VirtualizedListContainer = styled("div")`
   flex: 1;
   min-height: 0;
@@ -88,6 +131,7 @@ const flatFonts = (fonts: FontDataApi[]): FontData[] => {
         name: s.name,
         url: s.url,
         style: s.style,
+        img: font.img, // Include preview image from font family
       }))
     );
   }, []);
@@ -113,23 +157,20 @@ const VirtualizedFontItem: React.FC<VirtualizedFontItemProps> = ({ index, style,
   const [isInView, setIsInView] = useState(false);
   const itemRef = useRef<HTMLDivElement>(null);
 
-  if (!font) {
-    return (
-      <div style={style}>
-        <LoadingItem>Loading...</LoadingItem>
-      </div>
-    );
-  }
-
-  // Load font when item comes into view using Google Fonts
+  // Always call useEffect, but handle the font loading conditionally inside
   useEffect(() => {
+    // Early return if no font to avoid hooks ordering issues
+    if (!font) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting && !isInView) {
             setIsInView(true);
-            // Load font via Google Fonts when it comes into view
-            loadGoogleFont(font.family);
+            // Only load font via Google Fonts if no preview image is available
+            if (!font.img) {
+              loadGoogleFont(font.family);
+            }
           }
         });
       },
@@ -149,7 +190,16 @@ const VirtualizedFontItem: React.FC<VirtualizedFontItemProps> = ({ index, style,
         observer.unobserve(itemRef.current);
       }
     };
-  }, [font.family, isInView]);
+  }, [font?.family, font?.img, isInView, font, loadGoogleFont]);
+
+  // Render loading state if no font
+  if (!font) {
+    return (
+      <div style={style}>
+        <LoadingItem>Loading...</LoadingItem>
+      </div>
+    );
+  }
 
 
 
@@ -213,14 +263,10 @@ const VirtualizedFontItem: React.FC<VirtualizedFontItemProps> = ({ index, style,
             </button>
           )}
         </span>
-        <FontDisplay
-          css={{
-            fontFamily: `'${font.name}'`,
-          }}
-          fontStyle={font.style}
-        >
-          {!font.styles?.length ? font.name : font.family}
-        </FontDisplay>
+        <FontPreview 
+          font={font}
+          text={!font.styles?.length ? font.name : font.family}
+        />
         <span>
           {!isExpanded &&
             some(font.styles, (fontStyle) =>
@@ -239,14 +285,11 @@ const VirtualizedFontItem: React.FC<VirtualizedFontItemProps> = ({ index, style,
             onClick={() => onChangeFontFamily(fontStyle)}
           >
             <span></span>
-            <FontDisplay
-              css={{
-                fontFamily: `'${fontStyle.name}'`,
-              }}
-              fontStyle={fontStyle.style}
-            >
-              {handleFontStyleName(fontStyle.style)}
-            </FontDisplay>
+            <FontPreview 
+              font={fontStyle}
+              text={handleFontStyleName(fontStyle.style)}
+              usePreviewImage={false} // For style variants, always use text
+            />
             <span>
               {selected
                 .map((s) => s.name)
@@ -343,8 +386,8 @@ const FontSidebarOptimized: ForwardRefRenderFunction<HTMLDivElement, FontSidebar
   // Preload popular fonts when sidebar opens
   useEffect(() => {
     if (props.open && popularFonts.length > 0) {
-      // Preload first few popular fonts for immediate preview
-      const fontsToPreload = popularFonts.slice(0, 8);
+      // Preload first few popular fonts for immediate preview (only those without preview images)
+      const fontsToPreload = popularFonts.slice(0, 8).filter(font => !font.img);
       fontsToPreload.forEach((font) => {
         loadGoogleFont(font.family);
       });
@@ -367,17 +410,15 @@ const FontSidebarOptimized: ForwardRefRenderFunction<HTMLDivElement, FontSidebar
             {popularFonts.map((font, idx) => (
               <div key={`popular-${idx}`} className="carousel-item">
                 <OutlineButton onClick={() => {
-                  loadGoogleFont(font.family);
+                  if (!font.img) {
+                    loadGoogleFont(font.family);
+                  }
                   onChangeFontFamily(font);
                 }}>
-                  <FontDisplay
-                    css={{
-                      fontFamily: `'${font.name}'`,
-                    }}
-                    fontStyle={font.style}
-                  >
-                    {font.family}
-                  </FontDisplay>
+                  <FontPreview 
+                    font={font}
+                    text={font.family}
+                  />
                 </OutlineButton>
               </div>
             ))}
@@ -414,9 +455,10 @@ const FontSidebarOptimized: ForwardRefRenderFunction<HTMLDivElement, FontSidebar
             {usedFonts.slice(0, 5).map((font, idx) => (
               <ListItem key={`used-${idx}`} onClick={() => onChangeFontFamily(font)}>
                 <span></span>
-                <FontDisplay css={{ fontFamily: `'${font.name}'` }} fontStyle={font.style}>
-                  {font.family}
-                </FontDisplay>
+                <FontPreview 
+                  font={font}
+                  text={font.family}
+                />
                 <span>
                   {selected.map((s) => s.name).includes(font.name) && <CheckIcon />}
                 </span>
