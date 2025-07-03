@@ -321,7 +321,7 @@ export default function WhatsAppCampaignDialog({
     setQrRetryTimer(20);
 
     console.log("QR not ready, starting 20-second retry timer...");
-    toast.info("QR code is being generated, retrying in 20 seconds...");
+    // toast.info("QR code is being generated, retrying in 20 seconds...");
 
     const retryInterval = setInterval(() => {
       setQrRetryTimer((prev) => {
@@ -412,9 +412,9 @@ export default function WhatsAppCampaignDialog({
           setIsCreatingSession(false);
         } else {
           console.log("WhatsApp not connected, auto-starting new session");
-          toast.info(
-            "WhatsApp connection found but not active. Starting new session..."
-          );
+          // toast.info(
+          //   "WhatsApp connection found but not active. Starting new session..."
+          // );
           // Auto-start new session if disconnected
           handleCreateNewSession();
         }
@@ -548,7 +548,7 @@ export default function WhatsAppCampaignDialog({
         whatsappUsername: newSessionId,
       }));
 
-      toast.info("Creating new WhatsApp session...");
+      // toast.info("Creating new WhatsApp session...");
 
       // First, clean up any existing sessions
       await cleanupExistingSessions();
@@ -562,7 +562,7 @@ export default function WhatsAppCampaignDialog({
           startResponse.status === 422 ||
           startResponse.message?.includes("Session already exists")
         ) {
-          toast.info("Existing session detected. Terminating and retrying...");
+          // toast.info("Existing session detected. Terminating and retrying...");
 
           try {
             // Try to terminate the existing session
@@ -578,7 +578,7 @@ export default function WhatsAppCampaignDialog({
               );
             }
           } catch (retryError) {
-            toast.error("Failed to resolve session conflict");
+            // toast.error("Failed to resolve session conflict");
             setConnectionStatus("error");
             setIsCreatingSession(false);
             return;
@@ -607,7 +607,7 @@ export default function WhatsAppCampaignDialog({
       // Don't start polling yet - wait until QR code is loaded
     } catch (error) {
       console.error("Error creating WhatsApp session:", error);
-      toast.error("Failed to create WhatsApp session");
+      // toast.error("Failed to create WhatsApp session");
       setConnectionStatus("error");
       setIsCreatingSession(false);
     }
@@ -698,7 +698,7 @@ export default function WhatsAppCampaignDialog({
           setShowQRCode(true);
           setIsCreatingSession(false);
           setIsWaitingForQR(false);
-          toast.success("QR code ready! Please scan to connect.");
+          // toast.success("QR code ready! Please scan to connect.");
 
           // Now that QR code is loaded, start status polling
           startConnectionPolling();
@@ -713,7 +713,7 @@ export default function WhatsAppCampaignDialog({
           // Check if it's a timeout (which is normal during QR generation)
           if (response.data.timeout) {
             console.log("QR generation timeout - this is normal, retrying...");
-            toast.info("QR code is being generated, please wait...");
+            // toast.info("QR code is being generated, please wait...");
           }
 
           // Start 30-second retry timer
@@ -932,7 +932,7 @@ export default function WhatsAppCampaignDialog({
         }));
 
         setAudioGenerationProgress(100);
-        toast.success("Voiceover generated successfully!");
+        // toast.success("Voiceover generated successfully!");
         
         // Automatically proceed to next step after audio generation
         // setTimeout(() => {
@@ -1183,7 +1183,7 @@ export default function WhatsAppCampaignDialog({
         if (customersToSelect.length < numberOfCustomersToSelect) {
           toast.warning(`Only ${customersToSelect.length} customers available (requested ${numberOfCustomersToSelect})`);
         } else {
-          toast.success(`Successfully selected ${customersToSelect.length} customers`);
+          // toast.success(`Successfully selected ${customersToSelect.length} customers`);
         }
       };
       
@@ -1197,7 +1197,7 @@ export default function WhatsAppCampaignDialog({
       
       // Show warning if user requested more than available
       if (numberOfCustomersToSelect > availableCustomers.length && !hasNextPage) {
-        toast.warning(`Only ${availableCustomers.length} customers available (requested ${numberOfCustomersToSelect})`);
+        // toast.warning(`Only ${availableCustomers.length} customers available (requested ${numberOfCustomersToSelect})`);
       }
     }
   };

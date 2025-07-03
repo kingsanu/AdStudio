@@ -13,6 +13,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import MediaUploadForm from "./MediaUploadForm";
 import { cloneDeep } from "lodash";
 import { RootLayerProps } from "canva-editor/layers/RootLayer";
+// Custom scrollbar removed to fix drag functionality
 
 // Constants for infinite loading
 const PAGE_SIZE = 20;
@@ -141,6 +142,146 @@ interface MediaContentProps {
   onClose: () => void;
 }
 
+// Enhanced draggable component with higher z-index for media items
+const MediaDraggable: FC<{ 
+  children: React.ReactNode; 
+  onDrop: (pos: any) => void; 
+  onClick: () => void; 
+}> = ({ children, onDrop, onClick }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isClick, setIsClick] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [size, setSize] = useState({ w: 50, h: 50 });
+
+  const handleMouseDown = (e: any) => {
+    setIsClick(true);
+
+    setTimeout(() => {
+      if (isClick) {
+        setIsDragging(false);
+        e.preventDefault();
+      }
+    }, 300);
+
+    const offsetX = e.nativeEvent.offsetX;
+    const offsetY = e.nativeEvent.offsetY;
+    const offsetW = ref.current?.offsetWidth || 0;
+    const offsetH = ref.current?.offsetHeight ? ref.current?.offsetHeight / 2 : 0;
+
+    setPosition({ x: e.clientX - offsetX, y: e.clientY - offsetY - offsetH });
+    setSize({ w: offsetW, h: offsetH });
+
+    function isInDropArea(e: MouseEvent) {
+      const dropArea: any = getElementByClassNearestTheCursorPosition(e, "page-content");
+      if (!dropArea) return false;
+
+      const clientX = e.clientX;
+      const clientY = e.clientY;
+      const dropAreaRect = dropArea.getBoundingClientRect();
+      const x = dropAreaRect.left;
+      const y = dropAreaRect.top;
+      const width = dropAreaRect.width;
+      const height = dropAreaRect.height;
+
+      return (
+        clientX >= x &&
+        clientX <= x + width &&
+        clientY >= y &&
+        clientY <= y + height
+      );
+    }
+
+    const handleMouseMove = (e: MouseEvent) => {
+      setIsClick(false);
+      setIsDragging(true);
+
+      const x = e.clientX - offsetX,
+        y = e.clientY - offsetY - offsetH;
+      setPosition({ x, y });
+    };
+
+    const handleMouseUp = (e: MouseEvent) => {
+      setIsDragging(false);
+      onDrop(
+        isInDropArea(e)
+          ? { x: e.clientX - offsetW, y: e.clientY - offsetH }
+          : null
+      );
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
+
+  function getElementByClassNearestTheCursorPosition(e: MouseEvent, className: string) {
+    const cursorX = e.clientX;
+    const cursorY = e.clientY;
+    const elements = document.querySelectorAll(`.${className}`);
+    let closestElement: Element | null = null;
+    let closestDistance = Infinity;
+
+    for (const element of elements) {
+      const elementRect = element.getBoundingClientRect();
+      const distance = Math.sqrt(
+        Math.pow(cursorX - elementRect.left, 2) +
+          Math.pow(cursorY - elementRect.top, 2)
+      );
+
+      if (distance < closestDistance) {
+        closestElement = element;
+        closestDistance = distance;
+      }
+    }
+
+    return closestElement;
+  }
+
+  return (
+    <>
+      <div
+        ref={ref}
+        onMouseDown={handleMouseDown}
+        onClick={() => {
+          if (isClick && onClick) {
+            onClick();
+          }
+        }}
+      >
+        {isDragging && (
+          <div
+            css={{
+              width: size.w,
+              height: size.h,
+            }}
+          >
+            {""}
+          </div>
+        )}
+        <div
+          ref={dragRef}
+          style={{
+            ...(isDragging && {
+              position: "fixed", // Use fixed instead of absolute for better positioning
+              left: position.x,
+              top: position.y,
+              width: size.w,
+              height: size.h,
+              zIndex: 99999, // Much higher z-index
+              pointerEvents: "none", // Prevent interference with drop detection
+            }),
+          }}
+        >
+          {children}
+        </div>
+      </div>
+    </>
+  );
+};
+
 const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
   const { actions, state, config } = useEditor();
   const [keyword, setKeyword] = useState("");
@@ -154,6 +295,38 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
     null
   );
   const [overviewScrollPosition, setOverviewScrollPosition] = useState(0);
+
+  // Remove global styles as they interfere with horizontal scroll
+  // The MediaDraggable component with position: fixed handles the overflow issue
+  /*
+  useEffect(() => {
+    const styleId = 'media-drag-styles';
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.textContent = `
+        // Only allow overflow for the main media content container vertically
+        .media-content-container {
+          overflow: visible !important;
+        }
+        
+        // Keep horizontal scroll functionality intact
+        .media-horizontal-scroll {
+          overflow-x: hidden !important;
+          overflow-y: visible !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
+    return () => {
+      const existingStyle = document.getElementById(styleId);
+      if (existingStyle) {
+        existingStyle.remove();
+      }
+    };
+  }, []);
+  */
 
   // Create refs for scroll containers (main screen - collapsed state)
   const backgroundsMainScrollRef = useRef<HTMLDivElement>(null);
@@ -612,7 +785,7 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
             <button
               css={{
                 position: "absolute",
-                left: "18px",
+                left: "0px",
                 top: "50%",
                 transform: "translateY(-50%)",
                 zIndex: 10,
@@ -641,7 +814,7 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
             <button
               css={{
                 position: "absolute",
-                right: "18px",
+                right: "0px",
                 top: "50%",
                 transform: "translateY(-50%)",
                 zIndex: 10,
@@ -670,9 +843,11 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
             <div
               ref={scrollContainerRef}
               css={{
-                overflowX: "auto",
+                overflowX: "hidden",
                 display: "flex",
                 gap: "12px",
+                height:"130px",
+                // border: "1px solid #ddd",
                 padding: "0 10px",
                 scrollBehavior: "smooth",
                 scrollbarWidth: "none",
@@ -683,7 +858,7 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
               }}
             >
               {displayItems.map((item) => (
-                <Draggable
+                <MediaDraggable
                   key={item._id}
                   onDrop={async (pos) => {
                     if (pos) {
@@ -725,7 +900,7 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
                       }}
                     />
                   </div>
-                </Draggable>
+                </MediaDraggable>
               ))}
             </div>
           </div>
@@ -748,15 +923,20 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
           height: "100%",
           overflowY: "auto",
           scrollbarWidth: "thin",
+          scrollbarColor: "#c1c1c1 transparent",
           "&::-webkit-scrollbar": {
             width: "6px",
           },
           "&::-webkit-scrollbar-thumb": {
-            backgroundColor: "rgba(0, 0, 0, 0.2)",
+            backgroundColor: "#c1c1c1",
             borderRadius: "3px",
+            opacity: 0.7,
           },
           "&::-webkit-scrollbar-track": {
-            backgroundColor: "rgba(0, 0, 0, 0.05)",
+            backgroundColor: "transparent",
+          },
+          "&::-webkit-scrollbar-thumb:hover": {
+            backgroundColor: "#a1a1a1",
           },
         }}
       >
@@ -781,7 +961,7 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
             }}
           >
             {items.map((item) => (
-              <Draggable
+              <MediaDraggable
                 key={item._id}
                 onDrop={async (pos) => {
                   if (pos) {
@@ -825,7 +1005,7 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
                     }}
                   />
                 </div>
-              </Draggable>
+              </MediaDraggable>
             ))}
           </div>
         )}
@@ -865,8 +1045,9 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
         flexDirection: "column",
         display: "flex",
         padding: 16,
+        paddingRight:4,
         paddingBottom: 0,
-        overflow: "hidden",
+        position: "relative", // Ensure proper positioning context
       }}
     >
       {!isMobile && <CloseSidebarButton onClose={onClose} />}
@@ -906,14 +1087,34 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
           <div
             ref={scrollRef}
             css={{
-              flexDirection: "column",
-              display: "flex",
               flexGrow: 1,
               height: "calc(100% - 80px)",
               overflowY: "auto",
-              padding: "4px 0",
+              scrollbarWidth: "thin",
+              scrollbarColor: "#c1c1c1 transparent",
+              "&::-webkit-scrollbar": {
+                width: "6px",
+              },
+              "&::-webkit-scrollbar-thumb": {
+                backgroundColor: "#c1c1c1",
+                borderRadius: "3px",
+                opacity: 0.7,
+              },
+              "&::-webkit-scrollbar-track": {
+                backgroundColor: "transparent",
+              },
+              "&::-webkit-scrollbar-thumb:hover": {
+                backgroundColor: "#a1a1a1",
+              },
             }}
           >
+            <div
+              css={{
+                flexDirection: "column",
+                display: "flex",
+                padding: "4px 0",
+              }}
+            >
             {viewState === "overview" ? (
               <>
                 {/* {renderOverviewSection(
@@ -954,6 +1155,7 @@ const MediaContent: FC<MediaContentProps> = ({ onClose }) => {
             ) : (
               renderExpandedSection()
             )}
+            </div>
           </div>
         </>
       )}

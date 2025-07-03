@@ -175,7 +175,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
       setHasUnsavedChanges(true);
       
       console.log("📝 Changes detected - saved to localStorage, cloud save pending...");
-      toast.info("Design saved locally - will sync to cloud soon", { duration: 2000 });
+      // toast.info("Design saved locally - will sync to cloud soon", { duration: 2000 });
       
     } catch (error) {
       console.error("❌ Error in debounced auto-save:", error);

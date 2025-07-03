@@ -29,7 +29,7 @@ const Draggable: FC<PropsWithChildren<DrapableProps>> = ({
         // Prevent the onClick event from firing
         e.preventDefault();
       }
-    }, 200);
+    }, 300);
 
     const offsetX = e.nativeEvent.offsetX;
     const offsetY = e.nativeEvent.offsetY;
