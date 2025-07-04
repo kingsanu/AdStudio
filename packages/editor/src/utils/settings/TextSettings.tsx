@@ -747,12 +747,18 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
     // Ensure we have valid input
     if (!fontList || !Array.isArray(fontList) || fontList.length === 0) {
       // Return default styles if no valid fonts
+      console.warn("⚠️ Invalid fontList provided to fontStyles:", fontList);
       return ["Bold", "Italic"];
     }
 
+    console.log("🎭 Processing font styles for fonts:", fontList.map(f => ({ name: f.name, style: f.style })));
+
     fontList.forEach((font) => {
       // Skip invalid fonts
-      if (!font || !font.name) return;
+      if (!font || !font.name) {
+        console.warn("⚠️ Invalid font object:", font);
+        return;
+      }
 
       // Add Italic style if the font name doesn't already include "Italic"
       if (!font.name.includes("Italic")) {
@@ -780,16 +786,29 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
     });
 
     // Remove duplicates
-    return [...new Set(fontStyles)];
+    const uniqueStyles = [...new Set(fontStyles)];
+    console.log("🎭 Final font styles:", uniqueStyles);
+    return uniqueStyles;
   }, []);
  const applyFont = (font: FontData) => {
+    console.log("🎨 applyFont called with font:", {
+      name: font.name,
+      family: font.family,
+      style: font.style,
+      url: font.url,
+      editingLayer: !!editingLayer,
+      layersCount: layers.length
+    });
+    
     actions.history.new();
     if (editingLayer) {
-
+      console.log("🎯 Applying font to editing layer:", editingLayer.id);
       const editor = textEditor?.editor;
       if (editor) {
+        console.log("📝 Setting font family to:", font.name);
         setFontFamily(font.name)(editor.state, editor.dispatch);
         const styles = fontStyles([font]);
+        console.log("🎭 Available font styles:", styles);
         if (!styles.includes('Bold')) {
           unsetBoldOfBlock(editor.state, editor.dispatch);
         }
@@ -816,9 +835,11 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
         }
       }
     } else {
-      layers.forEach((layer) => {
+      console.log("🎯 Applying font to selected layers, count:", layers.length);
+      layers.forEach((layer, index) => {
         const editor = layer.data.editor;
         if (editor) {
+          console.log(`📝 Setting font family for layer ${index}:`, font.name);
           selectAll(editor.state, editor.dispatch);
           setFontFamily(font.name)(editor.state, editor.dispatch);
           const styles = fontStyles([font]);
@@ -828,9 +849,12 @@ const TextSettings: FC<TextSettingsProps> = ({ layers }) => {
           if (!styles.includes('Italic')) {
             unsetItalicOfBlock(editor.state, editor.dispatch);
           }
+        } else {
+          console.warn(`⚠️ No editor found for layer ${index}`);
         }
       });
     }
+    console.log("✅ applyFont completed");
   };
   // const applyFont = (font: FontData) => {
   //   // Remove unnecessary console.log

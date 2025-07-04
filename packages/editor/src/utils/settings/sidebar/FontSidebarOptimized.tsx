@@ -9,6 +9,9 @@ import { some } from "lodash";
 import { FixedSizeList as List } from "react-window";
 import InfiniteLoader from "react-window-infinite-loader";
 
+// API configuration - use hardcoded for now as this is in the packages folder
+const API_BASE_URL = "https://adstudioserver.foodyqueen.com";
+
 // Icons (assuming these exist)
 import ArrowRightIcon from "canva-editor/icons/ArrowRightIcon";
 import  ArrowDownIcon  from "canva-editor/icons/ArrowDownIcon";
@@ -247,14 +250,25 @@ const VirtualizedFontItem: React.FC<VirtualizedFontItemProps> = ({ index, style,
   };
 
   const handleFontClick = async (font: FontData) => {
+    console.log("🖱️ VirtualizedFontItem handleFontClick:", {
+      fontName: font.name,
+      fontFamily: font.family,
+      hasStyles: !!font.styles,
+      stylesLength: font.styles?.length || 0
+    });
+    
     // Lazy load full font family data if needed
     if (font.styles && font.styles.length === 0) {
+      console.log("📥 Loading full font family data for:", font.family);
       const fullFontData = await loadFontFamily(font.family);
       if (fullFontData) {
         // Update font with full styles data
         font.styles = flatFonts([fullFontData]);
+        console.log("✅ Font styles loaded:", font.styles.length);
       }
     }
+    
+    console.log("🎯 Calling onChangeFontFamily from VirtualizedFontItem");
     onChangeFontFamily(font);
   };
 
@@ -435,6 +449,27 @@ const FontSidebarOptimized: ForwardRefRenderFunction<HTMLDivElement, FontSidebar
       return;
     }
 
+    // Decode URL if it was encoded
+    let fontUrl = font.url;
+    try {
+      // Check if URL is encoded and decode it
+      const decoded = decodeURIComponent(font.url);
+      if (decoded !== font.url) {
+        fontUrl = decoded;
+        console.log("🔓 Decoded font URL:", fontUrl);
+      }
+    } catch (e) {
+      console.warn("⚠️ Could not decode font URL:", font.url);
+    }
+
+    // Check if this is a Google Font or custom font that needs proxying
+    const isGoogleFont = fontUrl.includes('fonts.gstatic.com') || fontUrl.includes('fonts.googleapis.com');
+    // if (!isGoogleFont) {
+    //   // For non-Google fonts, use the backend proxy with full URL
+    //   fontUrl = `${API_BASE_URL}/api/proxy-font/${encodeURIComponent(fontUrl)}`;
+    //   console.log("🔄 Using proxied font URL:", fontUrl);
+    // }
+
     // Determine font format from URL
     const getFormat = (url: string) => {
       if (url.includes('.woff2')) return 'woff2';
@@ -450,7 +485,7 @@ const FontSidebarOptimized: ForwardRefRenderFunction<HTMLDivElement, FontSidebar
     style.textContent = `
       @font-face {
         font-family: '${font.name}';
-        src: url('${font.url}') format('${getFormat(font.url)}');
+        src: url('${fontUrl}') format('${getFormat(fontUrl)}');
         font-weight: ${font.style === 'bold' ? 'bold' : 'normal'};
         font-style: ${font.style === 'italic' ? 'italic' : 'normal'};
         font-display: swap;
@@ -459,7 +494,24 @@ const FontSidebarOptimized: ForwardRefRenderFunction<HTMLDivElement, FontSidebar
     
     document.head.appendChild(style);
     setLoadedFonts(prev => new Set(prev).add(font.family));
-    console.log("Loaded Custom Font:", font.name, font.url);
+    console.log("✅ Custom Font CSS Created:", font.name, fontUrl);
+    console.log("🌐 Browser will make HTTP request to:", fontUrl);
+    
+    // Test the proxy URL to verify it works
+    if (!isGoogleFont) {
+      console.log("🔍 Testing proxy URL...");
+      fetch(fontUrl, { method: 'HEAD' })
+        .then(response => {
+          if (response.ok) {
+            console.log("✅ Proxy URL is accessible:", response.status, response.statusText);
+          } else {
+            console.error("❌ Proxy URL failed:", response.status, response.statusText);
+          }
+        })
+        .catch(error => {
+          console.error("❌ Proxy URL error:", error);
+        });
+    }
   }, [loadedFonts]);
 
   // Preload popular fonts when sidebar opens
@@ -484,16 +536,35 @@ const FontSidebarOptimized: ForwardRefRenderFunction<HTMLDivElement, FontSidebar
   };
 
   const handleFontSelect = (font: FontData) => {
+    console.log("🎯 FontSidebarOptimized handleFontSelect called with:", {
+      fontName: font.name,
+      fontFamily: font.family,
+      fontStyle: font.style,
+      fontUrl: font.url,
+      hasImg: !!font.img,
+      isLoaded: loadedFonts.has(font.family)
+    });
+    
+    // Check if this is a Google Font or custom font
+    const isGoogleFont = font.url && (font.url.includes('fonts.gstatic.com') || font.url.includes('fonts.googleapis.com'));
+    console.log(`📋 Font type: ${isGoogleFont ? 'Google Font' : 'Custom Font'}`);
+    
     // Ensure font is loaded before selecting
     if (!font.img && !loadedFonts.has(font.family)) {
-      if (font.url && (font.url.includes('fonts.gstatic.com') || font.url.includes('fonts.googleapis.com'))) {
+      console.log("📥 Loading font before selection:", font.family);
+      if (font.url && isGoogleFont) {
+        console.log("🔗 Loading via Google Fonts API");
         loadGoogleFont(font.family);
       } else if (font.url) {
+        console.log("🔄 Loading via custom font proxy");
         loadCustomFont(font);
       } else {
+        console.log("🔗 Fallback to Google Fonts");
         loadGoogleFont(font.family);
       }
     }
+    
+    console.log("🚀 Calling onChangeFontFamily with font:", font);
     onChangeFontFamily(font);
   };
 

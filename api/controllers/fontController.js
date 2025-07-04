@@ -34,6 +34,12 @@ function paginateData(data, size = 30, index = 0, keyword = "") {
  */
 const getAllFonts = async (req, res) => {
   try {
+    // Clear cache if requested
+    if (req.query.clearCache === 'true') {
+      fontCache.invalidateFonts();
+      console.log(`[FontController] Font cache cleared`);
+    }
+
     // Check cache first
     const cachedResult = fontCache.getAllFonts();
     if (cachedResult) {
@@ -56,12 +62,29 @@ const getAllFonts = async (req, res) => {
     const transformedFonts = fonts.map((font) => ({
       family: font.family,
       img: font.img, // Include preview image
-      styles: font.styles.map((style) => ({
-        name: style.name,
-        style: style.style,
-        url:encodeURIComponent(style.url),
-        // url: `/api/proxy-font/${encodeURIComponent(style.url)}`, // Proxy the font URL
-      })),
+      styles: font.styles.map((style) => {
+        // Ensure URL is properly decoded - handle double encoding
+        let cleanUrl = style.url;
+        try {
+          // Try to decode if it's URL encoded
+          if (cleanUrl.includes('%')) {
+            cleanUrl = decodeURIComponent(cleanUrl);
+            // If still encoded, decode again
+            if (cleanUrl.includes('%')) {
+              cleanUrl = decodeURIComponent(cleanUrl);
+            }
+          }
+        } catch (e) {
+          console.warn(`[FontController] Failed to decode URL for ${style.name}:`, style.url);
+          cleanUrl = style.url; // Use original if decoding fails
+        }
+        
+        return {
+          name: style.name,
+          style: style.style,
+          url: cleanUrl, // Use cleaned URL
+        };
+      }),
     }));
 
     // Cache all fonts for 3 days
@@ -131,13 +154,17 @@ const getFonts = async (req, res) => {
     const transformedFonts = fonts.map((font) => ({
       family: font.family,
       img: font.img, // Include preview image
-      styles: font.styles.map((style) => ({
-        name: style.name,
-        style: style.style,
-                url:encodeURIComponent(style.url),
-
-        // url: `/api/proxy-font/${encodeURIComponent(style.url)}`, // Proxy the font URL
-      })),
+      styles: font.styles.map((style) => {
+        // Check if this is a Google Font or custom font that needs proxying
+        const isGoogleFont = style.url.includes('fonts.gstatic.com') || style.url.includes('fonts.googleapis.com');
+        const finalUrl = isGoogleFont ? style.url : `/api/proxy-font/${encodeURIComponent(style.url)}`;
+        
+        return {
+          name: style.name,
+          style: style.style,
+          url: finalUrl, // Use original for Google Fonts, proxy for others
+        };
+      }),
     }));
 
     const result = paginateData(transformedFonts, +ps, +pi, kw);
@@ -180,13 +207,17 @@ const getFontByFamily = async (req, res) => {
     const transformedFont = {
       family: font.family,
       img: font.img, // Include preview image
-      styles: font.styles.map((style) => ({
-        name: style.name,
-        style: style.style,
-        url:encodeURIComponent(style.url),
-
-        // url: `/api/proxy-font/${encodeURIComponent(style.url)}`, // Proxy the font URL
-      })),
+      styles: font.styles.map((style) => {
+        // Check if this is a Google Font or custom font that needs proxying
+        const isGoogleFont = style.url.includes('fonts.gstatic.com') || style.url.includes('fonts.googleapis.com');
+        const finalUrl = isGoogleFont ? style.url : `/api/proxy-font/${encodeURIComponent(style.url)}`;
+        
+        return {
+          name: style.name,
+          style: style.style,
+          url: finalUrl, // Use original for Google Fonts, proxy for others
+        };
+      }),
     };
 
     // Cache the result
