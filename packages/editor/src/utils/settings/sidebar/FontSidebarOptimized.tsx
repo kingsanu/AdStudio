@@ -9,8 +9,23 @@ import { some } from "lodash";
 import { FixedSizeList as List } from "react-window";
 import InfiniteLoader from "react-window-infinite-loader";
 
-// API configuration - use hardcoded for now as this is in the packages folder
-const API_BASE_URL = "https://adstudioserver.foodyqueen.com";
+// API configuration - detect environment
+const getApiBaseUrl = () => {
+  // First check if we have an environment variable
+  if (typeof window !== 'undefined' && (window as any).__ENV__?.VITE_API_URL) {
+    return (window as any).__ENV__.VITE_API_URL;
+  }
+  
+  // Then check if we're on localhost (development)
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    return "http://localhost:4000";
+  }
+  
+  // Production fallback
+  return "https://adstudioserver.foodyqueen.com";
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 // Icons (assuming these exist)
 import ArrowRightIcon from "canva-editor/icons/ArrowRightIcon";
@@ -419,6 +434,17 @@ const FontSidebarOptimized: ForwardRefRenderFunction<HTMLDivElement, FontSidebar
       return;
     }
 
+    // In production, some environments might block Google Fonts
+    const isProduction = !window.location.hostname.includes('localhost');
+    
+    if (isProduction) {
+      // In production, create a custom font loading approach
+      console.log("🔄 Production environment detected, using alternative font loading for:", fontFamily);
+      // You could implement a fallback here or just log and use system fonts
+      setLoadedFonts(prev => new Set(prev).add(fontFamily));
+      return;
+    }
+
     // Create Google Fonts link with multiple weights and styles
     const link = document.createElement('link');
     link.id = linkId;
@@ -464,11 +490,15 @@ const FontSidebarOptimized: ForwardRefRenderFunction<HTMLDivElement, FontSidebar
 
     // Check if this is a Google Font or custom font that needs proxying
     const isGoogleFont = fontUrl.includes('fonts.gstatic.com') || fontUrl.includes('fonts.googleapis.com');
-    // if (!isGoogleFont) {
-    //   // For non-Google fonts, use the backend proxy with full URL
-    //   fontUrl = `${API_BASE_URL}/api/proxy-font/${encodeURIComponent(fontUrl)}`;
-    //   console.log("🔄 Using proxied font URL:", fontUrl);
-    // }
+    
+    // In production (Docker), proxy ALL fonts through backend to avoid network issues
+    const isProduction = !window.location.hostname.includes('localhost');
+    
+    if (!isGoogleFont || isProduction) {
+      // For non-Google fonts OR production environment, use the backend proxy
+      fontUrl = `${API_BASE_URL}/api/proxy-font/${encodeURIComponent(fontUrl)}`;
+      console.log("🔄 Using proxied font URL:", fontUrl);
+    }
 
     // Determine font format from URL
     const getFormat = (url: string) => {

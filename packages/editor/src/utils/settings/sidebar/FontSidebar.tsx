@@ -120,7 +120,7 @@ const FontSidebar: ForwardRefRenderFunction<
       .get<FontDataApi[]>(
         `${config.apis.url}${config.apis.searchFonts}?${buildParams(query)}`
       )
-      .then((res) => res.data.data);
+      .then((res) => res.data);
   }, []);
 
   const loadFontList = useCallback(
